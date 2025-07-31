@@ -59,7 +59,7 @@ export class CphNg {
 
     private checkProblem() {
         if (!this._problem) {
-            io.warn(vscode.l10n.t('Not problem found. Please create a problem first.'));
+            io.warn(vscode.l10n.t('No problem found. Please create a problem first.'));
             return false;
         }
         return true;
@@ -446,7 +446,7 @@ export class CphNg {
                 canSelectFiles: true,
                 canSelectFolders: false,
                 canSelectMany: false,
-                title: vscode.l10n.t('Choose {type} file', { type: vscode.l10n.t(`cphNg.${option}`) }),
+                title: vscode.l10n.t('Choose {type} file', { type: vscode.l10n.t(option) }),
                 filters: { [vscode.l10n.t('Text files')]: ['in', 'ans', 'out'], [vscode.l10n.t('All files')]: ['*'] },
             });
             if (fileUri && fileUri[0]) {

@@ -218,10 +218,11 @@
                 "SE",
                 "WT",
                 "FC",
-                "CMP",
+                "CP",
                 "CPD",
                 "JG",
                 "JGD",
+                "CMP",
                 "SK",
                 "RJ"
               ],
@@ -239,10 +240,11 @@
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SE%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WT%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.FC%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CMP%",
+                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CP%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CPD%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JG%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JGD%",
+                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CMP%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SK%",
                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RJ%"
               ]
@@ -327,7 +329,9 @@
     "package": "pnpm vsce package --allow-star-activation --no-dependencies",
     "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
     "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "install-hooks": "node scripts/install-hooks.js",
+    "check-translations": "node scripts/pre-commit"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.27.1",

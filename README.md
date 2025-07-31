@@ -31,6 +31,134 @@ This is the next generation of the [Competitive Programming Helper](https://gith
 [^2]: CPH-NG calculates a hash of the current source code.
       If the hash matches the last one, it skips the compile process to emit the running time.
 
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [pnpm](https://pnpm.io/) (recommended) or npm
+- [Visual Studio Code](https://code.visualstudio.com/)
+
+### Local Development Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/langningchen/cph-ng.git
+   cd cph-ng
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   # or: npm install
+   ```
+
+3. **Set up Git hooks** (for translation checking)
+   ```bash
+   pnpm run install-hooks
+   # or: npm run install-hooks
+   ```
+
+4. **Start development**
+   ```bash
+   pnpm run watch
+   # or: npm run watch
+   ```
+
+5. **Open in VS Code**
+   - Open the project folder in VS Code
+   - Press `F5` to start debugging
+   - A new Extension Development Host window will open with CPH-NG loaded
+
+### Development Scripts
+
+- **`pnpm run watch`** - Start development build with file watching
+- **`pnpm run compile`** - Build for production
+- **`pnpm run lint`** - Run ESLint
+- **`pnpm run check-translations`** - Check translation completeness
+- **`pnpm run install-hooks`** - Install Git pre-commit hooks
+- **`pnpm run package`** - Package the extension as `.vsix`
+
+### Project Structure
+
+```
+cph-ng/
+├── src/                    # Extension source code
+│   ├── extension.ts        # Main extension entry point
+│   ├── cphNg.ts           # Core CPH-NG functionality
+│   ├── compiler.ts        # Compilation logic
+│   ├── runner.ts          # Test case execution
+│   └── webview/           # React webview components
+│       ├── App.tsx        # Main webview app
+│       ├── components/    # React components
+│       └── l10n/          # Webview translations
+├── l10n/                  # Extension runtime translations
+├── scripts/               # Development scripts and hooks
+├── package.json           # Extension manifest and dependencies
+├── package.nls.json       # Configuration translations (English)
+├── package.nls.zh.json    # Configuration translations (Chinese)
+└── webpack.config.mjs     # Build configuration
+```
+
+### Translation Management
+
+This project supports internationalization (i18n) with automatic translation checking:
+
+#### Adding New Translations
+
+1. **Extension Configuration** (package.json)
+   - Add `%key%` references in package.json
+   - Add translations in `package.nls.json` (English)
+   - Add translations in `package.nls.zh.json` (Chinese)
+
+2. **Runtime Messages** (Extension code)
+   - Use `vscode.l10n.t('key')` in TypeScript code
+   - Add translations in `l10n/bundle.l10n.zh-cn.json`
+
+3. **Webview UI** (React components)
+   - Use `t('key')` in React components
+   - Add translations in `src/webview/l10n/en.json` (English)
+   - Add translations in `src/webview/l10n/zh.json` (Chinese)
+
+#### Translation Checking
+
+- **Automatic**: Pre-commit hook checks translation completeness
+- **Manual**: Run `pnpm run check-translations`
+- **Bypass**: Use `git commit --no-verify` (not recommended)
+
+### Building and Packaging
+
+1. **Development Build**
+   ```bash
+   pnpm run compile
+   ```
+
+2. **Create VSIX Package**
+   ```bash
+   pnpm run package
+   ```
+
+3. **Install Locally**
+   ```bash
+   code --install-extension cph-ng-*.vsix
+   ```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Make changes and ensure translations are complete
+4. Commit your changes (pre-commit hook will check translations)
+5. Push to your branch: `git push origin feature/your-feature`
+6. Create a Pull Request
+
+### Debugging
+
+- **Extension Host**: Press `F5` in VS Code to start debugging
+- **Webview**: Open Chrome DevTools in the webview panel
+- **Logs**: Check VS Code Output panel (CPH-NG channels)
+- **Compilation**: Check Output panel (CPH-NG Compilation channel)
+
 ## License
 
 This project is licensed under the terms of the [GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).

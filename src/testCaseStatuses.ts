@@ -23,9 +23,9 @@ export class TestCaseStatuses {
     static AC = new TestCaseStatus('AC', vscode.l10n.t('Accepted'), '73, 205, 50');
     static PE = new TestCaseStatus('PE', vscode.l10n.t('Presentation Error'), '255, 119, 142');
     static WA = new TestCaseStatus('WA', vscode.l10n.t('Wrong Answer'), '211, 20, 13');
-    static TLE = new TestCaseStatus('TLE', vscode.l10n.t('Time Limit Exceed'), '12, 0, 102');
-    static MLE = new TestCaseStatus('MLE', vscode.l10n.t('Memory Limit Exceed'), '83, 0, 167');
-    static OLE = new TestCaseStatus('OLE', vscode.l10n.t('Output Limit Exceed'), '131, 0, 167');
+    static TLE = new TestCaseStatus('TLE', vscode.l10n.t('Time Limit Exceeded'), '12, 0, 102');
+    static MLE = new TestCaseStatus('MLE', vscode.l10n.t('Memory Limit Exceeded'), '83, 0, 167');
+    static OLE = new TestCaseStatus('OLE', vscode.l10n.t('Output Limit Exceeded'), '131, 0, 167');
     static RE = new TestCaseStatus('RE', vscode.l10n.t('Runtime Error'), '26, 38, 200');
     static RF = new TestCaseStatus('RF', vscode.l10n.t('Restricted Function'), '0, 145, 130');
     static CE = new TestCaseStatus('CE', vscode.l10n.t('Compilation Error'), '139, 116, 0');
