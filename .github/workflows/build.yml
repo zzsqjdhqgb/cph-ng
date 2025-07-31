@@ -1,0 +1,168 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
+      - '.gitignore'
+  pull_request:
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE' 
+      - '.gitignore'
+  workflow_dispatch:
+   inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+      pre-release:
+        type: boolean
+        required: true
+        description: 'Whether this is a pre-release version'
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'production' || '' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+        
+      # 验证版本格式 (仅在发布时)
+      - name: Validate version format
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Version format is invalid. Expected format: x.y.z (numbers only)"
+            echo "Examples: 1.0.0, 2.1.3, 10.5.12"
+            exit 1
+          fi
+          
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+          run_install: false
+          
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          
+      # 高级缓存策略
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+            
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm package
+
+      # 创建版本分支和更新版本 (仅在发布时)
+      - name: Create version branch and bump version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          BRANCH_NAME="release/v${VERSION}"
+          
+          # 配置 git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # 创建并切换到新分支
+          git checkout -b "$BRANCH_NAME"
+          
+          # 更新版本号
+          pnpm version "$VERSION" --no-git-tag-version
+          
+          # 提交版本更改
+          git add package.json
+          git commit -m "chore: bump version to v${VERSION}"
+          
+          # 推送分支
+          git push origin "$BRANCH_NAME"
+          
+          # 创建并推送标签
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      # 发布到 VS Code Marketplace (仅在发布时)
+      - name: Publish to VS Code Marketplace
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.pre-release }}" = "true" ]; then
+            pnpm run publish --pre-release
+          else
+            pnpm run publish
+          fi
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # 创建 GitHub Release (仅在发布时)
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
+          files: ./*.vsix
+          prerelease: ${{ github.event.inputs.pre-release == 'true' }}
+          generate_release_notes: true
+          body: |
+            🎉 New release v${{ github.event.inputs.version }}
+            
+            ## What's Changed
+            ${{ github.event.inputs.pre-release == 'true' && '⚠️ This is a pre-release version.' || '' }}
+            
+            ## Installation
+            Download the `.vsix` file below and install it manually in VS Code, or install from the marketplace.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 上传构建产物 (始终执行)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || github.sha }}
+          path: ./*.vsix
+          if-no-files-found: error
+          
+      # 构建证明 (始终执行)
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ./*.vsix
+          
+      # 上传失败日志
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ github.sha }}
+          path: |
+            .pnpm-debug.log*
+            npm-debug.log*
+          if-no-files-found: ignore

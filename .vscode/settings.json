@@ -1,0 +1,18 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"files.exclude": {
+		"dist": false
+	},
+	"search.exclude": {
+		"dist": true
+	},
+	"typescript.tsc.autoDetect": "off",
+	"typescript.preferences.autoImportSpecifierExcludeRegexes": [
+		"^@mui/[^/]+$",
+		"^@mui/[^/]+/esm$",
+		"^@mui/[^/]+/esm/[^/]+$",
+	],
+	"cSpell.words": [
+		"divyanshuagrawal"
+	]
+}
