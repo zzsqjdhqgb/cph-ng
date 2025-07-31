@@ -78,9 +78,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm package
-
       # 创建版本分支和更新版本 (仅在发布时)
       - name: Create version branch and bump version
         if: github.event_name == 'workflow_dispatch'
@@ -108,6 +105,9 @@ jobs:
           # 创建并推送标签
           git tag "v${VERSION}"
           git push origin "v${VERSION}"
+
+      - name: Build
+        run: pnpm package
 
       # 发布到 VS Code Marketplace (仅在发布时)
       - name: Publish to VS Code Marketplace
