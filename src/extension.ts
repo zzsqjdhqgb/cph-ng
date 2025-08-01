@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { mkdir, rm } from 'fs/promises';
+import { access, constants, mkdir, rm } from 'fs/promises';
 import { extname, join } from 'path';
 import * as vscode from 'vscode';
 import Companion from './companion';
@@ -193,30 +193,39 @@ class ExtensionManager {
             if (['.cpp', '.c'].includes(extname(filePath))) {
                 if (this.cphNg.problem?.srcPath !== filePath) {
                     try {
-                        await this.cphNg.loadProblem(
+                        await access(
                             this.cphNg.getBinByCpp(filePath),
+                            constants.R_OK,
                         );
-                        if (
-                            !this.cphNg.problem &&
-                            Settings.cphCapable.autoImport
-                        ) {
-                            const problem = await CphCapable.loadProblem(
-                                CphCapable.getProbByCpp(filePath),
+                        try {
+                            await this.cphNg.loadProblem(
+                                this.cphNg.getBinByCpp(filePath),
                             );
-                            if (problem) {
-                                this.cphNg.problem = problem;
-                                this.cphNg.saveProblem();
-                                this.updateContext();
+                            if (
+                                !this.cphNg.problem &&
+                                Settings.cphCapable.autoImport
+                            ) {
+                                const problem = await CphCapable.loadProblem(
+                                    CphCapable.getProbByCpp(filePath),
+                                );
+                                if (problem) {
+                                    this.cphNg.problem = problem;
+                                    this.cphNg.saveProblem();
+                                    this.updateContext();
+                                }
                             }
+                        } catch (error: unknown) {
+                            const err = error as Error;
+                            io.error(
+                                vscode.l10n.t(
+                                    'Failed to load problem: {error}',
+                                    {
+                                        error: err.message,
+                                    },
+                                ),
+                            );
                         }
-                    } catch (error: unknown) {
-                        const err = error as Error;
-                        io.error(
-                            vscode.l10n.t('Failed to load problem: {error}', {
-                                error: err.message,
-                            }),
-                        );
-                    }
+                    } catch (error) {}
                 }
             } else if (
                 !this.cphNg.problem?.testCases
