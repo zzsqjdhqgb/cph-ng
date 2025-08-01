@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.0.3
 
 - **feat**: Add support for saving unsaved changes in the editor before
   compilation.
