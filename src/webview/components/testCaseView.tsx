@@ -161,7 +161,7 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                                 }}
                             />
                         </CphFlex>
-                        {!running && testCase.status?.name != 'AC' && (
+                        {!running && (
                             <>
                                 <Divider />
                                 <CphFlex smallGap>
@@ -190,6 +190,16 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                                             <TestCaseDataView
                                                 label={t('testCaseView.error')}
                                                 value={testCase.error}
+                                                readOnly={true}
+                                            />
+                                        )}
+                                    {testCase.message &&
+                                        testCase.message.length > 0 && (
+                                            <TestCaseDataView
+                                                label={t(
+                                                    'testCaseView.message',
+                                                )}
+                                                value={testCase.message}
                                                 readOnly={true}
                                             />
                                         )}

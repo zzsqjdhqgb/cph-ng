@@ -28,6 +28,7 @@ export interface EditProblemDetailsMessage {
     title: string;
     url: string;
     timeLimit: number;
+    isSpecialJudge: boolean;
 }
 export interface DeleteProblemMessage {
     type: 'deleteProblem';
@@ -51,7 +52,7 @@ export interface RunTestCaseMessage {
 export interface ChooseTestCaseFileMessage {
     type: 'chooseTestCaseFile';
     index: number;
-    label: string;
+    label: 'input' | 'answer';
 }
 export interface UpdateTestCaseMessage {
     type: 'updateTestCase';
@@ -69,4 +70,7 @@ export interface DeleteTestCaseMessage {
 export interface OpenFileMessage {
     type: 'openFile';
     path: string;
+}
+export interface ChooseCheckerFileMessage {
+    type: 'chooseCheckerFile';
 }

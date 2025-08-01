@@ -22,13 +22,13 @@ import * as vscode from 'vscode';
 import Settings from './settings';
 import { TestCaseStatuses } from './testCaseStatuses';
 import { TestCase, TestCaseStatus } from './types';
+import Result from './result';
 
-export interface RunResult {
+type RunnerResult = Result<{
+    time?: number;
     output: string;
     error: string;
-    time?: number;
-    status: TestCaseStatus;
-}
+}>;
 
 export class Runner {
     public async runExecutable(
@@ -36,7 +36,7 @@ export class Runner {
         timeLimit: number,
         testCase: TestCase,
         abortController: AbortController,
-    ): Promise<RunResult> {
+    ): Promise<RunnerResult> {
         return new Promise((resolve) => {
             const startTime = Date.now();
             const child = spawn(executablePath, [], {
@@ -62,18 +62,18 @@ export class Runner {
                 error += data.toString();
             });
 
-            const commonResolve = (
-                finalStatus: TestCaseStatus,
-                additionalError: string,
-            ) => {
+            const commonResolve = (status: TestCaseStatus, message: string) => {
                 const endTime = Date.now();
                 clearTimeout(killTimeout);
                 resolve({
-                    output: output.trim(),
-                    error: `${error}\n${additionalError}`.trim(),
-                    status: finalStatus,
-                    time: endTime - startTime,
-                });
+                    status,
+                    message,
+                    data: {
+                        output: output.trim(),
+                        error: error.trim(),
+                        time: endTime - startTime,
+                    },
+                } as RunnerResult);
             };
 
             child.on('close', (code, signal) => {

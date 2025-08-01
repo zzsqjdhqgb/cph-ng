@@ -50,6 +50,7 @@ export interface TestCase {
     outputFile?: boolean;
     error?: string;
     status?: TestCaseStatus;
+    message?: string;
     time?: number;
     isExpand: boolean;
 }
@@ -61,4 +62,7 @@ export interface Problem {
     timeLimit: number;
     srcPath: string;
     srcHash?: string;
+    isSpecialJudge?: boolean;
+    checkerPath?: string;
+    checkerHash?: string;
 }

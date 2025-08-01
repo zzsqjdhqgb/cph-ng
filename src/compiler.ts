@@ -66,9 +66,7 @@ export class Compiler {
         try {
             await access(outputPath, constants.F_OK);
             await unlink(outputPath);
-        } catch {
-            // File doesn't exist, continue
-        }
+        } catch {}
 
         try {
             const { stderr } = await execAsync(compileCommand, {

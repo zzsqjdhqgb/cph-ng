@@ -50,6 +50,9 @@ class ExtensionManager {
                 mkdir(join(Settings.cache.directory, 'diff'), {
                     recursive: true,
                 }),
+                mkdir(join(Settings.cache.directory, 'checker'), {
+                    recursive: true,
+                }),
             ]);
 
             this.companion = new Companion(async (problem, document) => {
@@ -225,7 +228,7 @@ class ExtensionManager {
                                 ),
                             );
                         }
-                    } catch (error) {}
+                    } catch {}
                 }
             } else if (
                 !this.cphNg.problem?.testCases

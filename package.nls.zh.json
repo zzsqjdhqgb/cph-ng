@@ -49,6 +49,7 @@
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.JGD": "已评测",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.MLE": "内存超限",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.OLE": "输出超限",
+    "cph-ng.sidebar.hiddenStatuses.enumDescriptions.PC": "部分正确",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.PE": "格式错误",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.RE": "运行时错误",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.RF": "受限函数",

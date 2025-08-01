@@ -49,6 +49,7 @@
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.JGD": "Judged",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.MLE": "Memory Limit Exceeded",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.OLE": "Output Limit Exceeded",
+    "cph-ng.sidebar.hiddenStatuses.enumDescriptions.PC": "Partially Correct",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.PE": "Presentation Error",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.RE": "Runtime Error",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.RF": "Restricted Function",

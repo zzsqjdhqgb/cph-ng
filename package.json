@@ -207,6 +207,7 @@
                             "enum": [
                                 "UKE",
                                 "AC",
+                                "PC",
                                 "PE",
                                 "WA",
                                 "TLE",
@@ -229,6 +230,7 @@
                             "enumDescriptions": [
                                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.UKE%",
                                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.AC%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.PC%",
                                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.PE%",
                                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WA%",
                                 "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.TLE%",

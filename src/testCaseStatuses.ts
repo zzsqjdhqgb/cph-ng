@@ -29,6 +29,11 @@ export class TestCaseStatuses {
         vscode.l10n.t('Accepted'),
         '73, 205, 50',
     );
+    static PC = new TestCaseStatus(
+        'PC',
+        vscode.l10n.t('Partially Correct'),
+        '237, 152, 19',
+    );
     static PE = new TestCaseStatus(
         'PE',
         vscode.l10n.t('Presentation Error'),

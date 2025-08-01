@@ -79,6 +79,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         editProblemDetailsMessage.title,
                         editProblemDetailsMessage.url,
                         editProblemDetailsMessage.timeLimit,
+                        editProblemDetailsMessage.isSpecialJudge,
                     );
                     break;
                 case 'deleteProblem':
@@ -137,6 +138,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         ),
                     );
                     break;
+                case 'chooseCheckerFile':
+                    await this.helper.chooseCheckerFile();
+                    break;
             }
         });
     }
@@ -176,7 +180,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 window.vscode = acquireVsCodeApi();
 window.isDarkMode = ${isDarkMode};
 window.hiddenStatuses = ${JSON.stringify(Settings.sidebar.hiddenStatuses)};
-window.partyUri = '${Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''}';
+window.partyUri = '${
+            Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''
+        }';
 window.language = '${vscode.env.language}';
 </script>
 </body>

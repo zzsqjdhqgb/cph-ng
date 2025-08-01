@@ -32,6 +32,5 @@
         }
     ],
     "embeddedLanguageFormatting": "auto",
-    "singleAttributePerLine": true,
-    "plugins": ["prettier-plugin-organize-imports"]
+    "singleAttributePerLine": true
 }
