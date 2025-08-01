@@ -54,48 +54,22 @@ jobs:
                     exit 1
                   fi
 
-            # 检查并更新 CHANGELOG (仅在发布时)
-            - name: Check and update CHANGELOG
+            # 检查 CHANGELOG 是否包含对应版本 (仅在发布时)
+            - name: Check CHANGELOG for version
               if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
-
-                  # 检查是否存在 [Unreleased] 章节
-                  if ! grep -q "^## \[Unreleased\]" CHANGELOG.md; then
-                    echo "Error: CHANGELOG.md does not contain an [Unreleased] section"
-                    echo "Please add an [Unreleased] section with the changes for this release"
+                  if ! grep -q "^## $VERSION" CHANGELOG.md; then
+                    echo "Error: CHANGELOG.md does not contain an entry for version $VERSION"
+                    echo "Please add the changelog entry for version $VERSION before publishing"
                     echo ""
                     echo "Expected format in CHANGELOG.md:"
-                    echo "## [Unreleased]"
+                    echo "## $VERSION"
                     echo ""
                     echo "- Your changes here"
                     exit 1
                   fi
-
-                  # 获取上一个版本号（第二个版本标题）
-                  LAST_VERSION=$(grep "^## " CHANGELOG.md | sed -n '2p' | sed 's/^## //' | sed 's/\[//g' | sed 's/\]//g')
-                  echo "Last version: $LAST_VERSION"
-                  echo "Current version: $VERSION"
-
-                  # 版本比较函数 (使用 sort -V 进行语义版本比较)
-                  if [ "$LAST_VERSION" != "Unreleased" ]; then
-                    # 比较版本号
-                    if ! printf '%s\n%s\n' "$LAST_VERSION" "$VERSION" | sort -V -C; then
-                      echo "Error: Current version $VERSION is not higher than last version $LAST_VERSION"
-                      echo "Please ensure the new version is higher than the previous one"
-                      exit 1
-                    fi
-                    
-                    # 检查版本是否相同
-                    if [ "$VERSION" = "$LAST_VERSION" ]; then
-                      echo "Error: Current version $VERSION is the same as last version $LAST_VERSION"
-                      echo "Please use a higher version number"
-                      exit 1
-                    fi
-                  fi
-
-                  echo "✅ Found [Unreleased] section in CHANGELOG"
-                  echo "✅ Version $VERSION is valid and higher than previous version"
+                  echo "✅ Found CHANGELOG entry for version $VERSION"
 
             - uses: pnpm/action-setup@v4
               name: Install pnpm
@@ -139,15 +113,12 @@ jobs:
                   # 创建并切换到新分支
                   git checkout -b "$BRANCH_NAME"
 
-                  # 更新 CHANGELOG：将 [Unreleased] 替换为当前版本
-                  sed -i "s/^## \[Unreleased\]/## $VERSION/" CHANGELOG.md
-
                   # 更新版本号
                   pnpm version "$VERSION" --no-git-tag-version
 
                   # 提交版本更改
-                  git add package.json CHANGELOG.md
-                  git commit -m "chore: bump version to v${VERSION} and update CHANGELOG"
+                  git add package.json
+                  git commit -m "chore: bump version to v${VERSION}"
 
                   # 推送分支
                   git push origin "$BRANCH_NAME"
@@ -156,6 +127,9 @@ jobs:
                   git tag "v${VERSION}"
                   git push origin "v${VERSION}"
 
+            - name: Build
+              run: pnpm package
+
             # 提取 CHANGELOG 内容 (仅在发布时)
             - name: Extract changelog for version
               if: github.event_name == 'workflow_dispatch'
@@ -163,7 +137,7 @@ jobs:
               run: |
                   VERSION="${{ github.event.inputs.version }}"
 
-                  # 由于我们已经更新了 CHANGELOG，现在提取该版本的内容
+                  # 提取该版本的 changelog 内容
                   CHANGELOG_CONTENT=$(awk "/^## $VERSION\$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
 
                   if [ -z "$CHANGELOG_CONTENT" ]; then
@@ -177,9 +151,6 @@ jobs:
                   echo "EOF" >> $GITHUB_OUTPUT
 
                   echo "✅ Extracted changelog content for version $VERSION"
-
-            - name: Build
-              run: pnpm package
 
             # 发布到 VS Code Marketplace (仅在发布时)
             - name: Publish to VS Code Marketplace
@@ -231,36 +202,6 @@ jobs:
               uses: actions/attest-build-provenance@v2
               with:
                   subject-path: ./*.vsix
-
-            # 为下一个开发周期准备 CHANGELOG (仅在发布时)
-            - name: Prepare CHANGELOG for next development cycle
-              if: github.event_name == 'workflow_dispatch'
-              run: |
-                  VERSION="${{ github.event.inputs.version }}"
-
-                  # 切换回主分支
-                  git checkout main
-
-                  # 在 CHANGELOG 顶部添加新的 [Unreleased] 章节
-                  # 创建临时文件    
-                  echo '# Change Log' > temp_changelog.md
-                  echo '' >> temp_changelog.md
-                  echo 'All notable changes to the "cph-ng" extension will be documented in this file.' >> temp_changelog.md
-                  echo '' >> temp_changelog.md
-                  echo '## [Unreleased]' >> temp_changelog.md
-                  echo '' >> temp_changelog.md
-                  # 将现有内容（除了标题）添加到临时文件
-                  tail -n +5 CHANGELOG.md >> temp_changelog.md
-
-                  # 替换原文件
-                  mv temp_changelog.md CHANGELOG.md
-
-                  # 提交变更
-                  git add CHANGELOG.md
-                  git commit -m "chore: prepare CHANGELOG for next development cycle"
-                  git push origin main
-
-                  echo "✅ Added new [Unreleased] section to CHANGELOG for next development cycle"
 
             # 上传失败日志
             - name: Upload logs on failure
