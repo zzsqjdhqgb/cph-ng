@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import CphFlex from './cphFlex';
 import CphText from './cphText';
 
-const NoTestCases: React.FC = () => {
+const NoTestCases = () => {
     const { t } = useTranslation();
 
     return (

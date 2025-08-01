@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { CreateProblemMessage } from '../messages';
 import CphFlex from './cphFlex';
 
-const CreateProblemView: React.FC = () => {
+const CreateProblemView = () => {
     const { t } = useTranslation();
     return (
         <Container>

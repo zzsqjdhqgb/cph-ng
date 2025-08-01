@@ -38,12 +38,12 @@ import CphFlex from './cphFlex';
 import CphText from './cphText';
 import TestCaseDataView from './testCaseDataView';
 
-interface TestCaseProp {
+interface TestCaseViewProp {
     testCase: TestCase;
     index: number;
 }
 
-const TestCaseView: React.FC<TestCaseProp> = ({ testCase, index }) => {
+const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
     const { t } = useTranslation();
     const running = isRunningStatus(testCase.status);
 

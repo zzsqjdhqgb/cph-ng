@@ -23,7 +23,11 @@ import ProblemActions from './problemActions';
 import ProblemTitle from './problemTitle';
 import TestCasesView from './testCasesView';
 
-const ProblemView: React.FC<{ problem: Problem }> = ({ problem }) => {
+interface ProblemViewProps {
+    problem: Problem;
+}
+
+const ProblemView = ({ problem }: ProblemViewProps) => {
     return (
         <CphFlex
             column

@@ -25,7 +25,7 @@ interface CphFlexProps extends BoxProps {
     alignStart?: boolean;
 }
 
-const CphFlex: React.FC<CphFlexProps> = (props) => {
+const CphFlex = (props: CphFlexProps) => {
     return (
         <Box
             alignItems={props.alignStart ? 'flex-start' : 'center'}

@@ -24,14 +24,15 @@ import { deleteProps } from '../utils';
 interface CphButtonProps extends IconButtonProps {
     icon: typeof SvgIcon;
     name: string;
+    larger?: boolean;
 }
 
-const CphButton: React.FC<CphButtonProps> = (props) => {
+const CphButton = (props: CphButtonProps) => {
     return (
         <Tooltip title={props.name}>
             <IconButton
                 color={'primary'}
-                size={'small'}
+                size={props.larger ? 'medium' : 'small'}
                 {...deleteProps(props, ['icon', 'name'])}
             >
                 <props.icon fontSize={'small'} />

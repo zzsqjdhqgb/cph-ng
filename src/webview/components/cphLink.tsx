@@ -24,7 +24,7 @@ interface CphLinkProps extends LinkProps {
     name: string;
 }
 
-const CphLink: React.FC<CphLinkProps> = (props) => {
+const CphLink = (props: CphLinkProps) => {
     return (
         <Tooltip title={props.name}>
             <Link

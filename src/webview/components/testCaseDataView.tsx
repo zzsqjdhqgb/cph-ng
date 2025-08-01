@@ -100,7 +100,7 @@ const ansiToReact = (ansi: string) => {
     );
 };
 
-const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({
+const TestCaseDataView = ({
     label,
     isFile,
     value,
@@ -108,7 +108,7 @@ const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({
     onChooseFile,
     outputActions,
     readOnly,
-}) => {
+}: CodeMirrorSectionProps) => {
     const { t } = useTranslation();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);

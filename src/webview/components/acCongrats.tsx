@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import CphFlex from './cphFlex';
 import CphText from './cphText';
 
-const AcCongrats: React.FC = () => {
+const AcCongrats = () => {
     const { t } = useTranslation();
 
     return (

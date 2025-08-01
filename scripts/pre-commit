@@ -27,30 +27,50 @@ const TRANSLATION_CONFIGS = {
         title: 'VSCode Extension Configuration Translations',
         requiredKeysExtractor: extractPackageJsonTranslationKeys,
         files: [
-            { path: 'package.nls.json', name: 'English', keyExtractor: getAllKeys },
-            { path: 'package.nls.zh.json', name: 'Chinese', keyExtractor: getAllKeys }
+            {
+                path: 'package.nls.json',
+                name: 'English',
+                keyExtractor: getAllKeys,
+            },
+            {
+                path: 'package.nls.zh.json',
+                name: 'Chinese',
+                keyExtractor: getAllKeys,
+            },
         ],
-        referenceFile: 'package.json'
+        referenceFile: 'package.json',
     },
     bundle: {
         title: 'VSCode Extension Runtime Bundle Translations',
         requiredKeysExtractor: extractVSCodeL10nCalls,
         files: [
-            { path: 'l10n/bundle.l10n.zh-cn.json', name: 'Bundle', keyExtractor: (data) => new Set(Object.keys(data)) }
+            {
+                path: 'l10n/bundle.l10n.zh-cn.json',
+                name: 'Bundle',
+                keyExtractor: (data) => new Set(Object.keys(data)),
+            },
         ],
         referenceFile: 'vscode.l10n.t calls',
-        checkDynamic: true
+        checkDynamic: true,
     },
     webview: {
         title: 'React Webview Translations',
         requiredKeysExtractor: extractWebviewTranslationCalls,
         files: [
-            { path: 'src/webview/l10n/en.json', name: 'English', keyExtractor: (data) => new Set(Object.keys(data)) },
-            { path: 'src/webview/l10n/zh.json', name: 'Chinese', keyExtractor: (data) => new Set(Object.keys(data)) }
+            {
+                path: 'src/webview/l10n/en.json',
+                name: 'English',
+                keyExtractor: (data) => new Set(Object.keys(data)),
+            },
+            {
+                path: 'src/webview/l10n/zh.json',
+                name: 'Chinese',
+                keyExtractor: (data) => new Set(Object.keys(data)),
+            },
         ],
         referenceFile: 't() calls',
-        checkDynamic: true
-    }
+        checkDynamic: true,
+    },
 };
 
 function log(message, color = 'reset') {
@@ -248,12 +268,14 @@ function extractTranslationCalls(patterns) {
                     const dynamicMatches = content.match(dynamicRegex);
                     if (dynamicMatches) {
                         dynamicMatches.forEach((match) => {
-                            const lines = content.substring(0, content.indexOf(match)).split('\n');
+                            const lines = content
+                                .substring(0, content.indexOf(match))
+                                .split('\n');
                             const lineNum = lines.length;
                             dynamicKeys.push({
                                 file: file,
                                 line: lineNum,
-                                match: match.trim()
+                                match: match.trim(),
                             });
                         });
                     }
@@ -263,28 +285,35 @@ function extractTranslationCalls(patterns) {
             }
         }
     } catch (error) {
-        log(`Warning: Failed to extract translation calls: ${error.message}`, 'yellow');
+        log(
+            `Warning: Failed to extract translation calls: ${error.message}`,
+            'yellow',
+        );
     }
 
     return { requiredKeys, dynamicKeys };
 }
 
 function extractVSCodeL10nCalls() {
-    return extractTranslationCalls([{
-        dir: 'src',
-        exts: ['ts', 'js'],
-        staticRegex: /vscode\.l10n\.t\s*\(\s*['"](.*?)['"]/g,
-        dynamicRegex: /vscode\.l10n\.t\s*\(\s*(?!['"]).+?\)/g
-    }]);
+    return extractTranslationCalls([
+        {
+            dir: 'src',
+            exts: ['ts', 'js'],
+            staticRegex: /vscode\.l10n\.t\s*\(\s*['"](.*?)['"]/g,
+            dynamicRegex: /vscode\.l10n\.t\s*\(\s*(?!['"]).+?\)/g,
+        },
+    ]);
 }
 
 function extractWebviewTranslationCalls() {
-    return extractTranslationCalls([{
-        dir: path.join('src', 'webview'),
-        exts: ['tsx', 'ts'],
-        staticRegex: /\bt\s*\(\s*['"](.*?)['"]/g,
-        dynamicRegex: /\bt\s*\(\s*(?!['"]).+?\)/g
-    }]);
+    return extractTranslationCalls([
+        {
+            dir: path.join('src', 'webview'),
+            exts: ['tsx', 'ts'],
+            staticRegex: /\bt\s*\(\s*['"](.*?)['"]/g,
+            dynamicRegex: /\bt\s*\(\s*(?!['"]).+?\)/g,
+        },
+    ]);
 }
 
 function checkTranslations(config) {
@@ -297,17 +326,25 @@ function checkTranslations(config) {
         const extractResult = config.requiredKeysExtractor();
         const requiredKeys = extractResult.requiredKeys || extractResult;
         const dynamicKeys = extractResult.dynamicKeys || [];
-        
-        log(`Required translation keys from ${config.referenceFile}: ${requiredKeys.size}`);
+
+        log(
+            `Required translation keys from ${config.referenceFile}: ${requiredKeys.size}`,
+        );
 
         // Check for dynamic translation keys (if enabled)
         if (config.checkDynamic && dynamicKeys.length > 0) {
             hasErrors = true;
             log(`  ❌ Dynamic translation keys are not allowed:`, 'red');
             dynamicKeys.forEach((dynamicKey) => {
-                log(`    - ${dynamicKey.file}:${dynamicKey.line} - ${dynamicKey.match}`, 'red');
+                log(
+                    `    - ${dynamicKey.file}:${dynamicKey.line} - ${dynamicKey.match}`,
+                    'red',
+                );
             });
-            log(`  ℹ️  All translation keys must be static strings wrapped in quotes`, 'yellow');
+            log(
+                `  ℹ️  All translation keys must be static strings wrapped in quotes`,
+                'yellow',
+            );
         }
 
         // Check each translation file
@@ -315,7 +352,9 @@ function checkTranslations(config) {
         for (const fileConfig of config.files) {
             const data = loadJsonFile(fileConfig.path);
             const keys = fileConfig.keyExtractor(data);
-            log(`${fileConfig.name} translations (${fileConfig.path}): ${keys.size} keys`);
+            log(
+                `${fileConfig.name} translations (${fileConfig.path}): ${keys.size} keys`,
+            );
 
             // Auto-sort keys
             if (checkKeysOrder(data, fileConfig.path)) {
@@ -323,7 +362,9 @@ function checkTranslations(config) {
             }
 
             // Check missing keys
-            const missingKeys = [...requiredKeys].filter((key) => !keys.has(key));
+            const missingKeys = [...requiredKeys].filter(
+                (key) => !keys.has(key),
+            );
             if (missingKeys.length > 0) {
                 hasErrors = true;
                 log(`  ❌ Missing keys in ${fileConfig.path}:`, 'red');
@@ -334,14 +375,20 @@ function checkTranslations(config) {
             const extraKeys = [...keys].filter((key) => !requiredKeys.has(key));
             if (extraKeys.length > 0) {
                 hasErrors = true;
-                log(`  ❌ Extra keys in ${fileConfig.path} (not used in ${config.referenceFile}):`, 'red');
+                log(
+                    `  ❌ Extra keys in ${fileConfig.path} (not used in ${config.referenceFile}):`,
+                    'red',
+                );
                 extraKeys.forEach((key) => log(`    - ${key}`, 'red'));
             }
         }
 
         // Report auto-sorting
         if (sortedFiles.length > 0) {
-            log(`  ℹ️  Files were automatically sorted and will be included in commit`, 'blue');
+            log(
+                `  ℹ️  Files were automatically sorted and will be included in commit`,
+                'blue',
+            );
         }
 
         if (!hasErrors) {
@@ -349,7 +396,10 @@ function checkTranslations(config) {
         }
     } catch (error) {
         hasErrors = true;
-        log(`❌ Error checking ${config.title.toLowerCase()}: ${error.message}`, 'red');
+        log(
+            `❌ Error checking ${config.title.toLowerCase()}: ${error.message}`,
+            'red',
+        );
     }
 
     return hasErrors;
@@ -406,7 +456,10 @@ function main() {
     } else {
         log('✅ All translations are complete!', 'green');
         if (hasAutoSorted) {
-            log('🔧 Files were automatically sorted and included in commit', 'blue');
+            log(
+                '🔧 Files were automatically sorted and included in commit',
+                'blue',
+            );
         }
         log('Proceeding with commit...', 'green');
         process.exit(0);

@@ -33,7 +33,11 @@ import CphFlex from './cphFlex';
 import CphLink from './cphLink';
 import CphText from './cphText';
 
-const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
+interface ProblemTitleProps {
+    problem: Problem;
+}
+
+const ProblemTitle = ({ problem }: ProblemTitleProps) => {
     const { t } = useTranslation();
     const [isHoveringTitle, setHoveringTitle] = useState(false);
     const [isEditDialogOpen, setEditDialogOpen] = useState(false);

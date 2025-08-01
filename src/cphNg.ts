@@ -82,9 +82,6 @@ export class CphNg {
     public getBinByCpp(cppFile: string): string {
         return `${cppFile}.bin`;
     }
-    public getCppByBin(binFile: string): string {
-        return binFile.substring(0, binFile.length - 4);
-    }
 
     private checkProblem() {
         if (!this._problem) {
@@ -293,7 +290,6 @@ export class CphNg {
             this._problem = JSON.parse(
                 gunzipSync(data).toString('utf8'),
             ) as Problem;
-            this._problem.srcPath = this.getCppByBin(binFile);
             this.emitProblemChange();
         } catch (e: unknown) {
             const error = e as Error;
@@ -667,7 +663,10 @@ export class CphNg {
                 canSelectFolders: false,
                 canSelectMany: false,
                 title: vscode.l10n.t('Choose {type} file', {
-                    type: option === 'input' ? vscode.l10n.t('input') : vscode.l10n.t('answer'),
+                    type:
+                        option === 'input'
+                            ? vscode.l10n.t('input')
+                            : vscode.l10n.t('answer'),
                 }),
                 filters: {
                     [vscode.l10n.t('Text files')]: ['in', 'ans', 'out'],

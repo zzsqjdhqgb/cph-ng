@@ -40,7 +40,11 @@ import {
 import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 
-const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
+interface ProblemActionsProps {
+    problem: Problem;
+}
+
+const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const { t } = useTranslation();
     const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const hasRunning = problem.testCases.some((tc) =>
@@ -57,6 +61,7 @@ const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
             <Container>
                 <CphFlex smallGap>
                     <CphButton
+                        larger={true}
                         name={t('problemActions.addTestCase')}
                         icon={AddIcon}
                         onClick={() => {
@@ -66,6 +71,7 @@ const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
                         }}
                     />
                     <CphButton
+                        larger={true}
                         name={t('problemActions.loadTestCases')}
                         icon={FileCopyIcon}
                         onClick={() => {
@@ -76,6 +82,7 @@ const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
                     />
                     {hasRunning ? (
                         <CphButton
+                            larger={true}
                             name={t('problemActions.stopTestCases')}
                             icon={PlaylistRemoveIcon}
                             color={'warning'}
@@ -87,6 +94,7 @@ const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
                         />
                     ) : (
                         <CphButton
+                            larger={true}
                             name={t('problemActions.runAll')}
                             icon={PlaylistPlayIcon}
                             color={'success'}
@@ -98,6 +106,7 @@ const ProblemActions: React.FC<{ problem: Problem }> = ({ problem }) => {
                         />
                     )}
                     <CphButton
+                        larger={true}
                         name={t('problemActions.deleteProblem')}
                         icon={DeleteForeverIcon}
                         color={'error'}

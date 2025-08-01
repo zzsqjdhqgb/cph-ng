@@ -24,7 +24,11 @@ import CphFlex from './cphFlex';
 import NoTestCases from './noTestCases';
 import TestCaseView from './testCaseView';
 
-const TestCasesView: React.FC<{ problem: Problem }> = ({ problem }) => {
+interface TestCasesViewProps {
+    problem: Problem;
+}
+
+const TestCasesView = ({ problem }: TestCasesViewProps) => {
     return (
         <Container>
             <CphFlex column>

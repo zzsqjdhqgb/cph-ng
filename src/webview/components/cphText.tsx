@@ -20,7 +20,7 @@ import React from 'react';
 
 interface CphTextProps extends TypographyProps {}
 
-const CphText: React.FC<CphTextProps> = (props) => {
+const CphText = (props: CphTextProps) => {
     return (
         <Typography
             overflow={'hidden'}
