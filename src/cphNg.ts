@@ -317,14 +317,14 @@ export class CphNg {
         problem.timeLimit = timeLimit;
         this.saveProblem();
     }
-    public saveProblem(): void {
+    public async saveProblem(): Promise<void> {
         try {
             if (!this.checkProblem()) {
                 return;
             }
             const problem = this._problem!;
             this.emitProblemChange();
-            writeFile(
+            return writeFile(
                 this.getBinByCpp(problem.srcPath),
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
@@ -563,13 +563,13 @@ export class CphNg {
             testCase.status = TestCaseStatuses.CE;
             testCase.isExpand = true;
             this.saveProblem();
+            this.runAbortController = undefined;
             return;
         }
 
         await this.run(outputPath, testCase);
         testCase.isExpand = isExpandStatus(testCase.status);
         this.saveProblem();
-
         this.runAbortController = undefined;
     }
     public async runTestCases(): Promise<void> {
@@ -608,6 +608,7 @@ export class CphNg {
                 testCase.status = TestCaseStatuses.CE;
             }
             this.saveProblem();
+            this.runAbortController = undefined;
             return;
         }
         for (const testCase of problem.testCases) {
@@ -629,7 +630,6 @@ export class CphNg {
             }
         }
         this.saveProblem();
-
         this.runAbortController = undefined;
     }
     public async stopTestCases(): Promise<void> {
