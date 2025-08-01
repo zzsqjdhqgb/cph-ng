@@ -4,6 +4,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 ## [Unreleased]
 
+## [Unreleased]
+
 - **feat**: Add support for saving unsaved changes in the editor before
   compilation.
 - **fix**: The "file not found" warning no longer appears when the current
