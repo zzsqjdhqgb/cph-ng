@@ -28,7 +28,12 @@ import { Problem } from './types';
 class Companion {
     server: Server;
 
-    constructor(onCreateProblem: (problem: Problem) => void) {
+    constructor(
+        onCreateProblem: (
+            problem: Problem,
+            document: vscode.TextDocument,
+        ) => void,
+    ) {
         this.server = createServer((request, response) => {
             let requestData = '';
 
@@ -67,8 +72,7 @@ class Companion {
                     const document = await vscode.workspace.openTextDocument(
                         problem.srcPath,
                     );
-                    await vscode.window.showTextDocument(document);
-                    onCreateProblem(problem);
+                    onCreateProblem(problem, document);
                 } catch (e) {
                     // Handle parsing errors silently
                 }

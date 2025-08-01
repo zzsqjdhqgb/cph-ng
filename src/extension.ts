@@ -24,8 +24,6 @@ import { CphNg } from './cphNg';
 import { io } from './io';
 import Settings from './settings';
 import { SidebarProvider } from './sidebarProvider';
-import { TestCaseStatuses } from './testCaseStatuses';
-import { Problem } from './types';
 
 class ExtensionManager {
     private sidebarProvider!: SidebarProvider;
@@ -54,9 +52,10 @@ class ExtensionManager {
                 }),
             ]);
 
-            this.companion = new Companion((problem: Problem) => {
+            this.companion = new Companion(async (problem, document) => {
                 this.cphNg.problem = problem;
-                this.cphNg.saveProblem();
+                await this.cphNg.saveProblem();
+                await vscode.window.showTextDocument(document);
                 this.updateContext();
             });
             this.cphNg = new CphNg();
@@ -164,12 +163,7 @@ class ExtensionManager {
             this.cphNg.problem?.testCases.some(
                 (tc) =>
                     tc.status &&
-                    [
-                        TestCaseStatuses.CP,
-                        TestCaseStatuses.CPD,
-                        TestCaseStatuses.JG,
-                        TestCaseStatuses.JGD,
-                    ].includes(tc.status),
+                    ['CP', 'CPD', 'JG', 'JGD'].includes(tc.status.name),
             ) || false;
 
         vscode.commands.executeCommand(
