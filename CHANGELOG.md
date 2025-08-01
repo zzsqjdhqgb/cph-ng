@@ -2,11 +2,18 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: Add support for saving unsaved changes in the editor before
+  compilation.
+
 ## 0.0.2
 
 - **fix**: The icon in problem actions has been enlarged.
-- **fix**: The "file not found" warning no longer appears when data is received from the companion app.
-- **fix**: The test case status now updates correctly after a compilation error (CE) occurs.
+- **fix**: The "file not found" warning no longer appears when data is received
+  from the companion app.
+- **fix**: The test case status now updates correctly after a compilation error
+  (CE) occurs.
 
 ## 0.0.1
 

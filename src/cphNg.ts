@@ -119,6 +119,12 @@ export class CphNg {
     private async compile(): Promise<CompileResult> {
         try {
             const problem = this._problem!;
+            const editor = vscode.window.visibleTextEditors.find(
+                (editor) => editor.document.fileName === problem.srcPath,
+            );
+            if (editor) {
+                await editor.document.save();
+            }
             const hash = SHA256(
                 (await readFile(problem.srcPath)).toString(),
             ).toString();
