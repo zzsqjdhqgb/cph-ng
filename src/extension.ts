@@ -197,12 +197,12 @@ class ExtensionManager {
                 if (this.cphNg.problem?.srcPath !== filePath) {
                     try {
                         await access(
-                            this.cphNg.getBinByCpp(filePath),
+                            await this.cphNg.getBinByCpp(filePath),
                             constants.R_OK,
                         );
                         try {
                             await this.cphNg.loadProblem(
-                                this.cphNg.getBinByCpp(filePath),
+                                await this.cphNg.getBinByCpp(filePath),
                             );
                             if (
                                 !this.cphNg.problem &&

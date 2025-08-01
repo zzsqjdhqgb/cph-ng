@@ -27,6 +27,7 @@
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.ask": "提示用户确认是否使用找到的文件。",
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.never": "忽略任何找到的文件且不使用它们。",
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.markdownDescription": "确定问题设置期间找到匹配测试用例文件时的行为。选项包括：\n- `ask`：提示用户确认是否使用找到的文件。\n- `always`：始终自动使用找到的文件而不提示。\n- `never`：忽略任何找到的文件且不使用它们。",
+    "cph-ng.configuration.problem.properties.problemFilePath.markdownDescription": "指定**题目文件路径**，这是存储题目定义和测试用例的位置。你可以使用以下占位符：\n- `${workspace}`：工作区文件夹的路径。\n- `${tmp}`：临时目录的路径。\n- `${home}`：用户主目录的路径。\n- `${dirname}`：源文件的目录名。\n- `${basename}`：源文件的基本名称。\n- `${extname}`：源文件的扩展名。",
     "cph-ng.configuration.problem.properties.templateFile.markdownDescription": "指定在创建新问题时使用的**模板文件**。此文件可以包含问题详细信息的占位符，这些占位符将在创建新问题时被实际值替换。这允许在问题之间保持一致的格式和结构。\n占位符包括：\n- `${title}`：问题的标题。\n- `${timeLimit}`：问题的时间限制（以毫秒为单位）。\n- `${url}`：问题的 URL。",
     "cph-ng.configuration.problem.title": "题目",
     "cph-ng.configuration.runner.properties.timeAddition.markdownDescription": "在执行期间，为每个测试用例的时间限制添加额外的时间（单位为**毫秒**）。例如，如果一个测试用例的时间限制为 `1000ms`，此值为 `1000ms`，那么你的程序将被允许运行 `2000ms`，之后才会被终止。这对于应对轻微的开销或系统差异非常有用。",

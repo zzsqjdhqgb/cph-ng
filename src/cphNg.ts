@@ -44,6 +44,8 @@ import {
     TestCaseStatus,
 } from './types';
 import Result from './result';
+import { renderTemplate } from './strTemplate';
+import { homedir, tmpdir } from 'os';
 
 type ProblemChangeCallback = (problem: Problem | undefined) => void;
 
@@ -90,8 +92,26 @@ export class CphNg {
         }
     }
 
-    public getBinByCpp(cppFile: string): string {
-        return `${cppFile}.bin`;
+    public async getBinByCpp(cppFile: string): Promise<string> {
+        const dir = renderTemplate(Settings.problem.problemFilePath, [
+            ['tmp', tmpdir()],
+            ['home', homedir()],
+            [
+                'workspace',
+                vscode.workspace.workspaceFolders
+                    ? vscode.workspace.workspaceFolders[0].uri.fsPath
+                    : '',
+            ],
+            ['dirname', dirname(cppFile)],
+            ['basename', basename(cppFile)],
+            ['extname', extname(cppFile)],
+        ]);
+        try {
+            await access(dirname(dir), constants.F_OK);
+        } catch {
+            await mkdir(dirname(dir), { recursive: true });
+        }
+        return join(dir, `${cppFile}.bin`);
     }
 
     private checkProblem() {
@@ -419,7 +439,7 @@ export class CphNg {
             const problem = this._problem!;
             this.emitProblemChange();
             return writeFile(
-                this.getBinByCpp(problem.srcPath),
+                await this.getBinByCpp(problem.srcPath),
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
         } catch (error: unknown) {
@@ -436,7 +456,7 @@ export class CphNg {
             return;
         }
         const problem = this._problem!;
-        const binPath = this.getBinByCpp(problem.srcPath);
+        const binPath = await this.getBinByCpp(problem.srcPath);
 
         try {
             await access(binPath, constants.F_OK);

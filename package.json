@@ -134,6 +134,11 @@
                         "type": "string",
                         "default": "",
                         "markdownDescription": "%cph-ng.configuration.problem.properties.templateFile.markdownDescription%"
+                    },
+                    "cph-ng.problem.problemFilePath": {
+                        "type": "string",
+                        "default": "${workspace}/.cph-ng",
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.problemFilePath.markdownDescription%"
                     }
                 }
             },
