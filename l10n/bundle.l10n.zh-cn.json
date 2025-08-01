@@ -61,9 +61,5 @@
     "Wrong Answer": "答案错误",
     "answer": "答案",
     "input": "输入",
-    "not found": "未找到",
-    "__WHITELIST__": [
-        "input",
-        "answer"
-    ]
+    "not found": "未找到"
 }

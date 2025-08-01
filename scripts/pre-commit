@@ -16,7 +16,41 @@ const colors = {
     yellow: '\x1b[33m',
     blue: '\x1b[34m',
     reset: '\x1b[0m',
-    bold: '\x1b[1m'
+    bold: '\x1b[1m',
+};
+
+// Configuration constants
+
+// Translation checker configurations
+const TRANSLATION_CONFIGS = {
+    packageJson: {
+        title: 'VSCode Extension Configuration Translations',
+        requiredKeysExtractor: extractPackageJsonTranslationKeys,
+        files: [
+            { path: 'package.nls.json', name: 'English', keyExtractor: getAllKeys },
+            { path: 'package.nls.zh.json', name: 'Chinese', keyExtractor: getAllKeys }
+        ],
+        referenceFile: 'package.json'
+    },
+    bundle: {
+        title: 'VSCode Extension Runtime Bundle Translations',
+        requiredKeysExtractor: extractVSCodeL10nCalls,
+        files: [
+            { path: 'l10n/bundle.l10n.zh-cn.json', name: 'Bundle', keyExtractor: (data) => new Set(Object.keys(data)) }
+        ],
+        referenceFile: 'vscode.l10n.t calls',
+        checkDynamic: true
+    },
+    webview: {
+        title: 'React Webview Translations',
+        requiredKeysExtractor: extractWebviewTranslationCalls,
+        files: [
+            { path: 'src/webview/l10n/en.json', name: 'English', keyExtractor: (data) => new Set(Object.keys(data)) },
+            { path: 'src/webview/l10n/zh.json', name: 'Chinese', keyExtractor: (data) => new Set(Object.keys(data)) }
+        ],
+        referenceFile: 't() calls',
+        checkDynamic: true
+    }
 };
 
 function log(message, color = 'reset') {
@@ -39,31 +73,39 @@ function getAllKeys(obj, prefix = '') {
         const fullKey = prefix ? `${prefix}.${key}` : key;
         keys.add(fullKey);
 
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        if (
+            typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value)
+        ) {
             const nestedKeys = getAllKeys(value, fullKey);
-            nestedKeys.forEach(k => keys.add(k));
+            nestedKeys.forEach((k) => keys.add(k));
         }
     }
 
     return keys;
 }
 
-function checkKeysOrder(obj, filePath, excludeKeys = []) {
+function checkKeysOrder(obj, filePath) {
     let hasChanges = false;
 
     function sortObjectKeys(currentObj) {
         const sortedObj = {};
         const keys = Object.keys(currentObj);
-        const filteredKeys = keys.filter(key => !excludeKeys.includes(key));
-        const excludedKeys = keys.filter(key => excludeKeys.includes(key));
 
-        // Sort filtered keys alphabetically
-        const sortedKeys = [...filteredKeys].sort();
+        // Sort keys alphabetically
+        const sortedKeys = keys.sort();
 
-        // Add sorted keys first
+        // Add sorted keys
         for (const key of sortedKeys) {
-            if (typeof currentObj[key] === 'object' && currentObj[key] !== null && !Array.isArray(currentObj[key])) {
-                const [sortedValue, childHasChanges] = sortObjectKeys(currentObj[key]);
+            if (
+                typeof currentObj[key] === 'object' &&
+                currentObj[key] !== null &&
+                !Array.isArray(currentObj[key])
+            ) {
+                const [sortedValue, childHasChanges] = sortObjectKeys(
+                    currentObj[key],
+                );
                 sortedObj[key] = sortedValue;
                 hasChanges = hasChanges || childHasChanges;
             } else {
@@ -71,15 +113,12 @@ function checkKeysOrder(obj, filePath, excludeKeys = []) {
             }
         }
 
-        // Add excluded keys at the end (maintaining their original order)
-        for (const key of excludedKeys) {
-            sortedObj[key] = currentObj[key];
-        }
-
         // Check if order changed
         const originalKeys = Object.keys(currentObj);
         const newKeys = Object.keys(sortedObj);
-        const orderChanged = originalKeys.some((key, index) => key !== newKeys[index]);
+        const orderChanged = originalKeys.some(
+            (key, index) => key !== newKeys[index],
+        );
 
         return [sortedObj, orderChanged];
     }
@@ -89,10 +128,17 @@ function checkKeysOrder(obj, filePath, excludeKeys = []) {
 
     if (hasChanges) {
         try {
-            fs.writeFileSync(filePath, JSON.stringify(sortedObj, null, 4) + '\n', 'utf8');
+            fs.writeFileSync(
+                filePath,
+                JSON.stringify(sortedObj, null, 4) + '\n',
+                'utf8',
+            );
             log(`  🔧 Auto-sorted keys in ${filePath}`, 'blue');
         } catch (error) {
-            log(`  ❌ Failed to auto-sort ${filePath}: ${error.message}`, 'red');
+            log(
+                `  ❌ Failed to auto-sort ${filePath}: ${error.message}`,
+                'red',
+            );
             return false;
         }
     }
@@ -107,13 +153,21 @@ function extractPackageJsonTranslationKeys() {
     // Extract translation keys from package.json
     function extractFromObject(obj) {
         for (const [key, value] of Object.entries(obj)) {
-            if (typeof value === 'string' && value.startsWith('%') && value.endsWith('%')) {
+            if (
+                typeof value === 'string' &&
+                value.startsWith('%') &&
+                value.endsWith('%')
+            ) {
                 // Extract key from %key% format
                 const translationKey = value.slice(1, -1);
                 requiredKeys.add(translationKey);
             } else if (Array.isArray(value)) {
-                value.forEach(item => {
-                    if (typeof item === 'string' && item.startsWith('%') && item.endsWith('%')) {
+                value.forEach((item) => {
+                    if (
+                        typeof item === 'string' &&
+                        item.startsWith('%') &&
+                        item.endsWith('%')
+                    ) {
                         const translationKey = item.slice(1, -1);
                         requiredKeys.add(translationKey);
                     } else if (typeof item === 'object' && item !== null) {
@@ -143,7 +197,9 @@ function findFilesRecursively(dir, extensions = []) {
 
                 if (stat.isDirectory()) {
                     // Skip node_modules and other common directories
-                    if (!['node_modules', '.git', 'dist', 'out'].includes(item)) {
+                    if (
+                        !['node_modules', '.git', 'dist', 'out'].includes(item)
+                    ) {
                         walkDir(fullPath);
                     }
                 } else if (stat.isFile()) {
@@ -165,316 +221,169 @@ function findFilesRecursively(dir, extensions = []) {
     return files;
 }
 
-function extractVSCodeL10nCalls() {
+function extractTranslationCalls(patterns) {
     const requiredKeys = new Set();
+    const dynamicKeys = [];
 
     try {
-        // Find all TypeScript and JavaScript files in src directory
-        const files = findFilesRecursively('src', ['ts', 'js']);
+        for (const { dir, exts, staticRegex, dynamicRegex } of patterns) {
+            const files = findFilesRecursively(dir, exts);
 
-        for (const file of files) {
-            try {
-                const content = fs.readFileSync(file, 'utf8');
+            for (const file of files) {
+                try {
+                    const content = fs.readFileSync(file, 'utf8');
 
-                // Match vscode.l10n.t('key') or vscode.l10n.t("key")
-                const matches = content.match(/vscode\.l10n\.t\s*\(\s*['"](.*?)['"]/g);
-                if (matches) {
-                    matches.forEach(match => {
-                        const keyMatch = match.match(/vscode\.l10n\.t\s*\(\s*['"]([^'"]*)['"]/);
-                        if (keyMatch) {
-                            requiredKeys.add(keyMatch[1]);
-                        }
-                    });
+                    // Extract static keys
+                    const matches = content.match(staticRegex);
+                    if (matches) {
+                        matches.forEach((match) => {
+                            const keyMatch = match.match(/['"]([^'"]*)['"]/);
+                            if (keyMatch) {
+                                requiredKeys.add(keyMatch[1]);
+                            }
+                        });
+                    }
+
+                    // Check for dynamic keys
+                    const dynamicMatches = content.match(dynamicRegex);
+                    if (dynamicMatches) {
+                        dynamicMatches.forEach((match) => {
+                            const lines = content.substring(0, content.indexOf(match)).split('\n');
+                            const lineNum = lines.length;
+                            dynamicKeys.push({
+                                file: file,
+                                line: lineNum,
+                                match: match.trim()
+                            });
+                        });
+                    }
+                } catch (error) {
+                    // Ignore errors for individual files
                 }
-            } catch (error) {
-                // Ignore errors for individual files
             }
         }
     } catch (error) {
-        log(`Warning: Failed to extract vscode.l10n.t calls: ${error.message}`, 'yellow');
+        log(`Warning: Failed to extract translation calls: ${error.message}`, 'yellow');
     }
 
-    return requiredKeys;
+    return { requiredKeys, dynamicKeys };
+}
+
+function extractVSCodeL10nCalls() {
+    return extractTranslationCalls([{
+        dir: 'src',
+        exts: ['ts', 'js'],
+        staticRegex: /vscode\.l10n\.t\s*\(\s*['"](.*?)['"]/g,
+        dynamicRegex: /vscode\.l10n\.t\s*\(\s*(?!['"]).+?\)/g
+    }]);
 }
 
 function extractWebviewTranslationCalls() {
-    const requiredKeys = new Set();
-
-    try {
-        // Find all TypeScript and TSX files in webview directory
-        const webviewDir = path.join('src', 'webview');
-        const files = findFilesRecursively(webviewDir, ['tsx', 'ts']);
-
-        for (const file of files) {
-            try {
-                const content = fs.readFileSync(file, 'utf8');
-
-                // Match t('key') or t("key")
-                const matches = content.match(/\bt\s*\(\s*['"](.*?)['"]/g);
-                if (matches) {
-                    matches.forEach(match => {
-                        const keyMatch = match.match(/\bt\s*\(\s*['"]([^'"]*)['"]/);
-                        if (keyMatch) {
-                            requiredKeys.add(keyMatch[1]);
-                        }
-                    });
-                }
-            } catch (error) {
-                // Ignore errors for individual files
-            }
-        }
-    } catch (error) {
-        log(`Warning: Failed to extract webview t() calls: ${error.message}`, 'yellow');
-    }
-
-    return requiredKeys;
+    return extractTranslationCalls([{
+        dir: path.join('src', 'webview'),
+        exts: ['tsx', 'ts'],
+        staticRegex: /\bt\s*\(\s*['"](.*?)['"]/g,
+        dynamicRegex: /\bt\s*\(\s*(?!['"]).+?\)/g
+    }]);
 }
 
-function checkPackageJsonTranslations() {
-    log(`\n${colors.bold}Checking VSCode Extension Configuration Translations...${colors.reset}`);
+function checkTranslations(config) {
+    log(`\n${colors.bold}Checking ${config.title}...${colors.reset}`);
 
     let hasErrors = false;
 
     try {
-        // Get required keys from package.json
-        const requiredKeys = extractPackageJsonTranslationKeys();
-        log(`Required translation keys from package.json: ${requiredKeys.size}`);
+        // Get required keys
+        const extractResult = config.requiredKeysExtractor();
+        const requiredKeys = extractResult.requiredKeys || extractResult;
+        const dynamicKeys = extractResult.dynamicKeys || [];
+        
+        log(`Required translation keys from ${config.referenceFile}: ${requiredKeys.size}`);
 
-        // Check English translations
-        const englishData = loadJsonFile('package.nls.json');
-        const englishKeys = getAllKeys(englishData);
-        log(`English translations (package.nls.json): ${englishKeys.size} keys`);
+        // Check for dynamic translation keys (if enabled)
+        if (config.checkDynamic && dynamicKeys.length > 0) {
+            hasErrors = true;
+            log(`  ❌ Dynamic translation keys are not allowed:`, 'red');
+            dynamicKeys.forEach((dynamicKey) => {
+                log(`    - ${dynamicKey.file}:${dynamicKey.line} - ${dynamicKey.match}`, 'red');
+            });
+            log(`  ℹ️  All translation keys must be static strings wrapped in quotes`, 'yellow');
+        }
 
-        // Check Chinese translations
-        const chineseData = loadJsonFile('package.nls.zh.json');
-        const chineseKeys = getAllKeys(chineseData);
-        log(`Chinese translations (package.nls.zh.json): ${chineseKeys.size} keys`);
+        // Check each translation file
+        const sortedFiles = [];
+        for (const fileConfig of config.files) {
+            const data = loadJsonFile(fileConfig.path);
+            const keys = fileConfig.keyExtractor(data);
+            log(`${fileConfig.name} translations (${fileConfig.path}): ${keys.size} keys`);
 
-        // Auto-sort keys
-        const englishSorted = checkKeysOrder(englishData, 'package.nls.json');
-        const chineseSorted = checkKeysOrder(chineseData, 'package.nls.zh.json');
+            // Auto-sort keys
+            if (checkKeysOrder(data, fileConfig.path)) {
+                sortedFiles.push(fileConfig.path);
+            }
 
-        if (englishSorted || chineseSorted) {
+            // Check missing keys
+            const missingKeys = [...requiredKeys].filter((key) => !keys.has(key));
+            if (missingKeys.length > 0) {
+                hasErrors = true;
+                log(`  ❌ Missing keys in ${fileConfig.path}:`, 'red');
+                missingKeys.forEach((key) => log(`    - ${key}`, 'red'));
+            }
+
+            // Check extra keys
+            const extraKeys = [...keys].filter((key) => !requiredKeys.has(key));
+            if (extraKeys.length > 0) {
+                hasErrors = true;
+                log(`  ❌ Extra keys in ${fileConfig.path} (not used in ${config.referenceFile}):`, 'red');
+                extraKeys.forEach((key) => log(`    - ${key}`, 'red'));
+            }
+        }
+
+        // Report auto-sorting
+        if (sortedFiles.length > 0) {
             log(`  ℹ️  Files were automatically sorted and will be included in commit`, 'blue');
         }
 
-        // Check missing keys in English
-        const missingInEnglish = [...requiredKeys].filter(key => !englishKeys.has(key));
-        if (missingInEnglish.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Missing keys in package.nls.json:`, 'red');
-            missingInEnglish.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check missing keys in Chinese
-        const missingInChinese = [...requiredKeys].filter(key => !chineseKeys.has(key));
-        if (missingInChinese.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Missing keys in package.nls.zh.json:`, 'red');
-            missingInChinese.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check extra keys in English (now fatal error)
-        const extraInEnglish = [...englishKeys].filter(key => !requiredKeys.has(key));
-        if (extraInEnglish.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Extra keys in package.nls.json (not used in package.json):`, 'red');
-            extraInEnglish.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check extra keys in Chinese (now fatal error)
-        const extraInChinese = [...chineseKeys].filter(key => !requiredKeys.has(key));
-        if (extraInChinese.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Extra keys in package.nls.zh.json (not used in package.json):`, 'red');
-            extraInChinese.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
         if (!hasErrors) {
-            log(`  ✅ Package.json translations are complete`, 'green');
+            log(`  ✅ ${config.title} are complete`, 'green');
         }
-
     } catch (error) {
         hasErrors = true;
-        log(`❌ Error checking package.json translations: ${error.message}`, 'red');
-    }
-
-    return hasErrors;
-}
-
-function checkBundleTranslations() {
-    log(`\n${colors.bold}Checking VSCode Extension Runtime Bundle Translations...${colors.reset}`);
-
-    let hasErrors = false;
-
-    try {
-        // Get required keys from vscode.l10n.t calls
-        const requiredKeys = extractVSCodeL10nCalls();
-        log(`Required translation keys from vscode.l10n.t calls: ${requiredKeys.size}`);
-
-        // Check Chinese bundle translations
-        const bundleData = loadJsonFile('l10n/bundle.l10n.zh-cn.json');
-        const bundleKeys = new Set(Object.keys(bundleData));
-        log(`Bundle translations (l10n/bundle.l10n.zh-cn.json): ${bundleKeys.size} keys`);
-
-        // Load whitelist from bundle file if it exists
-        const whitelist = new Set();
-        if (bundleData['__WHITELIST__']) {
-            if (Array.isArray(bundleData['__WHITELIST__'])) {
-                bundleData['__WHITELIST__'].forEach(key => whitelist.add(key));
-                log(`Whitelist found: ${whitelist.size} allowed extra keys`);
-            } else {
-                log(`  ⚠️  __WHITELIST__ should be an array, ignoring...`, 'yellow');
-            }
-            // Remove whitelist from bundle keys for normal checking
-            bundleKeys.delete('__WHITELIST__');
-        }
-
-        // Auto-sort keys (exclude __WHITELIST__ from ordering)
-        const bundleSorted = checkKeysOrder(bundleData, 'l10n/bundle.l10n.zh-cn.json', ['__WHITELIST__']);
-
-        if (bundleSorted) {
-            log(`  ℹ️  Bundle file was automatically sorted and will be included in commit`, 'blue');
-        }
-
-        // Check missing keys in bundle
-        const missingInBundle = [...requiredKeys].filter(key => !bundleKeys.has(key));
-        if (missingInBundle.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Missing keys in l10n/bundle.l10n.zh-cn.json:`, 'red');
-            missingInBundle.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check extra keys in bundle (now fatal error, excluding whitelisted ones)
-        const extraInBundle = [...bundleKeys].filter(key => !requiredKeys.has(key) && !whitelist.has(key));
-        if (extraInBundle.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Extra keys in l10n/bundle.l10n.zh-cn.json (not used in code and not whitelisted):`, 'red');
-            extraInBundle.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Show whitelisted keys that are present
-        const whitelistedPresent = [...whitelist].filter(key => bundleKeys.has(key));
-        if (whitelistedPresent.length > 0) {
-            log(`  ℹ️  Whitelisted keys present in bundle:`, 'blue');
-            whitelistedPresent.forEach(key => log(`    - ${key}`, 'blue'));
-        }
-
-        if (!hasErrors) {
-            log(`  ✅ Bundle translations are complete`, 'green');
-        }
-
-    } catch (error) {
-        hasErrors = true;
-        log(`❌ Error checking bundle translations: ${error.message}`, 'red');
-    }
-
-    return hasErrors;
-}
-
-function checkWebviewTranslations() {
-    log(`\n${colors.bold}Checking React Webview Translations...${colors.reset}`);
-
-    let hasErrors = false;
-
-    try {
-        // Get required keys from t() calls
-        const requiredKeys = extractWebviewTranslationCalls();
-        log(`Required translation keys from t() calls: ${requiredKeys.size}`);
-
-        // Check English translations
-        const englishData = loadJsonFile('src/webview/l10n/en.json');
-        const englishKeys = new Set(Object.keys(englishData));
-        log(`English translations (src/webview/l10n/en.json): ${englishKeys.size} keys`);
-
-        // Check Chinese translations
-        const chineseData = loadJsonFile('src/webview/l10n/zh.json');
-        const chineseKeys = new Set(Object.keys(chineseData));
-        log(`Chinese translations (src/webview/l10n/zh.json): ${chineseKeys.size} keys`);
-
-        // Auto-sort keys
-        const englishSorted = checkKeysOrder(englishData, 'src/webview/l10n/en.json');
-        const chineseSorted = checkKeysOrder(chineseData, 'src/webview/l10n/zh.json');
-
-        if (englishSorted || chineseSorted) {
-            log(`  ℹ️  Webview translation files were automatically sorted and will be included in commit`, 'blue');
-        }
-
-        // Check missing keys in English
-        const missingInEnglish = [...requiredKeys].filter(key => !englishKeys.has(key));
-        if (missingInEnglish.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Missing keys in src/webview/l10n/en.json:`, 'red');
-            missingInEnglish.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check missing keys in Chinese
-        const missingInChinese = [...requiredKeys].filter(key => !chineseKeys.has(key));
-        if (missingInChinese.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Missing keys in src/webview/l10n/zh.json:`, 'red');
-            missingInChinese.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check extra keys in English (now fatal error)
-        const extraInEnglish = [...englishKeys].filter(key => !requiredKeys.has(key));
-        if (extraInEnglish.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Extra keys in src/webview/l10n/en.json (not used in code):`, 'red');
-            extraInEnglish.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        // Check extra keys in Chinese (now fatal error)
-        const extraInChinese = [...chineseKeys].filter(key => !requiredKeys.has(key));
-        if (extraInChinese.length > 0) {
-            hasErrors = true;
-            log(`  ❌ Extra keys in src/webview/l10n/zh.json (not used in code):`, 'red');
-            extraInChinese.forEach(key => log(`    - ${key}`, 'red'));
-        }
-
-        if (!hasErrors) {
-            log(`  ✅ Webview translations are complete`, 'green');
-        }
-
-    } catch (error) {
-        hasErrors = true;
-        log(`❌ Error checking webview translations: ${error.message}`, 'red');
+        log(`❌ Error checking ${config.title.toLowerCase()}: ${error.message}`, 'red');
     }
 
     return hasErrors;
 }
 
 function main() {
-    log(`${colors.bold}${colors.blue}🔍 Checking translation completeness and auto-sorting...${colors.reset}`);
+    log(
+        `${colors.bold}${colors.blue}🔍 Checking translation completeness and auto-sorting...${colors.reset}`,
+    );
 
     let hasAnyErrors = false;
-    let hasAutoSorted = false;
 
-    // Check package.json translations
-    const packageErrors = checkPackageJsonTranslations();
-    hasAnyErrors = hasAnyErrors || packageErrors;
+    // Check all translation configurations
+    for (const [key, config] of Object.entries(TRANSLATION_CONFIGS)) {
+        const hasErrors = checkTranslations(config);
+        hasAnyErrors = hasAnyErrors || hasErrors;
+    }
 
-    // Check bundle translations
-    const bundleErrors = checkBundleTranslations();
-    hasAnyErrors = hasAnyErrors || bundleErrors;
-
-    // Check webview translations
-    const webviewErrors = checkWebviewTranslations();
-    hasAnyErrors = hasAnyErrors || webviewErrors;
-
-    // If files were auto-sorted, add them to git staging
+    // Auto-add sorted files to git staging
     const filesToCheck = [
         'package.nls.json',
         'package.nls.zh.json',
         'l10n/bundle.l10n.zh-cn.json',
         'src/webview/l10n/en.json',
-        'src/webview/l10n/zh.json'
+        'src/webview/l10n/zh.json',
     ];
 
+    let hasAutoSorted = false;
     for (const file of filesToCheck) {
         try {
-            // Check if file was modified (simple timestamp check would be better, but this works)
-            const status = execSync(`git status --porcelain "${file}"`, { encoding: 'utf8', stdio: 'pipe' }).trim();
+            const status = execSync(`git status --porcelain "${file}"`, {
+                encoding: 'utf8',
+                stdio: 'pipe',
+            }).trim();
             if (status && status.includes('M ')) {
                 execSync(`git add "${file}"`, { stdio: 'pipe' });
                 hasAutoSorted = true;

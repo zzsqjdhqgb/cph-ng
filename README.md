@@ -1,8 +1,10 @@
 # CPH NG
 
-> Quickly compile, run and judge competitive programming problems in VS Code. Automatically download testcases , or write & test your own problems.
+> Quickly compile, run and judge competitive programming problems in VS Code.
+> Automatically download testcases , or write & test your own problems.
 
-This is the next generation of the [Competitive Programming Helper](https://github.com/agrawal-d/cph).
+This is the next generation of the
+[Competitive Programming Helper](https://github.com/agrawal-d/cph).
 
 ## Features
 
@@ -14,8 +16,8 @@ This is the next generation of the [Competitive Programming Helper](https://gith
 
 ## Comparison with CPH
 
-| Feature                 | CPH                  | CPH-NG                 |
-| ----------------------- | -------------------- | ---------------------- |
+| Feature                 | CPH                   | CPH-NG                  |
+| ----------------------- | --------------------- | ----------------------- |
 | Automatic Compilation   | ✅                    | ✅                      |
 | Intelligent Judge       | ✅                    | ✅                      |
 | Competitive Companion   | ✅                    | ✅                      |
@@ -28,8 +30,10 @@ This is the next generation of the [Competitive Programming Helper](https://gith
 | Cache compiled program  | ❌                    | ✅ [^2]                 |
 
 [^1]: They are: AC PE WA TLE OLE RE CE SE RJ SK
-[^2]: CPH-NG calculates a hash of the current source code.
-      If the hash matches the last one, it skips the compile process to emit the running time.
+
+[^2]:
+    CPH-NG calculates a hash of the current source code. If the hash matches the
+    last one, it skips the compile process to emit the running time.
 
 ## Development
 
@@ -42,33 +46,37 @@ This is the next generation of the [Competitive Programming Helper](https://gith
 ### Local Development Setup
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/langningchen/cph-ng.git
-   cd cph-ng
-   ```
+
+    ```bash
+    git clone https://github.com/langningchen/cph-ng.git
+    cd cph-ng
+    ```
 
 2. **Install dependencies**
-   ```bash
-   pnpm install
-   # or: npm install
-   ```
+
+    ```bash
+    pnpm install
+    # or: npm install
+    ```
 
 3. **Set up Git hooks** (for translation checking)
-   ```bash
-   pnpm run install-hooks
-   # or: npm run install-hooks
-   ```
+
+    ```bash
+    pnpm run install-hooks
+    # or: npm run install-hooks
+    ```
 
 4. **Start development**
-   ```bash
-   pnpm run watch
-   # or: npm run watch
-   ```
+
+    ```bash
+    pnpm run watch
+    # or: npm run watch
+    ```
 
 5. **Open in VS Code**
-   - Open the project folder in VS Code
-   - Press `F5` to start debugging
-   - A new Extension Development Host window will open with CPH-NG loaded
+    - Open the project folder in VS Code
+    - Press `F5` to start debugging
+    - A new Extension Development Host window will open with CPH-NG loaded
 
 ### Development Scripts
 
@@ -102,23 +110,24 @@ cph-ng/
 
 ### Translation Management
 
-This project supports internationalization (i18n) with automatic translation checking:
+This project supports internationalization (i18n) with automatic translation
+checking:
 
 #### Adding New Translations
 
 1. **Extension Configuration** (package.json)
-   - Add `%key%` references in package.json
-   - Add translations in `package.nls.json` (English)
-   - Add translations in `package.nls.zh.json` (Chinese)
+    - Add `%key%` references in package.json
+    - Add translations in `package.nls.json` (English)
+    - Add translations in `package.nls.zh.json` (Chinese)
 
 2. **Runtime Messages** (Extension code)
-   - Use `vscode.l10n.t('key')` in TypeScript code
-   - Add translations in `l10n/bundle.l10n.zh-cn.json`
+    - Use `vscode.l10n.t('key')` in TypeScript code
+    - Add translations in `l10n/bundle.l10n.zh-cn.json`
 
 3. **Webview UI** (React components)
-   - Use `t('key')` in React components
-   - Add translations in `src/webview/l10n/en.json` (English)
-   - Add translations in `src/webview/l10n/zh.json` (Chinese)
+    - Use `t('key')` in React components
+    - Add translations in `src/webview/l10n/en.json` (English)
+    - Add translations in `src/webview/l10n/zh.json` (Chinese)
 
 #### Translation Checking
 
@@ -129,19 +138,21 @@ This project supports internationalization (i18n) with automatic translation che
 ### Building and Packaging
 
 1. **Development Build**
-   ```bash
-   pnpm run compile
-   ```
+
+    ```bash
+    pnpm run compile
+    ```
 
 2. **Create VSIX Package**
-   ```bash
-   pnpm run package
-   ```
+
+    ```bash
+    pnpm run package
+    ```
 
 3. **Install Locally**
-   ```bash
-   code --install-extension cph-ng-*.vsix
-   ```
+    ```bash
+    code --install-extension cph-ng-*.vsix
+    ```
 
 ### Contributing
 
@@ -161,7 +172,8 @@ This project supports internationalization (i18n) with automatic translation che
 
 ## License
 
-This project is licensed under the terms of the [GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).
+This project is licensed under the terms of the
+[GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).
 
 ## Known Issues
 
@@ -169,4 +181,5 @@ See [GitHub Issues](https://github.com/langningchen/cph-ng/issues).
 
 ## Change Log
 
-See [CHANGELOG.md](https://github.com/langningchen/cph-ng/blob/main/CHANGELOG.md)
+See
+[CHANGELOG.md](https://github.com/langningchen/cph-ng/blob/main/CHANGELOG.md)

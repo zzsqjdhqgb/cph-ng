@@ -1,42 +1,42 @@
 // Copyright (C) 2025 Langning Chen
-// 
+//
 // This file is part of cph-ng.
-// 
+//
 // cph-ng is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // cph-ng is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { AnserJsonEntry, ansiToJson } from 'anser';
-import { basename } from '../utils';
-import { OpenFileMessage } from '../messages';
-import Alert from '@mui/material/Alert';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ClearIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DifferenceIcon from '@mui/icons-material/Difference';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
-import React, { CSSProperties, useEffect, useState } from 'react';
+import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
-import TextareaAutosize from 'react-textarea-autosize';
-import CphLink from './cphLink';
-import CphFlex from './cphFlex';
-import CphButton from './cphButton';
-import CphText from './cphText';
+import { AnserJsonEntry, ansiToJson } from 'anser';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import TextareaAutosize from 'react-textarea-autosize';
+import { OpenFileMessage } from '../messages';
+import { basename } from '../utils';
+import CphButton from './cphButton';
+import CphFlex from './cphFlex';
+import CphLink from './cphLink';
+import CphText from './cphText';
 
 interface OutputActions {
     onSetAnswer: () => void;
     onCompare: () => void;
-};
+}
 
 interface CodeMirrorSectionProps {
     label: string;
@@ -53,9 +53,9 @@ const ansiToReact = (ansi: string) => {
         <div
             contentEditable
             suppressContentEditableWarning={true}
-            onCut={e => e.preventDefault()}
-            onPaste={e => e.preventDefault()}
-            onBeforeInput={e => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            onPaste={(e) => e.preventDefault()}
+            onBeforeInput={(e) => e.preventDefault()}
             style={{ cursor: 'text', outline: 'none' }}
         >
             {ansiToJson(ansi).map((entry: AnserJsonEntry, index: number) => {
@@ -71,24 +71,44 @@ const ansiToReact = (ansi: string) => {
                     } else if (decoration === 'italic') {
                         styles.fontStyle = 'italic';
                     } else if (decoration === 'underline') {
-                        styles.textDecoration = `${styles.textDecoration} underline`.trim();
+                        styles.textDecoration =
+                            `${styles.textDecoration} underline`.trim();
                     } else if (decoration === 'blink') {
                         styles.animation = 'blink 1s infinite';
                     } else if (decoration === 'reverse') {
-                        [styles.color, styles.backgroundColor] = [styles.backgroundColor, styles.color];
+                        [styles.color, styles.backgroundColor] = [
+                            styles.backgroundColor,
+                            styles.color,
+                        ];
                     } else if (decoration === 'hidden') {
                         styles.visibility = 'hidden';
                     } else if (decoration === 'strikethrough') {
-                        styles.textDecoration = `${styles.textDecoration} line-through`.trim();
+                        styles.textDecoration =
+                            `${styles.textDecoration} line-through`.trim();
                     }
                 }
-                return <span key={index} style={styles}>{entry.content}</span>;
+                return (
+                    <span
+                        key={index}
+                        style={styles}
+                    >
+                        {entry.content}
+                    </span>
+                );
             })}
         </div>
     );
 };
 
-const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({ label, isFile, value, onBlur, onChooseFile, outputActions, readOnly }) => {
+const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({
+    label,
+    isFile,
+    value,
+    onBlur,
+    onChooseFile,
+    outputActions,
+    readOnly,
+}) => {
     const { t } = useTranslation();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
@@ -98,10 +118,12 @@ const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({ label, isFile, val
     }, [value]);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(value).then(() => {
-            setSnackbarOpen(true);
-        })
-            .catch(err => {
+        navigator.clipboard
+            .writeText(value)
+            .then(() => {
+                setSnackbarOpen(true);
+            })
+            .catch((err) => {
                 console.error('Failed to copy code: ', err);
             });
     };
@@ -127,44 +149,61 @@ const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({ label, isFile, val
     };
 
     return (
-        <CphFlex column smallGap>
+        <CphFlex
+            column
+            smallGap
+        >
             <CphFlex justifyContent={'space-between'}>
-                <CphFlex flex={1} flexWrap={'wrap'}>
+                <CphFlex
+                    flex={1}
+                    flexWrap={'wrap'}
+                >
                     <CphText>{label}</CphText>
-                    {isFile && <CphLink
-                        name={value}
-                        onClick={() => {
-                            vscode.postMessage({
-                                type: 'openFile',
-                                path: value
-                            } as OpenFileMessage);
-                        }}>
-                        {basename(value)}
-                    </CphLink>}
+                    {isFile && (
+                        <CphLink
+                            name={value}
+                            onClick={() => {
+                                vscode.postMessage({
+                                    type: 'openFile',
+                                    path: value,
+                                } as OpenFileMessage);
+                            }}
+                        >
+                            {basename(value)}
+                        </CphLink>
+                    )}
                 </CphFlex>
-                {outputActions && <CphButton
-                    name={t('testCaseDataView.compare')}
-                    icon={DifferenceIcon}
-                    onClick={outputActions.onCompare}
-                />}
-                {isFile ? (
-                    readOnly || <CphButton
-                        name={t('testCaseDataView.clearFile')}
-                        icon={ClearIcon}
-                        onClick={() => onBlur && onBlur('')}
+                {outputActions && (
+                    <CphButton
+                        name={t('testCaseDataView.compare')}
+                        icon={DifferenceIcon}
+                        onClick={outputActions.onCompare}
                     />
+                )}
+                {isFile ? (
+                    readOnly || (
+                        <CphButton
+                            name={t('testCaseDataView.clearFile')}
+                            icon={ClearIcon}
+                            onClick={() => onBlur && onBlur('')}
+                        />
+                    )
                 ) : (
                     <>
-                        {readOnly || <CphButton
-                            name={t('testCaseDataView.loadFile')}
-                            icon={FileOpenIcon}
-                            onClick={onChooseFile}
-                        />}
-                        {outputActions && <CphButton
-                            name={t('testCaseDataView.setAnswer')}
-                            icon={ArrowUpwardIcon}
-                            onClick={outputActions.onSetAnswer}
-                        />}
+                        {readOnly || (
+                            <CphButton
+                                name={t('testCaseDataView.loadFile')}
+                                icon={FileOpenIcon}
+                                onClick={onChooseFile}
+                            />
+                        )}
+                        {outputActions && (
+                            <CphButton
+                                name={t('testCaseDataView.setAnswer')}
+                                icon={ArrowUpwardIcon}
+                                onClick={outputActions.onSetAnswer}
+                            />
+                        )}
                         <CphButton
                             name={t('testCaseDataView.copy')}
                             icon={ContentCopyIcon}
@@ -173,33 +212,42 @@ const TestCaseDataView: React.FC<CodeMirrorSectionProps> = ({ label, isFile, val
                     </>
                 )}
             </CphFlex>
-            {isFile || (readOnly ? (
-                <div style={{
-                    ...commonStyle,
-                    maxHeight: '20em',
-                }}>{ansiToReact(value)}</div>
-            ) : (
-                <TextareaAutosize
-                    value={internalValue}
-                    onChange={e => setInternalValue(e.target.value)}
-                    onBlur={e => onBlur && onBlur(e.target.value)}
-                    maxRows={10}
-                    style={{
-                        ...commonStyle,
-                        resize: 'none',
-                    } as any}
-                />
-            ))}
+            {isFile ||
+                (readOnly ? (
+                    <div
+                        style={{
+                            ...commonStyle,
+                            maxHeight: '20em',
+                        }}
+                    >
+                        {ansiToReact(value)}
+                    </div>
+                ) : (
+                    <TextareaAutosize
+                        value={internalValue}
+                        onChange={(e) => setInternalValue(e.target.value)}
+                        onBlur={(e) => onBlur && onBlur(e.target.value)}
+                        maxRows={10}
+                        style={
+                            {
+                                ...commonStyle,
+                                resize: 'none',
+                            } as any
+                        }
+                    />
+                ))}
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={3000}
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert onClose={handleCloseSnackbar}
+                <Alert
+                    onClose={handleCloseSnackbar}
                     severity={'success'}
                     variant={'filled'}
-                    sx={{ width: '100%' }}>
+                    sx={{ width: '100%' }}
+                >
                     {t('testCaseDataView.snackbar.message')}
                 </Alert>
             </Snackbar>

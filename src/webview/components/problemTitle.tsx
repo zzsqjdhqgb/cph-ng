@@ -1,37 +1,37 @@
 // Copyright (C) 2025 Langning Chen
-// 
+//
 // This file is part of cph-ng.
-// 
+//
 // cph-ng is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // cph-ng is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { basename } from '../utils';
-import { EditProblemDetailsMessage, OpenFileMessage } from '../messages';
-import { Problem } from '../../types';
+import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import CphButton from './cphButton';
-import CphFlex from './cphFlex';
-import CphLink from './cphLink';
-import CphText from './cphText';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import EditIcon from '@mui/icons-material/Edit';
-import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Problem } from '../../types';
+import { EditProblemDetailsMessage, OpenFileMessage } from '../messages';
+import { basename } from '../utils';
+import CphButton from './cphButton';
+import CphFlex from './cphFlex';
+import CphLink from './cphLink';
+import CphText from './cphText';
 
 const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
     const { t } = useTranslation();
@@ -59,32 +59,61 @@ const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
         <Container>
             <CphFlex
                 onMouseEnter={() => setHoveringTitle(true)}
-                onMouseLeave={() => setHoveringTitle(false)}>
-                <CphFlex column alignStart flexShrink={1} width={'unset'}>
+                onMouseLeave={() => setHoveringTitle(false)}
+            >
+                <CphFlex
+                    column
+                    alignStart
+                    flexShrink={1}
+                    width={'unset'}
+                >
                     <CphText
                         whiteSpace={'nowrap'}
                         sx={{ cursor: problem.url ? 'pointer' : 'default' }}
                         title={problem.name}
                     >
                         {problem.url ? (
-                            <CphLink href={problem.url} name={problem.url}>{problem.name}</CphLink>
-                        ) : problem.name}
+                            <CphLink
+                                href={problem.url}
+                                name={problem.url}
+                            >
+                                {problem.name}
+                            </CphLink>
+                        ) : (
+                            problem.name
+                        )}
                     </CphText>
-                    <CphText
-                        fontSize={'0.8rem'}>
-                        {t('problemTitle.timeLimit', { time: problem.timeLimit })}&emsp;
-                        <CphLink name={problem.srcPath} onClick={() => {
-                            vscode.postMessage({
-                                type: 'openFile',
-                                path: problem.srcPath
-                            } as OpenFileMessage);
-                        }}>{basename(problem.srcPath)}</CphLink>
+                    <CphText fontSize={'0.8rem'}>
+                        {t('problemTitle.timeLimit', {
+                            time: problem.timeLimit,
+                        })}
+                        &emsp;
+                        <CphLink
+                            name={problem.srcPath}
+                            onClick={() => {
+                                vscode.postMessage({
+                                    type: 'openFile',
+                                    path: problem.srcPath,
+                                } as OpenFileMessage);
+                            }}
+                        >
+                            {basename(problem.srcPath)}
+                        </CphLink>
                     </CphText>
                 </CphFlex>
-                {isHoveringTitle && <CphButton name={t('problemTitle.editTitle')} icon={EditIcon}
-                    color={'secondary'} onClick={handleEditTitle} />}
+                {isHoveringTitle && (
+                    <CphButton
+                        name={t('problemTitle.editTitle')}
+                        icon={EditIcon}
+                        color={'secondary'}
+                        onClick={handleEditTitle}
+                    />
+                )}
             </CphFlex>
-            <Dialog open={isEditDialogOpen} onClose={handleEditDialogClose}>
+            <Dialog
+                open={isEditDialogOpen}
+                onClose={handleEditDialogClose}
+            >
                 <DialogTitle>{t('problemTitle.dialog.title')}</DialogTitle>
                 <DialogContent>
                     <TextField
@@ -92,7 +121,7 @@ const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
                         margin={'normal'}
                         label={t('problemTitle.dialog.field.title')}
                         value={editedTitle}
-                        onChange={e => setEditedTitle(e.target.value)}
+                        onChange={(e) => setEditedTitle(e.target.value)}
                         fullWidth
                         autoFocus
                     />
@@ -101,7 +130,7 @@ const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
                         margin={'normal'}
                         label={t('problemTitle.dialog.field.url')}
                         value={editedUrl}
-                        onChange={e => setEditedUrl(e.target.value)}
+                        onChange={(e) => setEditedUrl(e.target.value)}
                         fullWidth
                         type={'url'}
                     />
@@ -110,16 +139,25 @@ const ProblemTitle: React.FC<{ problem: Problem }> = ({ problem }) => {
                         margin={'normal'}
                         label={t('problemTitle.dialog.field.time')}
                         value={editedTimeLimit}
-                        onChange={e => setEditedTimeLimit(parseInt(e.target.value))}
+                        onChange={(e) =>
+                            setEditedTimeLimit(parseInt(e.target.value))
+                        }
                         fullWidth
                         type={'number'}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setEditDialogOpen(false)} color={'primary'}>
+                    <Button
+                        onClick={() => setEditDialogOpen(false)}
+                        color={'primary'}
+                    >
                         {t('problemTitle.dialog.cancel')}
                     </Button>
-                    <Button onClick={handleEditDialogClose} color={'primary'} autoFocus>
+                    <Button
+                        onClick={handleEditDialogClose}
+                        color={'primary'}
+                        autoFocus
+                    >
                         {t('problemTitle.dialog.save')}
                     </Button>
                 </DialogActions>

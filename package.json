@@ -1,385 +1,386 @@
 {
-  "name": "cph-ng",
-  "displayName": "CPH NG",
-  "description": "The next generation of CPH.",
-  "version": "0.0.0",
-  "license": "AGPL-3.0-only",
-  "publisher": "langningchen",
-  "icon": "res/cph-ng.png",
-  "pricing": "Free",
-  "l10n": "./l10n",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/langningchen/cph-ng"
-  },
-  "engines": {
-    "vscode": "^1.74.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "*"
-  ],
-  "main": "./dist/extension.js",
-  "exports": {
-    "import": "./dist/extension.js",
-    "require": "./dist/extension.cjs"
-  },
-  "contributes": {
-    "views": {
-      "cph-ng-sidebar": [
-        {
-          "id": "cphSidebar",
-          "name": "%cph-ng.views.cph-ng-sidebar.name%",
-          "type": "webview",
-          "icon": "./res/panel-view-icon.svg"
-        }
-      ]
+    "name": "cph-ng",
+    "displayName": "CPH NG",
+    "description": "The next generation of CPH.",
+    "version": "0.0.0",
+    "license": "AGPL-3.0-only",
+    "publisher": "langningchen",
+    "icon": "res/cph-ng.png",
+    "pricing": "Free",
+    "l10n": "./l10n",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/langningchen/cph-ng"
     },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "cph-ng-sidebar",
-          "title": "%cph-ng.viewsContainers.activitybar.title%",
-          "icon": "./res/panel-view-icon.svg"
-        }
-      ]
+    "engines": {
+        "vscode": "^1.74.0"
     },
-    "configuration": [
-      {
-        "title": "%cph-ng.configuration.compilation.title%",
-        "properties": {
-          "cph-ng.compilation.cCompiler": {
-            "type": "string",
-            "default": "gcc",
-            "markdownDescription": "%cph-ng.configuration.compilation.properties.cCompiler.markdownDescription%"
-          },
-          "cph-ng.compilation.cArgs": {
-            "type": "string",
-            "default": "-O2 -std=c11 -Wall -DCPH",
-            "markdownDescription": "%cph-ng.configuration.compilation.properties.cArgs.markdownDescription%"
-          },
-          "cph-ng.compilation.cppCompiler": {
-            "type": "string",
-            "default": "g++",
-            "markdownDescription": "%cph-ng.configuration.compilation.properties.cppCompiler.markdownDescription%"
-          },
-          "cph-ng.compilation.cppArgs": {
-            "type": "string",
-            "default": "-O2 -std=c++14 -Wall -DCPH",
-            "markdownDescription": "%cph-ng.configuration.compilation.properties.cppArgs.markdownDescription%"
-          },
-          "cph-ng.compilation.timeout": {
-            "type": "number",
-            "default": 10000,
-            "markdownDescription": "%cph-ng.configuration.compilation.properties.timeout.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.runner.title%",
-        "properties": {
-          "cph-ng.runner.timeAddition": {
-            "type": "number",
-            "default": 1000,
-            "markdownDescription": "%cph-ng.configuration.runner.properties.timeAddition.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.comparing.title%",
-        "properties": {
-          "cph-ng.comparing.oleSize": {
-            "type": "number",
-            "default": 2,
-            "markdownDescription": "%cph-ng.configuration.comparing.properties.oleSize.markdownDescription%"
-          },
-          "cph-ng.comparing.regardPEAsAC": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%cph-ng.configuration.comparing.properties.regardPEAsAC.markdownDescription%"
-          },
-          "cph-ng.comparing.ignoreError": {
-            "type": "boolean",
-            "default": false,
-            "markdownDescription": "%cph-ng.configuration.comparing.properties.ignoreError.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.problem.title%",
-        "properties": {
-          "cph-ng.problem.defaultTimeLimit": {
-            "type": "number",
-            "default": 1000,
-            "markdownDescription": "%cph-ng.configuration.problem.properties.defaultTimeLimit.markdownDescription%"
-          },
-          "cph-ng.problem.foundMatchTestCaseBehavior": {
-            "type": "string",
-            "default": "always",
-            "enum": [
-              "ask",
-              "always",
-              "never"
-            ],
-            "markdownDescription": "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.markdownDescription%",
-            "markdownEnumDescriptions": [
-              "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.ask%",
-              "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.always%",
-              "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.never%"
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./dist/extension.js",
+    "exports": {
+        "import": "./dist/extension.js",
+        "require": "./dist/extension.cjs"
+    },
+    "contributes": {
+        "views": {
+            "cph-ng-sidebar": [
+                {
+                    "id": "cphSidebar",
+                    "name": "%cph-ng.views.cph-ng-sidebar.name%",
+                    "type": "webview",
+                    "icon": "./res/panel-view-icon.svg"
+                }
             ]
-          },
-          "cph-ng.problem.templateFile": {
-            "type": "string",
-            "default": "",
-            "markdownDescription": "%cph-ng.configuration.problem.properties.templateFile.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.cache.title%",
-        "properties": {
-          "cph-ng.cache.directory": {
-            "type": "string",
-            "default": "${tmp}/cph-ng",
-            "markdownDescription": "%cph-ng.configuration.cache.properties.directory.markdownDescription%"
-          },
-          "cph-ng.cache.cleanOnStartup": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%cph-ng.configuration.cache.properties.cleanOnStartup.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.cphCapable.title%",
-        "properties": {
-          "cph-ng.cphCapable.autoImport": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%cph-ng.configuration.cphCapable.properties.autoImport.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.companion.title%",
-        "properties": {
-          "cph-ng.companion.listenPort": {
-            "type": "number",
-            "default": 27121,
-            "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
-          }
-        }
-      },
-      {
-        "title": "%cph-ng.configuration.sidebar.title%",
-        "properties": {
-          "cph-ng.sidebar.retainWhenHidden": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%cph-ng.configuration.sidebar.properties.retainWhenHidden.markdownDescription%"
-          },
-          "cph-ng.sidebar.showAcGif": {
-            "type": "boolean",
-            "default": true,
-            "markdownDescription": "%cph-ng.configuration.sidebar.properties.showAcGif.markdownDescription%"
-          },
-          "cph-ng.sidebar.colorTheme": {
-            "type": "string",
-            "default": "auto",
-            "markdownDescription": "%cph-ng.configuration.sidebar.properties.colorTheme.markdownDescription%",
-            "enum": [
-              "auto",
-              "light",
-              "dark"
-            ],
-            "markdownEnumDescriptions": [
-              "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.auto%",
-              "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.light%",
-              "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.dark%"
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "cph-ng-sidebar",
+                    "title": "%cph-ng.viewsContainers.activitybar.title%",
+                    "icon": "./res/panel-view-icon.svg"
+                }
             ]
-          },
-          "cph-ng.sidebar.hiddenStatuses": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "UKE",
-                "AC",
-                "PE",
-                "WA",
-                "TLE",
-                "MLE",
-                "OLE",
-                "RE",
-                "RF",
-                "CE",
-                "SE",
-                "WT",
-                "FC",
-                "CP",
-                "CPD",
-                "JG",
-                "JGD",
-                "CMP",
-                "SK",
-                "RJ"
-              ],
-              "enumDescriptions": [
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.UKE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.AC%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.PE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WA%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.TLE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.MLE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.OLE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RF%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SE%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WT%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.FC%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CP%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CPD%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JG%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JGD%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CMP%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SK%",
-                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RJ%"
-              ]
+        },
+        "configuration": [
+            {
+                "title": "%cph-ng.configuration.compilation.title%",
+                "properties": {
+                    "cph-ng.compilation.cCompiler": {
+                        "type": "string",
+                        "default": "gcc",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.cCompiler.markdownDescription%"
+                    },
+                    "cph-ng.compilation.cArgs": {
+                        "type": "string",
+                        "default": "-O2 -std=c11 -Wall -DCPH",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.cArgs.markdownDescription%"
+                    },
+                    "cph-ng.compilation.cppCompiler": {
+                        "type": "string",
+                        "default": "g++",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.cppCompiler.markdownDescription%"
+                    },
+                    "cph-ng.compilation.cppArgs": {
+                        "type": "string",
+                        "default": "-O2 -std=c++14 -Wall -DCPH",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.cppArgs.markdownDescription%"
+                    },
+                    "cph-ng.compilation.timeout": {
+                        "type": "number",
+                        "default": 10000,
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.timeout.markdownDescription%"
+                    }
+                }
             },
-            "uniqueItems": true,
-            "default": [],
-            "markdownDescription": "%cph-ng.configuration.sidebar.properties.hiddenStatuses.markdownDescription%"
-          }
+            {
+                "title": "%cph-ng.configuration.runner.title%",
+                "properties": {
+                    "cph-ng.runner.timeAddition": {
+                        "type": "number",
+                        "default": 1000,
+                        "markdownDescription": "%cph-ng.configuration.runner.properties.timeAddition.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.comparing.title%",
+                "properties": {
+                    "cph-ng.comparing.oleSize": {
+                        "type": "number",
+                        "default": 2,
+                        "markdownDescription": "%cph-ng.configuration.comparing.properties.oleSize.markdownDescription%"
+                    },
+                    "cph-ng.comparing.regardPEAsAC": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.comparing.properties.regardPEAsAC.markdownDescription%"
+                    },
+                    "cph-ng.comparing.ignoreError": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.comparing.properties.ignoreError.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.problem.title%",
+                "properties": {
+                    "cph-ng.problem.defaultTimeLimit": {
+                        "type": "number",
+                        "default": 1000,
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.defaultTimeLimit.markdownDescription%"
+                    },
+                    "cph-ng.problem.foundMatchTestCaseBehavior": {
+                        "type": "string",
+                        "default": "always",
+                        "enum": [
+                            "ask",
+                            "always",
+                            "never"
+                        ],
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.markdownDescription%",
+                        "markdownEnumDescriptions": [
+                            "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.ask%",
+                            "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.always%",
+                            "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.never%"
+                        ]
+                    },
+                    "cph-ng.problem.templateFile": {
+                        "type": "string",
+                        "default": "",
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.templateFile.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.cache.title%",
+                "properties": {
+                    "cph-ng.cache.directory": {
+                        "type": "string",
+                        "default": "${tmp}/cph-ng",
+                        "markdownDescription": "%cph-ng.configuration.cache.properties.directory.markdownDescription%"
+                    },
+                    "cph-ng.cache.cleanOnStartup": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.cache.properties.cleanOnStartup.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.cphCapable.title%",
+                "properties": {
+                    "cph-ng.cphCapable.autoImport": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.cphCapable.properties.autoImport.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.companion.title%",
+                "properties": {
+                    "cph-ng.companion.listenPort": {
+                        "type": "number",
+                        "default": 27121,
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
+                    }
+                }
+            },
+            {
+                "title": "%cph-ng.configuration.sidebar.title%",
+                "properties": {
+                    "cph-ng.sidebar.retainWhenHidden": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.retainWhenHidden.markdownDescription%"
+                    },
+                    "cph-ng.sidebar.showAcGif": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.showAcGif.markdownDescription%"
+                    },
+                    "cph-ng.sidebar.colorTheme": {
+                        "type": "string",
+                        "default": "auto",
+                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.colorTheme.markdownDescription%",
+                        "enum": [
+                            "auto",
+                            "light",
+                            "dark"
+                        ],
+                        "markdownEnumDescriptions": [
+                            "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.auto%",
+                            "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.light%",
+                            "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.dark%"
+                        ]
+                    },
+                    "cph-ng.sidebar.hiddenStatuses": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "UKE",
+                                "AC",
+                                "PE",
+                                "WA",
+                                "TLE",
+                                "MLE",
+                                "OLE",
+                                "RE",
+                                "RF",
+                                "CE",
+                                "SE",
+                                "WT",
+                                "FC",
+                                "CP",
+                                "CPD",
+                                "JG",
+                                "JGD",
+                                "CMP",
+                                "SK",
+                                "RJ"
+                            ],
+                            "enumDescriptions": [
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.UKE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.AC%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.PE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WA%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.TLE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.MLE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.OLE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RF%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SE%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.WT%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.FC%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CP%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CPD%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JG%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.JGD%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.CMP%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.SK%",
+                                "%cph-ng.sidebar.hiddenStatuses.enumDescriptions.RJ%"
+                            ]
+                        },
+                        "uniqueItems": true,
+                        "default": [],
+                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.hiddenStatuses.markdownDescription%"
+                    }
+                }
+            }
+        ],
+        "commands": [
+            {
+                "command": "cph-ng.createProblem",
+                "title": "%cph-ng.commands.createProblem%",
+                "icon": "$(add)"
+            },
+            {
+                "command": "cph-ng.runTestCases",
+                "title": "%cph-ng.commands.runTestCases%",
+                "icon": "$(play)"
+            },
+            {
+                "command": "cph-ng.stopTestCases",
+                "title": "%cph-ng.commands.stopTestCases%",
+                "icon": "$(stop)"
+            },
+            {
+                "command": "cph-ng.addTestCase",
+                "title": "%cph-ng.commands.addTestCase%"
+            },
+            {
+                "command": "cph-ng.loadTestCases",
+                "title": "%cph-ng.commands.loadTestCases%"
+            },
+            {
+                "command": "cph-ng.deleteProblem",
+                "title": "%cph-ng.commands.deleteProblem%"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "cph-ng.createProblem",
+                "key": "ctrl+alt+b",
+                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem"
+            },
+            {
+                "command": "cph-ng.runTestCases",
+                "key": "ctrl+alt+b",
+                "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning"
+            },
+            {
+                "command": "cph-ng.stopTestCases",
+                "key": "ctrl+alt+b",
+                "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning"
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "cph-ng.createProblem",
+                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem",
+                    "group": "navigation"
+                },
+                {
+                    "command": "cph-ng.runTestCases",
+                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning",
+                    "group": "navigation"
+                },
+                {
+                    "command": "cph-ng.stopTestCases",
+                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning",
+                    "group": "navigation"
+                }
+            ]
         }
-      }
-    ],
-    "commands": [
-      {
-        "command": "cph-ng.createProblem",
-        "title": "%cph-ng.commands.createProblem%",
-        "icon": "$(add)"
-      },
-      {
-        "command": "cph-ng.runTestCases",
-        "title": "%cph-ng.commands.runTestCases%",
-        "icon": "$(play)"
-      },
-      {
-        "command": "cph-ng.stopTestCases",
-        "title": "%cph-ng.commands.stopTestCases%",
-        "icon": "$(stop)"
-      },
-      {
-        "command": "cph-ng.addTestCase",
-        "title": "%cph-ng.commands.addTestCase%"
-      },
-      {
-        "command": "cph-ng.loadTestCases",
-        "title": "%cph-ng.commands.loadTestCases%"
-      },
-      {
-        "command": "cph-ng.deleteProblem",
-        "title": "%cph-ng.commands.deleteProblem%"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "cph-ng.createProblem",
-        "key": "ctrl+alt+b",
-        "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem"
-      },
-      {
-        "command": "cph-ng.runTestCases",
-        "key": "ctrl+alt+b",
-        "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning"
-      },
-      {
-        "command": "cph-ng.stopTestCases",
-        "key": "ctrl+alt+b",
-        "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning"
-      }
-    ],
-    "menus": {
-      "editor/title": [
-        {
-          "command": "cph-ng.createProblem",
-          "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem",
-          "group": "navigation"
-        },
-        {
-          "command": "cph-ng.runTestCases",
-          "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning",
-          "group": "navigation"
-        },
-        {
-          "command": "cph-ng.stopTestCases",
-          "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning",
-          "group": "navigation"
-        }
-      ]
+    },
+    "scripts": {
+        "vscode:prepublish": "webpack --mode production",
+        "compile": "webpack --mode production",
+        "watch": "webpack --watch --mode development",
+        "package": "pnpm vsce package --allow-star-activation --no-dependencies",
+        "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
+        "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
+        "lint": "eslint src",
+        "install-hooks": "node scripts/install-hooks.js",
+        "check-translations": "node scripts/pre-commit"
+    },
+    "devDependencies": {
+        "@babel/preset-react": "^7.27.1",
+        "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
+        "@types/adm-zip": "^0.5.7",
+        "@types/crypto-js": "^4.2.2",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "~24.1.0",
+        "@types/speed-measure-webpack-plugin": "^1.3.6",
+        "@types/vscode": "1.74.0",
+        "@types/webpack": "^5.28.5",
+        "@typescript-eslint/eslint-plugin": "^8.38.0",
+        "@typescript-eslint/parser": "^8.38.0",
+        "@vscode/test-cli": "^0.0.11",
+        "@vscode/test-electron": "^2.5.2",
+        "@vscode/vsce": "^3.6.0",
+        "eslint": "^9.32.0",
+        "prettier-plugin-organize-imports": "^4.2.0",
+        "react-refresh": "^0.17.0",
+        "terser-webpack-plugin": "^5.3.14",
+        "thread-loader": "^4.0.4",
+        "ts-loader": "^9.5.2",
+        "typescript": "^5.8.3",
+        "webpack": "^5.101.0",
+        "webpack-cli": "^6.0.1"
+    },
+    "dependencies": {
+        "@codemirror/language": "^6.11.2",
+        "@codemirror/state": "^6.5.2",
+        "@codemirror/view": "^6.38.1",
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@lezer/highlight": "^1.2.1",
+        "@mui/icons-material": "^7.2.0",
+        "@mui/material": "^7.2.0",
+        "@types/react": "^19.1.9",
+        "@types/react-dom": "^19.1.7",
+        "@uiw/react-codemirror": "^4.24.1",
+        "adm-zip": "^0.5.16",
+        "anser": "^2.3.2",
+        "ansi_up": "^6.0.6",
+        "codemirror": "^6.0.2",
+        "copy-webpack-plugin": "^13.0.0",
+        "crypto-js": "^4.2.0",
+        "elements": "link:../.local/share/pnpm/global/5/node_modules/@vscode-elements/elements",
+        "i18next": "^25.3.2",
+        "react": "^19.1.1",
+        "react-dom": "^19.1.1",
+        "react-i18next": "^15.6.1",
+        "react-textarea-autosize": "^8.5.9"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "webpack --mode production",
-    "compile": "webpack --mode production",
-    "watch": "webpack --watch --mode development",
-    "package": "pnpm vsce package --allow-star-activation --no-dependencies",
-    "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
-    "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
-    "lint": "eslint src",
-    "install-hooks": "node scripts/install-hooks.js",
-    "check-translations": "node scripts/pre-commit"
-  },
-  "devDependencies": {
-    "@babel/preset-react": "^7.27.1",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
-    "@types/adm-zip": "^0.5.7",
-    "@types/crypto-js": "^4.2.2",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "~24.1.0",
-    "@types/speed-measure-webpack-plugin": "^1.3.6",
-    "@types/vscode": "1.74.0",
-    "@types/webpack": "^5.28.5",
-    "@typescript-eslint/eslint-plugin": "^8.38.0",
-    "@typescript-eslint/parser": "^8.38.0",
-    "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2",
-    "@vscode/vsce": "^3.6.0",
-    "eslint": "^9.32.0",
-    "react-refresh": "^0.17.0",
-    "terser-webpack-plugin": "^5.3.14",
-    "thread-loader": "^4.0.4",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.8.3",
-    "webpack": "^5.101.0",
-    "webpack-cli": "^6.0.1"
-  },
-  "dependencies": {
-    "@codemirror/language": "^6.11.2",
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.1",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@lezer/highlight": "^1.2.1",
-    "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
-    "@uiw/react-codemirror": "^4.24.1",
-    "adm-zip": "^0.5.16",
-    "anser": "^2.3.2",
-    "ansi_up": "^6.0.6",
-    "codemirror": "^6.0.2",
-    "copy-webpack-plugin": "^13.0.0",
-    "crypto-js": "^4.2.0",
-    "elements": "link:../.local/share/pnpm/global/5/node_modules/@vscode-elements/elements",
-    "i18next": "^25.3.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-i18next": "^15.6.1",
-    "react-textarea-autosize": "^8.5.9"
-  }
 }

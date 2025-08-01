@@ -1,24 +1,24 @@
 // Copyright (C) 2025 Langning Chen
-// 
+//
 // This file is part of cph-ng.
-// 
+//
 // cph-ng is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // cph-ng is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import * as vscode from 'vscode';
 import { CphNg } from './cphNg';
 import Settings from './settings';
 import * as messages from './webview/messages';
-import * as vscode from 'vscode';
 
 export interface JudgeResult {
     verdict: 'AC' | 'WA' | 'TLE' | 'RE' | 'CE';
@@ -39,13 +39,20 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphSidebar';
     private _view?: vscode.WebviewView;
 
-    constructor(private readonly _extensionUri: vscode.Uri, private helper: CphNg) {
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+        private helper: CphNg,
+    ) {
         helper.addProblemChangeListener((problem) => {
             this._view?.webview.postMessage({ type: 'problem', problem });
         });
     }
 
-    public focus() { vscode.commands.executeCommand('workbench.view.extension.cph-ng-sidebar'); }
+    public focus() {
+        vscode.commands.executeCommand(
+            'workbench.view.extension.cph-ng-sidebar',
+        );
+    }
 
     public resolveWebviewView(webviewView: vscode.WebviewView) {
         this._view = webviewView;
@@ -66,11 +73,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     await this.helper.getProblem();
                     break;
                 case 'editProblemDetails':
-                    const editProblemDetailsMessage = message as messages.EditProblemDetailsMessage;
+                    const editProblemDetailsMessage =
+                        message as messages.EditProblemDetailsMessage;
                     await this.helper.editProblemDetails(
                         editProblemDetailsMessage.title,
                         editProblemDetailsMessage.url,
-                        editProblemDetailsMessage.timeLimit);
+                        editProblemDetailsMessage.timeLimit,
+                    );
                     break;
                 case 'deleteProblem':
                     await this.helper.deleteProblem();
@@ -82,13 +91,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     await this.helper.loadTestCases();
                     break;
                 case 'updateTestCase':
-                    let updateTestCaseMessage = message as messages.UpdateTestCaseMessage;
+                    let updateTestCaseMessage =
+                        message as messages.UpdateTestCaseMessage;
                     await this.helper.updateTestCase(
                         updateTestCaseMessage.index,
-                        updateTestCaseMessage.testCase);
+                        updateTestCaseMessage.testCase,
+                    );
                     break;
                 case 'runTestCase':
-                    const runTestCaseMessage = message as messages.RunTestCaseMessage;
+                    const runTestCaseMessage =
+                        message as messages.RunTestCaseMessage;
                     await this.helper.runTestCase(runTestCaseMessage.index);
                     break;
                 case 'runTestCases':
@@ -98,22 +110,32 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     await this.helper.stopTestCases();
                     break;
                 case 'chooseTestCaseFile':
-                    const chooseTestCaseFileMessage = message as messages.ChooseTestCaseFileMessage;
+                    const chooseTestCaseFileMessage =
+                        message as messages.ChooseTestCaseFileMessage;
                     await this.helper.chooseTestCaseFile(
                         chooseTestCaseFileMessage.index,
-                        chooseTestCaseFileMessage.label);
+                        chooseTestCaseFileMessage.label,
+                    );
                     break;
                 case 'compareTestCase':
-                    const compareTestCaseMessage = message as messages.CompareTestCaseMessage;
+                    const compareTestCaseMessage =
+                        message as messages.CompareTestCaseMessage;
                     this.helper.compareTestCase(compareTestCaseMessage.index);
                     break;
                 case 'deleteTestCase':
-                    const deleteTestCaseMessage = message as messages.DeleteTestCaseMessage;
-                    await this.helper.deleteTestCase(deleteTestCaseMessage.index);
+                    const deleteTestCaseMessage =
+                        message as messages.DeleteTestCaseMessage;
+                    await this.helper.deleteTestCase(
+                        deleteTestCaseMessage.index,
+                    );
                     break;
                 case 'openFile':
                     const openFileMessage = message as messages.OpenFileMessage;
-                    vscode.window.showTextDocument(await vscode.workspace.openTextDocument(openFileMessage.path));
+                    vscode.window.showTextDocument(
+                        await vscode.workspace.openTextDocument(
+                            openFileMessage.path,
+                        ),
+                    );
                     break;
             }
         });
@@ -121,15 +143,27 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
     public refresh() {
         if (this._view) {
-            this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+            this._view.webview.html = this._getHtmlForWebview(
+                this._view.webview,
+            );
         }
     }
 
     private _getHtmlForWebview(webview: vscode.Webview): string {
-        const getUri = (filename: string) => webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, filename));
-        let isDarkMode = vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? true : false;
-        if (Settings.sidebar.colorTheme === "light") { isDarkMode = false; }
-        if (Settings.sidebar.colorTheme === "dark") { isDarkMode = true; }
+        const getUri = (filename: string) =>
+            webview.asWebviewUri(
+                vscode.Uri.joinPath(this._extensionUri, filename),
+            );
+        let isDarkMode =
+            vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark
+                ? true
+                : false;
+        if (Settings.sidebar.colorTheme === 'light') {
+            isDarkMode = false;
+        }
+        if (Settings.sidebar.colorTheme === 'dark') {
+            isDarkMode = true;
+        }
         return `<!DOCTYPE html><html>
 <head>
 <link rel="stylesheet" href="${getUri('dist/styles.css')}">
