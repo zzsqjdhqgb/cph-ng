@@ -133,18 +133,9 @@ export class TestCaseVerdicts {
 export const writeToTestCaseIO = async (
     testCaseIO: TestCaseIO,
     data: string,
-    alwaysUseFile: boolean = false,
 ) => {
     if (testCaseIO.useFile) {
         await writeFile(testCaseIO.path, data);
-    } else if (alwaysUseFile) {
-        const path = join(
-            Settings.cache.directory,
-            'io',
-            SHA256(data).toString(),
-        );
-        await writeFile(path, data);
-        testCaseIO = { useFile: true, path };
     } else {
         testCaseIO.data = data;
     }

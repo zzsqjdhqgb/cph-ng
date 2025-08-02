@@ -41,9 +41,7 @@ export class Checker {
                 const outputFile = await testCaseIOToPath(
                     testCase.result!.stdout,
                 );
-                const answerFile = await testCaseIOToPath(
-                    testCase.result!.stderr,
-                );
+                const answerFile = await testCaseIOToPath(testCase.answer);
 
                 this.logger.info(
                     'Running checker',
@@ -92,11 +90,13 @@ export class Checker {
                             break;
                         case 3:
                             verdict = TestCaseVerdicts.SE;
-                            message = vscode.l10n.t('Checker run failed');
+                            message += `\n${vscode.l10n.t(
+                                'Checker run failed',
+                            )}`;
                             break;
                         case 4:
                             verdict = TestCaseVerdicts.WA;
-                            message = vscode.l10n.t('Unexpected EOF');
+                            message += `\n${vscode.l10n.t('Unexpected EOF')}`;
                             break;
                         case 5:
                             verdict = TestCaseVerdicts.PC;
@@ -107,14 +107,14 @@ export class Checker {
                                 'Checker returned unknown exit code',
                                 code,
                             );
-                            message = vscode.l10n.t(
+                            message += `\n${vscode.l10n.t(
                                 'Checker returned unknown exit code: {code}',
                                 { code },
-                            );
+                            )}`;
                     }
 
                     resolve({
-                        verdict: verdict,
+                        verdict,
                         message: message.trim(),
                     });
                 });
