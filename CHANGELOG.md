@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.0.4
 
 - **feat**: Add problem file path configuration.
 - **feat**: Add logging to help identify issues.
