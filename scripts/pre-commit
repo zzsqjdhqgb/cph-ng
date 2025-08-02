@@ -462,8 +462,15 @@ function main() {
             );
         }
         log('Proceeding with commit...', 'green');
-        process.exit(0);
     }
+
+    log(
+        `${colors.bold}${colors.blue}🔧 Formatting code using prettier...${colors.reset}`,
+    );
+    execSync(`pnpm prettier --write .`);
+    execSync(`git add .`, { stdio: 'pipe' });
+    log('✅ Code formatted!', 'green');
+    process.exit(0);
 }
 
 // Only run if executed as main script
