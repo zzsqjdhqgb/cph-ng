@@ -151,7 +151,11 @@ export class CphNg {
 
     private getTCHash(tc: TC) {
         const problem = this._problem!;
-        return SHA256(`${problem.srcPath}-${tc.stdin}`)
+        return SHA256(
+            `${problem.srcPath}-${
+                tc.stdin.useFile ? tc.stdin.path : tc.stdin.data
+            }`,
+        )
             .toString()
             .substring(64 - 6);
     }
