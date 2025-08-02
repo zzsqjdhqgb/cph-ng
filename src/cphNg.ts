@@ -319,7 +319,7 @@ export class CphNg {
                               abortController,
                           )
                         : await this.compareOutputs(
-                              runData.stderr,
+                              runData.stdout,
                               await testCaseIOToString(testCase.answer),
                               runData.stderr,
                           ),
@@ -339,6 +339,7 @@ export class CphNg {
         answer: string,
         stderr: string,
     ): Promise<Result<{}>> {
+        this.logger.trace('compareOutputs', { stdout, answer, stderr });
         if (!Settings.comparing.ignoreError && stderr) {
             return { verdict: TestCaseVerdicts.RE, message: '' };
         }
@@ -350,6 +351,10 @@ export class CphNg {
         }
         const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
         const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
+        this.logger.trace('Compressed data', {
+            compressOutput,
+            compressAnswer,
+        });
         if (compressOutput !== compressAnswer) {
             return { verdict: TestCaseVerdicts.WA, message: '' };
         }
@@ -655,8 +660,8 @@ export class CphNg {
                         tc.stdin.useFile
                             ? tc.stdin.path
                             : tc.answer.useFile
-                              ? tc.answer.path
-                              : 'unknown',
+                            ? tc.answer.path
+                            : 'unknown',
                     )}`,
                     description: vscode.l10n.t(
                         'Input {input}, Answer {answer}',
@@ -963,14 +968,6 @@ export class CphNg {
             return;
         }
         const problem = this._problem!;
-        if (!problem.isSpecialJudge) {
-            io.warn(
-                vscode.l10n.t(
-                    'This problem is not a special judge problem. No checker file needed.',
-                ),
-            );
-            return;
-        }
         const checkerFileUri = await vscode.window.showOpenDialog({
             canSelectFiles: true,
             canSelectFolders: false,
