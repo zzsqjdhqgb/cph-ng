@@ -86,6 +86,7 @@ export class CphNg {
         return this._problem;
     }
     set problem(problem: Problem | undefined) {
+        this.runAbortController && this.runAbortController.abort();
         this._problem = problem;
         this.emitProblemChange();
     }
@@ -395,7 +396,7 @@ export class CphNg {
                 );
                 return;
             }
-            this._problem = {
+            this.problem = {
                 name: basename(filePath, extname(filePath)),
                 srcPath: filePath,
                 testCases: [],
@@ -417,7 +418,7 @@ export class CphNg {
         this.logger.trace('loadProblem', { binFile });
         try {
             const data = await readFile(binFile);
-            this._problem = JSON.parse(
+            this.problem = JSON.parse(
                 gunzipSync(data).toString('utf8'),
             ) as Problem;
             this.logger.info(
@@ -426,7 +427,6 @@ export class CphNg {
                 'from',
                 binFile,
             );
-            this.emitProblemChange();
         } catch (e) {
             io.warn(
                 vscode.l10n.t('Parse problem file {file} failed: {error}.', {
@@ -434,8 +434,7 @@ export class CphNg {
                     error: (e as Error).message,
                 }),
             );
-            this._problem = undefined;
-            this.emitProblemChange();
+            this.problem = undefined;
         }
     }
     public async editProblemDetails(
@@ -494,8 +493,7 @@ export class CphNg {
                 }),
             );
         } finally {
-            this._problem = undefined;
-            this.emitProblemChange();
+            this.problem = undefined;
         }
     }
     public async addTestCase(): Promise<void> {

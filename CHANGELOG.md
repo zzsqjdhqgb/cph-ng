@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: Stop running when changes problem
+
 ## 0.0.4
 
 - **feat**: Add problem file path configuration.
