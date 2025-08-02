@@ -35,17 +35,17 @@ const TestCasesView = ({ problem }: TestCasesViewProps) => {
                 {problem.testCases.length ? (
                     <>
                         {partyUri &&
-                        problem.testCases.every(
-                            (tc) => tc.status?.name === 'AC',
-                        ) ? (
+                            problem.testCases.every(
+                                (tc) => tc.result?.verdict.name === 'AC',
+                            ) ? (
                             <AcCongrats />
                         ) : null}
                         <Box width={'100%'}>
                             {problem.testCases.map((tc, index) =>
-                                tc.status &&
-                                hiddenStatuses.includes(
-                                    tc.status?.name,
-                                ) ? null : (
+                                tc.result?.verdict &&
+                                    hiddenStatuses.includes(
+                                        tc.result?.verdict.name,
+                                    ) ? null : (
                                     <TestCaseView
                                         testCase={tc}
                                         index={index}

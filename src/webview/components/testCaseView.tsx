@@ -25,7 +25,7 @@ import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningStatus, TestCase } from '../../types';
+import { isRunningVerdict, TestCase } from '../../types';
 import {
     ChooseTestCaseFileMessage,
     CompareTestCaseMessage,
@@ -45,7 +45,7 @@ interface TestCaseViewProp {
 
 const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
     const { t } = useTranslation();
-    const running = isRunningStatus(testCase.status);
+    const running = isRunningVerdict(testCase.result?.verdict);
 
     const emitUpdateTestCase = () =>
         vscode.postMessage({
@@ -64,14 +64,14 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
             }}
             sx={{
                 borderLeft: `4px solid`,
-                ...(testCase.status
+                ...(testCase.result?.verdict
                     ? {
-                          borderLeftColor: `rgb(${testCase.status.color})`,
-                          backgroundColor: `rgba(${testCase.status.color}, 0.1)`,
-                      }
+                        borderLeftColor: `rgb(${testCase.result.verdict.color})`,
+                        backgroundColor: `rgba(${testCase.result.verdict.color}, 0.1)`,
+                    }
                     : {
-                          borderLeftColor: 'transparent',
-                      }),
+                        borderLeftColor: 'transparent',
+                    }),
             }}
         >
             <AccordionSummary
@@ -82,19 +82,19 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                 <CphFlex smallGap>
                     <CphFlex flex={1}>
                         <CphText fontWeight={'bold'}>#{index + 1}</CphText>
-                        <Tooltip title={testCase.status?.fullName}>
-                            <CphText>{testCase.status?.name}</CphText>
+                        <Tooltip title={testCase.result?.verdict.fullName}>
+                            <CphText>{testCase.result?.verdict.name}</CphText>
                         </Tooltip>
                     </CphFlex>
-                    {testCase.time && (
+                    {testCase.result?.time ? (
                         <Chip
                             label={t('testCaseView.time', {
-                                time: testCase.time,
+                                time: testCase.result.time,
                             })}
                             size={'small'}
                             sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
                         />
-                    )}
+                    ) : <></>}
                     <CphButton
                         name={t('testCaseView.run')}
                         icon={PlayArrowIcon}
@@ -127,29 +127,25 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                     <CphFlex>
                         <CphFlex smallGap>
                             <TestCaseDataView
-                                label={t('testCaseView.input')}
-                                isFile={testCase.inputFile}
-                                value={testCase.input}
+                                label={t('testCaseView.stdin')}
+                                value={testCase.stdin}
                                 onBlur={(value) => {
-                                    testCase.inputFile = false;
-                                    testCase.input = value;
+                                    testCase.stdin = { useFile: false, data: value };
                                     emitUpdateTestCase();
                                 }}
                                 onChooseFile={() =>
                                     vscode.postMessage({
                                         type: 'chooseTestCaseFile',
                                         index,
-                                        label: 'input',
+                                        label: 'stdin',
                                     } as ChooseTestCaseFileMessage)
                                 }
                             />
                             <TestCaseDataView
                                 label={t('testCaseView.answer')}
-                                isFile={testCase.answerFile}
                                 value={testCase.answer}
                                 onBlur={(value) => {
-                                    testCase.answerFile = false;
-                                    testCase.answer = value;
+                                    testCase.answer = { useFile: false, data: value };
                                     emitUpdateTestCase();
                                 }}
                                 onChooseFile={() => {
@@ -161,20 +157,18 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                                 }}
                             />
                         </CphFlex>
-                        {!running && (
+                        {testCase.result && (
                             <>
                                 <Divider />
                                 <CphFlex smallGap>
                                     <TestCaseDataView
-                                        label={t('testCaseView.output')}
-                                        isFile={testCase.outputFile}
-                                        value={testCase.output ?? ''}
+                                        label={t('testCaseView.stdout')}
+                                        value={testCase.result.stdout}
                                         readOnly={true}
                                         outputActions={{
                                             onSetAnswer: () => {
-                                                testCase.status = undefined;
-                                                testCase.answer =
-                                                    testCase.output ?? '';
+                                                testCase.answer = testCase.result!.stdout;
+                                                testCase.result = undefined;
                                                 emitUpdateTestCase();
                                             },
                                             onCompare: () => {
@@ -185,24 +179,21 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                                             },
                                         }}
                                     />
-                                    {testCase.error &&
-                                        testCase.error.length > 0 && (
-                                            <TestCaseDataView
-                                                label={t('testCaseView.error')}
-                                                value={testCase.error}
-                                                readOnly={true}
-                                            />
+                                    <TestCaseDataView
+                                        label={t('testCaseView.stderr')}
+                                        value={testCase.result.stderr}
+                                        readOnly={true}
+                                    />
+                                    <TestCaseDataView
+                                        label={t(
+                                            'testCaseView.message',
                                         )}
-                                    {testCase.message &&
-                                        testCase.message.length > 0 && (
-                                            <TestCaseDataView
-                                                label={t(
-                                                    'testCaseView.message',
-                                                )}
-                                                value={testCase.message}
-                                                readOnly={true}
-                                            />
-                                        )}
+                                        value={{
+                                            useFile: false,
+                                            data: testCase.result.message
+                                        }}
+                                        readOnly={true}
+                                    />
                                 </CphFlex>
                             </>
                         )}

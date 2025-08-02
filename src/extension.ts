@@ -24,6 +24,7 @@ import { CphNg } from './cphNg';
 import { io, Logger } from './io';
 import Settings from './settings';
 import { SidebarProvider } from './sidebarProvider';
+import { isRunningVerdict } from './types';
 
 class ExtensionManager {
     private logger: Logger = new Logger('extension');
@@ -53,7 +54,7 @@ class ExtensionManager {
                 mkdir(join(Settings.cache.directory, 'diff'), {
                     recursive: true,
                 }),
-                mkdir(join(Settings.cache.directory, 'checker'), {
+                mkdir(join(Settings.cache.directory, 'io'), {
                     recursive: true,
                 }),
             ]);
@@ -156,12 +157,11 @@ class ExtensionManager {
 
             this.updateContext();
             this.logger.info('CPH-NG extension activated successfully');
-        } catch (error: unknown) {
-            const err = error as Error;
-            this.logger.error('Failed to activate extension', err);
+        } catch (e) {
+            this.logger.error('Failed to activate extension', e);
             io.error(
                 vscode.l10n.t('Failed to activate CPH-NG extension: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }
@@ -177,10 +177,8 @@ class ExtensionManager {
         this.logger.trace('updateContext');
         const hasProblem = !!this.cphNg.problem;
         const isRunning =
-            this.cphNg.problem?.testCases.some(
-                (tc) =>
-                    tc.status &&
-                    ['CP', 'CPD', 'JG', 'JGD'].includes(tc.status.name),
+            this.cphNg.problem?.testCases.some((tc) =>
+                isRunningVerdict(tc.result?.verdict),
             ) || false;
 
         this.logger.debug('Context update', { hasProblem, isRunning });
@@ -213,9 +211,9 @@ class ExtensionManager {
                 this.cphNg.problem?.testCases
                     .flatMap((tc) =>
                         [
-                            tc.inputFile ? [tc.input] : [],
-                            tc.answerFile ? [tc.answer] : [],
-                            tc.outputFile && tc.output ? [tc.output] : [],
+                            tc.stdin.useFile ? [tc.stdin.path] : [],
+                            tc.result?.stdout.useFile ? [tc.result.stdout] : [],
+                            tc.result?.stderr.useFile ? [tc.result.stderr] : [],
                         ].flat(),
                     )
                     .includes(filePath)
@@ -254,13 +252,12 @@ class ExtensionManager {
                                     this.updateContext();
                                 }
                             }
-                        } catch (error: unknown) {
-                            const err = error as Error;
+                        } catch (e) {
                             io.error(
                                 vscode.l10n.t(
                                     'Failed to load problem: {error}',
                                     {
-                                        error: err.message,
+                                        error: (e as Error).message,
                                     },
                                 ),
                             );
@@ -274,11 +271,10 @@ class ExtensionManager {
                 this.cphNg.problem = undefined;
                 this.updateContext();
             }
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Error in checkActiveFile: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }

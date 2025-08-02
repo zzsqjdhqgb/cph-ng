@@ -21,21 +21,6 @@ import Settings from './settings';
 import * as messages from './webview/messages';
 import { Logger } from './io';
 
-export interface JudgeResult {
-    verdict: 'AC' | 'WA' | 'TLE' | 'RE' | 'CE';
-    details: string;
-    testResults: TestResult[];
-}
-
-export interface TestResult {
-    input: string;
-    expected: string;
-    output: string;
-    verdict: 'AC' | 'WA' | 'TLE' | 'RE';
-    time: number;
-    error?: string;
-}
-
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphSidebar';
     private _view?: vscode.WebviewView;
@@ -155,11 +140,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     default:
                         this.logger.warn('Unknown message type:', message.type);
                 }
-            } catch (error: unknown) {
-                const err = error as Error;
+            } catch (e) {
                 this.logger.error('Error handling webview message', {
                     messageType: message.type,
-                    error: err,
+                    error: e as Error,
                 });
             }
         });

@@ -33,10 +33,10 @@
     "testCaseDataView.snackbar.message": "Copied",
     "testCaseView.answer": "Answer",
     "testCaseView.delete": "Delete",
-    "testCaseView.error": "Error",
-    "testCaseView.input": "Input",
     "testCaseView.message": "Message",
-    "testCaseView.output": "Output",
     "testCaseView.run": "Run",
+    "testCaseView.stderr": "Error",
+    "testCaseView.stdin": "Input",
+    "testCaseView.stdout": "Output",
     "testCaseView.time": "{{time}} ms"
 }

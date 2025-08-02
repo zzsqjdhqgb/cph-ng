@@ -16,21 +16,11 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { spawn } from 'child_process';
-import { access, constants, writeFile } from 'fs/promises';
-import { basename, extname, join } from 'path';
 import * as vscode from 'vscode';
-import { Compiler } from './compiler';
-import Settings from './settings';
-import { TestCaseStatuses } from './testCaseStatuses';
-import { TestCase, TestCaseStatus } from './types';
+import { testCaseIOToPath, TestCaseVerdicts } from './types.backend';
+import { TestCase, TestCaseVerdict } from './types';
 import Result from './result';
 import { Logger } from './io';
-
-export interface CheckerResult {
-    status: TestCaseStatus;
-    message?: string;
-    score?: number;
-}
 
 export class Checker {
     private logger: Logger = new Logger('checker');
@@ -47,23 +37,13 @@ export class Checker {
         });
         return new Promise(async (resolve) => {
             try {
-                const tempDir = join(Settings.cache.directory, 'checker');
-                const inputFile = testCase.inputFile
-                    ? testCase.input
-                    : join(tempDir, 'input.txt');
-                const outputFile = testCase.outputFile
-                    ? testCase.output!
-                    : join(tempDir, 'output.txt');
-                const answerFile = testCase.answerFile
-                    ? testCase.answer!
-                    : join(tempDir, 'answer.txt');
-                await Promise.all([
-                    !testCase.inputFile && writeFile(inputFile, testCase.input),
-                    !testCase.outputFile &&
-                        writeFile(outputFile, testCase.output!),
-                    !testCase.answerFile &&
-                        writeFile(answerFile, testCase.answer!),
-                ]);
+                const inputFile = await testCaseIOToPath(testCase.stdin);
+                const outputFile = await testCaseIOToPath(
+                    testCase.result!.stdout,
+                );
+                const answerFile = await testCaseIOToPath(
+                    testCase.result!.stderr,
+                );
 
                 this.logger.info(
                     'Running checker',
@@ -97,32 +77,32 @@ export class Checker {
                         stderr,
                         code,
                     });
-                    let status: TestCaseStatus;
+                    let verdict: TestCaseVerdict;
                     let message = stderr.trim() || stdout.trim();
 
                     switch (code) {
                         case 0:
-                            status = TestCaseStatuses.AC;
+                            verdict = TestCaseVerdicts.AC;
                             break;
                         case 1:
-                            status = TestCaseStatuses.WA;
+                            verdict = TestCaseVerdicts.WA;
                             break;
                         case 2:
-                            status = TestCaseStatuses.PE;
+                            verdict = TestCaseVerdicts.PE;
                             break;
                         case 3:
-                            status = TestCaseStatuses.SE;
+                            verdict = TestCaseVerdicts.SE;
                             message = vscode.l10n.t('Checker run failed');
                             break;
                         case 4:
-                            status = TestCaseStatuses.WA;
+                            verdict = TestCaseVerdicts.WA;
                             message = vscode.l10n.t('Unexpected EOF');
                             break;
                         case 5:
-                            status = TestCaseStatuses.PC;
+                            verdict = TestCaseVerdicts.PC;
                             break;
                         default:
-                            status = TestCaseStatuses.SE;
+                            verdict = TestCaseVerdicts.SE;
                             this.logger.warn(
                                 'Checker returned unknown exit code',
                                 code,
@@ -134,30 +114,29 @@ export class Checker {
                     }
 
                     resolve({
-                        status,
+                        verdict: verdict,
                         message: message.trim(),
                     });
                 });
 
-                child.on('error', (error: Error) => {
-                    this.logger.warn('Failed to run checker', error);
+                child.on('error', (e: Error) => {
+                    this.logger.warn('Failed to run checker', e);
                     resolve({
-                        status: TestCaseStatuses.SE,
+                        verdict: TestCaseVerdicts.SE,
                         message: vscode.l10n.t(
                             'Failed to run checker: {error}',
                             {
-                                error: error.message,
+                                error: e.message,
                             },
                         ),
                     });
                 });
-            } catch (error) {
-                this.logger.warn('Checker setup failed', error);
-                const err = error as Error;
+            } catch (e) {
+                this.logger.warn('Checker setup failed', e);
                 resolve({
-                    status: TestCaseStatuses.SE,
+                    verdict: TestCaseVerdicts.SE,
                     message: vscode.l10n.t('Checker setup failed: {error}', {
-                        error: err.message,
+                        error: (e as Error).message,
                     }),
                 });
             }

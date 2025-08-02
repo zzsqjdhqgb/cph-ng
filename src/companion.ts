@@ -91,13 +91,13 @@ class Companion {
                         document: document.fileName,
                     });
                     onCreateProblem(problem, document);
-                } catch (error) {
-                    this.logger.warn('Parse data from companion failed', error);
+                } catch (e) {
+                    this.logger.warn('Parse data from companion failed', e);
                     io.warn(
                         vscode.l10n.t(
                             'Parse data from companion failed: {message}.',
                             {
-                                message: (error as Error).message,
+                                message: (e as Error).message,
                             },
                         ),
                     );
@@ -107,8 +107,8 @@ class Companion {
             response.end();
         });
 
-        this.server.on('error', (error) => {
-            this.logger.error('Server error occurred', error);
+        this.server.on('error', (e) => {
+            this.logger.error('Server error occurred', e);
             if (
                 vscode.extensions.getExtension(
                     'divyanshuagrawal.competitive-programming-helper',
@@ -124,7 +124,7 @@ class Companion {
                 io.error(
                     vscode.l10n.t(
                         'Failed to start companion server: {error}.',
-                        { error: error.message },
+                        { error: e.message },
                     ),
                 );
             }
@@ -165,13 +165,12 @@ class Companion {
                     this.logger.info('Template applied successfully', {
                         srcPath: problem.srcPath,
                     });
-                } catch (templateError: unknown) {
-                    const err = templateError as Error;
-                    this.logger.warn('Template file error', err);
+                } catch (e) {
+                    this.logger.warn('Template file error', e);
                     io.warn(
                         vscode.l10n.t(
                             'Failed to use template file: {error}, creating empty file instead',
-                            { error: err.message },
+                            { error: (e as Error).message },
                         ),
                     );
                     await writeFile(problem.srcPath, '');
@@ -185,10 +184,11 @@ class Companion {
                 );
                 await writeFile(problem.srcPath, '');
             }
-        } catch (error: unknown) {
-            const err = error as Error;
-            this.logger.error('Failed to create source file', err);
-            throw new Error(`Failed to create source file: ${err.message}`);
+        } catch (e) {
+            this.logger.error('Failed to create source file', e);
+            throw new Error(
+                `Failed to create source file: ${(e as Error).message}`,
+            );
         }
     }
 

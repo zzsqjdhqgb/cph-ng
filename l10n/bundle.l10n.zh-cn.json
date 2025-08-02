@@ -13,7 +13,6 @@
     "Comparing": "正在比较",
     "Compilation Error": "编译错误",
     "Compilation failed": "编译失败",
-    "Compilation process failed: {error}": "编译过程失败：{error}",
     "Compiled": "已编译",
     "Compiling": "正在编译",
     "Error in checkActiveFile: {error}": "检查活动文件时出错：{error}",
@@ -57,7 +56,6 @@
     "Select test cases to add": "选择要添加的测试用例",
     "Skipped": "已跳过",
     "System Error": "系统错误",
-    "Test case execution failed: {error}": "测试用例执行失败：{error}",
     "Test case index {index} out of range 1~{max}.": "测试用例编号 {index} 超过范围 1~{max}。",
     "Test cases already running. Please stop them first.": "测试用例已经在运行。请先停止他们。",
     "Text files": "文本文件",
@@ -70,6 +68,6 @@
     "Waiting": "等待中",
     "Wrong Answer": "答案错误",
     "answer": "答案",
-    "input": "输入",
-    "not found": "未找到"
+    "not found": "未找到",
+    "stdin": "输入"
 }

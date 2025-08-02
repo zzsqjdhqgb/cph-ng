@@ -32,6 +32,7 @@ import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 import CphLink from './cphLink';
 import CphText from './cphText';
+import { TestCaseIO } from '../../types';
 
 interface OutputActions {
     onSetAnswer: () => void;
@@ -40,8 +41,7 @@ interface OutputActions {
 
 interface CodeMirrorSectionProps {
     label: string;
-    isFile?: boolean;
-    value: string;
+    value: TestCaseIO;
     onBlur?: (value: string) => void;
     onChooseFile?: () => void;
     outputActions?: OutputActions;
@@ -102,13 +102,13 @@ const ansiToReact = (ansi: string) => {
 
 const TestCaseDataView = ({
     label,
-    isFile,
     value,
     onBlur,
     onChooseFile,
     outputActions,
     readOnly,
 }: CodeMirrorSectionProps) => {
+    console.log(value);
     const { t } = useTranslation();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
@@ -116,17 +116,6 @@ const TestCaseDataView = ({
     useEffect(() => {
         setInternalValue(value);
     }, [value]);
-
-    const handleCopy = () => {
-        navigator.clipboard
-            .writeText(value)
-            .then(() => {
-                setSnackbarOpen(true);
-            })
-            .catch((err) => {
-                console.error('Failed to copy code: ', err);
-            });
-    };
 
     const handleCloseSnackbar = () => {
         setSnackbarOpen(false);
@@ -159,17 +148,17 @@ const TestCaseDataView = ({
                     flexWrap={'wrap'}
                 >
                     <CphText>{label}</CphText>
-                    {isFile && (
+                    {internalValue.useFile && (
                         <CphLink
-                            name={value}
+                            name={internalValue.path}
                             onClick={() => {
                                 vscode.postMessage({
                                     type: 'openFile',
-                                    path: value,
+                                    path: internalValue.path,
                                 } as OpenFileMessage);
                             }}
                         >
-                            {basename(value)}
+                            {basename(internalValue.path)}
                         </CphLink>
                     )}
                 </CphFlex>
@@ -180,7 +169,7 @@ const TestCaseDataView = ({
                         onClick={outputActions.onCompare}
                     />
                 )}
-                {isFile ? (
+                {internalValue.useFile ? (
                     readOnly || (
                         <CphButton
                             name={t('testCaseDataView.clearFile')}
@@ -207,12 +196,21 @@ const TestCaseDataView = ({
                         <CphButton
                             name={t('testCaseDataView.copy')}
                             icon={ContentCopyIcon}
-                            onClick={handleCopy}
+                            onClick={() => {
+                                navigator.clipboard
+                                    .writeText(internalValue.data)
+                                    .then(() => {
+                                        setSnackbarOpen(true);
+                                    })
+                                    .catch(e => {
+                                        console.error('Failed to copy code: ', e);
+                                    });
+                            }}
                         />
                     </>
                 )}
             </CphFlex>
-            {isFile ||
+            {internalValue.useFile ||
                 (readOnly ? (
                     <div
                         style={{
@@ -220,12 +218,15 @@ const TestCaseDataView = ({
                             maxHeight: '20em',
                         }}
                     >
-                        {ansiToReact(value)}
+                        {ansiToReact(internalValue.data)}
                     </div>
                 ) : (
                     <TextareaAutosize
-                        value={internalValue}
-                        onChange={(e) => setInternalValue(e.target.value)}
+                        value={internalValue.data}
+                        onChange={(e) => setInternalValue({
+                            useFile: false,
+                            data: e.target.value
+                        })}
                         onBlur={(e) => onBlur && onBlur(e.target.value)}
                         maxRows={10}
                         style={

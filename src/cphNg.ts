@@ -34,15 +34,21 @@ import { Compiler } from './compiler';
 import { io, Logger, setCompilationMessage } from './io';
 import { Runner } from './runner';
 import Settings from './settings';
-import { TestCaseStatuses } from './testCaseStatuses';
 import {
-    isExpandStatus,
-    isRunningStatus,
+    testCaseIOToPath,
+    testCaseIOToString,
+    TestCaseVerdicts,
+    writeToTestCaseIO,
+} from './types.backend';
+import {
+    isExpandVerdict,
+    isRunningVerdict,
     Problem,
     TestCase,
-    TestCaseStatus,
+    TestCaseIO,
+    TestCaseVerdict,
 } from './types';
-import Result from './result';
+import Result, { assignResult } from './result';
 import { renderTemplate } from './strTemplate';
 import { homedir, tmpdir } from 'os';
 
@@ -149,7 +155,7 @@ export class CphNg {
 
     private getTestCaseHash(testCase: TestCase) {
         const problem = this._problem!;
-        return SHA256(`${problem.srcPath}-${testCase.input}`)
+        return SHA256(`${problem.srcPath}-${testCase.stdin}`)
             .toString()
             .substring(64 - 6);
     }
@@ -183,14 +189,14 @@ export class CphNg {
                     outputPath,
                 });
                 return {
-                    status: TestCaseStatuses.CE,
+                    verdict: TestCaseVerdicts.CE,
                     message: compileResult,
                 };
             }
         }
         this.logger.debug('Compilation successful', { srcPath, outputPath });
         return {
-            status: TestCaseStatuses.UKE,
+            verdict: TestCaseVerdicts.UKE,
             message: '',
             data: {
                 outputPath,
@@ -212,7 +218,7 @@ export class CphNg {
                 problem.srcPath,
                 problem.srcHash,
             );
-            if (compileResult.status !== TestCaseStatuses.UKE) {
+            if (compileResult.verdict !== TestCaseVerdicts.UKE) {
                 return compileResult;
             } else if (!problem.isSpecialJudge) {
                 problem.srcHash = compileResult.data!.hash;
@@ -222,7 +228,7 @@ export class CphNg {
             try {
                 await access(problem.checkerPath!, constants.X_OK);
                 return {
-                    status: TestCaseStatuses.UKE,
+                    verdict: TestCaseVerdicts.UKE,
                     message: '',
                     data: {
                         outputPath: compileResult.data!.outputPath,
@@ -236,12 +242,12 @@ export class CphNg {
                 problem.checkerPath!,
                 problem.checkerHash,
             );
-            if (checkerCompileResult.status !== TestCaseStatuses.UKE) {
+            if (checkerCompileResult.verdict !== TestCaseVerdicts.UKE) {
                 return checkerCompileResult;
             }
             problem.checkerHash = checkerCompileResult.data!.hash;
             return {
-                status: TestCaseStatuses.UKE,
+                verdict: TestCaseVerdicts.UKE,
                 message: '',
                 data: {
                     outputPath: compileResult.data!.outputPath,
@@ -250,16 +256,10 @@ export class CphNg {
                     checkerHash: checkerCompileResult.data!.hash,
                 },
             };
-        } catch (error: unknown) {
-            const err = error as Error;
-            io.error(
-                vscode.l10n.t('Compilation process failed: {error}', {
-                    error: err.message,
-                }),
-            );
+        } catch (e) {
             return {
-                status: TestCaseStatuses.SE,
-                message: err.message,
+                verdict: TestCaseVerdicts.SE,
+                message: (e as Error).message,
             };
         }
     }
@@ -268,11 +268,11 @@ export class CphNg {
         testCase: TestCase,
         checkerOutputPath?: string,
     ) {
+        const problem = this._problem!;
+        const result = testCase.result!;
+        const abortController = this.runAbortController!;
         try {
-            const problem = this._problem!;
-            const abortController = this.runAbortController!;
-
-            testCase.status = TestCaseStatuses.JG;
+            result.verdict = TestCaseVerdicts.JG;
             this.emitProblemChange();
 
             const runResult = await this.runner.runExecutable(
@@ -282,83 +282,78 @@ export class CphNg {
                 abortController,
             );
             const runData = runResult.data!;
-            testCase.time = runData.time;
-            testCase.status = TestCaseStatuses.JGD;
-            testCase.outputFile = testCase.answerFile;
-            if (testCase.outputFile) {
-                testCase.output = join(
-                    Settings.cache.directory,
-                    'out',
-                    `${this.getTestCaseHash(testCase)}.out`,
-                );
-                await writeFile(testCase.output, runData.output);
+            result.time = runData.time;
+            result.verdict = TestCaseVerdicts.JGD;
+            if (testCase.answer.useFile) {
+                result.stdout = {
+                    useFile: true,
+                    path: join(
+                        Settings.cache.directory,
+                        'out',
+                        `${this.getTestCaseHash(testCase)}.out`,
+                    ),
+                };
             } else {
-                testCase.output = runData.output;
+                result.stdout.useFile = false;
             }
-            testCase.error = runData.error;
+            result.stdout = await writeToTestCaseIO(
+                result.stdout,
+                runData.stdout,
+            );
+
+            result.stderr = { useFile: false, data: runData.stderr };
             this.emitProblemChange();
 
-            if (runResult.status !== TestCaseStatuses.UKE) {
-                testCase.status = runResult.status;
-                testCase.message = runResult.message;
-            } else if (testCase.time && testCase.time > problem.timeLimit) {
-                testCase.status = TestCaseStatuses.TLE;
-            } else if (checkerOutputPath) {
-                testCase.status = TestCaseStatuses.CMP;
-                this.emitProblemChange();
-                const checkerResult = await this.checker.runChecker(
-                    checkerOutputPath!,
-                    testCase,
-                    abortController,
-                );
-                testCase.status = checkerResult.status;
-                testCase.message = checkerResult.message;
+            if (assignResult(result, runResult)) {
+            } else if (result.time && result.time > problem.timeLimit) {
+                result.verdict = TestCaseVerdicts.TLE;
             } else {
-                testCase.status = TestCaseStatuses.CMP;
+                result.verdict = TestCaseVerdicts.CMP;
                 this.emitProblemChange();
-                const compareResult = await this.compareOutputs(
-                    runData.output,
-                    testCase.answerFile
-                        ? await readFile(testCase.answer, 'utf8')
-                        : testCase.answer,
-                    runData.error,
+                assignResult(
+                    result,
+                    checkerOutputPath
+                        ? await this.checker.runChecker(
+                              checkerOutputPath!,
+                              testCase,
+                              abortController,
+                          )
+                        : await this.compareOutputs(
+                              runData.stderr,
+                              await testCaseIOToString(testCase.answer),
+                              runData.stderr,
+                          ),
                 );
-                testCase.status = compareResult.status;
-                testCase.message = compareResult.message;
             }
             this.emitProblemChange();
-        } catch (error: unknown) {
-            const err = error as Error;
-            io.error(
-                vscode.l10n.t('Test case execution failed: {error}', {
-                    error: err.message,
-                }),
-            );
-            testCase.status = TestCaseStatuses.SE;
-            testCase.error = err.message;
+        } catch (e) {
+            assignResult(result, {
+                verdict: TestCaseVerdicts.SE,
+                message: (e as Error).message,
+            });
             this.emitProblemChange();
         }
     }
     private async compareOutputs(
-        output: string,
+        stdout: string,
         answer: string,
-        error: string,
+        stderr: string,
     ): Promise<Result<{}>> {
-        if (!Settings.comparing.ignoreError && error) {
-            return { status: TestCaseStatuses.RE };
+        if (!Settings.comparing.ignoreError && stderr) {
+            return { verdict: TestCaseVerdicts.RE, message: '' };
         }
         if (
             Settings.comparing.oleSize &&
-            output.length >= answer.length * Settings.comparing.oleSize
+            stdout.length >= answer.length * Settings.comparing.oleSize
         ) {
-            return { status: TestCaseStatuses.OLE };
+            return { verdict: TestCaseVerdicts.OLE, message: '' };
         }
-        const compressOutput = output.replace(/\r|\n|\t|\s/g, '');
+        const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
         const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
         if (compressOutput !== compressAnswer) {
-            return { status: TestCaseStatuses.WA };
+            return { verdict: TestCaseVerdicts.WA, message: '' };
         }
-        const fixedOutput = output
+        const fixedOutput = stdout
             .trimEnd()
             .split('\n')
             .map((line) => line.trimEnd())
@@ -369,9 +364,9 @@ export class CphNg {
             .map((line) => line.trimEnd())
             .join('\n');
         if (fixedOutput !== fixedAnswer && !Settings.comparing.regardPEAsAC) {
-            return { status: TestCaseStatuses.PE };
+            return { verdict: TestCaseVerdicts.PE, message: '' };
         }
-        return { status: TestCaseStatuses.AC };
+        return { verdict: TestCaseVerdicts.AC, message: '' };
     }
 
     public async createProblem(): Promise<void> {
@@ -402,11 +397,10 @@ export class CphNg {
                 timeLimit: Settings.problem.defaultTimeLimit,
             };
             this.saveProblem();
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to create problem: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }
@@ -428,12 +422,11 @@ export class CphNg {
                 binFile,
             );
             this.emitProblemChange();
-        } catch (e: unknown) {
-            const error = e as Error;
+        } catch (e) {
             io.warn(
                 vscode.l10n.t('Parse problem file {file} failed: {error}.', {
                     file: basename(binFile),
-                    error: error.message,
+                    error: (e as Error).message,
                 }),
             );
             this._problem = undefined;
@@ -470,11 +463,10 @@ export class CphNg {
                 binPath,
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to save problem: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }
@@ -507,10 +499,8 @@ export class CphNg {
             return;
         }
         this._problem.testCases.push({
-            inputFile: false,
-            input: '',
-            answerFile: false,
-            answer: '',
+            stdin: { useFile: false, data: '' },
+            answer: { useFile: false, data: '' },
             isExpand: false,
         });
         this.saveProblem();
@@ -618,10 +608,8 @@ export class CphNg {
                 if (ext === '.in') {
                     this.logger.debug('Found input file:', fileName);
                     testCases.push({
-                        inputFile: true,
-                        input: filePath,
-                        answerFile: false,
-                        answer: '',
+                        stdin: { useFile: true, path: filePath },
+                        answer: { useFile: false, data: '' },
                         isExpand: false,
                     });
                 }
@@ -636,11 +624,13 @@ export class CphNg {
                         fileName.replace(ext, '.in'),
                     );
                     const existingTestCase = testCases.find(
-                        (tc) => tc.input === inputFile,
+                        (tc) => tc.stdin.useFile && tc.stdin.path === inputFile,
                     );
                     if (existingTestCase) {
-                        existingTestCase.answerFile = true;
-                        existingTestCase.answer = filePath;
+                        existingTestCase.answer = {
+                            useFile: true,
+                            path: filePath,
+                        };
                         this.logger.debug('Matched answer with input:', {
                             input: inputFile,
                             answer: filePath,
@@ -651,10 +641,8 @@ export class CphNg {
                             fileName,
                         );
                         testCases.push({
-                            inputFile: false,
-                            input: '',
-                            answerFile: true,
-                            answer: filePath,
+                            stdin: { useFile: false, data: '' },
+                            answer: { useFile: true, path: filePath },
                             isExpand: false,
                         });
                     }
@@ -663,15 +651,21 @@ export class CphNg {
             this.logger.info(`Created ${testCases.length} test cases`);
             const chosenIndexes = await vscode.window.showQuickPick(
                 testCases.map((tc, index) => ({
-                    label: `${basename(tc.input || tc.answer)}`,
+                    label: `${basename(
+                        tc.stdin.useFile
+                            ? tc.stdin.path
+                            : tc.answer.useFile
+                            ? tc.answer.path
+                            : 'unknown',
+                    )}`,
                     description: vscode.l10n.t(
                         'Input {input}, Answer {answer}',
                         {
-                            input: tc.inputFile
-                                ? tc.input.replace(folderPath + '/', '')
+                            input: tc.stdin.useFile
+                                ? tc.stdin.path.replace(folderPath + '/', '')
                                 : vscode.l10n.t('not found'),
-                            answer: tc.answerFile
-                                ? tc.answer.replace(folderPath + '/', '')
+                            answer: tc.answer.useFile
+                                ? tc.answer.path.replace(folderPath + '/', '')
                                 : vscode.l10n.t('not found'),
                         },
                     ),
@@ -697,11 +691,10 @@ export class CphNg {
                 problem.testCases.push(testCase);
             });
             this.saveProblem();
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to load test cases: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }
@@ -727,18 +720,23 @@ export class CphNg {
         this.runAbortController = new AbortController();
 
         const testCase = problem.testCases[index];
-        testCase.status = TestCaseStatuses.CP;
-        testCase.output = testCase.error = undefined;
-        testCase.time = undefined;
-        testCase.outputFile = testCase.isExpand = false;
+        testCase.result = {
+            verdict: TestCaseVerdicts.CP,
+            stdout: { useFile: false, data: '' },
+            stderr: { useFile: false, data: '' },
+            time: 0,
+            message: '',
+        };
+        testCase.isExpand = false;
         this.emitProblemChange();
+        const result = testCase.result;
 
         const compileResult = await this.compile();
-        if (compileResult.status !== TestCaseStatuses.UKE) {
+        if (compileResult.verdict !== TestCaseVerdicts.UKE) {
             setCompilationMessage(
                 compileResult.message || vscode.l10n.t('Compilation failed'),
             );
-            testCase.status = TestCaseStatuses.CE;
+            result.verdict = TestCaseVerdicts.CE;
             testCase.isExpand = true;
             this.saveProblem();
             this.runAbortController = undefined;
@@ -753,7 +751,7 @@ export class CphNg {
             testCase,
             compileData.checkerOutputPath,
         );
-        testCase.isExpand = isExpandStatus(testCase.status);
+        testCase.isExpand = isExpandVerdict(result.verdict);
         this.saveProblem();
         this.runAbortController = undefined;
     }
@@ -776,21 +774,25 @@ export class CphNg {
         this.runAbortController = new AbortController();
 
         for (const testCase of problem.testCases) {
-            testCase.status = TestCaseStatuses.CP;
-            testCase.output = testCase.error = undefined;
-            testCase.time = undefined;
-            testCase.outputFile = testCase.isExpand = false;
+            testCase.result = {
+                verdict: TestCaseVerdicts.CP,
+                stdout: { useFile: false, data: '' },
+                stderr: { useFile: false, data: '' },
+                time: 0,
+                message: '',
+            };
+            testCase.isExpand = false;
         }
         this.emitProblemChange();
 
         const compileResult = await this.compile();
-        if (compileResult.status !== TestCaseStatuses.UKE) {
+        if (compileResult.verdict !== TestCaseVerdicts.UKE) {
             setCompilationMessage(
                 compileResult.message || vscode.l10n.t('Compilation failed'),
             );
             for (const testCaseIndex in problem.testCases) {
-                const testCase = problem.testCases[testCaseIndex];
-                testCase.status = TestCaseStatuses.CE;
+                problem.testCases[testCaseIndex].result!.verdict =
+                    TestCaseVerdicts.CE;
             }
             this.saveProblem();
             this.runAbortController = undefined;
@@ -800,14 +802,14 @@ export class CphNg {
         problem.srcHash = compileData.hash;
         problem.checkerHash = compileData.checkerHash;
         for (const testCase of problem.testCases) {
-            testCase.status = TestCaseStatuses.CPD;
+            testCase.result!.verdict = TestCaseVerdicts.CPD;
         }
         this.emitProblemChange();
 
         let hasExpandStatus = false;
         for (const testCase of problem.testCases) {
             if (this.runAbortController.signal.aborted) {
-                testCase.status = TestCaseStatuses.SK;
+                testCase.result!.verdict = TestCaseVerdicts.SK;
             } else {
                 await this.run(
                     compileData.outputPath,
@@ -815,7 +817,9 @@ export class CphNg {
                     compileData.checkerOutputPath,
                 );
                 if (!hasExpandStatus) {
-                    testCase.isExpand = isExpandStatus(testCase.status);
+                    testCase.isExpand = isExpandVerdict(
+                        testCase.result!.verdict,
+                    );
                     this.emitProblemChange();
                     hasExpandStatus = testCase.isExpand;
                 }
@@ -833,8 +837,8 @@ export class CphNg {
             this.runAbortController.abort();
         } else {
             for (const testCase of problem.testCases) {
-                if (isRunningStatus(testCase.status)) {
-                    testCase.status = TestCaseStatuses.RJ;
+                if (isRunningVerdict(testCase.result!.verdict)) {
+                    testCase.result!.verdict = TestCaseVerdicts.RJ;
                 }
             }
             this.saveProblem();
@@ -842,7 +846,7 @@ export class CphNg {
     }
     public async chooseTestCaseFile(
         index: number,
-        option: 'input' | 'answer',
+        option: 'stdin' | 'answer',
     ): Promise<void> {
         try {
             if (!this.checkProblem() || !this.checkIndex(index)) {
@@ -856,8 +860,8 @@ export class CphNg {
                 canSelectMany: false,
                 title: vscode.l10n.t('Choose {type} file', {
                     type:
-                        option === 'input'
-                            ? vscode.l10n.t('input')
+                        option === 'stdin'
+                            ? vscode.l10n.t('stdin')
                             : vscode.l10n.t('answer'),
                 }),
                 filters: {
@@ -866,20 +870,22 @@ export class CphNg {
                 },
             });
             if (fileUri && fileUri[0]) {
-                const filePath = fileUri[0].fsPath;
+                const path = fileUri[0].fsPath;
                 if (
-                    (option === 'input' || option === 'answer') &&
+                    (option === 'stdin' || option === 'answer') &&
                     Settings.problem.foundMatchTestCaseBehavior !== 'never'
                 ) {
-                    const isInput = option === 'input';
-                    const mainExt = extname(filePath);
+                    const isInput = option === 'stdin';
+                    const mainExt = extname(path);
                     const pairExt = isInput ? ['.ans', '.out'] : ['.in'];
-                    testCase[isInput ? 'input' : 'answer'] = filePath;
-                    testCase[isInput ? 'inputFile' : 'answerFile'] = true;
+                    testCase[isInput ? 'stdin' : 'answer'] = {
+                        useFile: true,
+                        path,
+                    };
                     for (const ext of pairExt) {
-                        const pairFile = filePath.replace(mainExt, ext);
+                        const pairPath = path.replace(mainExt, ext);
                         if (
-                            await access(pairFile, constants.F_OK)
+                            await access(pairPath, constants.F_OK)
                                 .then(() => true)
                                 .catch(() => false)
                         ) {
@@ -891,20 +897,18 @@ export class CphNg {
                                         'Found matching {found} file: {file}. Do you want to use it?',
                                         {
                                             found: vscode.l10n.t(
-                                                `cphNg.${
-                                                    isInput ? 'answer' : 'input'
-                                                }`,
+                                                isInput ? 'answer' : 'stdin',
                                             ),
-                                            file: basename(pairFile),
+                                            file: basename(pairPath),
                                         },
                                     ),
                                     true,
                                 ))
                             ) {
-                                testCase[isInput ? 'answer' : 'input'] =
-                                    pairFile;
-                                testCase[isInput ? 'answerFile' : 'inputFile'] =
-                                    true;
+                                testCase[isInput ? 'answer' : 'stdin'] = {
+                                    useFile: true,
+                                    path: pairPath,
+                                };
                                 break;
                             }
                         }
@@ -916,11 +920,10 @@ export class CphNg {
                 }
                 this.saveProblem();
             }
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to choose test case file: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }
@@ -932,39 +935,17 @@ export class CphNg {
             }
             const problem = this._problem!;
             const testCase = problem.testCases[index];
-            if (testCase.output === undefined) {
-                return;
-            }
-            const leftFile = testCase.answerFile
-                ? testCase.answer
-                : join(
-                      Settings.cache.directory,
-                      'diff',
-                      `${this.getTestCaseHash(testCase)}.ans`,
-                  );
-            const rightFile = testCase.outputFile
-                ? testCase.output
-                : join(
-                      Settings.cache.directory,
-                      'diff',
-                      `${this.getTestCaseHash(testCase)}.out`,
-                  );
-            if (!testCase.answerFile) {
-                await writeFile(leftFile, testCase.answer);
-            }
-            if (!testCase.outputFile) {
-                await writeFile(rightFile, testCase.output);
-            }
+            const leftFile = await testCaseIOToPath(testCase.answer);
+            const rightFile = await testCaseIOToPath(testCase.result!.stdout);
             vscode.commands.executeCommand(
                 'vscode.diff',
                 vscode.Uri.file(leftFile),
                 vscode.Uri.file(rightFile),
             );
-        } catch (error: unknown) {
-            const err = error as Error;
+        } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to compare test case: {error}', {
-                    error: err.message,
+                    error: (e as Error).message,
                 }),
             );
         }

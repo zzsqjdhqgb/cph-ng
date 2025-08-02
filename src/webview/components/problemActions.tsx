@@ -29,7 +29,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningStatus, Problem } from '../../types';
+import { isRunningVerdict, Problem } from '../../types';
 import {
     AddTestCaseMessage,
     DeleteProblemMessage,
@@ -48,7 +48,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const { t } = useTranslation();
     const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const hasRunning = problem.testCases.some((tc) =>
-        isRunningStatus(tc.status),
+        isRunningVerdict(tc.result?.verdict),
     );
 
     const handleDelete = () => {

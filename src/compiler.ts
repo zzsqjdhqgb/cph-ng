@@ -40,11 +40,10 @@ export class Compiler {
             );
             this.logger.debug('Generated executable path', { executablePath });
             return executablePath;
-        } catch (error: unknown) {
-            this.logger.error('Failed to generate executable path', error);
-            const err = error as Error;
+        } catch (e) {
+            this.logger.error('Failed to generate executable path', e);
             throw new Error(
-                `Failed to generate executable path: ${err.message}`,
+                `Failed to generate executable path: ${(e as Error).message}`,
             );
         }
     }
@@ -96,10 +95,9 @@ export class Compiler {
                 outputPath,
             });
             return stderr;
-        } catch (e: unknown) {
-            const error = e as Error;
-            this.logger.error('Compilation failed', error);
-            return error.message;
+        } catch (e) {
+            this.logger.error('Compilation failed', e);
+            return (e as Error).message;
         }
     }
 }

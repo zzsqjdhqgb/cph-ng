@@ -15,21 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-export const isRunningStatus = (status?: TestCaseStatus): boolean => {
+export const isRunningVerdict = (verdict?: TestCaseVerdict): boolean => {
     return (
-        status !== undefined &&
-        ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(status?.name)
+        verdict !== undefined &&
+        ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
     );
 };
 
-export const isExpandStatus = (status?: TestCaseStatus): boolean => {
+export const isExpandVerdict = (verdict?: TestCaseVerdict): boolean => {
     return !(
-        (status !== undefined && ['AC', 'SK', 'RJ'].includes(status.name)) ||
-        isRunningStatus(status)
+        (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
+        isRunningVerdict(verdict)
     );
 };
 
-export class TestCaseStatus {
+export class TestCaseVerdict {
     name: string;
     fullName: string;
     color: string;
@@ -41,18 +41,23 @@ export class TestCaseStatus {
     }
 }
 
+export type TestCaseIO =
+    | { useFile: true; path: string }
+    | { useFile: false; data: string };
+
+export type TestCaseResult = {
+    verdict: TestCaseVerdict;
+    time: number;
+    stdout: TestCaseIO;
+    stderr: TestCaseIO;
+    message: string;
+};
+
 export interface TestCase {
-    input: string;
-    inputFile: boolean;
-    answer: string;
-    answerFile: boolean;
-    output?: string;
-    outputFile?: boolean;
-    error?: string;
-    status?: TestCaseStatus;
-    message?: string;
-    time?: number;
+    stdin: TestCaseIO;
+    answer: TestCaseIO;
     isExpand: boolean;
+    result?: TestCaseResult;
 }
 
 export interface Problem {

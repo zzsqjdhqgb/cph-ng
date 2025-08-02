@@ -33,10 +33,10 @@
     "testCaseDataView.snackbar.message": "已复制",
     "testCaseView.answer": "答案",
     "testCaseView.delete": "删除",
-    "testCaseView.error": "错误",
-    "testCaseView.input": "输入",
-    "testCaseView.message": "Message",
-    "testCaseView.output": "输出",
+    "testCaseView.message": "消息",
     "testCaseView.run": "运行",
+    "testCaseView.stderr": "错误",
+    "testCaseView.stdin": "输入",
+    "testCaseView.stdout": "输出",
     "testCaseView.time": "{{time}} 毫秒"
 }

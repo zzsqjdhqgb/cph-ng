@@ -52,7 +52,7 @@ export interface RunTestCaseMessage {
 export interface ChooseTestCaseFileMessage {
     type: 'chooseTestCaseFile';
     index: number;
-    label: 'input' | 'answer';
+    label: 'stdin' | 'answer';
 }
 export interface UpdateTestCaseMessage {
     type: 'updateTestCase';

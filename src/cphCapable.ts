@@ -53,10 +53,9 @@ export class CphCapable {
             name: cphProblem.name,
             url: cphProblem.url,
             testCases: cphProblem.tests.map((test) => ({
-                input: test.input,
-                inputFile: false,
-                answer: test.output,
-                answerFile: false,
+                stdin: { useFile: false, data: test.input },
+                answer: { useFile: false, data: test.output },
+                isExpand: false,
             })),
             timeLimit: cphProblem.timeLimit,
             srcPath: cphProblem.srcPath,
@@ -79,8 +78,8 @@ export class CphCapable {
                 problem,
             });
             return problem;
-        } catch (error) {
-            this.logger.error('Failed to load problem', error);
+        } catch (e) {
+            this.logger.error('Failed to load problem', e);
             return undefined;
         }
     }
