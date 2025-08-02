@@ -655,8 +655,8 @@ export class CphNg {
                         tc.stdin.useFile
                             ? tc.stdin.path
                             : tc.answer.useFile
-                            ? tc.answer.path
-                            : 'unknown',
+                              ? tc.answer.path
+                              : 'unknown',
                     )}`,
                     description: vscode.l10n.t(
                         'Input {input}, Answer {answer}',

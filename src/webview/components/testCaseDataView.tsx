@@ -109,7 +109,6 @@ const TestCaseDataView = ({
     outputActions,
     readOnly,
 }: CodeMirrorSectionProps) => {
-    console.log(value);
     const { t } = useTranslation();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
@@ -138,6 +137,9 @@ const TestCaseDataView = ({
         outline: 'none',
     };
 
+    if (!value.useFile && !value.data && readOnly) {
+        return <></>;
+    }
     return (
         <ErrorBoundary>
             <CphFlex
