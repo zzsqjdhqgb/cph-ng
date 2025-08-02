@@ -22,19 +22,26 @@ import { basename, dirname, extname, join } from 'path';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 import Settings from './settings';
+import { Logger } from './io';
 
 const execAsync = promisify(exec);
 
 export class Compiler {
+    private logger: Logger = new Logger('compiler');
+
     public async getExecutablePath(filePath: string): Promise<string> {
+        this.logger.trace('getExecutablePath', { filePath });
         try {
             const base = basename(filePath, extname(filePath));
-            return join(
+            const executablePath = join(
                 Settings.cache.directory,
                 'bin',
                 base + (type() === 'Windows_NT' ? '.exe' : ''),
             );
+            this.logger.debug('Generated executable path', { executablePath });
+            return executablePath;
         } catch (error: unknown) {
+            this.logger.error('Failed to generate executable path', error);
             const err = error as Error;
             throw new Error(
                 `Failed to generate executable path: ${err.message}`,
@@ -47,6 +54,7 @@ export class Compiler {
         outputPath: string,
         abortController: AbortController,
     ): Promise<string> {
+        this.logger.trace('compile', { filePath, outputPath });
         const ext = extname(filePath);
         let compileCommand = '';
 
@@ -58,6 +66,7 @@ export class Compiler {
                 compileCommand = `${Settings.compilation.cCompiler} ${Settings.compilation.cArgs} "${filePath}" -o "${outputPath}"`;
                 break;
             default:
+                this.logger.warn('Unsupported file type', { type: ext });
                 return vscode.l10n.t('Unsupported file type: {type}.', {
                     type: ext,
                 });
@@ -65,18 +74,31 @@ export class Compiler {
 
         try {
             await access(outputPath, constants.F_OK);
+            this.logger.debug('Output file exists, removing it', {
+                outputPath,
+            });
             await unlink(outputPath);
-        } catch {}
+        } catch {
+            this.logger.debug('Output file does not exist, skipping removal', {
+                outputPath,
+            });
+        }
 
         try {
+            this.logger.info('Starting compilation', { compileCommand });
             const { stderr } = await execAsync(compileCommand, {
                 timeout: Settings.compilation.timeout,
                 cwd: dirname(filePath),
                 signal: abortController.signal,
             });
+            this.logger.debug('Compilation completed successfully', {
+                filePath,
+                outputPath,
+            });
             return stderr;
         } catch (e: unknown) {
             const error = e as Error;
+            this.logger.error('Compilation failed', error);
             return error.message;
         }
     }

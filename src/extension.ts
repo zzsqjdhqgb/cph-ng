@@ -21,19 +21,22 @@ import * as vscode from 'vscode';
 import Companion from './companion';
 import { CphCapable } from './cphCapable';
 import { CphNg } from './cphNg';
-import { io } from './io';
+import { io, Logger } from './io';
 import Settings from './settings';
 import { SidebarProvider } from './sidebarProvider';
 
 class ExtensionManager {
+    private logger: Logger = new Logger('extension');
     private sidebarProvider!: SidebarProvider;
     private companion!: Companion;
     private cphNg!: CphNg;
     private timer!: NodeJS.Timeout;
 
     public async activate(context: vscode.ExtensionContext) {
+        this.logger.info('Activating CPH-NG extension');
         try {
             if (Settings.cache.cleanOnStartup) {
+                this.logger.info('Cleaning cache on startup');
                 await rm(Settings.cache.directory, {
                     force: true,
                     recursive: true,
@@ -54,8 +57,13 @@ class ExtensionManager {
                     recursive: true,
                 }),
             ]);
+            this.logger.info('Cache directories created successfully');
 
             this.companion = new Companion(async (problem, document) => {
+                this.logger.debug('Companion callback triggered', {
+                    problemName: problem.name,
+                    documentPath: document.fileName,
+                });
                 this.cphNg.problem = problem;
                 await this.cphNg.saveProblem();
                 await vscode.window.showTextDocument(document);
@@ -63,6 +71,7 @@ class ExtensionManager {
             });
             this.cphNg = new CphNg();
             this.cphNg.addProblemChangeListener(() => {
+                this.logger.trace('Problem change detected');
                 this.updateContext();
             });
             this.sidebarProvider = new SidebarProvider(
@@ -146,8 +155,10 @@ class ExtensionManager {
             );
 
             this.updateContext();
+            this.logger.info('CPH-NG extension activated successfully');
         } catch (error: unknown) {
             const err = error as Error;
+            this.logger.error('Failed to activate extension', err);
             io.error(
                 vscode.l10n.t('Failed to activate CPH-NG extension: {error}', {
                     error: err.message,
@@ -157,10 +168,13 @@ class ExtensionManager {
     }
 
     public deactivate() {
+        this.logger.info('Deactivating CPH-NG extension');
         this.companion.dispose();
+        this.logger.info('CPH-NG extension deactivated');
     }
 
     private updateContext() {
+        this.logger.trace('updateContext');
         const hasProblem = !!this.cphNg.problem;
         const isRunning =
             this.cphNg.problem?.testCases.some(
@@ -169,6 +183,7 @@ class ExtensionManager {
                     ['CP', 'CPD', 'JG', 'JGD'].includes(tc.status.name),
             ) || false;
 
+        this.logger.debug('Context update', { hasProblem, isRunning });
         vscode.commands.executeCommand(
             'setContext',
             'cph-ng.hasProblem',
@@ -182,6 +197,7 @@ class ExtensionManager {
     }
 
     private async checkActiveFile() {
+        this.logger.trace('checkActiveFile');
         try {
             const editor = vscode.window.activeTextEditor;
             if (!editor || editor.document.uri.scheme !== 'file') {
@@ -193,8 +209,29 @@ class ExtensionManager {
                 return;
             }
 
-            if (['.cpp', '.c'].includes(extname(filePath))) {
+            if (
+                this.cphNg.problem?.testCases
+                    .flatMap((tc) =>
+                        [
+                            tc.inputFile ? [tc.input] : [],
+                            tc.answerFile ? [tc.answer] : [],
+                            tc.outputFile && tc.output ? [tc.output] : [],
+                        ].flat(),
+                    )
+                    .includes(filePath)
+            ) {
+                this.logger.debug('Test case file is active', { filePath });
+            } else if (this.cphNg.problem?.checkerPath === filePath) {
+                this.logger.debug('Checker file is active', { filePath });
+            } else if (['.cpp', '.c'].includes(extname(filePath))) {
+                this.logger.debug('C/C++ file is active', { filePath });
                 if (this.cphNg.problem?.srcPath !== filePath) {
+                    this.logger.trace(
+                        'Last source file',
+                        this.cphNg.problem?.srcPath,
+                        'is not the current file',
+                        { filePath },
+                    );
                     try {
                         await access(
                             await this.cphNg.getBinByCpp(filePath),
@@ -228,19 +265,12 @@ class ExtensionManager {
                                 ),
                             );
                         }
-                    } catch {}
+                    } catch {
+                        this.cphNg.problem = undefined;
+                        this.updateContext();
+                    }
                 }
-            } else if (
-                !this.cphNg.problem?.testCases
-                    .flatMap((tc) =>
-                        [
-                            tc.inputFile ? [tc.input] : [],
-                            tc.answerFile ? [tc.answer] : [],
-                            tc.outputFile && tc.output ? [tc.output] : [],
-                        ].flat(),
-                    )
-                    .includes(filePath)
-            ) {
+            } else {
                 this.cphNg.problem = undefined;
                 this.updateContext();
             }

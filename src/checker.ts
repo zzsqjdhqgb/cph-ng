@@ -24,6 +24,7 @@ import Settings from './settings';
 import { TestCaseStatuses } from './testCaseStatuses';
 import { TestCase, TestCaseStatus } from './types';
 import Result from './result';
+import { Logger } from './io';
 
 export interface CheckerResult {
     status: TestCaseStatus;
@@ -32,11 +33,18 @@ export interface CheckerResult {
 }
 
 export class Checker {
+    private logger: Logger = new Logger('checker');
+
     public async runChecker(
         checkerOutputPath: string,
         testCase: TestCase,
         abortController: AbortController,
     ): Promise<Result<{}>> {
+        this.logger.trace('runChecker', {
+            checkerOutputPath,
+            testCase,
+            abortController,
+        });
         return new Promise(async (resolve) => {
             try {
                 const tempDir = join(Settings.cache.directory, 'checker');
@@ -57,6 +65,12 @@ export class Checker {
                         writeFile(answerFile, testCase.answer!),
                 ]);
 
+                this.logger.info(
+                    'Running checker',
+                    checkerOutputPath,
+                    'with arguments',
+                    [inputFile, outputFile, answerFile],
+                );
                 const child = spawn(
                     checkerOutputPath,
                     [inputFile, outputFile, answerFile],
@@ -78,6 +92,11 @@ export class Checker {
                 });
 
                 child.on('close', (code) => {
+                    this.logger.debug('Checker stopped', {
+                        stdout,
+                        stderr,
+                        code,
+                    });
                     let status: TestCaseStatus;
                     let message = stderr.trim() || stdout.trim();
 
@@ -104,6 +123,10 @@ export class Checker {
                             break;
                         default:
                             status = TestCaseStatuses.SE;
+                            this.logger.warn(
+                                'Checker returned unknown exit code',
+                                code,
+                            );
                             message = vscode.l10n.t(
                                 'Checker returned unknown exit code: {code}',
                                 { code },
@@ -116,18 +139,20 @@ export class Checker {
                     });
                 });
 
-                child.on('error', (err: Error) => {
+                child.on('error', (error: Error) => {
+                    this.logger.warn('Failed to run checker', error);
                     resolve({
                         status: TestCaseStatuses.SE,
                         message: vscode.l10n.t(
                             'Failed to run checker: {error}',
                             {
-                                error: err.message,
+                                error: error.message,
                             },
                         ),
                     });
                 });
             } catch (error) {
+                this.logger.warn('Checker setup failed', error);
                 const err = error as Error;
                 resolve({
                     status: TestCaseStatuses.SE,

@@ -31,8 +31,7 @@ import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { Checker } from './checker';
 import { Compiler } from './compiler';
-import { io } from './io';
-import { output } from './output';
+import { io, Logger, setCompilationMessage } from './io';
 import { Runner } from './runner';
 import Settings from './settings';
 import { TestCaseStatuses } from './testCaseStatuses';
@@ -61,6 +60,7 @@ type CompileResult = Result<{
 }>;
 
 export class CphNg {
+    private logger: Logger = new Logger('cphNg');
     private _problem?: Problem;
     private compiler: Compiler;
     private runner: Runner;
@@ -69,6 +69,7 @@ export class CphNg {
     private runAbortController?: AbortController;
 
     constructor() {
+        this.logger.trace('constructor');
         this.compiler = new Compiler();
         this.runner = new Runner();
         this.checker = new Checker();
@@ -111,11 +112,13 @@ export class CphNg {
         } catch {
             await mkdir(dirname(dir), { recursive: true });
         }
-        return join(dir, `${cppFile}.bin`);
+        return join(dir);
     }
 
     private checkProblem() {
+        this.logger.trace('checkProblem');
         if (!this._problem) {
+            this.logger.warn('No problem found');
             io.warn(
                 vscode.l10n.t(
                     'No problem found. Please create a problem first.',
@@ -123,12 +126,15 @@ export class CphNg {
             );
             return false;
         }
+        this.logger.debug('Problem exists', { problem: this._problem });
         return true;
     }
     private checkIndex(index: number) {
+        this.logger.trace('checkIndex', { index });
         const problem = this._problem!;
         const max = problem.testCases.length - 1;
         if (index < 0 || index > max) {
+            this.logger.warn('Test case index out of range', { index, max });
             io.warn(
                 vscode.l10n.t('Test case index {index} out of range 1~{max}.', {
                     index,
@@ -137,6 +143,7 @@ export class CphNg {
             );
             return false;
         }
+        this.logger.warn('Test case index is valid', { index });
         return true;
     }
 
@@ -151,6 +158,7 @@ export class CphNg {
         srcPath: string,
         srcHash?: string,
     ): Promise<DoCompileResult> {
+        this.logger.trace('doCompile', { srcPath, srcHash });
         const hash = SHA256((await readFile(srcPath)).toString()).toString();
         const outputPath = await this.compiler.getExecutablePath(srcPath);
         const hasOutputFile = async () =>
@@ -159,18 +167,28 @@ export class CphNg {
                 .catch(() => false);
 
         if (srcHash !== hash || !(await hasOutputFile())) {
+            this.logger.info('Source hash mismatch or output file missing', {
+                srcHash,
+                hash,
+                outputPath,
+            });
             const compileResult = await this.compiler.compile(
                 srcPath,
                 outputPath,
                 this.runAbortController!,
             );
             if (!(await hasOutputFile())) {
+                this.logger.error('Compilation failed, output file not found', {
+                    srcPath,
+                    outputPath,
+                });
                 return {
                     status: TestCaseStatuses.CE,
                     message: compileResult,
                 };
             }
         }
+        this.logger.debug('Compilation successful', { srcPath, outputPath });
         return {
             status: TestCaseStatuses.UKE,
             message: '',
@@ -397,11 +415,18 @@ export class CphNg {
         this.emitProblemChange();
     }
     public async loadProblem(binFile: string): Promise<void> {
+        this.logger.trace('loadProblem', { binFile });
         try {
             const data = await readFile(binFile);
             this._problem = JSON.parse(
                 gunzipSync(data).toString('utf8'),
             ) as Problem;
+            this.logger.info(
+                'Problem loaded',
+                { problem: this._problem },
+                'from',
+                binFile,
+            );
             this.emitProblemChange();
         } catch (e: unknown) {
             const error = e as Error;
@@ -432,14 +457,17 @@ export class CphNg {
         this.saveProblem();
     }
     public async saveProblem(): Promise<void> {
+        this.logger.trace('saveProblem');
         try {
             if (!this.checkProblem()) {
                 return;
             }
             const problem = this._problem!;
+            const binPath = await this.getBinByCpp(problem.srcPath);
+            this.logger.info('Saving problem', { problem }, 'to', binPath);
             this.emitProblemChange();
             return writeFile(
-                await this.getBinByCpp(problem.srcPath),
+                binPath,
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
         } catch (error: unknown) {
@@ -452,6 +480,7 @@ export class CphNg {
         }
     }
     public async deleteProblem(): Promise<void> {
+        this.logger.trace('deleteProblem');
         if (!this.checkProblem()) {
             return;
         }
@@ -473,6 +502,7 @@ export class CphNg {
         }
     }
     public async addTestCase(): Promise<void> {
+        this.logger.trace('addTestCase');
         if (!this._problem) {
             return;
         }
@@ -486,12 +516,14 @@ export class CphNg {
         this.saveProblem();
     }
     public async loadTestCases(): Promise<void> {
+        this.logger.trace('loadTestCases');
         try {
             if (!this.checkProblem()) {
                 return;
             }
             const problem = this._problem!;
 
+            this.logger.debug('Showing test case loading options');
             const option = (
                 await vscode.window.showQuickPick(
                     [
@@ -508,11 +540,14 @@ export class CphNg {
                 )
             )?.value;
             if (!option) {
+                this.logger.debug('User cancelled test case loading');
                 return;
             }
+            this.logger.info('User selected loading option:', option);
 
             let folderPath = '';
             if (option === 'zip') {
+                this.logger.debug('Loading test cases from zip file');
                 const zipPath = await vscode.window.showOpenDialog({
                     title: vscode.l10n.t(
                         'Choose a zip file containing test cases',
@@ -520,20 +555,25 @@ export class CphNg {
                     filters: { 'Zip files': ['zip'], 'All files': ['*'] },
                 });
                 if (!zipPath) {
+                    this.logger.debug('User cancelled zip file selection');
                     return;
                 }
+                this.logger.info('Processing zip file:', zipPath[0].fsPath);
                 const zipFile = new AdmZip(zipPath[0].fsPath);
                 const entries = zipFile.getEntries();
                 if (!entries.length) {
+                    this.logger.warn('Empty zip file');
                     io.warn(
                         vscode.l10n.t('No test cases found in the zip file.'),
                     );
                     return;
                 }
                 folderPath = zipPath[0].fsPath.replace(/\.zip$/, '');
+                this.logger.debug('Extracting zip to:', folderPath);
                 await mkdir(folderPath, { recursive: true });
                 zipFile.extractAllTo(folderPath, true);
             } else if (option === 'folder') {
+                this.logger.debug('Loading test cases from folder');
                 const folderUri = await vscode.window.showOpenDialog({
                     canSelectFiles: false,
                     canSelectFolders: true,
@@ -543,13 +583,17 @@ export class CphNg {
                     ),
                 });
                 if (!folderUri) {
+                    this.logger.debug('User cancelled folder selection');
                     return;
                 }
                 folderPath = folderUri[0].fsPath;
+                this.logger.info('Using folder:', folderPath);
             } else {
-                throw new Error(
-                    vscode.l10n.t('Unknown option: {option}.', { option }),
-                );
+                const errorMsg = vscode.l10n.t('Unknown option: {option}.', {
+                    option,
+                });
+                this.logger.error(errorMsg);
+                throw new Error(errorMsg);
             }
 
             async function getAllFiles(dirPath: string): Promise<string[]> {
@@ -566,11 +610,13 @@ export class CphNg {
             }
 
             const allFiles = await getAllFiles(folderPath);
+            this.logger.info(`Found ${allFiles.length} files in total`);
             const testCases: TestCase[] = [];
             for (const filePath of allFiles) {
                 const fileName = basename(filePath);
                 const ext = extname(fileName).toLowerCase();
                 if (ext === '.in') {
+                    this.logger.debug('Found input file:', fileName);
                     testCases.push({
                         inputFile: true,
                         input: filePath,
@@ -584,6 +630,7 @@ export class CphNg {
                 const fileName = basename(filePath);
                 const ext = extname(fileName).toLowerCase();
                 if (ext === '.ans' || ext === '.out') {
+                    this.logger.debug('Found answer file:', fileName);
                     const inputFile = join(
                         dirname(filePath),
                         fileName.replace(ext, '.in'),
@@ -594,7 +641,15 @@ export class CphNg {
                     if (existingTestCase) {
                         existingTestCase.answerFile = true;
                         existingTestCase.answer = filePath;
+                        this.logger.debug('Matched answer with input:', {
+                            input: inputFile,
+                            answer: filePath,
+                        });
                     } else {
+                        this.logger.warn(
+                            'Answer file without matching input:',
+                            fileName,
+                        );
                         testCases.push({
                             inputFile: false,
                             input: '',
@@ -605,6 +660,7 @@ export class CphNg {
                     }
                 }
             }
+            this.logger.info(`Created ${testCases.length} test cases`);
             const chosenIndexes = await vscode.window.showQuickPick(
                 testCases.map((tc, index) => ({
                     label: `${basename(tc.input || tc.answer)}`,
@@ -628,13 +684,18 @@ export class CphNg {
                 },
             );
             if (!chosenIndexes) {
+                this.logger.debug('User cancelled test case selection');
                 return;
             }
-            chosenIndexes
-                .map((index) => testCases[index.value])
-                .forEach((testCase) => {
-                    problem.testCases.push(testCase);
-                });
+            const selectedTestCases = chosenIndexes.map(
+                (index) => testCases[index.value],
+            );
+            this.logger.info(
+                `User selected ${selectedTestCases.length} test cases`,
+            );
+            selectedTestCases.forEach((testCase) => {
+                problem.testCases.push(testCase);
+            });
             this.saveProblem();
         } catch (error: unknown) {
             const err = error as Error;
@@ -649,6 +710,7 @@ export class CphNg {
         index: number,
         testCase: TestCase,
     ): Promise<void> {
+        this.logger.trace('updateTestCase', { index, testCase });
         if (!this.checkProblem() || !this.checkIndex(index)) {
             return;
         }
@@ -657,6 +719,7 @@ export class CphNg {
         this.saveProblem();
     }
     public async runTestCase(index: number): Promise<void> {
+        this.logger.trace('runTestCase', { index });
         if (!this.checkProblem() || !this.checkIndex(index)) {
             return;
         }
@@ -672,7 +735,7 @@ export class CphNg {
 
         const compileResult = await this.compile();
         if (compileResult.status !== TestCaseStatuses.UKE) {
-            output.setCompilationMessage(
+            setCompilationMessage(
                 compileResult.message || vscode.l10n.t('Compilation failed'),
             );
             testCase.status = TestCaseStatuses.CE;
@@ -722,7 +785,7 @@ export class CphNg {
 
         const compileResult = await this.compile();
         if (compileResult.status !== TestCaseStatuses.UKE) {
-            output.setCompilationMessage(
+            setCompilationMessage(
                 compileResult.message || vscode.l10n.t('Compilation failed'),
             );
             for (const testCaseIndex in problem.testCases) {

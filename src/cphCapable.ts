@@ -18,6 +18,7 @@
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
+import { Logger } from './io';
 import { Problem } from './types';
 
 export interface CphProblem {
@@ -33,16 +34,22 @@ export interface CphProblem {
 }
 
 export class CphCapable {
+    private static logger: Logger = new Logger('cphCapable');
+
     public static getProbByCpp(cppFile: string): string {
-        return join(
+        this.logger.trace('getProbByCpp', { cppFile });
+        const probPath = join(
             dirname(cppFile),
             '.cph',
             `.${basename(cppFile)}_${MD5(cppFile).toString(enc.Hex)}.prob`,
         );
+        this.logger.debug('Generated problem file path', { probPath });
+        return probPath;
     }
 
     public static toProblem(cphProblem: CphProblem): Problem {
-        return {
+        this.logger.trace('toProblem', { cphProblem });
+        const problem = {
             name: cphProblem.name,
             url: cphProblem.url,
             testCases: cphProblem.tests.map((test) => ({
@@ -54,17 +61,26 @@ export class CphCapable {
             timeLimit: cphProblem.timeLimit,
             srcPath: cphProblem.srcPath,
         } as Problem;
+        this.logger.info('Converted CphProblem to Problem', { problem });
+        return problem;
     }
 
     public static async loadProblem(
         probFile: string,
     ): Promise<Problem | undefined> {
+        this.logger.trace('loadProblem', { probFile });
         try {
             const data = await readFile(probFile);
-            return CphCapable.toProblem(
+            const problem = CphCapable.toProblem(
                 JSON.parse(data.toString()) as CphProblem,
             );
-        } catch {
+            this.logger.debug('Loaded problem from file', {
+                probFile,
+                problem,
+            });
+            return problem;
+        } catch (error) {
+            this.logger.error('Failed to load problem', error);
             return undefined;
         }
     }

@@ -20,12 +20,13 @@ import { createServer, Server } from 'http';
 import { join } from 'path';
 import * as vscode from 'vscode';
 import { CphCapable, CphProblem } from './cphCapable';
-import { io } from './io';
+import { io, Logger } from './io';
 import Settings from './settings';
 import { renderTemplate } from './strTemplate';
 import { Problem } from './types';
 
 class Companion {
+    private logger: Logger = new Logger('companion');
     server: Server;
 
     constructor(
@@ -34,6 +35,9 @@ class Companion {
             document: vscode.TextDocument,
         ) => void,
     ) {
+        this.logger.trace('constructor', {
+            onCreateProblem,
+        });
         this.server = createServer((request, response) => {
             let requestData = '';
 
@@ -42,6 +46,7 @@ class Companion {
             });
 
             request.on('close', async () => {
+                this.logger.debug('Received request', requestData);
                 try {
                     const problem = CphCapable.toProblem(
                         JSON.parse(requestData) as CphProblem,
@@ -50,6 +55,7 @@ class Companion {
                         vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
                     if (!workspaceFolder) {
+                        this.logger.warn('No workspace folder found');
                         io.info(
                             vscode.l10n.t(
                                 'No workspace folder found. Please open a workspace folder.',
@@ -62,31 +68,53 @@ class Companion {
                         workspaceFolder.toString(),
                         this.getProblemFileName(problem.name),
                     );
+                    this.logger.info('Created problem source path', {
+                        srcPath: problem.srcPath,
+                    });
 
                     try {
                         await access(problem.srcPath);
+                        this.logger.debug('Source file already exists', {
+                            srcPath: problem.srcPath,
+                        });
                     } catch {
+                        this.logger.info('Creating new source file', {
+                            srcPath: problem.srcPath,
+                        });
                         await this.createSourceFile(problem);
                     }
 
                     const document = await vscode.workspace.openTextDocument(
                         problem.srcPath,
                     );
+                    this.logger.info('Opened document', {
+                        document: document.fileName,
+                    });
                     onCreateProblem(problem, document);
-                } catch (e) {
-                    // Handle parsing errors silently
+                } catch (error) {
+                    this.logger.warn('Parse data from companion failed', error);
+                    io.warn(
+                        vscode.l10n.t(
+                            'Parse data from companion failed: {message}.',
+                            {
+                                message: (error as Error).message,
+                            },
+                        ),
+                    );
                 }
             });
 
             response.end();
         });
 
-        this.server.on('error', (e) => {
+        this.server.on('error', (error) => {
+            this.logger.error('Server error occurred', error);
             if (
                 vscode.extensions.getExtension(
                     'divyanshuagrawal.competitive-programming-helper',
                 )?.isActive
             ) {
+                this.logger.warn('CPH extension conflict detected');
                 io.warn(
                     vscode.l10n.t(
                         'CPH-NG is not compatible with CPH, please disable CPH to use CPH-NG.',
@@ -96,22 +124,33 @@ class Companion {
                 io.error(
                     vscode.l10n.t(
                         'Failed to start companion server: {error}.',
-                        { error: e.message },
+                        { error: error.message },
                     ),
                 );
             }
         });
 
+        this.logger.info(
+            'Companion server listen at port',
+            Settings.companion.listenPort,
+        );
         this.server.listen(Settings.companion.listenPort);
     }
 
     public dispose() {
+        this.logger.trace('dispose');
         this.server.close();
     }
 
     private async createSourceFile(problem: Problem): Promise<void> {
+        this.logger.trace('createSourceFile', {
+            problem,
+        });
         try {
             if (Settings.problem.templateFile) {
+                this.logger.info('Using template file', {
+                    templateFile: Settings.problem.templateFile,
+                });
                 try {
                     const template = await readFile(
                         Settings.problem.templateFile,
@@ -123,8 +162,12 @@ class Companion {
                         ['url', problem.url || ''],
                     ]);
                     await writeFile(problem.srcPath, renderedTemplate);
+                    this.logger.info('Template applied successfully', {
+                        srcPath: problem.srcPath,
+                    });
                 } catch (templateError: unknown) {
                     const err = templateError as Error;
+                    this.logger.warn('Template file error', err);
                     io.warn(
                         vscode.l10n.t(
                             'Failed to use template file: {error}, creating empty file instead',
@@ -132,22 +175,36 @@ class Companion {
                         ),
                     );
                     await writeFile(problem.srcPath, '');
+                    this.logger.info('Created empty source file', {
+                        srcPath: problem.srcPath,
+                    });
                 }
             } else {
+                this.logger.info(
+                    'No template file configured, creating empty file',
+                );
                 await writeFile(problem.srcPath, '');
             }
         } catch (error: unknown) {
             const err = error as Error;
+            this.logger.error('Failed to create source file', err);
             throw new Error(`Failed to create source file: ${err.message}`);
         }
     }
 
     private getProblemFileName(name: string) {
+        this.logger.trace('getProblemFileName', {
+            name,
+        });
         const words = name.match(/[\p{L}]+|[0-9]+/gu);
-        return (
+        const fileName =
             (words ? `${words.join('_')}` : `${name.replace(/\W+/g, '_')}`) +
-            '.cpp'
-        );
+            '.cpp';
+        this.logger.debug('Generated problem file name', {
+            originalName: name,
+            fileName,
+        });
+        return fileName;
     }
 }
 

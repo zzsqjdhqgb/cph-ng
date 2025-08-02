@@ -15,12 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { Logger } from './io';
+
+const logger = new Logger('strTemplate');
+
 export const renderTemplate = (
     original: string,
     replacements: [string, string][],
 ) => {
+    logger.trace('renderTemplate', { original, replacements });
     for (const replacement of replacements) {
         original = original.replaceAll(`\${${replacement[0]}}`, replacement[1]);
+        logger.trace('Applied replacement', { replacement, result: original });
     }
+    logger.trace('Template rendering completed', { result: original });
     return original;
 };

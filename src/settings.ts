@@ -18,16 +18,21 @@
 import { homedir, tmpdir } from 'os';
 import * as vscode from 'vscode';
 import { renderTemplate } from './strTemplate';
+import { Logger } from './io';
 
 class SettingsSection {
     private name: string;
+    protected logger: Logger = new Logger('settings');
     constructor(name: string) {
         this.name = name;
+        this.logger.trace(`Created SettingsSection: ${name}`);
     }
     protected get(key: string): unknown {
+        this.logger.trace(`Getting setting: ${this.name}.${key}`);
         const value = vscode.workspace
             .getConfiguration('cph-ng')
             .get(`${this.name}.${key}`);
+        this.logger.debug(`Setting value for ${this.name}.${key}:`, value);
         return value;
     }
 }
@@ -58,10 +63,12 @@ class CacheSection extends SettingsSection {
         super('cache');
     }
     get directory(): string {
-        return renderTemplate(this.get('directory') as string, [
+        const directory = renderTemplate(this.get('directory') as string, [
             ['tmp', tmpdir()],
             ['home', homedir()],
         ]);
+        this.logger.debug('Cache directory resolved:', directory);
+        return directory;
     }
     get cleanOnStartup(): boolean {
         return this.get('cleanOnStartup') as boolean;

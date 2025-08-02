@@ -23,6 +23,7 @@ import Settings from './settings';
 import { TestCaseStatuses } from './testCaseStatuses';
 import { TestCase, TestCaseStatus } from './types';
 import Result from './result';
+import { Logger } from './io';
 
 type RunnerResult = Result<{
     time?: number;
@@ -31,12 +32,20 @@ type RunnerResult = Result<{
 }>;
 
 export class Runner {
+    private logger: Logger = new Logger('runner');
+
     public async runExecutable(
         executablePath: string,
         timeLimit: number,
         testCase: TestCase,
         abortController: AbortController,
     ): Promise<RunnerResult> {
+        this.logger.trace('runExecutable', {
+            executablePath,
+            timeLimit,
+            testCase,
+        });
+        this.logger.info('Running executable', executablePath);
         return new Promise((resolve) => {
             const startTime = Date.now();
             const child = spawn(executablePath, [], {
@@ -51,20 +60,31 @@ export class Runner {
 
             const killTimeout = setTimeout(() => {
                 killed = true;
+                this.logger.warn('Killing process due to timeout', {
+                    executablePath,
+                    timeLimit,
+                });
                 child.kill('SIGKILL');
             }, timeLimit + Settings.runner.timeAddition);
 
             child.stdout.on('data', (data) => {
                 output += data.toString();
+                this.logger.debug('Process stdout', { data: data.toString() });
             });
 
             child.stderr.on('data', (data) => {
                 error += data.toString();
+                this.logger.debug('Process stderr', { data: data.toString() });
             });
 
             const commonResolve = (status: TestCaseStatus, message: string) => {
                 const endTime = Date.now();
                 clearTimeout(killTimeout);
+                this.logger.debug('Process completed', {
+                    status,
+                    message,
+                    duration: endTime - startTime,
+                });
                 resolve({
                     status,
                     message,
@@ -102,6 +122,7 @@ export class Runner {
             });
 
             child.on('error', (err: Error) => {
+                this.logger.error('Process error', err);
                 commonResolve(
                     abortController.signal.aborted
                         ? TestCaseStatuses.RJ
@@ -118,13 +139,16 @@ export class Runner {
 
                 inputStream.on('data', (chunk) => {
                     child.stdin.write(chunk);
+                    this.logger.debug('Writing to stdin', { chunk });
                 });
 
                 inputStream.on('end', () => {
                     child.stdin.end();
+                    this.logger.debug('Input stream ended');
                 });
 
                 inputStream.on('error', (err: Error) => {
+                    this.logger.error('Input stream error', err);
                     commonResolve(
                         TestCaseStatuses.SE,
                         vscode.l10n.t('Input file read failed: {message}.', {
@@ -135,6 +159,9 @@ export class Runner {
             } else {
                 child.stdin.write(testCase.input);
                 child.stdin.end();
+                this.logger.debug('Input written to stdin', {
+                    input: testCase.input,
+                });
             }
         });
     }

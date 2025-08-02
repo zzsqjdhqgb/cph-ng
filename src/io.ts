@@ -17,9 +17,12 @@
 
 import * as vscode from 'vscode';
 
-export const outputChannel = vscode.window.createOutputChannel('CPH-NG', {
+const outputChannel = vscode.window.createOutputChannel('CPH-NG', {
     log: true,
 });
+const compilationChannel = vscode.window.createOutputChannel(
+    vscode.l10n.t('CPH-NG Compilation'),
+);
 
 export class Logger {
     private module: string;
@@ -52,14 +55,16 @@ export class Logger {
 export class Io {
     private logger: Logger = new Logger('IO');
     public info(message: string) {
-        (this.logger.info(message),
-            vscode.window.showInformationMessage(message));
+        this.logger.info(message);
+        vscode.window.showInformationMessage(message);
     }
     public warn(message: string) {
-        (this.logger.warn(message), vscode.window.showWarningMessage(message));
+        this.logger.warn(message);
+        vscode.window.showWarningMessage(message);
     }
     public error(message: string) {
-        (this.logger.error(message), vscode.window.showErrorMessage(message));
+        this.logger.error(message);
+        vscode.window.showErrorMessage(message);
     }
     public async confirm(
         message: string,
@@ -78,3 +83,11 @@ export class Io {
 }
 
 export const io = new Io();
+
+export const setCompilationMessage = (message: string): void => {
+    const logger = new Logger('compilation');
+    logger.info('Setting compilation message:', message);
+    compilationChannel.clear();
+    compilationChannel.appendLine(message);
+    compilationChannel.show();
+};

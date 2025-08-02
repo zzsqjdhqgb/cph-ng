@@ -42,6 +42,7 @@
     "No test cases found in the zip file.": "在 ZIP 压缩文件中未找到测试用例。",
     "No workspace folder found. Please open a workspace folder.": "未找到工作区文件夹，请打开一个工作区文件夹。",
     "Output Limit Exceeded": "输出超限",
+    "Parse data from companion failed: {message}.": "从伴侣解析数据失败：{message}。",
     "Parse problem file {file} failed: {error}.": "解析题目文件 {file} 失败：{error}。",
     "Partially Correct": "部分正确",
     "Presentation Error": "格式错误",
