@@ -26,6 +26,7 @@ import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
 import { GetProblemMessage } from './messages';
+import ErrorBoundary from './components/errorBoundary';
 
 i18n.use(initReactI18next).init({
     resources: {
@@ -61,11 +62,13 @@ const App = () => {
     });
     return (
         <ThemeProvider theme={theme}>
-            {problem ? (
-                <ProblemView problem={problem} />
-            ) : (
-                <CreateProblemView />
-            )}
+            <ErrorBoundary>
+                {problem ? (
+                    <ProblemView problem={problem} />
+                ) : (
+                    <CreateProblemView />
+                )}
+            </ErrorBoundary>
         </ThemeProvider>
     );
 };

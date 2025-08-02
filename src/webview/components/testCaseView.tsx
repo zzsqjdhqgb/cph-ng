@@ -37,6 +37,7 @@ import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 import CphText from './cphText';
 import TestCaseDataView from './testCaseDataView';
+import ErrorBoundary from './errorBoundary';
 
 interface TestCaseViewProp {
     testCase: TestCase;
@@ -55,152 +56,163 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
         } as UpdateTestCaseMessage);
 
     return (
-        <Accordion
-            expanded={testCase.isExpand}
-            disableGutters={true}
-            onChange={(_, expanded) => {
-                testCase.isExpand = expanded;
-                emitUpdateTestCase();
-            }}
-            sx={{
-                borderLeft: `4px solid`,
-                ...(testCase.result?.verdict
-                    ? {
-                        borderLeftColor: `rgb(${testCase.result.verdict.color})`,
-                        backgroundColor: `rgba(${testCase.result.verdict.color}, 0.1)`,
-                    }
-                    : {
-                        borderLeftColor: 'transparent',
-                    }),
-            }}
-        >
-            <AccordionSummary
+        <ErrorBoundary>
+            <Accordion
+                expanded={testCase.isExpand}
+                disableGutters={true}
+                onChange={(_, expanded) => {
+                    testCase.isExpand = expanded;
+                    emitUpdateTestCase();
+                }}
                 sx={{
-                    '& > span': { margin: '0 !important' },
+                    borderLeft: `4px solid`,
+                    ...(testCase.result?.verdict
+                        ? {
+                              borderLeftColor: `rgb(${testCase.result.verdict.color})`,
+                              backgroundColor: `rgba(${testCase.result.verdict.color}, 0.1)`,
+                          }
+                        : {
+                              borderLeftColor: 'transparent',
+                          }),
                 }}
             >
-                <CphFlex smallGap>
-                    <CphFlex flex={1}>
-                        <CphText fontWeight={'bold'}>#{index + 1}</CphText>
-                        <Tooltip title={testCase.result?.verdict.fullName}>
-                            <CphText>{testCase.result?.verdict.name}</CphText>
-                        </Tooltip>
-                    </CphFlex>
-                    {testCase.result?.time ? (
-                        <Chip
-                            label={t('testCaseView.time', {
-                                time: testCase.result.time,
-                            })}
-                            size={'small'}
-                            sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
-                        />
-                    ) : <></>}
-                    <CphButton
-                        name={t('testCaseView.run')}
-                        icon={PlayArrowIcon}
-                        color={'success'}
-                        loading={running}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            vscode.postMessage({
-                                type: 'runTestCase',
-                                index,
-                            } as RunTestCaseMessage);
-                        }}
-                    />
-                    <CphButton
-                        name={t('testCaseView.delete')}
-                        icon={DeleteIcon}
-                        color={'error'}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            vscode.postMessage({
-                                type: 'deleteTestCase',
-                                index,
-                            } as DeleteTestCaseMessage);
-                        }}
-                    />
-                </CphFlex>
-            </AccordionSummary>
-            {testCase.isExpand && (
-                <AccordionDetails>
-                    <CphFlex>
-                        <CphFlex smallGap>
-                            <TestCaseDataView
-                                label={t('testCaseView.stdin')}
-                                value={testCase.stdin}
-                                onBlur={(value) => {
-                                    testCase.stdin = { useFile: false, data: value };
-                                    emitUpdateTestCase();
-                                }}
-                                onChooseFile={() =>
-                                    vscode.postMessage({
-                                        type: 'chooseTestCaseFile',
-                                        index,
-                                        label: 'stdin',
-                                    } as ChooseTestCaseFileMessage)
-                                }
-                            />
-                            <TestCaseDataView
-                                label={t('testCaseView.answer')}
-                                value={testCase.answer}
-                                onBlur={(value) => {
-                                    testCase.answer = { useFile: false, data: value };
-                                    emitUpdateTestCase();
-                                }}
-                                onChooseFile={() => {
-                                    vscode.postMessage({
-                                        type: 'chooseTestCaseFile',
-                                        index,
-                                        label: 'answer',
-                                    } as ChooseTestCaseFileMessage);
-                                }}
-                            />
+                <AccordionSummary
+                    sx={{
+                        '& > span': { margin: '0 !important' },
+                    }}
+                >
+                    <CphFlex smallGap>
+                        <CphFlex flex={1}>
+                            <CphText fontWeight={'bold'}>#{index + 1}</CphText>
+                            <Tooltip title={testCase.result?.verdict.fullName}>
+                                <CphText>
+                                    {testCase.result?.verdict.name}
+                                </CphText>
+                            </Tooltip>
                         </CphFlex>
-                        {testCase.result && (
-                            <>
-                                <Divider />
-                                <CphFlex smallGap>
-                                    <TestCaseDataView
-                                        label={t('testCaseView.stdout')}
-                                        value={testCase.result.stdout}
-                                        readOnly={true}
-                                        outputActions={{
-                                            onSetAnswer: () => {
-                                                testCase.answer = testCase.result!.stdout;
-                                                testCase.result = undefined;
-                                                emitUpdateTestCase();
-                                            },
-                                            onCompare: () => {
-                                                vscode.postMessage({
-                                                    type: 'compareTestCase',
-                                                    index,
-                                                } as CompareTestCaseMessage);
-                                            },
-                                        }}
-                                    />
-                                    <TestCaseDataView
-                                        label={t('testCaseView.stderr')}
-                                        value={testCase.result.stderr}
-                                        readOnly={true}
-                                    />
-                                    <TestCaseDataView
-                                        label={t(
-                                            'testCaseView.message',
-                                        )}
-                                        value={{
-                                            useFile: false,
-                                            data: testCase.result.message
-                                        }}
-                                        readOnly={true}
-                                    />
-                                </CphFlex>
-                            </>
+                        {testCase.result?.time ? (
+                            <Chip
+                                label={t('testCaseView.time', {
+                                    time: testCase.result.time,
+                                })}
+                                size={'small'}
+                                sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
+                            />
+                        ) : (
+                            <></>
                         )}
+                        <CphButton
+                            name={t('testCaseView.run')}
+                            icon={PlayArrowIcon}
+                            color={'success'}
+                            loading={running}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                vscode.postMessage({
+                                    type: 'runTestCase',
+                                    index,
+                                } as RunTestCaseMessage);
+                            }}
+                        />
+                        <CphButton
+                            name={t('testCaseView.delete')}
+                            icon={DeleteIcon}
+                            color={'error'}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                vscode.postMessage({
+                                    type: 'deleteTestCase',
+                                    index,
+                                } as DeleteTestCaseMessage);
+                            }}
+                        />
                     </CphFlex>
-                </AccordionDetails>
-            )}
-        </Accordion>
+                </AccordionSummary>
+                {testCase.isExpand && (
+                    <AccordionDetails>
+                        <CphFlex>
+                            <CphFlex smallGap>
+                                <TestCaseDataView
+                                    label={t('testCaseView.stdin')}
+                                    value={testCase.stdin}
+                                    onBlur={(value) => {
+                                        testCase.stdin = {
+                                            useFile: false,
+                                            data: value,
+                                        };
+                                        emitUpdateTestCase();
+                                    }}
+                                    onChooseFile={() =>
+                                        vscode.postMessage({
+                                            type: 'chooseTestCaseFile',
+                                            index,
+                                            label: 'stdin',
+                                        } as ChooseTestCaseFileMessage)
+                                    }
+                                />
+                                <TestCaseDataView
+                                    label={t('testCaseView.answer')}
+                                    value={testCase.answer}
+                                    onBlur={(value) => {
+                                        testCase.answer = {
+                                            useFile: false,
+                                            data: value,
+                                        };
+                                        emitUpdateTestCase();
+                                    }}
+                                    onChooseFile={() => {
+                                        vscode.postMessage({
+                                            type: 'chooseTestCaseFile',
+                                            index,
+                                            label: 'answer',
+                                        } as ChooseTestCaseFileMessage);
+                                    }}
+                                />
+                            </CphFlex>
+                            {testCase.result && (
+                                <>
+                                    <Divider />
+                                    <CphFlex smallGap>
+                                        <TestCaseDataView
+                                            label={t('testCaseView.stdout')}
+                                            value={testCase.result.stdout}
+                                            readOnly={true}
+                                            outputActions={{
+                                                onSetAnswer: () => {
+                                                    testCase.answer =
+                                                        testCase.result!.stdout;
+                                                    testCase.result = undefined;
+                                                    emitUpdateTestCase();
+                                                },
+                                                onCompare: () => {
+                                                    vscode.postMessage({
+                                                        type: 'compareTestCase',
+                                                        index,
+                                                    } as CompareTestCaseMessage);
+                                                },
+                                            }}
+                                        />
+                                        <TestCaseDataView
+                                            label={t('testCaseView.stderr')}
+                                            value={testCase.result.stderr}
+                                            readOnly={true}
+                                        />
+                                        <TestCaseDataView
+                                            label={t('testCaseView.message')}
+                                            value={{
+                                                useFile: false,
+                                                data: testCase.result.message,
+                                            }}
+                                            readOnly={true}
+                                        />
+                                    </CphFlex>
+                                </>
+                            )}
+                        </CphFlex>
+                    </AccordionDetails>
+                )}
+            </Accordion>
+        </ErrorBoundary>
     );
 };
 
