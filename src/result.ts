@@ -15,19 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { TestCaseResult, TestCaseVerdict } from './types';
-import { TestCaseVerdicts } from './types.backend';
+import { TCResult, TCVerdict } from './types';
+import { TCVerdicts } from './types.backend';
 
 interface Result<T> {
-    verdict: TestCaseVerdict;
-    message: string;
+    verdict: TCVerdict;
+    msg: string;
     data?: T;
 }
 
-export const assignResult = (tcResult: TestCaseResult, result: Result<any>) => {
-    if (result.verdict !== TestCaseVerdicts.UKE) {
+export const assignResult = (tcResult: TCResult, result: Result<any>) => {
+    if (result.verdict !== TCVerdicts.UKE) {
         tcResult.verdict = result.verdict;
-        tcResult.message = result.message;
+        tcResult.msg = result.msg;
         return true;
     }
     return false;

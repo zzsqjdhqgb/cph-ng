@@ -21,46 +21,46 @@ import React from 'react';
 import { Problem } from '../../types';
 import AcCongrats from './acCongrats';
 import CphFlex from './cphFlex';
-import NoTestCases from './noTestCases';
-import TestCaseView from './testCaseView';
+import NoTcs from './noTcs';
+import TcView from './tcView';
 
-interface TestCasesViewProps {
+interface TcsViewProps {
     problem: Problem;
 }
 
-const TestCasesView = ({ problem }: TestCasesViewProps) => {
+const TcsView = ({ problem }: TcsViewProps) => {
     return (
         <Container>
             <CphFlex column>
-                {problem.testCases.length ? (
+                {problem.tcs.length ? (
                     <>
                         {partyUri &&
-                        problem.testCases.every(
+                        problem.tcs.every(
                             (tc) => tc.result?.verdict.name === 'AC',
                         ) ? (
                             <AcCongrats />
                         ) : null}
                         <Box width={'100%'}>
-                            {problem.testCases.map((tc, index) =>
+                            {problem.tcs.map((tc, idx) =>
                                 tc.result?.verdict &&
                                 hiddenStatuses.includes(
                                     tc.result?.verdict.name,
                                 ) ? null : (
-                                    <TestCaseView
-                                        testCase={tc}
-                                        index={index}
-                                        key={index}
+                                    <TcView
+                                        tc={tc}
+                                        idx={idx}
+                                        key={idx}
                                     />
                                 ),
                             )}
                         </Box>
                     </>
                 ) : (
-                    <NoTestCases />
+                    <NoTcs />
                 )}
             </CphFlex>
         </Container>
     );
 };
 
-export default TestCasesView;
+export default TcsView;

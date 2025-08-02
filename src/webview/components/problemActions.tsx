@@ -31,12 +31,12 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, Problem } from '../../types';
 import {
-    AddTestCaseMessage,
-    DeleteProblemMessage,
-    LoadTestCasesMessage,
-    RunTestCasesMessage,
-    StopTestCasesMessage,
-} from '../messages';
+    AddTcMsg,
+    DelProblemMsg,
+    LoadTcsMsg,
+    RunTcsMsg,
+    StopTcsMsg,
+} from '../msgs';
 import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 
@@ -46,14 +46,14 @@ interface ProblemActionsProps {
 
 const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const { t } = useTranslation();
-    const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const hasRunning = problem.testCases.some((tc) =>
+    const [isDelDialogOpen, setDelDialogOpen] = useState(false);
+    const hasRunning = problem.tcs.some((tc) =>
         isRunningVerdict(tc.result?.verdict),
     );
 
-    const handleDelete = () => {
-        vscode.postMessage({ type: 'deleteProblem' } as DeleteProblemMessage);
-        setDeleteDialogOpen(false);
+    const handleDel = () => {
+        vscode.postMessage({ type: 'delProblem' } as DelProblemMsg);
+        setDelDialogOpen(false);
     };
 
     return (
@@ -62,46 +62,46 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                 <CphFlex smallGap>
                     <CphButton
                         larger={true}
-                        name={t('problemActions.addTestCase')}
+                        name={t('problemActions.addTc')}
                         icon={AddIcon}
                         onClick={() => {
                             vscode.postMessage({
-                                type: 'addTestCase',
-                            } as AddTestCaseMessage);
+                                type: 'addTc',
+                            } as AddTcMsg);
                         }}
                     />
                     <CphButton
                         larger={true}
-                        name={t('problemActions.loadTestCases')}
+                        name={t('problemActions.loadTcs')}
                         icon={FileCopyIcon}
                         onClick={() => {
                             vscode.postMessage({
-                                type: 'loadTestCases',
-                            } as LoadTestCasesMessage);
+                                type: 'loadTcs',
+                            } as LoadTcsMsg);
                         }}
                     />
                     {hasRunning ? (
                         <CphButton
                             larger={true}
-                            name={t('problemActions.stopTestCases')}
+                            name={t('problemActions.stopTcs')}
                             icon={PlaylistRemoveIcon}
                             color={'warning'}
                             onClick={() => {
                                 vscode.postMessage({
-                                    type: 'stopTestCases',
-                                } as StopTestCasesMessage);
+                                    type: 'stopTcs',
+                                } as StopTcsMsg);
                             }}
                         />
                     ) : (
                         <CphButton
                             larger={true}
-                            name={t('problemActions.runAll')}
+                            name={t('problemActions.runTcs')}
                             icon={PlaylistPlayIcon}
                             color={'success'}
                             onClick={() => {
                                 vscode.postMessage({
-                                    type: 'runTestCases',
-                                } as RunTestCasesMessage);
+                                    type: 'runTcs',
+                                } as RunTcsMsg);
                             }}
                         />
                     )}
@@ -110,13 +110,13 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         name={t('problemActions.deleteProblem')}
                         icon={DeleteForeverIcon}
                         color={'error'}
-                        onClick={() => setDeleteDialogOpen(true)}
+                        onClick={() => setDelDialogOpen(true)}
                     />
                 </CphFlex>
             </Container>
             <Dialog
-                open={isDeleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
+                open={isDelDialogOpen}
+                onClose={() => setDelDialogOpen(false)}
             >
                 <DialogTitle>{t('problemActions.dialog.title')}</DialogTitle>
                 <DialogContent>
@@ -126,13 +126,13 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                 </DialogContent>
                 <DialogActions>
                     <Button
-                        onClick={() => setDeleteDialogOpen(false)}
+                        onClick={() => setDelDialogOpen(false)}
                         color={'primary'}
                     >
                         {t('problemActions.dialog.cancel')}
                     </Button>
                     <Button
-                        onClick={handleDelete}
+                        onClick={handleDel}
                         color={'primary'}
                         autoFocus
                     >

@@ -17,7 +17,7 @@
 
 import Box, { BoxProps } from '@mui/material/Box';
 import React from 'react';
-import { deleteProps } from '../utils';
+import { delProps } from '../utils';
 
 interface CphFlexProps extends BoxProps {
     smallGap?: boolean;
@@ -34,7 +34,7 @@ const CphFlex = (props: CphFlexProps) => {
             flexWrap={'wrap'}
             gap={props.smallGap ? 0.5 : 1}
             width={'100%'}
-            {...deleteProps(props, ['smallGap', 'column', 'alignStart'])}
+            {...delProps(props, ['smallGap', 'column', 'alignStart'])}
         >
             {' '}
             {props.children}

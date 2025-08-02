@@ -52,7 +52,7 @@ export class CphCapable {
         const problem = {
             name: cphProblem.name,
             url: cphProblem.url,
-            testCases: cphProblem.tests.map((test) => ({
+            tcs: cphProblem.tests.map((test) => ({
                 stdin: { useFile: false, data: test.input },
                 answer: { useFile: false, data: test.output },
                 isExpand: false,

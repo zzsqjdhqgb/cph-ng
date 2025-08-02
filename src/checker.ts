@@ -17,8 +17,8 @@
 
 import { spawn } from 'child_process';
 import * as vscode from 'vscode';
-import { testCaseIOToPath, TestCaseVerdicts } from './types.backend';
-import { TestCase, TestCaseVerdict } from './types';
+import { tcIo2Path, TCVerdicts } from './types.backend';
+import { TC, TCVerdict } from './types';
 import Result from './result';
 import { Logger } from './io';
 
@@ -27,21 +27,19 @@ export class Checker {
 
     public async runChecker(
         checkerOutputPath: string,
-        testCase: TestCase,
+        tc: TC,
         abortController: AbortController,
     ): Promise<Result<{}>> {
         this.logger.trace('runChecker', {
             checkerOutputPath,
-            testCase,
+            tc,
             abortController,
         });
         return new Promise(async (resolve) => {
             try {
-                const inputFile = await testCaseIOToPath(testCase.stdin);
-                const outputFile = await testCaseIOToPath(
-                    testCase.result!.stdout,
-                );
-                const answerFile = await testCaseIOToPath(testCase.answer);
+                const inputFile = await tcIo2Path(tc.stdin);
+                const outputFile = await tcIo2Path(tc.result!.stdout);
+                const answerFile = await tcIo2Path(tc.answer);
 
                 this.logger.info(
                     'Running checker',
@@ -75,39 +73,37 @@ export class Checker {
                         stderr,
                         code,
                     });
-                    let verdict: TestCaseVerdict;
-                    let message = stderr.trim() || stdout.trim();
+                    let verdict: TCVerdict;
+                    let msg = stderr.trim() || stdout.trim();
 
                     switch (code) {
                         case 0:
-                            verdict = TestCaseVerdicts.AC;
+                            verdict = TCVerdicts.AC;
                             break;
                         case 1:
-                            verdict = TestCaseVerdicts.WA;
+                            verdict = TCVerdicts.WA;
                             break;
                         case 2:
-                            verdict = TestCaseVerdicts.PE;
+                            verdict = TCVerdicts.PE;
                             break;
                         case 3:
-                            verdict = TestCaseVerdicts.SE;
-                            message += `\n${vscode.l10n.t(
-                                'Checker run failed',
-                            )}`;
+                            verdict = TCVerdicts.SE;
+                            msg += `\n${vscode.l10n.t('Checker run failed')}`;
                             break;
                         case 4:
-                            verdict = TestCaseVerdicts.WA;
-                            message += `\n${vscode.l10n.t('Unexpected EOF')}`;
+                            verdict = TCVerdicts.WA;
+                            msg += `\n${vscode.l10n.t('Unexpected EOF')}`;
                             break;
                         case 5:
-                            verdict = TestCaseVerdicts.PC;
+                            verdict = TCVerdicts.PC;
                             break;
                         default:
-                            verdict = TestCaseVerdicts.SE;
+                            verdict = TCVerdicts.SE;
                             this.logger.warn(
                                 'Checker returned unknown exit code',
                                 code,
                             );
-                            message += `\n${vscode.l10n.t(
+                            msg += `\n${vscode.l10n.t(
                                 'Checker returned unknown exit code: {code}',
                                 { code },
                             )}`;
@@ -115,28 +111,25 @@ export class Checker {
 
                     resolve({
                         verdict,
-                        message: message.trim(),
+                        msg: msg.trim(),
                     });
                 });
 
                 child.on('error', (e: Error) => {
                     this.logger.warn('Failed to run checker', e);
                     resolve({
-                        verdict: TestCaseVerdicts.SE,
-                        message: vscode.l10n.t(
-                            'Failed to run checker: {error}',
-                            {
-                                error: e.message,
-                            },
-                        ),
+                        verdict: TCVerdicts.SE,
+                        msg: vscode.l10n.t('Failed to run checker: {msg}', {
+                            msg: e.message,
+                        }),
                     });
                 });
             } catch (e) {
                 this.logger.warn('Checker setup failed', e);
                 resolve({
-                    verdict: TestCaseVerdicts.SE,
-                    message: vscode.l10n.t('Checker setup failed: {error}', {
-                        error: (e as Error).message,
+                    verdict: TCVerdicts.SE,
+                    msg: vscode.l10n.t('Checker setup failed: {msg}', {
+                        msg: (e as Error).message,
                     }),
                 });
             }

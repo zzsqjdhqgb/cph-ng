@@ -21,7 +21,7 @@ import { Problem } from '../../types';
 import CphFlex from './cphFlex';
 import ProblemActions from './problemActions';
 import ProblemTitle from './problemTitle';
-import TestCasesView from './testCasesView';
+import TcsView from './tcsView';
 
 interface ProblemViewProps {
     problem: Problem;
@@ -50,7 +50,7 @@ const ProblemView = ({ problem }: ProblemViewProps) => {
                 bgcolor={'rgba(127, 127, 127, 0.05)'}
                 paddingY={2}
             >
-                <TestCasesView problem={problem} />
+                <TcsView problem={problem} />
             </Box>
             <ProblemActions problem={problem} />
         </CphFlex>

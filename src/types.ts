@@ -15,21 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-export const isRunningVerdict = (verdict?: TestCaseVerdict): boolean => {
+export const isRunningVerdict = (verdict?: TCVerdict): boolean => {
     return (
         verdict !== undefined &&
         ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
     );
 };
 
-export const isExpandVerdict = (verdict?: TestCaseVerdict): boolean => {
+export const isExpandVerdict = (verdict?: TCVerdict): boolean => {
     return !(
         (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
         isRunningVerdict(verdict)
     );
 };
 
-export class TestCaseVerdict {
+export class TCVerdict {
     name: string;
     fullName: string;
     color: string;
@@ -41,29 +41,29 @@ export class TestCaseVerdict {
     }
 }
 
-export type TestCaseIO =
+export type TCIO =
     | { useFile: true; path: string }
     | { useFile: false; data: string };
 
-export type TestCaseResult = {
-    verdict: TestCaseVerdict;
+export type TCResult = {
+    verdict: TCVerdict;
     time: number;
-    stdout: TestCaseIO;
-    stderr: TestCaseIO;
-    message: string;
+    stdout: TCIO;
+    stderr: TCIO;
+    msg: string;
 };
 
-export interface TestCase {
-    stdin: TestCaseIO;
-    answer: TestCaseIO;
+export interface TC {
+    stdin: TCIO;
+    answer: TCIO;
     isExpand: boolean;
-    result?: TestCaseResult;
+    result?: TCResult;
 }
 
 export interface Problem {
     name: string;
     url?: string;
-    testCases: TestCase[];
+    tcs: TC[];
     timeLimit: number;
     srcPath: string;
     srcHash?: string;

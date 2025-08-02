@@ -54,26 +54,26 @@ export class Logger {
 
 export class Io {
     private logger: Logger = new Logger('IO');
-    public info(message: string) {
-        this.logger.info(message);
-        vscode.window.showInformationMessage(message);
+    public info(msg: string) {
+        this.logger.info(msg);
+        vscode.window.showInformationMessage(msg);
     }
-    public warn(message: string) {
-        this.logger.warn(message);
-        vscode.window.showWarningMessage(message);
+    public warn(msg: string) {
+        this.logger.warn(msg);
+        vscode.window.showWarningMessage(msg);
     }
-    public error(message: string) {
-        this.logger.error(message);
-        vscode.window.showErrorMessage(message);
+    public error(msg: string) {
+        this.logger.error(msg);
+        vscode.window.showErrorMessage(msg);
     }
     public async confirm(
-        message: string,
+        msg: string,
         modal: boolean = false,
     ): Promise<boolean> {
-        this.logger.info(message);
+        this.logger.info(msg);
         return (
             (await vscode.window.showInformationMessage(
-                message,
+                msg,
                 { modal },
                 'Yes',
                 'No',

@@ -19,7 +19,7 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import SvgIcon from '@mui/material/SvgIcon';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
-import { deleteProps } from '../utils';
+import { delProps } from '../utils';
 
 interface CphButtonProps extends IconButtonProps {
     icon: typeof SvgIcon;
@@ -33,7 +33,7 @@ const CphButton = (props: CphButtonProps) => {
             <IconButton
                 color={'primary'}
                 size={props.larger ? 'medium' : 'small'}
-                {...deleteProps(props, ['icon', 'name'])}
+                {...delProps(props, ['icon', 'name'])}
             >
                 <props.icon fontSize={'small'} />
             </IconButton>

@@ -25,7 +25,7 @@ import CreateProblemView from './components/createProblemView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
-import { GetProblemMessage } from './messages';
+import { GetProblemMsg } from './msgs';
 import ErrorBoundary from './components/errorBoundary';
 
 i18n.use(initReactI18next).init({
@@ -42,17 +42,17 @@ const App = () => {
     useEffect(() => {
         i18n.changeLanguage(language);
         window.onmessage = (e) => {
-            const message = e.data;
-            switch (message.type) {
+            const msg = e.data;
+            switch (msg.type) {
                 case 'problem':
-                    setProblem(message.problem);
+                    setProblem(msg.problem);
                     break;
                 default:
-                    console.error('Unknown message type:', message.type);
+                    console.error('Unknown message type:', msg.type);
                     break;
             }
         };
-        vscode.postMessage({ type: 'getProblem' } as GetProblemMessage);
+        vscode.postMessage({ type: 'getProblem' } as GetProblemMsg);
     }, []);
 
     const theme = createTheme({

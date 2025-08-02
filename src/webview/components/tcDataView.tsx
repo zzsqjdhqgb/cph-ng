@@ -26,13 +26,13 @@ import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
-import { OpenFileMessage } from '../messages';
+import { OpenFileMsg } from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 import CphLink from './cphLink';
 import CphText from './cphText';
-import { TestCaseIO } from '../../types';
+import { TCIO } from '../../types';
 import ErrorBoundary from './errorBoundary';
 
 interface OutputActions {
@@ -42,7 +42,7 @@ interface OutputActions {
 
 interface CodeMirrorSectionProps {
     label: string;
-    value: TestCaseIO;
+    value: TCIO;
     onBlur?: (value: string) => void;
     onChooseFile?: () => void;
     outputActions?: OutputActions;
@@ -59,7 +59,7 @@ const ansiToReact = (ansi: string) => {
             onBeforeInput={(e) => e.preventDefault()}
             style={{ cursor: 'text', outline: 'none' }}
         >
-            {ansiToJson(ansi).map((entry: AnserJsonEntry, index: number) => {
+            {ansiToJson(ansi).map((entry: AnserJsonEntry, idx: number) => {
                 const styles: CSSProperties = {
                     color: `rgb(${entry.fg})`,
                     backgroundColor: `rgb(${entry.bg})`,
@@ -90,7 +90,7 @@ const ansiToReact = (ansi: string) => {
                 }
                 return (
                     <span
-                        key={index}
+                        key={idx}
                         style={styles}
                     >
                         {entry.content}
@@ -101,7 +101,7 @@ const ansiToReact = (ansi: string) => {
     );
 };
 
-const TestCaseDataView = ({
+const TcDataView = ({
     label,
     value,
     onBlur,
@@ -159,7 +159,7 @@ const TestCaseDataView = ({
                                     vscode.postMessage({
                                         type: 'openFile',
                                         path: internalValue.path,
-                                    } as OpenFileMessage);
+                                    } as OpenFileMsg);
                                 }}
                             >
                                 {basename(internalValue.path)}
@@ -168,7 +168,7 @@ const TestCaseDataView = ({
                     </CphFlex>
                     {outputActions && (
                         <CphButton
-                            name={t('testCaseDataView.compare')}
+                            name={t('tcDataView.compare')}
                             icon={DifferenceIcon}
                             onClick={outputActions.onCompare}
                         />
@@ -176,7 +176,7 @@ const TestCaseDataView = ({
                     {internalValue.useFile ? (
                         readOnly || (
                             <CphButton
-                                name={t('testCaseDataView.clearFile')}
+                                name={t('tcDataView.clearFile')}
                                 icon={ClearIcon}
                                 onClick={() => onBlur && onBlur('')}
                             />
@@ -185,20 +185,20 @@ const TestCaseDataView = ({
                         <>
                             {readOnly || (
                                 <CphButton
-                                    name={t('testCaseDataView.loadFile')}
+                                    name={t('tcDataView.loadFile')}
                                     icon={FileOpenIcon}
                                     onClick={onChooseFile}
                                 />
                             )}
                             {outputActions && (
                                 <CphButton
-                                    name={t('testCaseDataView.setAnswer')}
+                                    name={t('tcDataView.setAnswer')}
                                     icon={ArrowUpwardIcon}
                                     onClick={outputActions.onSetAnswer}
                                 />
                             )}
                             <CphButton
-                                name={t('testCaseDataView.copy')}
+                                name={t('tcDataView.copy')}
                                 icon={ContentCopyIcon}
                                 onClick={() => {
                                     navigator.clipboard
@@ -258,7 +258,7 @@ const TestCaseDataView = ({
                         variant={'filled'}
                         sx={{ width: '100%' }}
                     >
-                        {t('testCaseDataView.snackbar.message')}
+                        {t('tcDataView.snackbar.message')}
                     </Alert>
                 </Snackbar>
             </CphFlex>
@@ -266,4 +266,4 @@ const TestCaseDataView = ({
     );
 };
 
-export default TestCaseDataView;
+export default TcDataView;

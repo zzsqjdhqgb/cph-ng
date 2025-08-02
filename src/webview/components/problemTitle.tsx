@@ -29,10 +29,10 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../types';
 import {
-    ChooseCheckerFileMessage,
-    EditProblemDetailsMessage,
-    OpenFileMessage,
-} from '../messages';
+    ChooseCheckerFileMsg,
+    EditProblemDetailsMsg,
+    OpenFileMsg,
+} from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
 import CphFlex from './cphFlex';
@@ -66,7 +66,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
             url: editedUrl,
             timeLimit: editedTimeLimit,
             isSpecialJudge: editedIsSpecialJudge,
-        } as EditProblemDetailsMessage);
+        } as EditProblemDetailsMsg);
     };
 
     return (
@@ -110,7 +110,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                         vscode.postMessage({
                                             type: 'openFile',
                                             path: problem.checkerPath!,
-                                        } as OpenFileMessage);
+                                        } as OpenFileMsg);
                                     }}
                                 >
                                     {t('problemTitle.specialJudge')}
@@ -124,7 +124,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                 vscode.postMessage({
                                     type: 'openFile',
                                     path: problem.srcPath,
-                                } as OpenFileMessage);
+                                } as OpenFileMsg);
                             }}
                         >
                             {basename(problem.srcPath)}
@@ -194,7 +194,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                             onClick={() => {
                                 vscode.postMessage({
                                     type: 'chooseCheckerFile',
-                                } as ChooseCheckerFileMessage);
+                                } as ChooseCheckerFileMsg);
                             }}
                         >
                             {t('problemTitle.dialog.field.chooseCheckerFile')}

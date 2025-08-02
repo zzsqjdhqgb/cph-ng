@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 declare const vscode: {
-    postMessage<T>(message: T): Thenable<void>;
+    postMessage<T>(msg: T): Thenable<void>;
 };
 
 declare const isDarkMode: boolean;

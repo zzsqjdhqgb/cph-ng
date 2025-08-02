@@ -25,51 +25,51 @@ import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, TestCase } from '../../types';
+import { isRunningVerdict, TC } from '../../types';
 import {
-    ChooseTestCaseFileMessage,
-    CompareTestCaseMessage,
-    DeleteTestCaseMessage,
-    RunTestCaseMessage,
-    UpdateTestCaseMessage,
-} from '../messages';
+    ChooseTcFileMsg,
+    CompareTcMsg,
+    DelTcMsg,
+    RunTcMsg,
+    UpdateTcMsg,
+} from '../msgs';
 import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 import CphText from './cphText';
-import TestCaseDataView from './testCaseDataView';
+import TcDataView from './tcDataView';
 import ErrorBoundary from './errorBoundary';
 
-interface TestCaseViewProp {
-    testCase: TestCase;
-    index: number;
+interface TcViewProp {
+    tc: TC;
+    idx: number;
 }
 
-const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
+const TcView = ({ tc, idx }: TcViewProp) => {
     const { t } = useTranslation();
-    const running = isRunningVerdict(testCase.result?.verdict);
+    const running = isRunningVerdict(tc.result?.verdict);
 
-    const emitUpdateTestCase = () =>
+    const emitUpdate = () =>
         vscode.postMessage({
-            type: 'updateTestCase',
-            index,
-            testCase,
-        } as UpdateTestCaseMessage);
+            type: 'updateTc',
+            idx: idx,
+            tc,
+        } as UpdateTcMsg);
 
     return (
         <ErrorBoundary>
             <Accordion
-                expanded={testCase.isExpand}
+                expanded={tc.isExpand}
                 disableGutters={true}
                 onChange={(_, expanded) => {
-                    testCase.isExpand = expanded;
-                    emitUpdateTestCase();
+                    tc.isExpand = expanded;
+                    emitUpdate();
                 }}
                 sx={{
                     borderLeft: `4px solid`,
-                    ...(testCase.result?.verdict
+                    ...(tc.result?.verdict
                         ? {
-                              borderLeftColor: `rgb(${testCase.result.verdict.color})`,
-                              backgroundColor: `rgba(${testCase.result.verdict.color}, 0.1)`,
+                              borderLeftColor: `rgb(${tc.result.verdict.color})`,
+                              backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
                           }
                         : {
                               borderLeftColor: 'transparent',
@@ -83,17 +83,15 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                 >
                     <CphFlex smallGap>
                         <CphFlex flex={1}>
-                            <CphText fontWeight={'bold'}>#{index + 1}</CphText>
-                            <Tooltip title={testCase.result?.verdict.fullName}>
-                                <CphText>
-                                    {testCase.result?.verdict.name}
-                                </CphText>
+                            <CphText fontWeight={'bold'}>#{idx + 1}</CphText>
+                            <Tooltip title={tc.result?.verdict.fullName}>
+                                <CphText>{tc.result?.verdict.name}</CphText>
                             </Tooltip>
                         </CphFlex>
-                        {testCase.result?.time ? (
+                        {tc.result?.time ? (
                             <Chip
-                                label={t('testCaseView.time', {
-                                    time: testCase.result.time,
+                                label={t('tcView.time', {
+                                    time: tc.result.time,
                                 })}
                                 size={'small'}
                                 sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
@@ -102,106 +100,106 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
                             <></>
                         )}
                         <CphButton
-                            name={t('testCaseView.run')}
+                            name={t('tcView.run')}
                             icon={PlayArrowIcon}
                             color={'success'}
                             loading={running}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 vscode.postMessage({
-                                    type: 'runTestCase',
-                                    index,
-                                } as RunTestCaseMessage);
+                                    type: 'runTc',
+                                    idx: idx,
+                                } as RunTcMsg);
                             }}
                         />
                         <CphButton
-                            name={t('testCaseView.delete')}
+                            name={t('tcView.delete')}
                             icon={DeleteIcon}
                             color={'error'}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 vscode.postMessage({
-                                    type: 'deleteTestCase',
-                                    index,
-                                } as DeleteTestCaseMessage);
+                                    type: 'delTc',
+                                    idx: idx,
+                                } as DelTcMsg);
                             }}
                         />
                     </CphFlex>
                 </AccordionSummary>
-                {testCase.isExpand && (
+                {tc.isExpand && (
                     <AccordionDetails>
                         <CphFlex>
                             <CphFlex smallGap>
-                                <TestCaseDataView
-                                    label={t('testCaseView.stdin')}
-                                    value={testCase.stdin}
+                                <TcDataView
+                                    label={t('tcView.stdin')}
+                                    value={tc.stdin}
                                     onBlur={(value) => {
-                                        testCase.stdin = {
+                                        tc.stdin = {
                                             useFile: false,
                                             data: value,
                                         };
-                                        emitUpdateTestCase();
+                                        emitUpdate();
                                     }}
                                     onChooseFile={() =>
                                         vscode.postMessage({
-                                            type: 'chooseTestCaseFile',
-                                            index,
+                                            type: 'chooseTcFile',
+                                            idx: idx,
                                             label: 'stdin',
-                                        } as ChooseTestCaseFileMessage)
+                                        } as ChooseTcFileMsg)
                                     }
                                 />
-                                <TestCaseDataView
-                                    label={t('testCaseView.answer')}
-                                    value={testCase.answer}
+                                <TcDataView
+                                    label={t('tcView.answer')}
+                                    value={tc.answer}
                                     onBlur={(value) => {
-                                        testCase.answer = {
+                                        tc.answer = {
                                             useFile: false,
                                             data: value,
                                         };
-                                        emitUpdateTestCase();
+                                        emitUpdate();
                                     }}
                                     onChooseFile={() => {
                                         vscode.postMessage({
-                                            type: 'chooseTestCaseFile',
-                                            index,
+                                            type: 'chooseTcFile',
+                                            idx: idx,
                                             label: 'answer',
-                                        } as ChooseTestCaseFileMessage);
+                                        } as ChooseTcFileMsg);
                                     }}
                                 />
                             </CphFlex>
-                            {testCase.result && (
+                            {tc.result && (
                                 <>
                                     <Divider />
                                     <CphFlex smallGap>
-                                        <TestCaseDataView
-                                            label={t('testCaseView.stdout')}
-                                            value={testCase.result.stdout}
+                                        <TcDataView
+                                            label={t('tcView.stdout')}
+                                            value={tc.result.stdout}
                                             readOnly={true}
                                             outputActions={{
                                                 onSetAnswer: () => {
-                                                    testCase.answer =
-                                                        testCase.result!.stdout;
-                                                    testCase.result = undefined;
-                                                    emitUpdateTestCase();
+                                                    tc.answer =
+                                                        tc.result!.stdout;
+                                                    tc.result = undefined;
+                                                    emitUpdate();
                                                 },
                                                 onCompare: () => {
                                                     vscode.postMessage({
-                                                        type: 'compareTestCase',
-                                                        index,
-                                                    } as CompareTestCaseMessage);
+                                                        type: 'compareTc',
+                                                        idx: idx,
+                                                    } as CompareTcMsg);
                                                 },
                                             }}
                                         />
-                                        <TestCaseDataView
-                                            label={t('testCaseView.stderr')}
-                                            value={testCase.result.stderr}
+                                        <TcDataView
+                                            label={t('tcView.stderr')}
+                                            value={tc.result.stderr}
                                             readOnly={true}
                                         />
-                                        <TestCaseDataView
-                                            label={t('testCaseView.message')}
+                                        <TcDataView
+                                            label={t('tcView.message')}
                                             value={{
                                                 useFile: false,
-                                                data: testCase.result.message,
+                                                data: tc.result.msg,
                                             }}
                                             readOnly={true}
                                         />
@@ -216,4 +214,4 @@ const TestCaseView = ({ testCase, index }: TestCaseViewProp) => {
     );
 };
 
-export default TestCaseView;
+export default TcView;

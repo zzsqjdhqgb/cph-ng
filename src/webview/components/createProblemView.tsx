@@ -21,7 +21,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CreateProblemMessage } from '../messages';
+import { CreateProblemMsg } from '../msgs';
 import CphFlex from './cphFlex';
 
 const CreateProblemView = () => {
@@ -46,7 +46,7 @@ const CreateProblemView = () => {
                     onClick={() => {
                         vscode.postMessage({
                             type: 'createProblem',
-                        } as CreateProblemMessage);
+                        } as CreateProblemMsg);
                     }}
                 >
                     {t('createProblemView.button')}

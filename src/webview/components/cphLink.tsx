@@ -18,7 +18,7 @@
 import Link, { LinkProps } from '@mui/material/Link';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
-import { deleteProps } from '../utils';
+import { delProps } from '../utils';
 
 interface CphLinkProps extends LinkProps {
     name: string;
@@ -32,7 +32,7 @@ const CphLink = (props: CphLinkProps) => {
                 overflow={'hidden'}
                 textOverflow={'ellipsis'}
                 underline={'hover'}
-                {...deleteProps(props, ['name'])}
+                {...delProps(props, ['name'])}
             >
                 {props.children}
             </Link>

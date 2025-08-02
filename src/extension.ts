@@ -117,7 +117,7 @@ class ExtensionManager {
                     'cph-ng.runTestCases',
                     async () => {
                         this.sidebarProvider.focus();
-                        await this.cphNg.runTestCases();
+                        await this.cphNg.runTcs();
                     },
                 ),
             );
@@ -126,7 +126,7 @@ class ExtensionManager {
                     'cph-ng.stopTestCases',
                     async () => {
                         this.sidebarProvider.focus();
-                        await this.cphNg.stopTestCases();
+                        await this.cphNg.stopTcs();
                     },
                 ),
             );
@@ -134,7 +134,7 @@ class ExtensionManager {
                 vscode.commands.registerCommand(
                     'cph-ng.addTestCase',
                     async () => {
-                        await this.cphNg.addTestCase();
+                        await this.cphNg.addTc();
                     },
                 ),
             );
@@ -142,7 +142,7 @@ class ExtensionManager {
                 vscode.commands.registerCommand(
                     'cph-ng.loadTestCases',
                     async () => {
-                        await this.cphNg.loadTestCases();
+                        await this.cphNg.loadTcs();
                     },
                 ),
             );
@@ -150,7 +150,7 @@ class ExtensionManager {
                 vscode.commands.registerCommand(
                     'cph-ng.deleteProblem',
                     async () => {
-                        await this.cphNg.deleteProblem();
+                        await this.cphNg.delProblem();
                     },
                 ),
             );
@@ -160,8 +160,8 @@ class ExtensionManager {
         } catch (e) {
             this.logger.error('Failed to activate extension', e);
             io.error(
-                vscode.l10n.t('Failed to activate CPH-NG extension: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to activate CPH-NG extension: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
@@ -177,7 +177,7 @@ class ExtensionManager {
         this.logger.trace('updateContext');
         const hasProblem = !!this.cphNg.problem;
         const isRunning =
-            this.cphNg.problem?.testCases.some((tc) =>
+            this.cphNg.problem?.tcs.some((tc) =>
                 isRunningVerdict(tc.result?.verdict),
             ) || false;
 
@@ -208,7 +208,7 @@ class ExtensionManager {
             }
 
             if (
-                this.cphNg.problem?.testCases
+                this.cphNg.problem?.tcs
                     .flatMap((tc) =>
                         [
                             tc.stdin.useFile ? [tc.stdin.path] : [],
@@ -254,12 +254,9 @@ class ExtensionManager {
                             }
                         } catch (e) {
                             io.error(
-                                vscode.l10n.t(
-                                    'Failed to load problem: {error}',
-                                    {
-                                        error: (e as Error).message,
-                                    },
-                                ),
+                                vscode.l10n.t('Failed to load problem: {msg}', {
+                                    msg: (e as Error).message,
+                                }),
                             );
                         }
                     } catch {
@@ -273,8 +270,8 @@ class ExtensionManager {
             }
         } catch (e) {
             io.error(
-                vscode.l10n.t('Error in checkActiveFile: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Error in checkActiveFile: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }

@@ -95,9 +95,9 @@ class Companion {
                     this.logger.warn('Parse data from companion failed', e);
                     io.warn(
                         vscode.l10n.t(
-                            'Parse data from companion failed: {message}.',
+                            'Parse data from companion failed: {msg}.',
                             {
-                                message: (e as Error).message,
+                                msg: (e as Error).message,
                             },
                         ),
                     );
@@ -122,10 +122,9 @@ class Companion {
                 );
             } else {
                 io.error(
-                    vscode.l10n.t(
-                        'Failed to start companion server: {error}.',
-                        { error: e.message },
-                    ),
+                    vscode.l10n.t('Failed to start companion server: {msg}.', {
+                        msg: e.message,
+                    }),
                 );
             }
         });
@@ -169,8 +168,8 @@ class Companion {
                     this.logger.warn('Template file error', e);
                     io.warn(
                         vscode.l10n.t(
-                            'Failed to use template file: {error}, creating empty file instead',
-                            { error: (e as Error).message },
+                            'Failed to use template file: {msg}, creating empty file instead',
+                            { msg: (e as Error).message },
                         ),
                     );
                     await writeFile(problem.srcPath, '');

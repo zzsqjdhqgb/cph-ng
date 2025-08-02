@@ -20,8 +20,8 @@ import { createReadStream } from 'fs';
 import { dirname } from 'path';
 import * as vscode from 'vscode';
 import Settings from './settings';
-import { TestCaseVerdicts } from './types.backend';
-import { TestCase, TestCaseVerdict } from './types';
+import { TCVerdicts } from './types.backend';
+import { TC, TCVerdict } from './types';
 import Result from './result';
 import { Logger } from './io';
 
@@ -37,13 +37,13 @@ export class Runner {
     public async runExecutable(
         executablePath: string,
         timeLimit: number,
-        testCase: TestCase,
+        tc: TC,
         abortController: AbortController,
     ): Promise<RunnerResult> {
         this.logger.trace('runExecutable', {
             executablePath,
             timeLimit,
-            testCase,
+            tc,
         });
         this.logger.info('Running executable', executablePath);
         return new Promise((resolve) => {
@@ -77,20 +77,17 @@ export class Runner {
                 this.logger.debug('Process stderr', { data: data.toString() });
             });
 
-            const commonResolve = (
-                verdict: TestCaseVerdict,
-                message: string,
-            ) => {
+            const commonResolve = (verdict: TCVerdict, msg: string) => {
                 const endTime = Date.now();
                 clearTimeout(killTimeout);
                 this.logger.debug('Process completed', {
                     verdict,
-                    message,
+                    msg,
                     duration: endTime - startTime,
                 });
                 resolve({
                     verdict,
-                    message,
+                    msg,
                     data: {
                         stdout: stdout.trim(),
                         stderr: stderr.trim(),
@@ -102,40 +99,40 @@ export class Runner {
             child.on('close', (code, signal) => {
                 if (killed) {
                     commonResolve(
-                        TestCaseVerdicts.TLE,
+                        TCVerdicts.TLE,
                         vscode.l10n.t('Killed due to timeout'),
                     );
                 } else if (code) {
                     commonResolve(
-                        TestCaseVerdicts.RE,
+                        TCVerdicts.RE,
                         vscode.l10n.t('Process exited with code: {code}.', {
                             code,
                         }),
                     );
                 } else if (signal) {
                     commonResolve(
-                        TestCaseVerdicts.RE,
+                        TCVerdicts.RE,
                         vscode.l10n.t('Process exited with signal: {signal}.', {
                             signal,
                         }),
                     );
                 } else {
-                    commonResolve(TestCaseVerdicts.UKE, '');
+                    commonResolve(TCVerdicts.UKE, '');
                 }
             });
 
-            child.on('error', (err: Error) => {
-                this.logger.error('Process error', err);
+            child.on('error', (e: Error) => {
+                this.logger.error('Process error', e);
                 commonResolve(
                     abortController.signal.aborted
-                        ? TestCaseVerdicts.RJ
-                        : TestCaseVerdicts.SE,
-                    err.message,
+                        ? TCVerdicts.RJ
+                        : TCVerdicts.SE,
+                    e.message,
                 );
             });
 
-            if (testCase.stdin.useFile) {
-                const inputStream = createReadStream(testCase.stdin.path, {
+            if (tc.stdin.useFile) {
+                const inputStream = createReadStream(tc.stdin.path, {
                     encoding: 'utf8',
                 });
 
@@ -149,20 +146,20 @@ export class Runner {
                     this.logger.debug('Input stream ended');
                 });
 
-                inputStream.on('error', (err: Error) => {
-                    this.logger.error('Input stream error', err);
+                inputStream.on('error', (e: Error) => {
+                    this.logger.error('Input stream error', e);
                     commonResolve(
-                        TestCaseVerdicts.SE,
-                        vscode.l10n.t('Input file read failed: {message}.', {
-                            message: err.message,
+                        TCVerdicts.SE,
+                        vscode.l10n.t('Input file read failed: {msg}.', {
+                            msg: e.message,
                         }),
                     );
                 });
             } else {
-                child.stdin.write(testCase.stdin.data);
+                child.stdin.write(tc.stdin.data);
                 child.stdin.end();
                 this.logger.debug('Input written to stdin', {
-                    stdin: testCase.stdin.data,
+                    stdin: tc.stdin.data,
                 });
             }
         });

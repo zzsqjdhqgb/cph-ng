@@ -20,18 +20,18 @@ import { useTranslation } from 'react-i18next';
 import CphFlex from './cphFlex';
 import CphText from './cphText';
 
-const NoTestCases = () => {
+const NoTcs = () => {
     const { t } = useTranslation();
 
     return (
         <CphFlex column>
             <CphText textAlign={'center'}>
-                {t('noTestCases.firstLine')}
+                {t('noTcs.firstLine')}
                 <br />
-                {t('noTestCases.secondLine')}
+                {t('noTcs.secondLine')}
             </CphText>
         </CphFlex>
     );
 };
 
-export default NoTestCases;
+export default NoTcs;

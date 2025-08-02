@@ -34,19 +34,14 @@ import { Compiler } from './compiler';
 import { io, Logger, setCompilationMessage } from './io';
 import { Runner } from './runner';
 import Settings from './settings';
-import {
-    testCaseIOToPath,
-    testCaseIOToString,
-    TestCaseVerdicts,
-    writeToTestCaseIO,
-} from './types.backend';
+import { tcIo2Path, tcIo2Str, TCVerdicts, write2TcIo } from './types.backend';
 import {
     isExpandVerdict,
     isRunningVerdict,
     Problem,
-    TestCase,
-    TestCaseIO,
-    TestCaseVerdict,
+    TC,
+    TCIO,
+    TCVerdict,
 } from './types';
 import Result, { assignResult } from './result';
 import { renderTemplate } from './strTemplate';
@@ -136,27 +131,27 @@ export class CphNg {
         this.logger.debug('Problem exists', { problem: this._problem });
         return true;
     }
-    private checkIndex(index: number) {
-        this.logger.trace('checkIndex', { index });
+    private checkIdx(idx: number) {
+        this.logger.trace('checkIdx', { idx });
         const problem = this._problem!;
-        const max = problem.testCases.length - 1;
-        if (index < 0 || index > max) {
-            this.logger.warn('Test case index out of range', { index, max });
+        const max = problem.tcs.length - 1;
+        if (idx < 0 || idx > max) {
+            this.logger.warn('Test case idx out of range', { idx, max });
             io.warn(
-                vscode.l10n.t('Test case index {index} out of range 1~{max}.', {
-                    index,
+                vscode.l10n.t('Test case index {idx} out of range 1~{max}.', {
+                    idx,
                     max,
                 }),
             );
             return false;
         }
-        this.logger.warn('Test case index is valid', { index });
+        this.logger.warn('Test case idx is valid', { idx });
         return true;
     }
 
-    private getTestCaseHash(testCase: TestCase) {
+    private getTCHash(tc: TC) {
         const problem = this._problem!;
-        return SHA256(`${problem.srcPath}-${testCase.stdin}`)
+        return SHA256(`${problem.srcPath}-${tc.stdin}`)
             .toString()
             .substring(64 - 6);
     }
@@ -190,15 +185,15 @@ export class CphNg {
                     outputPath,
                 });
                 return {
-                    verdict: TestCaseVerdicts.CE,
-                    message: compileResult,
+                    verdict: TCVerdicts.CE,
+                    msg: compileResult,
                 };
             }
         }
         this.logger.debug('Compilation successful', { srcPath, outputPath });
         return {
-            verdict: TestCaseVerdicts.UKE,
-            message: '',
+            verdict: TCVerdicts.UKE,
+            msg: '',
             data: {
                 outputPath,
                 hash,
@@ -219,7 +214,7 @@ export class CphNg {
                 problem.srcPath,
                 problem.srcHash,
             );
-            if (compileResult.verdict !== TestCaseVerdicts.UKE) {
+            if (compileResult.verdict !== TCVerdicts.UKE) {
                 return compileResult;
             } else if (!problem.isSpecialJudge) {
                 problem.srcHash = compileResult.data!.hash;
@@ -229,8 +224,8 @@ export class CphNg {
             try {
                 await access(problem.checkerPath!, constants.X_OK);
                 return {
-                    verdict: TestCaseVerdicts.UKE,
-                    message: '',
+                    verdict: TCVerdicts.UKE,
+                    msg: '',
                     data: {
                         outputPath: compileResult.data!.outputPath,
                         hash: compileResult.data!.hash,
@@ -243,13 +238,13 @@ export class CphNg {
                 problem.checkerPath!,
                 problem.checkerHash,
             );
-            if (checkerCompileResult.verdict !== TestCaseVerdicts.UKE) {
+            if (checkerCompileResult.verdict !== TCVerdicts.UKE) {
                 return checkerCompileResult;
             }
             problem.checkerHash = checkerCompileResult.data!.hash;
             return {
-                verdict: TestCaseVerdicts.UKE,
-                message: '',
+                verdict: TCVerdicts.UKE,
+                msg: '',
                 data: {
                     outputPath: compileResult.data!.outputPath,
                     hash: compileResult.data!.hash,
@@ -259,69 +254,62 @@ export class CphNg {
             };
         } catch (e) {
             return {
-                verdict: TestCaseVerdicts.SE,
-                message: (e as Error).message,
+                verdict: TCVerdicts.SE,
+                msg: (e as Error).message,
             };
         }
     }
-    private async run(
-        outputPath: string,
-        testCase: TestCase,
-        checkerOutputPath?: string,
-    ) {
+    private async run(outputPath: string, tc: TC, checkerOutputPath?: string) {
         const problem = this._problem!;
-        const result = testCase.result!;
+        const result = tc.result!;
         const abortController = this.runAbortController!;
         try {
-            result.verdict = TestCaseVerdicts.JG;
+            result.verdict = TCVerdicts.JG;
             this.emitProblemChange();
 
             const runResult = await this.runner.runExecutable(
                 outputPath,
                 problem.timeLimit,
-                testCase,
+                tc,
                 abortController,
             );
             const runData = runResult.data!;
             result.time = runData.time;
-            result.verdict = TestCaseVerdicts.JGD;
-            if (testCase.answer.useFile) {
+            result.verdict = TCVerdicts.JGD;
+            if (tc.answer.useFile) {
                 result.stdout = {
                     useFile: true,
                     path: join(
                         Settings.cache.directory,
                         'out',
-                        `${this.getTestCaseHash(testCase)}.out`,
+                        `${this.getTCHash(tc)}.out`,
                     ),
                 };
             } else {
                 result.stdout.useFile = false;
             }
-            result.stdout = await writeToTestCaseIO(
-                result.stdout,
-                runData.stdout,
-            );
+            result.stdout = await write2TcIo(result.stdout, runData.stdout);
 
             result.stderr = { useFile: false, data: runData.stderr };
             this.emitProblemChange();
 
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
-                result.verdict = TestCaseVerdicts.TLE;
+                result.verdict = TCVerdicts.TLE;
             } else {
-                result.verdict = TestCaseVerdicts.CMP;
+                result.verdict = TCVerdicts.CMP;
                 this.emitProblemChange();
                 assignResult(
                     result,
                     checkerOutputPath
                         ? await this.checker.runChecker(
                               checkerOutputPath!,
-                              testCase,
+                              tc,
                               abortController,
                           )
                         : await this.compareOutputs(
                               runData.stdout,
-                              await testCaseIOToString(testCase.answer),
+                              await tcIo2Str(tc.answer),
                               runData.stderr,
                           ),
                 );
@@ -329,8 +317,8 @@ export class CphNg {
             this.emitProblemChange();
         } catch (e) {
             assignResult(result, {
-                verdict: TestCaseVerdicts.SE,
-                message: (e as Error).message,
+                verdict: TCVerdicts.SE,
+                msg: (e as Error).message,
             });
             this.emitProblemChange();
         }
@@ -342,13 +330,13 @@ export class CphNg {
     ): Promise<Result<{}>> {
         this.logger.trace('compareOutputs', { stdout, answer, stderr });
         if (!Settings.comparing.ignoreError && stderr) {
-            return { verdict: TestCaseVerdicts.RE, message: '' };
+            return { verdict: TCVerdicts.RE, msg: '' };
         }
         if (
             Settings.comparing.oleSize &&
             stdout.length >= answer.length * Settings.comparing.oleSize
         ) {
-            return { verdict: TestCaseVerdicts.OLE, message: '' };
+            return { verdict: TCVerdicts.OLE, msg: '' };
         }
         const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
         const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
@@ -357,7 +345,7 @@ export class CphNg {
             compressAnswer,
         });
         if (compressOutput !== compressAnswer) {
-            return { verdict: TestCaseVerdicts.WA, message: '' };
+            return { verdict: TCVerdicts.WA, msg: '' };
         }
         const fixedOutput = stdout
             .trimEnd()
@@ -370,9 +358,9 @@ export class CphNg {
             .map((line) => line.trimEnd())
             .join('\n');
         if (fixedOutput !== fixedAnswer && !Settings.comparing.regardPEAsAC) {
-            return { verdict: TestCaseVerdicts.PE, message: '' };
+            return { verdict: TCVerdicts.PE, msg: '' };
         }
-        return { verdict: TestCaseVerdicts.AC, message: '' };
+        return { verdict: TCVerdicts.AC, msg: '' };
     }
 
     public async createProblem(): Promise<void> {
@@ -399,14 +387,14 @@ export class CphNg {
             this.problem = {
                 name: basename(filePath, extname(filePath)),
                 srcPath: filePath,
-                testCases: [],
+                tcs: [],
                 timeLimit: Settings.problem.defaultTimeLimit,
             };
             this.saveProblem();
         } catch (e) {
             io.error(
-                vscode.l10n.t('Failed to create problem: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to create problem: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
@@ -429,9 +417,9 @@ export class CphNg {
             );
         } catch (e) {
             io.warn(
-                vscode.l10n.t('Parse problem file {file} failed: {error}.', {
+                vscode.l10n.t('Parse problem file {file} failed: {msg}.', {
                     file: basename(binFile),
-                    error: (e as Error).message,
+                    msg: (e as Error).message,
                 }),
             );
             this.problem = undefined;
@@ -469,14 +457,14 @@ export class CphNg {
             );
         } catch (e) {
             io.error(
-                vscode.l10n.t('Failed to save problem: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to save problem: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async deleteProblem(): Promise<void> {
-        this.logger.trace('deleteProblem');
+    public async delProblem(): Promise<void> {
+        this.logger.trace('delProblem');
         if (!this.checkProblem()) {
             return;
         }
@@ -496,19 +484,19 @@ export class CphNg {
             this.problem = undefined;
         }
     }
-    public async addTestCase(): Promise<void> {
+    public async addTc(): Promise<void> {
         this.logger.trace('addTestCase');
         if (!this._problem) {
             return;
         }
-        this._problem.testCases.push({
+        this._problem.tcs.push({
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
             isExpand: false,
         });
         this.saveProblem();
     }
-    public async loadTestCases(): Promise<void> {
+    public async loadTcs(): Promise<void> {
         this.logger.trace('loadTestCases');
         try {
             if (!this.checkProblem()) {
@@ -604,13 +592,13 @@ export class CphNg {
 
             const allFiles = await getAllFiles(folderPath);
             this.logger.info(`Found ${allFiles.length} files in total`);
-            const testCases: TestCase[] = [];
+            const tcs: TC[] = [];
             for (const filePath of allFiles) {
                 const fileName = basename(filePath);
                 const ext = extname(fileName).toLowerCase();
                 if (ext === '.in') {
                     this.logger.debug('Found input file:', fileName);
-                    testCases.push({
+                    tcs.push({
                         stdin: { useFile: true, path: filePath },
                         answer: { useFile: false, data: '' },
                         isExpand: false,
@@ -626,7 +614,7 @@ export class CphNg {
                         dirname(filePath),
                         fileName.replace(ext, '.in'),
                     );
-                    const existingTestCase = testCases.find(
+                    const existingTestCase = tcs.find(
                         (tc) => tc.stdin.useFile && tc.stdin.path === inputFile,
                     );
                     if (existingTestCase) {
@@ -643,7 +631,7 @@ export class CphNg {
                             'Answer file without matching input:',
                             fileName,
                         );
-                        testCases.push({
+                        tcs.push({
                             stdin: { useFile: false, data: '' },
                             answer: { useFile: true, path: filePath },
                             isExpand: false,
@@ -651,9 +639,9 @@ export class CphNg {
                     }
                 }
             }
-            this.logger.info(`Created ${testCases.length} test cases`);
-            const chosenIndexes = await vscode.window.showQuickPick(
-                testCases.map((tc, index) => ({
+            this.logger.info(`Created ${tcs.length} test cases`);
+            const chosenIdx = await vscode.window.showQuickPick(
+                tcs.map((tc, idx) => ({
                     label: `${basename(
                         tc.stdin.useFile
                             ? tc.stdin.path
@@ -672,7 +660,7 @@ export class CphNg {
                                 : vscode.l10n.t('not found'),
                         },
                     ),
-                    value: index,
+                    value: idx,
                     picked: true,
                 })),
                 {
@@ -680,67 +668,60 @@ export class CphNg {
                     title: vscode.l10n.t('Select test cases to add'),
                 },
             );
-            if (!chosenIndexes) {
+            if (!chosenIdx) {
                 this.logger.debug('User cancelled test case selection');
                 return;
             }
-            const selectedTestCases = chosenIndexes.map(
-                (index) => testCases[index.value],
-            );
-            this.logger.info(
-                `User selected ${selectedTestCases.length} test cases`,
-            );
-            selectedTestCases.forEach((testCase) => {
-                problem.testCases.push(testCase);
+            const selectedTCs = chosenIdx.map((idx) => tcs[idx.value]);
+            this.logger.info(`User selected ${selectedTCs.length} test cases`);
+            selectedTCs.forEach((tc) => {
+                problem.tcs.push(tc);
             });
             this.saveProblem();
         } catch (e) {
             io.error(
-                vscode.l10n.t('Failed to load test cases: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to load test cases: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async updateTestCase(
-        index: number,
-        testCase: TestCase,
-    ): Promise<void> {
-        this.logger.trace('updateTestCase', { index, testCase });
-        if (!this.checkProblem() || !this.checkIndex(index)) {
+    public async updateTc(idx: number, tc: TC): Promise<void> {
+        this.logger.trace('updateTestCase', { idx, tc });
+        if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
         const problem = this._problem!;
-        problem.testCases[index] = testCase;
+        problem.tcs[idx] = tc;
         this.saveProblem();
     }
-    public async runTestCase(index: number): Promise<void> {
-        this.logger.trace('runTestCase', { index });
-        if (!this.checkProblem() || !this.checkIndex(index)) {
+    public async runTc(idx: number): Promise<void> {
+        this.logger.trace('runTestCase', { idx });
+        if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
         const problem = this._problem!;
         this.runAbortController = new AbortController();
 
-        const testCase = problem.testCases[index];
-        testCase.result = {
-            verdict: TestCaseVerdicts.CP,
+        const tc = problem.tcs[idx];
+        tc.result = {
+            verdict: TCVerdicts.CP,
             stdout: { useFile: false, data: '' },
             stderr: { useFile: false, data: '' },
             time: 0,
-            message: '',
+            msg: '',
         };
-        testCase.isExpand = false;
+        tc.isExpand = false;
         this.emitProblemChange();
-        const result = testCase.result;
+        const result = tc.result;
 
         const compileResult = await this.compile();
-        if (compileResult.verdict !== TestCaseVerdicts.UKE) {
+        if (compileResult.verdict !== TCVerdicts.UKE) {
             setCompilationMessage(
-                compileResult.message || vscode.l10n.t('Compilation failed'),
+                compileResult.msg || vscode.l10n.t('Compilation failed'),
             );
-            result.verdict = TestCaseVerdicts.CE;
-            testCase.isExpand = true;
+            result.verdict = TCVerdicts.CE;
+            tc.isExpand = true;
             this.saveProblem();
             this.runAbortController = undefined;
             return;
@@ -751,19 +732,19 @@ export class CphNg {
 
         await this.run(
             compileData.outputPath,
-            testCase,
+            tc,
             compileData.checkerOutputPath,
         );
-        testCase.isExpand = isExpandVerdict(result.verdict);
+        tc.isExpand = isExpandVerdict(result.verdict);
         this.saveProblem();
         this.runAbortController = undefined;
     }
-    public async runTestCases(): Promise<void> {
+    public async runTcs(): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
         const problem = this._problem!;
-        if (!problem.testCases.length) {
+        if (!problem.tcs.length) {
             return;
         }
         if (this.runAbortController) {
@@ -776,26 +757,25 @@ export class CphNg {
         }
         this.runAbortController = new AbortController();
 
-        for (const testCase of problem.testCases) {
-            testCase.result = {
-                verdict: TestCaseVerdicts.CP,
+        for (const tc of problem.tcs) {
+            tc.result = {
+                verdict: TCVerdicts.CP,
                 stdout: { useFile: false, data: '' },
                 stderr: { useFile: false, data: '' },
                 time: 0,
-                message: '',
+                msg: '',
             };
-            testCase.isExpand = false;
+            tc.isExpand = false;
         }
         this.emitProblemChange();
 
         const compileResult = await this.compile();
-        if (compileResult.verdict !== TestCaseVerdicts.UKE) {
+        if (compileResult.verdict !== TCVerdicts.UKE) {
             setCompilationMessage(
-                compileResult.message || vscode.l10n.t('Compilation failed'),
+                compileResult.msg || vscode.l10n.t('Compilation failed'),
             );
-            for (const testCaseIndex in problem.testCases) {
-                problem.testCases[testCaseIndex].result!.verdict =
-                    TestCaseVerdicts.CE;
+            for (const tc of problem.tcs) {
+                tc.result!.verdict = TCVerdicts.CE;
             }
             this.saveProblem();
             this.runAbortController = undefined;
@@ -804,34 +784,32 @@ export class CphNg {
         const compileData = compileResult.data!;
         problem.srcHash = compileData.hash;
         problem.checkerHash = compileData.checkerHash;
-        for (const testCase of problem.testCases) {
-            testCase.result!.verdict = TestCaseVerdicts.CPD;
+        for (const tc of problem.tcs) {
+            tc.result!.verdict = TCVerdicts.CPD;
         }
         this.emitProblemChange();
 
         let hasExpandStatus = false;
-        for (const testCase of problem.testCases) {
+        for (const tc of problem.tcs) {
             if (this.runAbortController.signal.aborted) {
-                testCase.result!.verdict = TestCaseVerdicts.SK;
+                tc.result!.verdict = TCVerdicts.SK;
             } else {
                 await this.run(
                     compileData.outputPath,
-                    testCase,
+                    tc,
                     compileData.checkerOutputPath,
                 );
                 if (!hasExpandStatus) {
-                    testCase.isExpand = isExpandVerdict(
-                        testCase.result!.verdict,
-                    );
+                    tc.isExpand = isExpandVerdict(tc.result!.verdict);
                     this.emitProblemChange();
-                    hasExpandStatus = testCase.isExpand;
+                    hasExpandStatus = tc.isExpand;
                 }
             }
         }
         this.saveProblem();
         this.runAbortController = undefined;
     }
-    public async stopTestCases(): Promise<void> {
+    public async stopTcs(): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -839,24 +817,24 @@ export class CphNg {
         if (this.runAbortController) {
             this.runAbortController.abort();
         } else {
-            for (const testCase of problem.testCases) {
-                if (isRunningVerdict(testCase.result!.verdict)) {
-                    testCase.result!.verdict = TestCaseVerdicts.RJ;
+            for (const tc of problem.tcs) {
+                if (isRunningVerdict(tc.result!.verdict)) {
+                    tc.result!.verdict = TCVerdicts.RJ;
                 }
             }
             this.saveProblem();
         }
     }
-    public async chooseTestCaseFile(
-        index: number,
+    public async chooseTcFile(
+        idx: number,
         option: 'stdin' | 'answer',
     ): Promise<void> {
         try {
-            if (!this.checkProblem() || !this.checkIndex(index)) {
+            if (!this.checkProblem() || !this.checkIdx(idx)) {
                 return;
             }
             const problem = this._problem!;
-            const testCase = problem.testCases[index];
+            const tc = problem.tcs[idx];
             const fileUri = await vscode.window.showOpenDialog({
                 canSelectFiles: true,
                 canSelectFolders: false,
@@ -881,7 +859,7 @@ export class CphNg {
                     const isInput = option === 'stdin';
                     const mainExt = extname(path);
                     const pairExt = isInput ? ['.ans', '.out'] : ['.in'];
-                    testCase[isInput ? 'stdin' : 'answer'] = {
+                    tc[isInput ? 'stdin' : 'answer'] = {
                         useFile: true,
                         path,
                     };
@@ -908,7 +886,7 @@ export class CphNg {
                                     true,
                                 ))
                             ) {
-                                testCase[isInput ? 'answer' : 'stdin'] = {
+                                tc[isInput ? 'answer' : 'stdin'] = {
                                     useFile: true,
                                     path: pairPath,
                                 };
@@ -925,21 +903,21 @@ export class CphNg {
             }
         } catch (e) {
             io.error(
-                vscode.l10n.t('Failed to choose test case file: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to choose test case file: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async compareTestCase(index: number): Promise<void> {
+    public async compareTc(idx: number): Promise<void> {
         try {
-            if (!this.checkProblem() || !this.checkIndex(index)) {
+            if (!this.checkProblem() || !this.checkIdx(idx)) {
                 return;
             }
             const problem = this._problem!;
-            const testCase = problem.testCases[index];
-            const leftFile = await testCaseIOToPath(testCase.answer);
-            const rightFile = await testCaseIOToPath(testCase.result!.stdout);
+            const tc = problem.tcs[idx];
+            const leftFile = await tcIo2Path(tc.answer);
+            const rightFile = await tcIo2Path(tc.result!.stdout);
             vscode.commands.executeCommand(
                 'vscode.diff',
                 vscode.Uri.file(leftFile),
@@ -947,18 +925,18 @@ export class CphNg {
             );
         } catch (e) {
             io.error(
-                vscode.l10n.t('Failed to compare test case: {error}', {
-                    error: (e as Error).message,
+                vscode.l10n.t('Failed to compare test case: {msg}', {
+                    msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async deleteTestCase(index: number): Promise<void> {
-        if (!this.checkProblem() || !this.checkIndex(index)) {
+    public async delTc(idx: number): Promise<void> {
+        if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
         const problem = this._problem!;
-        problem.testCases.splice(index, 1);
+        problem.tcs.splice(idx, 1);
         this.saveProblem();
     }
     public async chooseCheckerFile(): Promise<void> {

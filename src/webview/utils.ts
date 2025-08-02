@@ -22,7 +22,7 @@ export const basename = (path: string) => {
     return path.split('\\').pop();
 };
 
-export const deleteProps = (obj: Object, props: string[]) => {
+export const delProps = (obj: Object, props: string[]) => {
     return Object.fromEntries(
         Object.entries(obj).filter(([key]) => !props.includes(key)),
     );

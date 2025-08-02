@@ -18,7 +18,7 @@
 import * as vscode from 'vscode';
 import { CphNg } from './cphNg';
 import Settings from './settings';
-import * as messages from './webview/messages';
+import * as msgs from './webview/msgs';
 import { Logger } from './io';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -55,10 +55,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(async (message) => {
-            this.logger.debug('Received message from webview', { message });
+        webviewView.webview.onDidReceiveMessage(async (msg) => {
+            this.logger.debug('Received message from webview', { msg });
             try {
-                switch (message.type) {
+                switch (msg.type) {
                     case 'createProblem':
                         await this.helper.createProblem();
                         break;
@@ -66,71 +66,61 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         await this.helper.getProblem();
                         break;
                     case 'editProblemDetails':
-                        const editProblemDetailsMessage =
-                            message as messages.EditProblemDetailsMessage;
+                        const editProblemDetailsMsg =
+                            msg as msgs.EditProblemDetailsMsg;
                         await this.helper.editProblemDetails(
-                            editProblemDetailsMessage.title,
-                            editProblemDetailsMessage.url,
-                            editProblemDetailsMessage.timeLimit,
-                            editProblemDetailsMessage.isSpecialJudge,
+                            editProblemDetailsMsg.title,
+                            editProblemDetailsMsg.url,
+                            editProblemDetailsMsg.timeLimit,
+                            editProblemDetailsMsg.isSpecialJudge,
                         );
                         break;
-                    case 'deleteProblem':
-                        await this.helper.deleteProblem();
+                    case 'delProblem':
+                        await this.helper.delProblem();
                         break;
-                    case 'addTestCase':
-                        await this.helper.addTestCase();
+                    case 'addTc':
+                        await this.helper.addTc();
                         break;
-                    case 'loadTestCases':
-                        await this.helper.loadTestCases();
+                    case 'loadTcs':
+                        await this.helper.loadTcs();
                         break;
-                    case 'updateTestCase':
-                        let updateTestCaseMessage =
-                            message as messages.UpdateTestCaseMessage;
-                        await this.helper.updateTestCase(
-                            updateTestCaseMessage.index,
-                            updateTestCaseMessage.testCase,
+                    case 'updateTc':
+                        const updateTcMsg = msg as msgs.UpdateTcMsg;
+                        await this.helper.updateTc(
+                            updateTcMsg.idx,
+                            updateTcMsg.tc,
                         );
                         break;
-                    case 'runTestCase':
-                        const runTestCaseMessage =
-                            message as messages.RunTestCaseMessage;
-                        await this.helper.runTestCase(runTestCaseMessage.index);
+                    case 'runTc':
+                        const runTcMsg = msg as msgs.RunTcMsg;
+                        await this.helper.runTc(runTcMsg.idx);
                         break;
-                    case 'runTestCases':
-                        await this.helper.runTestCases();
+                    case 'runTcs':
+                        await this.helper.runTcs();
                         break;
-                    case 'stopTestCases':
-                        await this.helper.stopTestCases();
+                    case 'stopTcs':
+                        await this.helper.stopTcs();
                         break;
-                    case 'chooseTestCaseFile':
-                        const chooseTestCaseFileMessage =
-                            message as messages.ChooseTestCaseFileMessage;
-                        await this.helper.chooseTestCaseFile(
-                            chooseTestCaseFileMessage.index,
-                            chooseTestCaseFileMessage.label,
+                    case 'chooseTcFile':
+                        const chooseTcFileMsg = msg as msgs.ChooseTcFileMsg;
+                        await this.helper.chooseTcFile(
+                            chooseTcFileMsg.idx,
+                            chooseTcFileMsg.label,
                         );
                         break;
-                    case 'compareTestCase':
-                        const compareTestCaseMessage =
-                            message as messages.CompareTestCaseMessage;
-                        this.helper.compareTestCase(
-                            compareTestCaseMessage.index,
-                        );
+                    case 'compareTc':
+                        const compareTcMsg = msg as msgs.CompareTcMsg;
+                        this.helper.compareTc(compareTcMsg.idx);
                         break;
-                    case 'deleteTestCase':
-                        const deleteTestCaseMessage =
-                            message as messages.DeleteTestCaseMessage;
-                        await this.helper.deleteTestCase(
-                            deleteTestCaseMessage.index,
-                        );
+                    case 'delTc':
+                        const delTcMsg = msg as msgs.DelTcMsg;
+                        await this.helper.delTc(delTcMsg.idx);
                         break;
                     case 'openFile':
-                        const openFileMessage =
-                            message as messages.OpenFileMessage;
+                        const openFileMsg = msg as msgs.OpenFileMsg;
                         vscode.window.showTextDocument(
                             await vscode.workspace.openTextDocument(
-                                openFileMessage.path,
+                                openFileMsg.path,
                             ),
                         );
                         break;
@@ -138,12 +128,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         await this.helper.chooseCheckerFile();
                         break;
                     default:
-                        this.logger.warn('Unknown message type:', message.type);
+                        this.logger.warn('Unknown message type:', msg.type);
                 }
             } catch (e) {
                 this.logger.error('Error handling webview message', {
-                    messageType: message.type,
-                    error: e as Error,
+                    msgType: msg.type,
+                    msg: e as Error,
                 });
             }
         });

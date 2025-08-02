@@ -12,5 +12,5 @@
         "^@mui/[^/]+/esm$",
         "^@mui/[^/]+/esm/[^/]+$"
     ],
-    "cSpell.words": ["divyanshuagrawal", "testlib"]
+    "cSpell.words": ["divyanshuagrawal", "TCIO", "testlib"]
 }
