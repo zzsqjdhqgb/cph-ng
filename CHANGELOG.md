@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: Stop running when changes problem
 - **fix**: Use correct output path
+- **fix**: Correctly access stdout and stderr paths
 
 ## 0.0.4
 

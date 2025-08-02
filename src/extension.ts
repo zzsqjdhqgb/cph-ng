@@ -212,8 +212,12 @@ class ExtensionManager {
                     .flatMap((tc) =>
                         [
                             tc.stdin.useFile ? [tc.stdin.path] : [],
-                            tc.result?.stdout.useFile ? [tc.result.stdout] : [],
-                            tc.result?.stderr.useFile ? [tc.result.stderr] : [],
+                            tc.result?.stdout.useFile
+                                ? [tc.result.stdout.path]
+                                : [],
+                            tc.result?.stderr.useFile
+                                ? [tc.result.stderr.path]
+                                : [],
                         ].flat(),
                     )
                     .includes(filePath)
