@@ -243,19 +243,6 @@ class ExtensionManager {
                             await this.cphNg.loadProblem(
                                 await this.cphNg.getBinByCpp(filePath),
                             );
-                            if (
-                                !this.cphNg.problem &&
-                                Settings.cphCapable.autoImport
-                            ) {
-                                const problem = await CphCapable.loadProblem(
-                                    CphCapable.getProbByCpp(filePath),
-                                );
-                                if (problem) {
-                                    this.cphNg.problem = problem;
-                                    this.cphNg.saveProblem();
-                                    this.updateContext();
-                                }
-                            }
                         } catch (e) {
                             io.error(
                                 vscode.l10n.t('Failed to load problem: {msg}', {
@@ -264,6 +251,20 @@ class ExtensionManager {
                             );
                         }
                     } catch {
+                        if (
+                            !this.cphNg.problem &&
+                            Settings.cphCapable.autoImport
+                        ) {
+                            const problem = await CphCapable.loadProblem(
+                                CphCapable.getProbByCpp(filePath),
+                            );
+                            if (problem) {
+                                this.cphNg.problem = problem;
+                                this.cphNg.saveProblem();
+                                this.updateContext();
+                                return;
+                            }
+                        }
                         this.cphNg.problem = undefined;
                         this.updateContext();
                     }
