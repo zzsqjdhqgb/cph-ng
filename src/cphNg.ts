@@ -145,7 +145,7 @@ export class CphNg {
             );
             return false;
         }
-        this.logger.warn('Test case idx is valid', { idx });
+        this.logger.debug('Test case idx is valid', { idx });
         return true;
     }
 
