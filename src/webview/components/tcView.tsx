@@ -109,6 +109,11 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 vscode.postMessage({
                                     type: 'runTc',
                                     idx: idx,
+                                    compile: e.altKey
+                                        ? false
+                                        : e.ctrlKey
+                                          ? true
+                                          : undefined,
                                 } as RunTcMsg);
                             }}
                         />

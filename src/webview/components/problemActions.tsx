@@ -98,9 +98,14 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             name={t('problemActions.runTcs')}
                             icon={PlaylistPlayIcon}
                             color={'success'}
-                            onClick={() => {
+                            onClick={(e) => {
                                 vscode.postMessage({
                                     type: 'runTcs',
+                                    compile: e.altKey
+                                        ? false
+                                        : e.ctrlKey
+                                          ? true
+                                          : undefined,
                                 } as RunTcsMsg);
                             }}
                         />

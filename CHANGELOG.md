@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: Hold `Ctrl` to force recompilation and `Alt` to skip compilation
+
 ## 0.0.6
 
 - **feat**: Add error popup when webview handle occurs error

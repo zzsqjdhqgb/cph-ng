@@ -35,6 +35,7 @@ export interface DelProblemMsg {
 }
 export interface RunTcsMsg {
     type: 'runTcs';
+    compile?: boolean;
 }
 export interface StopTcsMsg {
     type: 'stopTcs';
@@ -48,6 +49,7 @@ export interface LoadTcsMsg {
 export interface RunTcMsg {
     type: 'runTc';
     idx: number;
+    compile?: boolean;
 }
 export interface ChooseTcFileMsg {
     type: 'chooseTcFile';

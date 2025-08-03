@@ -94,10 +94,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'runTc':
                         const runTcMsg = msg as msgs.RunTcMsg;
-                        await this.helper.runTc(runTcMsg.idx);
+                        await this.helper.runTc(runTcMsg.idx, runTcMsg.compile);
                         break;
                     case 'runTcs':
-                        await this.helper.runTcs();
+                        const runTcsMsg = msg as msgs.RunTcsMsg;
+                        await this.helper.runTcs(runTcsMsg.compile);
                         break;
                     case 'stopTcs':
                         await this.helper.stopTcs();

@@ -163,6 +163,7 @@ export class CphNg {
     private async doCompile(
         srcPath: string,
         srcHash?: string,
+        compile?: boolean,
     ): Promise<DoCompileResult> {
         this.logger.trace('doCompile', { srcPath, srcHash });
         const hash = SHA256((await readFile(srcPath)).toString()).toString();
@@ -172,7 +173,12 @@ export class CphNg {
                 .then(() => true)
                 .catch(() => false);
 
-        if (srcHash !== hash || !(await hasOutputFile())) {
+        if (
+            (srcHash !== hash ||
+                !(await hasOutputFile()) ||
+                compile === true) &&
+            compile !== false
+        ) {
             this.logger.info('Source hash mismatch or output file missing', {
                 srcHash,
                 hash,
@@ -205,7 +211,7 @@ export class CphNg {
         };
     }
 
-    private async compile(): Promise<CompileResult> {
+    private async compile(compile?: boolean): Promise<CompileResult> {
         try {
             const problem = this._problem!;
             const editor = vscode.window.visibleTextEditors.find(
@@ -217,6 +223,7 @@ export class CphNg {
             const compileResult = await this.doCompile(
                 problem.srcPath,
                 problem.srcHash,
+                compile,
             );
             if (compileResult.verdict !== TCVerdicts.UKE) {
                 return compileResult;
@@ -241,6 +248,7 @@ export class CphNg {
             const checkerCompileResult = await this.doCompile(
                 problem.checkerPath!,
                 problem.checkerHash,
+                compile,
             );
             if (checkerCompileResult.verdict !== TCVerdicts.UKE) {
                 return checkerCompileResult;
@@ -699,7 +707,7 @@ export class CphNg {
         problem.tcs[idx] = tc;
         this.saveProblem();
     }
-    public async runTc(idx: number): Promise<void> {
+    public async runTc(idx: number, compile?: boolean): Promise<void> {
         this.logger.trace('runTestCase', { idx });
         if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
@@ -719,7 +727,7 @@ export class CphNg {
         this.emitProblemChange();
         const result = tc.result;
 
-        const compileResult = await this.compile();
+        const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
             setCompilationMessage(
                 compileResult.msg || vscode.l10n.t('Compilation failed'),
@@ -743,7 +751,7 @@ export class CphNg {
         this.saveProblem();
         this.runAbortController = undefined;
     }
-    public async runTcs(): Promise<void> {
+    public async runTcs(compile?: boolean): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -773,7 +781,7 @@ export class CphNg {
         }
         this.emitProblemChange();
 
-        const compileResult = await this.compile();
+        const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
             setCompilationMessage(
                 compileResult.msg || vscode.l10n.t('Compilation failed'),
