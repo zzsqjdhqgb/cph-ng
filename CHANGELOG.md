@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: Add error popup when webview handle occurs error.
+
 ## 0.0.5
 
 - **fix**: Stop running when changes problem

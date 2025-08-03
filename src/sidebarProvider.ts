@@ -19,7 +19,8 @@ import * as vscode from 'vscode';
 import { CphNg } from './cphNg';
 import Settings from './settings';
 import * as msgs from './webview/msgs';
-import { Logger } from './io';
+import { io, Logger } from './io';
+import { access, constants } from 'fs/promises';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphSidebar';
@@ -118,11 +119,18 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'openFile':
                         const openFileMsg = msg as msgs.OpenFileMsg;
-                        vscode.window.showTextDocument(
-                            await vscode.workspace.openTextDocument(
-                                openFileMsg.path,
-                            ),
-                        );
+                        try {
+                            await access(openFileMsg.path, constants.R_OK);
+                            vscode.window.showTextDocument(
+                                await vscode.workspace.openTextDocument(
+                                    openFileMsg.path,
+                                ),
+                            );
+                        } catch {
+                            vscode.l10n.t('File {file} does not exists.', {
+                                file: openFileMsg.path,
+                            });
+                        }
                         break;
                     case 'chooseCheckerFile':
                         await this.helper.chooseCheckerFile();
@@ -131,6 +139,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         this.logger.warn('Unknown message type:', msg.type);
                 }
             } catch (e) {
+                io.error(
+                    vscode.l10n.t(
+                        'Error occurred when handling message {msgType}: {msg}.',
+                        {
+                            msgType: msg.type,
+                            msg: e as Error,
+                        },
+                    ),
+                );
                 this.logger.error('Error handling webview message', {
                     msgType: msg.type,
                     msg: e as Error,
