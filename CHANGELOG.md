@@ -2,6 +2,11 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: Localize messages in LlmFileReader and LlmTcRunner for better
+  internationalization support
+
 ## 0.0.7
 
 - **feat**: Hold `Ctrl` to force recompilation and `Alt` to skip compilation
