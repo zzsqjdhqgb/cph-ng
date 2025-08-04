@@ -41,7 +41,7 @@ This is the next generation of the
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
-- [pnpm](https://pnpm.io/) (recommended) or npm
+- [pnpm](https://pnpm.io/)
 - [Visual Studio Code](https://code.visualstudio.com/)
 
 ### Local Development Setup
@@ -57,21 +57,18 @@ This is the next generation of the
 
     ```bash
     pnpm install
-    # or: npm install
     ```
 
 3. **Set up Git hooks** (for translation checking)
 
     ```bash
     pnpm run install-hooks
-    # or: npm run install-hooks
     ```
 
 4. **Start development**
 
     ```bash
     pnpm run watch
-    # or: npm run watch
     ```
 
 5. **Open in VS Code**
