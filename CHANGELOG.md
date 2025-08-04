@@ -5,6 +5,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: Hold `Ctrl` to force recompilation and `Alt` to skip compilation
+- **fix**: Changing to answer file will not be considered as changing problem
+  now
 
 ## 0.0.6
 

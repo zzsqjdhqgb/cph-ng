@@ -212,6 +212,7 @@ class ExtensionManager {
                     .flatMap((tc) =>
                         [
                             tc.stdin.useFile ? [tc.stdin.path] : [],
+                            tc.answer.useFile ? [tc.answer.path] : [],
                             tc.result?.stdout.useFile
                                 ? [tc.result.stdout.path]
                                 : [],
