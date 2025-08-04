@@ -25,7 +25,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../types';
 import {
@@ -47,12 +47,17 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
     const { t } = useTranslation();
     const [isHoveringTitle, setHoveringTitle] = useState(false);
     const [isEditDialogOpen, setEditDialogOpen] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(problem.name);
-    const [editedUrl, setEditedUrl] = useState(problem.url || '');
-    const [editedTimeLimit, setEditedTimeLimit] = useState(problem.timeLimit);
-    const [editedIsSpecialJudge, setEditedIsSpecialJudge] = useState(
-        problem.isSpecialJudge || false,
-    );
+    const [editedTitle, setEditedTitle] = useState('');
+    const [editedUrl, setEditedUrl] = useState('');
+    const [editedTimeLimit, setEditedTimeLimit] = useState(0);
+    const [editedIsSpecialJudge, setEditedIsSpecialJudge] = useState(false);
+
+    useEffect(() => {
+        setEditedTitle(problem.name);
+        setEditedUrl(problem.url || '');
+        setEditedTimeLimit(problem.timeLimit);
+        setEditedIsSpecialJudge(problem.isSpecialJudge || false);
+    }, [problem.name, problem.url, problem.timeLimit, problem.isSpecialJudge]);
 
     const handleEditTitle = () => {
         setEditDialogOpen(true);

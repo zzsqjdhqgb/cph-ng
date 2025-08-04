@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: Localize messages in LlmFileReader and LlmTcRunner for better
   internationalization support
+- **fix**: Edit problem dialog changes with file
 
 ## 0.0.7
 
