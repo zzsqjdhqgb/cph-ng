@@ -53,7 +53,7 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
         let tcIo: TCIO | undefined;
 
         if (idx) {
-            if (!this.cphNg.checkIdx(idx)) {
+            if (!this.cphNg.checkIdx(idx - 1)) {
                 result.content.push(
                     new vscode.LanguageModelTextPart(
                         `Error: Test case ${idx} not found. Valid test cases range from 1 to ${problem.tcs.length}.`,

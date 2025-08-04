@@ -58,7 +58,7 @@
     "Select test cases to add": "选择要添加的测试用例",
     "Skipped": "已跳过",
     "System Error": "系统错误",
-    "Test case index {idx} out of range 1~{max}.": "测试用例编号 {idx} 超过范围 1~{max}。",
+    "Test case index {idx} out of range 0~{max}.": "测试用例编号 {idx} 超过范围 0~{max}。",
     "Test cases already running. Please stop them first.": "测试用例已经在运行。请先停止他们。",
     "Text files": "文本文件",
     "Time Limit Exceeded": "时间超限",

@@ -56,7 +56,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                     `Error: No competitive programming problem found. Please open or create a problem first.`,
                 ),
             );
-        } else if (idx && !this.cphNg.checkIdx(idx)) {
+        } else if (idx && !this.cphNg.checkIdx(idx - 1)) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
                     `Error: Test case ${idx} not found. Valid test cases range from 1 to ${this.cphNg.problem?.tcs.length}.`,
@@ -68,13 +68,13 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
             });
 
             if (idx) {
-                await this.cphNg.runTc(idx);
+                await this.cphNg.runTc(idx - 1);
             } else {
                 await this.cphNg.runTcs();
             }
 
             const tcs = idx
-                ? [this.cphNg.problem!.tcs[idx]]
+                ? [this.cphNg.problem!.tcs[idx - 1]]
                 : this.cphNg.problem!.tcs;
             const outputParts: string[] = [];
             if (tcs[0].result!.verdict.name === 'CE') {

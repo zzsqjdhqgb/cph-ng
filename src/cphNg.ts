@@ -138,7 +138,7 @@ export class CphNg {
         if (idx < 0 || idx > max) {
             this.logger.warn('Test case idx out of range', { idx, max });
             io.warn(
-                vscode.l10n.t('Test case index {idx} out of range 1~{max}.', {
+                vscode.l10n.t('Test case index {idx} out of range 0~{max}.', {
                     idx,
                     max,
                 }),
