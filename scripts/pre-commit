@@ -257,9 +257,9 @@ function extractTranslationCalls(patterns) {
                     const matches = content.match(staticRegex);
                     if (matches) {
                         matches.forEach((match) => {
-                            const keyMatch = match.match(/['"]([^'"]*)['"]/);
+                            const keyMatch = match.match(/(['"])([^'"]*)\1/);
                             if (keyMatch) {
-                                requiredKeys.add(keyMatch[1]);
+                                requiredKeys.add(keyMatch[2]);
                             }
                         });
                     }
@@ -299,7 +299,7 @@ function extractVSCodeL10nCalls() {
         {
             dir: 'src',
             exts: ['ts', 'js'],
-            staticRegex: /vscode\.l10n\.t\s*\(\s*['"](.*?)['"]/g,
+            staticRegex: /vscode\.l10n\.t\s*\(\s*(['"])(.*?)\1/g,
             dynamicRegex: /vscode\.l10n\.t\s*\(\s*(?!['"]).+?\)/g,
         },
     ]);
