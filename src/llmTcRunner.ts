@@ -43,7 +43,11 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
             tcIo.useFile
                 ? `Data stored in file ${tcIo.path}, you can call \`read_problem_file\` to access it.`
                 : tcIo.data.trim()
-                  ? `\n${tcIo.data.trim()}`
+                  ? `\n\`\`\`\n${
+                        tcIo.data.length > 1000
+                            ? tcIo.data.substring(0, 1000) + '... (truncated)'
+                            : tcIo.data
+                    }\n\`\`\``
                   : `(<empty>)`;
 
         if (!this.cphNg.checkProblem()) {
