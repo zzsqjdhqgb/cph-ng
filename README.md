@@ -1,7 +1,9 @@
 # CPH NG
 
-> Quickly compile, run and judge competitive programming problems in VS Code.
-> Automatically download testcases , or write & test your own problems.
+> [!WARNING]
+> This extension is a work in progress and may have bugs, incomplete features and break changes without notice.
+
+> Quickly compile, run and judge competitive programming problems in VS Code. Automatically download testcases , or write & test your own problems.
 
 This is the next generation of the
 [Competitive Programming Helper](https://github.com/agrawal-d/cph).
@@ -40,7 +42,7 @@ This is the next generation of the
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
+- [Node.js](https://nodejs.org/) (v22 or higher)
 - [pnpm](https://pnpm.io/)
 - [Visual Studio Code](https://code.visualstudio.com/)
 
