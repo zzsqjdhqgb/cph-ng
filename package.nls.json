@@ -61,6 +61,6 @@
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.UKE": "Unknown Error",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.WA": "Wrong Answer",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.WT": "Waiting",
-    "cph-ng.views.cph-ng-sidebar.name": "Problem",
+    "cph-ng.views.cphNgContainer.name": "Problem",
     "cph-ng.viewsContainers.activitybar.title": "CPH-NG"
 }

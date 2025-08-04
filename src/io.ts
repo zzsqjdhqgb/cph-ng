@@ -54,6 +54,8 @@ export class Logger {
 
 export class Io {
     private logger: Logger = new Logger('IO');
+    private _compilationMsg = '';
+
     public info(msg: string) {
         this.logger.info(msg);
         vscode.window.showInformationMessage(msg);
@@ -80,14 +82,19 @@ export class Io {
             )) === 'Yes'
         );
     }
+
+    set compilationMsg(msg: string) {
+        const logger = new Logger('compilation');
+        logger.info('Setting compilation message:', msg);
+        compilationChannel.clear();
+        compilationChannel.appendLine(msg);
+        compilationChannel.show();
+        this._compilationMsg = msg;
+    }
+
+    get compilationMsg(): string {
+        return this._compilationMsg;
+    }
 }
 
 export const io = new Io();
-
-export const setCompilationMessage = (message: string): void => {
-    const logger = new Logger('compilation');
-    logger.info('Setting compilation message:', message);
-    compilationChannel.clear();
-    compilationChannel.appendLine(message);
-    compilationChannel.show();
-};

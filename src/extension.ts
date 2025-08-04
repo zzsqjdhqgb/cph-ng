@@ -25,6 +25,8 @@ import { io, Logger } from './io';
 import Settings from './settings';
 import { SidebarProvider } from './sidebarProvider';
 import { isRunningVerdict } from './types';
+import LlmTcRunner from './llmTcRunner';
+import LlmFileReader from './llmFileReader';
 
 class ExtensionManager {
     private logger: Logger = new Logger('extension');
@@ -90,6 +92,18 @@ class ExtensionManager {
                                 Settings.sidebar.retainWhenHidden,
                         },
                     },
+                ),
+            );
+            context.subscriptions.push(
+                vscode.lm.registerTool(
+                    'run_test_cases',
+                    new LlmTcRunner(this.cphNg),
+                ),
+            );
+            context.subscriptions.push(
+                vscode.lm.registerTool(
+                    'read_problem_file',
+                    new LlmFileReader(this.cphNg),
                 ),
             );
             context.subscriptions.push(

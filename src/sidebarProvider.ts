@@ -23,7 +23,7 @@ import { io, Logger } from './io';
 import { access, constants } from 'fs/promises';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = 'cphSidebar';
+    public static readonly viewType = 'cphNgSidebar';
     private _view?: vscode.WebviewView;
     private logger: Logger = new Logger('sidebar');
 
@@ -41,7 +41,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     public focus() {
         this.logger.trace('focus');
         vscode.commands.executeCommand(
-            'workbench.view.extension.cph-ng-sidebar',
+            'workbench.view.extension.cphNgContainer',
         );
     }
 

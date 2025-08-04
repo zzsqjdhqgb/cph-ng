@@ -13,7 +13,7 @@
         "url": "https://github.com/langningchen/cph-ng"
     },
     "engines": {
-        "vscode": "^1.102.0"
+        "vscode": "^1.95.0"
     },
     "categories": [
         "Other"
@@ -27,11 +27,65 @@
         "require": "./dist/extension.cjs"
     },
     "contributes": {
+        "languageModelTools": [
+            {
+                "name": "run_test_cases",
+                "toolReferenceName": "cphNgRunTestCases",
+                "displayName": "Run CPH-NG Test Cases",
+                "modelDescription": "A tool to execute one or all test cases for the active competitive programming problem using CPH-NG. Useful for verifying code correctness against provided examples or custom inputs. This tool is especially useful after the AI has generated or modified code for a competitive programming problem, allowing it to automatically validate the solution against existing test cases.",
+                "userDescription": "Runs test cases for the current competitive programming problem (CPH-NG).",
+                "canBeReferencedInPrompt": true,
+                "icon": "$(play)",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "idx": {
+                            "type": "number",
+                            "description": "The 1-based index of the specific test case to run (e.g., 1 for the first test case). If omitted, all test cases will be run."
+                        }
+                    }
+                },
+                "when": "cph-ng.hasProblem"
+            },
+            {
+                "name": "read_problem_file",
+                "toolReferenceName": "cphNgReadProblemFile",
+                "displayName": "Read CPH-NG Problem File",
+                "modelDescription": "A tool to read the content of a specific file associated with a competitive programming problem's test case. This includes input (stdin), actual output (stdout), expected output (answer), and error output (stderr) files. Useful for analyzing test case data or debugging. This tool can only read files explicitly linked to CPH-NG test cases, not arbitrary files.",
+                "userDescription": "Reads the content of a specific input, output, answer, or error file for a competitive programming problem (CPH-NG).",
+                "canBeReferencedInPrompt": true,
+                "icon": "$(file)",
+                "inputSchema": {
+                    "type": "object",
+                    "required": [
+                        "fileType"
+                    ],
+                    "properties": {
+                        "fileType": {
+                            "type": "string",
+                            "enum": [
+                                "input",
+                                "output",
+                                "answer",
+                                "error"
+                            ],
+                            "description": "The type of file to read: 'input' (standard input), 'output' (standard output from execution), 'answer' (expected output), or 'error' (standard error from execution)."
+                        },
+                        "idx": {
+                            "type": "number",
+                            "description": "The 1-based index of the test case to which the file belongs. For example, 1 for the first test case. If omitted, the tool will assume the request is for a general problem file (if applicable, though usually test case specific). It's highly recommended to provide this for test case related files.",
+                            "minimum": 1
+                        }
+                    }
+                },
+                "when": "cph-ng.hasProblem"
+            }
+        ],
         "views": {
-            "cph-ng-sidebar": [
+            "cphNgContainer": [
                 {
-                    "id": "cphSidebar",
-                    "name": "%cph-ng.views.cph-ng-sidebar.name%",
+                    "id": "cphNgSidebar",
+                    "name": "%cph-ng.views.cphNgContainer.name%",
                     "type": "webview",
                     "icon": "./res/panel-view-icon.svg"
                 }
@@ -40,7 +94,7 @@
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "cph-ng-sidebar",
+                    "id": "cphNgContainer",
                     "title": "%cph-ng.viewsContainers.activitybar.title%",
                     "icon": "./res/panel-view-icon.svg"
                 }
@@ -348,7 +402,7 @@
         "@types/mocha": "^10.0.10",
         "@types/node": "~24.1.0",
         "@types/speed-measure-webpack-plugin": "^1.3.6",
-        "@types/vscode": "1.102.0",
+        "@types/vscode": "1.95.0",
         "@types/webpack": "^5.28.5",
         "@typescript-eslint/eslint-plugin": "^8.38.0",
         "@typescript-eslint/parser": "^8.38.0",

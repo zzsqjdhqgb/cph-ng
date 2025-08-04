@@ -31,7 +31,7 @@ import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { Checker } from './checker';
 import { Compiler } from './compiler';
-import { io, Logger, setCompilationMessage } from './io';
+import { io, Logger } from './io';
 import { Runner } from './runner';
 import Settings from './settings';
 import { tcIo2Path, tcIo2Str, TCVerdicts, write2TcIo } from './types.backend';
@@ -117,7 +117,7 @@ export class CphNg {
         return join(dir);
     }
 
-    private checkProblem() {
+    public checkProblem() {
         this.logger.trace('checkProblem');
         if (!this._problem) {
             this.logger.warn('No problem found');
@@ -131,7 +131,7 @@ export class CphNg {
         this.logger.debug('Problem exists', { problem: this._problem });
         return true;
     }
-    private checkIdx(idx: number) {
+    public checkIdx(idx: number) {
         this.logger.trace('checkIdx', { idx });
         const problem = this._problem!;
         const max = problem.tcs.length - 1;
@@ -729,9 +729,8 @@ export class CphNg {
 
         const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            setCompilationMessage(
-                compileResult.msg || vscode.l10n.t('Compilation failed'),
-            );
+            io.compilationMsg =
+                compileResult.msg || vscode.l10n.t('Compilation failed');
             result.verdict = TCVerdicts.CE;
             tc.isExpand = true;
             this.saveProblem();
@@ -783,9 +782,8 @@ export class CphNg {
 
         const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            setCompilationMessage(
-                compileResult.msg || vscode.l10n.t('Compilation failed'),
-            );
+            io.compilationMsg =
+                compileResult.msg || vscode.l10n.t('Compilation failed');
             for (const tc of problem.tcs) {
                 tc.result!.verdict = TCVerdicts.CE;
             }

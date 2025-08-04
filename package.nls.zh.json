@@ -61,6 +61,6 @@
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.UKE": "未知错误",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.WA": "答案错误",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.WT": "等待中",
-    "cph-ng.views.cph-ng-sidebar.name": "题目",
+    "cph-ng.views.cphNgContainer.name": "题目",
     "cph-ng.viewsContainers.activitybar.title": "CPH-NG"
 }
