@@ -20,7 +20,9 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
     ): Promise<vscode.PreparedToolInvocation> {
         const { idx } = options.input;
         return {
-            invocationMessage: 'Running test cases using CPH...',
+            invocationMessage: idx
+                ? `Running test case ${idx} using CPH...`
+                : `Running all test cases using CPH...`,
             confirmationMessages: {
                 title: 'Run Test Cases',
                 message: idx
