@@ -96,5 +96,8 @@
     "answer": "答案",
     "not found": "未找到",
     "stdin": "输入",
-    "{fileType}": "{fileType}"
+    "test case {idx}'s {fileType}": "测试用例 {idx} 的 {fileType}",
+    "the problem's {fileType}": "题目的 {fileType}",
+    "Error: Invalid file type '{fileType}'. Must be 'input', 'output', 'answer', or 'error'.": "错误：无效的文件类型 '{fileType}'。必须是 'input'、'output'、'answer' 或 'error'。",
+    "Error: Could not retrieve data for {fileType} of test case {idx}. It might not exist or tests haven't been run yet.": "错误：无法检索测试用例 {idx} 的 {fileType} 数据。它可能不存在，或者测试尚未运行。"
 }

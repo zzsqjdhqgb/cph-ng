@@ -257,7 +257,7 @@ function extractTranslationCalls(patterns) {
                     const matches = content.match(staticRegex);
                     if (matches) {
                         matches.forEach((match) => {
-                            const keyMatch = match.match(/(['"])([^'"]*)\1/);
+                            const keyMatch = match.match(/(['"])(.*?)\1/);
                             if (keyMatch) {
                                 requiredKeys.add(keyMatch[2]);
                             }
