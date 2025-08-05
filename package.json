@@ -321,17 +321,17 @@
             {
                 "command": "cph-ng.createProblem",
                 "title": "%cph-ng.commands.createProblem%",
-                "icon": "$(add)"
+                "icon": "$(rocket)"
             },
             {
                 "command": "cph-ng.runTestCases",
                 "title": "%cph-ng.commands.runTestCases%",
-                "icon": "$(play)"
+                "icon": "$(run-all)"
             },
             {
                 "command": "cph-ng.stopTestCases",
                 "title": "%cph-ng.commands.stopTestCases%",
-                "icon": "$(stop)"
+                "icon": "$(stop-circle)"
             },
             {
                 "command": "cph-ng.addTestCase",

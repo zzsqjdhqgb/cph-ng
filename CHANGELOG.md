@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: Use the new Icon
+
 ## 0.0.8
 
 - **fix**: Localize messages in LlmFileReader and LlmTcRunner for better
