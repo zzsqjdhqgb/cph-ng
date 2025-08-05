@@ -56,17 +56,17 @@ export class Io {
     private logger: Logger = new Logger('IO');
     private _compilationMsg = '';
 
-    public info(msg: string) {
+    public info(msg: string, ...args: any) {
         this.logger.info(msg);
-        vscode.window.showInformationMessage(msg);
+        return vscode.window.showInformationMessage(msg, ...args);
     }
-    public warn(msg: string) {
+    public warn(msg: string, ...args: any) {
         this.logger.warn(msg);
-        vscode.window.showWarningMessage(msg);
+        return vscode.window.showWarningMessage(msg, ...args);
     }
-    public error(msg: string) {
+    public error(msg: string, ...args: any) {
         this.logger.error(msg);
-        vscode.window.showErrorMessage(msg);
+        return vscode.window.showErrorMessage(msg, ...args);
     }
     public async confirm(
         msg: string,

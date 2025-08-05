@@ -33,7 +33,8 @@ class ExtensionManager {
     private sidebarProvider!: SidebarProvider;
     private companion!: Companion;
     private cphNg!: CphNg;
-    private timer!: NodeJS.Timeout;
+    private fileTimer!: NodeJS.Timeout;
+    private compatibleTimer!: NodeJS.Timeout;
 
     public async activate(context: vscode.ExtensionContext) {
         this.logger.info('Activating CPH-NG extension');
@@ -112,9 +113,36 @@ class ExtensionManager {
                 }),
             );
 
-            this.timer = setInterval(() => this.checkActiveFile(), 1000);
+            this.fileTimer = setInterval(() => this.checkActiveFile(), 1000);
             context.subscriptions.push({
-                dispose: () => clearInterval(this.timer),
+                dispose: () => clearInterval(this.fileTimer),
+            });
+
+            let lastAlertTime = 0;
+            this.compatibleTimer = setInterval(async () => {
+                const currentTime = new Date().getTime();
+                if (
+                    vscode.extensions.getExtension(
+                        'divyanshuagrawal.competitive-programming-helper',
+                    )?.isActive &&
+                    currentTime - lastAlertTime > 5 * 1000
+                ) {
+                    lastAlertTime = currentTime;
+                    const result = (await io.warn(
+                        vscode.l10n.t(
+                            "CPH-NG is can not run with CPH, but it can load CPH problem file. Please disable CPH to use CPH-NG. You can select the 'Ignore' option to ignore this warning in this session.",
+                        ),
+                        { modal: true },
+                        { title: vscode.l10n.t('OK') },
+                        { title: vscode.l10n.t('Ignore') },
+                    )) as vscode.MessageItem;
+                    if (result.title === vscode.l10n.t('Ignore')) {
+                        clearInterval(this.compatibleTimer);
+                    }
+                }
+            }, 1000);
+            context.subscriptions.push({
+                dispose: () => clearInterval(this.compatibleTimer),
             });
 
             context.subscriptions.push(

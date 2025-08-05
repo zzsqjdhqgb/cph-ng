@@ -109,24 +109,11 @@ class Companion {
 
         this.server.on('error', (e) => {
             this.logger.error('Server error occurred', e);
-            if (
-                vscode.extensions.getExtension(
-                    'divyanshuagrawal.competitive-programming-helper',
-                )?.isActive
-            ) {
-                this.logger.warn('CPH extension conflict detected');
-                io.warn(
-                    vscode.l10n.t(
-                        'CPH-NG is not compatible with CPH, please disable CPH to use CPH-NG.',
-                    ),
-                );
-            } else {
-                io.error(
-                    vscode.l10n.t('Failed to start companion server: {msg}.', {
-                        msg: e.message,
-                    }),
-                );
-            }
+            io.error(
+                vscode.l10n.t('Failed to start companion server: {msg}.', {
+                    msg: e.message,
+                }),
+            );
         });
 
         this.logger.info(

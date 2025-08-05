@@ -7,7 +7,7 @@
     "All files": "所有文件",
     "Available files": "可用文件",
     "CPH-NG Compilation": "CPH-NG 编译",
-    "CPH-NG is not compatible with CPH, please disable CPH to use CPH-NG.": "CPH-NG 与 CPH 不兼容，请禁用 CPH 以使用 CPH-NG。",
+    "CPH-NG is can not run with CPH, but it can load CPH problem file. Please disable CPH to use CPH-NG. You can select the 'Ignore' option to ignore this warning in this session.": "CPH-NG 无法与 CPH 一起运行，但可以加载 CPH 问题文件。请禁用 CPH 才能使用 CPH-NG。您可以选择“忽略”选项来忽略此会话中的警告。",
     "Checker returned unknown exit code: {code}": "检查器返回了未知的退出代码：{code}",
     "Checker run failed": "检查器运行失败",
     "Checker setup failed: {msg}": "检查器设置失败：{msg}",
@@ -27,6 +27,8 @@
     "Error Output: {output}": "错误输出：{output}",
     "Error in checkActiveFile: {msg}": "检查活动文件时出错：{msg}",
     "Error occurred when handling message {msgType}: {msg}.": "在处理消息 {msgType} 的时候出现错误：{msg}。",
+    "Error: Could not retrieve data for {fileType} of test case {idx}. It might not exist or tests haven't been run yet.": "错误：无法检索测试用例 {idx} 的 {fileType} 数据。它可能不存在，或者测试尚未运行。",
+    "Error: Invalid file type '{fileType}'. Must be 'input', 'output', 'answer', or 'error'.": "错误：无效的文件类型 '{fileType}'。必须是 'input'、'output'、'answer' 或 'error'。",
     "Error: No competitive programming problem found. Please open or create a problem first.": "错误：未找到竞争性编程问题。请先打开或创建一个问题。",
     "Error: Please specify a test case index `idx` to read {fileType} data, as it is typically tied to a specific test case.": "错误：请指定测试用例索引 `idx` 以读取 {fileType} 数据，因为它通常与特定测试用例相关联。",
     "Error: Test case {idx} not found. Valid test cases range from 1 to {max}.": "错误：未找到测试用例 {idx}。有效的测试用例范围是 1 到 {max}。",
@@ -44,6 +46,7 @@
     "Fetched": "已获取",
     "File {file} does not exists.": "文件 {file} 不存在。",
     "Found matching {found} file: {file}. Do you want to use it?": "找到匹配的{found}文件：{file}。是否要使用它？",
+    "Ignore": "忽略",
     "Input file read failed: {msg}.": "输入文件读取失败：{msg}。",
     "Input {input}, Answer {answer}": "输入 {input}，答案 {answer}",
     "Input: {input}": "输入：{input}",
@@ -58,6 +61,7 @@
     "No problem found. Please create a problem first.": "未找到题目，请先创建一个题目。",
     "No test cases found in the zip file.": "在 ZIP 压缩文件中未找到测试用例。",
     "No workspace folder found. Please open a workspace folder.": "未找到工作区文件夹，请打开一个工作区文件夹。",
+    "OK": "确认",
     "Output Limit Exceeded": "输出超限",
     "Parse data from companion failed: {msg}.": "从伴侣解析数据失败：{msg}。",
     "Parse problem file {file} failed: {msg}.": "解析题目文件 {file} 失败：{msg}。",
@@ -97,7 +101,5 @@
     "not found": "未找到",
     "stdin": "输入",
     "test case {idx}'s {fileType}": "测试用例 {idx} 的 {fileType}",
-    "the problem's {fileType}": "题目的 {fileType}",
-    "Error: Invalid file type '{fileType}'. Must be 'input', 'output', 'answer', or 'error'.": "错误：无效的文件类型 '{fileType}'。必须是 'input'、'output'、'answer' 或 'error'。",
-    "Error: Could not retrieve data for {fileType} of test case {idx}. It might not exist or tests haven't been run yet.": "错误：无法检索测试用例 {idx} 的 {fileType} 数据。它可能不存在，或者测试尚未运行。"
+    "the problem's {fileType}": "题目的 {fileType}"
 }

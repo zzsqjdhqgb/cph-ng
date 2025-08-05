@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: Use the new Icon
+- **fix**: Constantly check CPH status
 
 ## 0.0.8
 
