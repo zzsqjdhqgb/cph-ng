@@ -3,7 +3,7 @@
     <defs>
         <mask id="xor-mask">
             <rect x="0" y="0" width="24" height="24" fill="#fff" />
-            <rect x="13" y="16" width="12" height="6" rx="1.5" ry="1.5" />
+            <rect x="7" y="13" width="18" height="9" />
         </mask>
     </defs>
 
@@ -12,7 +12,7 @@
         <rect x="9" y="3" width="6" height="18" rx="1.5" ry="1.5" />
         <rect x="18" y="10.5" width="6" height="10.5" rx="1.5" ry="1.5" />
     </g>
-    <text x="19" y="19" font-family="Consolas" font-size="5" text-anchor="middle" dominant-baseline="middle">
+    <text x="10" y="21" font-family="Consolas" font-size="10">
         NG
     </text>
 </svg>
