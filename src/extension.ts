@@ -18,15 +18,15 @@
 import { access, constants, mkdir, rm } from 'fs/promises';
 import { extname, join } from 'path';
 import * as vscode from 'vscode';
-import Companion from './companion';
-import { CphCapable } from './cphCapable';
-import { CphNg } from './cphNg';
-import { io, Logger } from './io';
-import Settings from './settings';
-import { SidebarProvider } from './sidebarProvider';
-import { isRunningVerdict } from './types';
-import LlmTcRunner from './llmTcRunner';
-import LlmFileReader from './llmFileReader';
+import Companion from './module/companion';
+import { CphCapable } from './module/cphCapable';
+import { CphNg } from './module/cphNg';
+import { io, Logger } from './utils/io';
+import Settings from './utils/settings';
+import { SidebarProvider } from './module/sidebarProvider';
+import { isRunningVerdict } from './utils/types';
+import LlmTcRunner from './ai/llmTcRunner';
+import LlmFileReader from './ai/llmFileReader';
 
 class ExtensionManager {
     private logger: Logger = new Logger('extension');

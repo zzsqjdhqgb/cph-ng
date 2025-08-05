@@ -20,10 +20,10 @@ import { createServer, Server } from 'http';
 import { join } from 'path';
 import * as vscode from 'vscode';
 import { CphCapable, CphProblem } from './cphCapable';
-import { io, Logger } from './io';
-import Settings from './settings';
-import { renderTemplate } from './strTemplate';
-import { Problem } from './types';
+import { io, Logger } from '../utils/io';
+import Settings from '../utils/settings';
+import { renderTemplate } from '../utils/strTemplate';
+import { Problem } from '../utils/types';
 
 class Companion {
     private logger: Logger = new Logger('companion');

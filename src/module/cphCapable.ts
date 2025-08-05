@@ -18,8 +18,8 @@
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
-import { Logger } from './io';
-import { Problem } from './types';
+import { Logger } from '../utils/io';
+import { Problem } from '../utils/types';
 
 export interface CphProblem {
     name: string;

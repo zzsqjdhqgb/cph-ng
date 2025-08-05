@@ -29,12 +29,17 @@ import {
 import { basename, dirname, extname, join } from 'path';
 import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
-import { Checker } from './checker';
-import { Compiler } from './compiler';
-import { io, Logger } from './io';
-import { Runner } from './runner';
-import Settings from './settings';
-import { tcIo2Path, tcIo2Str, TCVerdicts, write2TcIo } from './types.backend';
+import { Checker } from '../core/checker';
+import { Compiler } from '../core/compiler';
+import { io, Logger } from '../utils/io';
+import { Runner } from '../core/runner';
+import Settings from '../utils/settings';
+import {
+    tcIo2Path,
+    tcIo2Str,
+    TCVerdicts,
+    write2TcIo,
+} from '../utils/types.backend';
 import {
     isExpandVerdict,
     isRunningVerdict,
@@ -42,9 +47,9 @@ import {
     TC,
     TCIO,
     TCVerdict,
-} from './types';
-import Result, { assignResult } from './result';
-import { renderTemplate } from './strTemplate';
+} from '../utils/types';
+import Result, { assignResult } from '../utils/result';
+import { renderTemplate } from '../utils/strTemplate';
 import { homedir, tmpdir } from 'os';
 
 type ProblemChangeCallback = (problem: Problem | undefined) => void;

@@ -29,7 +29,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, Problem } from '../../types';
+import { isRunningVerdict, Problem } from '../../utils/types';
 import {
     AddTcMsg,
     DelProblemMsg,

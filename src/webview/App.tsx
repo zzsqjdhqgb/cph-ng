@@ -20,7 +20,7 @@ import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
-import { Problem } from '../types';
+import { Problem } from '../utils/types';
 import CreateProblemView from './components/createProblemView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';

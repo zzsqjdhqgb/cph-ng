@@ -17,9 +17,9 @@
 
 import * as vscode from 'vscode';
 import { CphNg } from './cphNg';
-import Settings from './settings';
-import * as msgs from './webview/msgs';
-import { io, Logger } from './io';
+import Settings from '../utils/settings';
+import * as msgs from '../webview/msgs';
+import { io, Logger } from '../utils/io';
 import { access, constants } from 'fs/promises';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {

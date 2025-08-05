@@ -19,11 +19,11 @@ import { spawn } from 'child_process';
 import { createReadStream } from 'fs';
 import { dirname } from 'path';
 import * as vscode from 'vscode';
-import Settings from './settings';
-import { TCVerdicts } from './types.backend';
-import { TC, TCVerdict } from './types';
-import Result from './result';
-import { Logger } from './io';
+import Settings from '../utils/settings';
+import { TCVerdicts } from '../utils/types.backend';
+import { TC, TCVerdict } from '../utils/types';
+import Result from '../utils/result';
+import { Logger } from '../utils/io';
 
 type RunnerResult = Result<{
     time: number;

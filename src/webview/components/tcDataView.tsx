@@ -32,7 +32,7 @@ import CphButton from './cphButton';
 import CphFlex from './cphFlex';
 import CphLink from './cphLink';
 import CphText from './cphText';
-import { TCIO } from '../../types';
+import { TCIO } from '../../utils/types';
 import ErrorBoundary from './errorBoundary';
 
 interface OutputActions {

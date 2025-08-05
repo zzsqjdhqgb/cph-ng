@@ -21,8 +21,8 @@ import { type } from 'os';
 import { basename, dirname, extname, join } from 'path';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
-import Settings from './settings';
-import { Logger } from './io';
+import Settings from '../utils/settings';
+import { Logger } from '../utils/io';
 
 const execAsync = promisify(exec);
 

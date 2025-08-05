@@ -17,10 +17,10 @@
 
 import { spawn } from 'child_process';
 import * as vscode from 'vscode';
-import { tcIo2Path, TCVerdicts } from './types.backend';
-import { TC, TCVerdict } from './types';
-import Result from './result';
-import { Logger } from './io';
+import { tcIo2Path, TCVerdicts } from '../utils/types.backend';
+import { TC, TCVerdict } from '../utils/types';
+import Result from '../utils/result';
+import { Logger } from '../utils/io';
 
 export class Checker {
     private logger: Logger = new Logger('checker');

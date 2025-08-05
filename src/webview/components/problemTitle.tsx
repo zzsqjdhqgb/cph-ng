@@ -27,7 +27,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Problem } from '../../types';
+import { Problem } from '../../utils/types';
 import {
     ChooseCheckerFileMsg,
     EditProblemDetailsMsg,

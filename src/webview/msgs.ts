@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { TC } from '../types';
+import { TC } from '../utils/types';
 
 export interface CreateProblemMsg {
     type: 'createProblem';

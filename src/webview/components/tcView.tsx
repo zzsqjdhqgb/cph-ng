@@ -25,7 +25,7 @@ import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, TC } from '../../types';
+import { isRunningVerdict, TC } from '../../utils/types';
 import {
     ChooseTcFileMsg,
     CompareTcMsg,

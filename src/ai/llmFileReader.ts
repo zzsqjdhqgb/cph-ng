@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { CphNg } from './cphNg';
-import { TCIO } from './types';
+import { CphNg } from '../module/cphNg';
+import { TCIO } from '../utils/types';
 import { readFile } from 'fs/promises';
 
 interface LlmFileReaderParams {
