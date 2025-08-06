@@ -7,6 +7,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: problem title in small screens
 - **fix**: add constrain to time limit
 - **feat**: add tips when there is no problem
+- **fix**: translation mistakes
 
 ## 0.0.9
 
