@@ -111,6 +111,7 @@ export class CphNg {
             ['dirname', dirname(cppFile)],
             ['basename', basename(cppFile)],
             ['extname', extname(cppFile)],
+            ['basenameNoExt', basename(cppFile, extname(cppFile))],
         ]);
         try {
             await access(dirname(dir), constants.F_OK);
@@ -565,6 +566,7 @@ export class CphNg {
                     );
                     return;
                 }
+                const cppPath = problem.srcPath;
                 folderPath = renderTemplate(Settings.problem.unzipFolder, [
                     [
                         'workspace',
@@ -572,11 +574,13 @@ export class CphNg {
                             ? vscode.workspace.workspaceFolders[0].uri.fsPath
                             : '',
                     ],
-                    ['dirname', dirname(problem.srcPath)],
-                    ['basename', basename(problem.srcPath)],
-                    ['extname', extname(problem.srcPath)],
+                    ['dirname', dirname(cppPath)],
+                    ['basename', basename(cppPath)],
+                    ['extname', extname(cppPath)],
+                    ['basenameNoExt', basename(cppPath, extname(cppPath))],
                     ['zipDirname', dirname(zipPath)],
                     ['zipBasename', basename(zipPath)],
+                    ['zipBasenameNoExt', basename(zipPath, extname(zipPath))],
                 ]);
                 this.logger.debug('Extracting zip to:', folderPath);
                 await mkdir(folderPath, { recursive: true });

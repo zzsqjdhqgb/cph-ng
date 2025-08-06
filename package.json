@@ -195,7 +195,7 @@
                     },
                     "cph-ng.problem.unzipFolder": {
                         "type": "string",
-                        "default": "${workspace}/.cph-ng/${zipBasename}",
+                        "default": "${workspace}/.cph-ng/${zipBasenameNoExt}",
                         "markdownDescription": "%cph-ng.configuration.problem.properties.unzipFolder.markdownDescription%"
                     }
                 }
