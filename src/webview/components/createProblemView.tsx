@@ -23,6 +23,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreateProblemMsg } from '../msgs';
 import CphFlex from './base/cphFlex';
+import Tips from './tips';
 
 const CreateProblemView = () => {
     const { t } = useTranslation();
@@ -30,27 +31,31 @@ const CreateProblemView = () => {
         <Container>
             <CphFlex
                 column
+                gap={5}
                 paddingY={2}
             >
-                <Alert
-                    sx={{ width: '100%', boxSizing: 'border-box' }}
-                    variant={'outlined'}
-                    severity={'warning'}
-                >
-                    {t('createProblemView.alert')}
-                </Alert>
-                <Button
-                    fullWidth
-                    variant={'contained'}
-                    endIcon={<SendIcon />}
-                    onClick={() => {
-                        vscode.postMessage({
-                            type: 'createProblem',
-                        } as CreateProblemMsg);
-                    }}
-                >
-                    {t('createProblemView.button')}
-                </Button>
+                <CphFlex column>
+                    <Alert
+                        sx={{ width: '100%', boxSizing: 'border-box' }}
+                        variant={'outlined'}
+                        severity={'warning'}
+                    >
+                        {t('createProblemView.alert')}
+                    </Alert>
+                    <Button
+                        fullWidth
+                        variant={'contained'}
+                        endIcon={<SendIcon />}
+                        onClick={() => {
+                            vscode.postMessage({
+                                type: 'createProblem',
+                            } as CreateProblemMsg);
+                        }}
+                    >
+                        {t('createProblemView.button')}
+                    </Button>
+                </CphFlex>
+                {showTips && <Tips />}
             </CphFlex>
         </Container>
     );

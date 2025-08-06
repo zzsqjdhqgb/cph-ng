@@ -41,5 +41,17 @@
     "tcView.stderr": "错误",
     "tcView.stdin": "输入",
     "tcView.stdout": "输出",
-    "tcView.time": "{{time}} 毫秒"
+    "tcView.time": "{{time}} 毫秒",
+    "tipMessage1": "按下 Ctrl+Alt+B 可以快速创建题目或运行所有测试用例。",
+    "tipMessage2": "按住 Ctrl 点击运行按钮将强制重新编译。",
+    "tipMessage3": "按住 Alt 点击运行按钮将跳过编译。",
+    "tipMessage4": "你可以请求 AI 代理调用 #cphNgRunTestCases 工具来帮助你。",
+    "tipMessage5": "特殊评判文件可以是源代码或可执行文件。",
+    "tipMessage6": "你可以在设置中隐藏 AC 祝贺 GIF。",
+    "tipMessage7": "你可以在设置中隐藏某些类型的测试用例。",
+    "tips.nextTip": "下一个提示",
+    "tips.previousTip": "上一个提示",
+    "tips.randomTip": "随机提示",
+    "tips.title": "你知道吗？",
+    "tips.tryNow": "立即尝试"
 }

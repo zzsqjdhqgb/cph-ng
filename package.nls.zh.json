@@ -41,6 +41,7 @@
     "cph-ng.configuration.sidebar.properties.hiddenStatuses.markdownDescription": "选择在侧边栏视图中隐藏哪些**提交状态**。从列表中选择一个或多个状态以对其进行过滤，从而专注于特定结果，减少视觉混乱。例如，你可以隐藏“接受”结果，只查看待处理或失败的提交。",
     "cph-ng.configuration.sidebar.properties.retainWhenHidden.markdownDescription": "如果为 `true`，即使侧边栏视图被隐藏，它也将**保持活动并保留其状态**。如果为 `false`，侧边栏在隐藏时将被释放，并在再次显示时重新创建，这可能会影响性能或导致短暂的视觉闪烁。设置此项时请考虑你的工作流程和系统资源。",
     "cph-ng.configuration.sidebar.properties.showAcGif.markdownDescription": "启用后，每当问题成功被接受（收到“接受”判决）时，侧边栏中将显示一个**祝贺 GIF**。这为成功的提交提供了视觉反馈。",
+    "cph-ng.configuration.sidebar.properties.showTips.markdownDescription": "启用后，一个**随机提示**会在没有题目的时候显示。",
     "cph-ng.configuration.sidebar.title": "侧边栏",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.AC": "通过",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.CE": "编译错误",

@@ -136,6 +136,23 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     case 'chooseCheckerFile':
                         await this.helper.chooseCheckerFile();
                         break;
+                    case 'startChat':
+                        await vscode.commands.executeCommand(
+                            'workbench.action.chat.open',
+                            {
+                                mode: 'agent',
+                                query: '#cphNgRunTestCases ',
+                                isPartialQuery: true,
+                            },
+                        );
+                        break;
+                    case 'openSettings':
+                        const openSettingsMsg = msg as msgs.OpenSettingsMsg;
+                        await vscode.commands.executeCommand(
+                            'workbench.action.openSettings',
+                            openSettingsMsg.item,
+                        );
+                        break;
                     default:
                         this.logger.warn('Unknown message type:', msg.type);
                 }
@@ -194,10 +211,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 window.vscode = acquireVsCodeApi();
 window.isDarkMode = ${isDarkMode};
 window.hiddenStatuses = ${JSON.stringify(Settings.sidebar.hiddenStatuses)};
-window.partyUri = '${
-            Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''
-        }';
+window.partyUri = '${Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''}';
 window.language = '${vscode.env.language}';
+window.showTips = '${Settings.sidebar.showTips}';
 </script>
 </body>
 </html>`;

@@ -41,5 +41,17 @@
     "tcView.stderr": "Error",
     "tcView.stdin": "Input",
     "tcView.stdout": "Output",
-    "tcView.time": "{{time}} ms"
+    "tcView.time": "{{time}} ms",
+    "tipMessage1": "Pressing Ctrl+Alt+B can quickly create a problem or run all test cases.",
+    "tipMessage2": "Holding Ctrl when clicking a run button will force a recompile.",
+    "tipMessage3": "Holding Alt when clicking a run button will skip compiling.",
+    "tipMessage4": "You can ask an AI agent to call the #cphNgRunTestCases tool to help you.",
+    "tipMessage5": "A special judge file can be either source code or an executable.",
+    "tipMessage6": "You can hide the AC congratulatory GIF in the settings.",
+    "tipMessage7": "You can hide certain types of test cases in the settings.",
+    "tips.nextTip": "Next Tip",
+    "tips.previousTip": "Previous Tip",
+    "tips.randomTip": "Random Tip",
+    "tips.title": "Do you know?",
+    "tips.tryNow": "Try now"
 }

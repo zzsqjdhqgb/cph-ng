@@ -44,8 +44,7 @@
                             "description": "The 1-based index of the specific test case to run (e.g., 1 for the first test case). If omitted, all test cases will be run."
                         }
                     }
-                },
-                "when": "cph-ng.hasProblem"
+                }
             },
             {
                 "name": "read_problem_file",
@@ -76,8 +75,7 @@
                             "description": "The 1-based index of the test case to which the file belongs. For example, 1 for the first test case. If omitted, the tool will assume the request is for a general problem file (if applicable, though usually test case specific). It's highly recommended to provide this for test case related files."
                         }
                     }
-                },
-                "when": "cph-ng.hasProblem"
+                }
             }
         ],
         "views": {
@@ -322,6 +320,11 @@
                         "uniqueItems": true,
                         "default": [],
                         "markdownDescription": "%cph-ng.configuration.sidebar.properties.hiddenStatuses.markdownDescription%"
+                    },
+                    "cph-ng.sidebar.showTips": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.showTips.markdownDescription%"
                     }
                 }
             }

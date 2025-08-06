@@ -76,3 +76,10 @@ export interface OpenFileMsg {
 export interface ChooseCheckerFileMsg {
     type: 'chooseCheckerFile';
 }
+export interface StartChatMsg {
+    type: 'startChat';
+}
+export interface OpenSettingsMsg {
+    type: 'openSettings';
+    item: string;
+}

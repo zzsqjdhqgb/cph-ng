@@ -166,6 +166,9 @@ class SidebarSection extends SettingsSection {
     get hiddenStatuses(): string[] {
         return this.get('hiddenStatuses') as string[];
     }
+    get showTips(): boolean {
+        return this.get('showTips') as boolean;
+    }
 }
 
 export default class Settings {

@@ -23,3 +23,4 @@ declare const isDarkMode: boolean;
 declare const partyUri: string;
 declare const hiddenStatuses: string[];
 declare const language: string;
+declare const showTips: boolean;
