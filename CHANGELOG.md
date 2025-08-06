@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: problem title in small screens
+- **fix**: add constrain to time limit
 
 ## 0.0.9
 

@@ -176,7 +176,10 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         label={t('problemTitle.dialog.field.time')}
                         value={editedTimeLimit}
                         onChange={(e) =>
-                            setEditedTimeLimit(parseInt(e.target.value))
+                            (!e.target.value || parseInt(e.target.value)) &&
+                            setEditedTimeLimit(
+                                Math.min(parseInt(e.target.value), 1000 * 60),
+                            )
                         }
                         fullWidth
                         type={'number'}
