@@ -585,6 +585,10 @@ export class CphNg {
                 this.logger.debug('Extracting zip to:', folderPath);
                 await mkdir(folderPath, { recursive: true });
                 zipData.extractAllTo(folderPath, true);
+                if (Settings.problem.deleteAfterUnzip) {
+                    this.logger.debug('Deleting zip file:', zipPath);
+                    await unlink(zipPath);
+                }
             } else if (option === 'folder') {
                 this.logger.debug('Loading test cases from folder');
                 const folderUri = await vscode.window.showOpenDialog({

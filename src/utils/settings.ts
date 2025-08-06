@@ -145,6 +145,9 @@ class ProblemSection extends SettingsSection {
             ['home', homedir()],
         ]);
     }
+    get deleteAfterUnzip(): boolean {
+        return this.get('deleteAfterUnzip') as boolean;
+    }
 }
 
 class SidebarSection extends SettingsSection {

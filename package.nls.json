@@ -23,6 +23,7 @@
     "cph-ng.configuration.cphCapable.properties.autoImport.markdownDescription": "Enable **automatic import of problem data** from Competitive Programming Helper (CPH) to CPH-NG. This streamlines the process of getting problem definitions and test cases into the extension, reducing manual setup.",
     "cph-ng.configuration.cphCapable.title": "CPH Capable",
     "cph-ng.configuration.problem.properties.defaultTimeLimit.markdownDescription": "Set the **default time limit** (in **milliseconds**) that will be applied to newly created problems within the extension. This value is used if no specific time limit is provided for a problem, ensuring a baseline for execution.",
+    "cph-ng.configuration.problem.properties.deleteAfterUnzip.markdownDescription": "Specify whether to delete the zip file after unzipping.",
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.always": "Automatically use the found file without prompting.",
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.ask": "Prompt the user to confirm whether to use the found file.",
     "cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.never": "Ignore any found files and do not use them.",

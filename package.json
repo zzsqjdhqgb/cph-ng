@@ -197,6 +197,11 @@
                         "type": "string",
                         "default": "${workspace}/.cph-ng/${zipBasenameNoExt}",
                         "markdownDescription": "%cph-ng.configuration.problem.properties.unzipFolder.markdownDescription%"
+                    },
+                    "cph-ng.problem.deleteAfterUnzip": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.deleteAfterUnzip.markdownDescription%"
                     }
                 }
             },

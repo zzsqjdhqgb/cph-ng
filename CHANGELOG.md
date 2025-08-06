@@ -9,6 +9,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: Remove unsupported schema keyword minimum
 - **feat**: Add unzip folder configuration
 - **feat**: Add placeholder `basenameNoExt`
+- **feat**: Add delete zip after unzip configuration
 
 ## 0.0.8
 
