@@ -192,6 +192,11 @@
                         "type": "string",
                         "default": "${workspace}/.cph-ng/${basename}.bin",
                         "markdownDescription": "%cph-ng.configuration.problem.properties.problemFilePath.markdownDescription%"
+                    },
+                    "cph-ng.problem.unzipFolder": {
+                        "type": "string",
+                        "default": "${workspace}/.cph-ng/${zipBasename}",
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.unzipFolder.markdownDescription%"
                     }
                 }
             },

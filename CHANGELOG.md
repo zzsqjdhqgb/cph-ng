@@ -7,6 +7,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: Use the new Icon
 - **fix**: Constantly check CPH status
 - **fix**: Remove unsupported schema keyword minimum
+- **feat**: Add unzip folder configuration
 
 ## 0.0.8
 

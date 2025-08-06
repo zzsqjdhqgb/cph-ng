@@ -102,8 +102,6 @@ export class CphNg {
 
     public async getBinByCpp(cppFile: string): Promise<string> {
         const dir = renderTemplate(Settings.problem.problemFilePath, [
-            ['tmp', tmpdir()],
-            ['home', homedir()],
             [
                 'workspace',
                 vscode.workspace.workspaceFolders
@@ -546,19 +544,20 @@ export class CphNg {
             let folderPath = '';
             if (option === 'zip') {
                 this.logger.debug('Loading test cases from zip file');
-                const zipPath = await vscode.window.showOpenDialog({
+                const zipFile = await vscode.window.showOpenDialog({
                     title: vscode.l10n.t(
                         'Choose a zip file containing test cases',
                     ),
                     filters: { 'Zip files': ['zip'], 'All files': ['*'] },
                 });
-                if (!zipPath) {
+                if (!zipFile) {
                     this.logger.debug('User cancelled zip file selection');
                     return;
                 }
-                this.logger.info('Processing zip file:', zipPath[0].fsPath);
-                const zipFile = new AdmZip(zipPath[0].fsPath);
-                const entries = zipFile.getEntries();
+                const zipPath = zipFile[0].fsPath;
+                this.logger.info('Processing zip file:', zipPath);
+                const zipData = new AdmZip(zipPath);
+                const entries = zipData.getEntries();
                 if (!entries.length) {
                     this.logger.warn('Empty zip file');
                     io.warn(
@@ -566,10 +565,22 @@ export class CphNg {
                     );
                     return;
                 }
-                folderPath = zipPath[0].fsPath.replace(/\.zip$/, '');
+                folderPath = renderTemplate(Settings.problem.unzipFolder, [
+                    [
+                        'workspace',
+                        vscode.workspace.workspaceFolders
+                            ? vscode.workspace.workspaceFolders[0].uri.fsPath
+                            : '',
+                    ],
+                    ['dirname', dirname(problem.srcPath)],
+                    ['basename', basename(problem.srcPath)],
+                    ['extname', extname(problem.srcPath)],
+                    ['zipDirname', dirname(zipPath)],
+                    ['zipBasename', basename(zipPath)],
+                ]);
                 this.logger.debug('Extracting zip to:', folderPath);
                 await mkdir(folderPath, { recursive: true });
-                zipFile.extractAllTo(folderPath, true);
+                zipData.extractAllTo(folderPath, true);
             } else if (option === 'folder') {
                 this.logger.debug('Loading test cases from folder');
                 const folderUri = await vscode.window.showOpenDialog({

@@ -134,7 +134,16 @@ class ProblemSection extends SettingsSection {
         return this.get('templateFile') as string;
     }
     get problemFilePath(): string {
-        return this.get('problemFilePath') as string;
+        return renderTemplate(this.get('problemFilePath') as string, [
+            ['tmp', tmpdir()],
+            ['home', homedir()],
+        ]);
+    }
+    get unzipFolder(): string {
+        return renderTemplate(this.get('unzipFolder') as string, [
+            ['tmp', tmpdir()],
+            ['home', homedir()],
+        ]);
     }
 }
 
