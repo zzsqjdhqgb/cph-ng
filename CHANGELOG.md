@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: problem title in small screens
+
 ## 0.0.9
 
 - **feat**: Use the new Icon

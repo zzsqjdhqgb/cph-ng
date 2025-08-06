@@ -31,9 +31,9 @@ const CphFlex = (props: CphFlexProps) => {
             alignItems={props.alignStart ? 'flex-start' : 'center'}
             display={'flex'}
             flexDirection={props.column ? 'column' : 'row'}
-            flexWrap={'wrap'}
             gap={props.smallGap ? 0.5 : 1}
             width={'100%'}
+            minWidth={0}
             {...delProps(props, ['smallGap', 'column', 'alignStart'])}
         >
             {' '}

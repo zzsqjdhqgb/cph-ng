@@ -90,6 +90,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         whiteSpace={'nowrap'}
                         sx={{ cursor: problem.url ? 'pointer' : 'default' }}
                         title={problem.name}
+                        width={'100%'}
                     >
                         {problem.url ? (
                             <CphLink

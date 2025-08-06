@@ -133,8 +133,11 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                 </AccordionSummary>
                 {tc.isExpand && (
                     <AccordionDetails>
-                        <CphFlex>
-                            <CphFlex smallGap>
+                        <CphFlex column>
+                            <CphFlex
+                                smallGap
+                                column
+                            >
                                 <TcDataView
                                     label={t('tcView.stdin')}
                                     value={tc.stdin}
@@ -175,7 +178,10 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                             {tc.result && (
                                 <>
                                     <Divider />
-                                    <CphFlex smallGap>
+                                    <CphFlex
+                                        smallGap
+                                        column
+                                    >
                                         <TcDataView
                                             label={t('tcView.stdout')}
                                             value={tc.result.stdout}
