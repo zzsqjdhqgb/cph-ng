@@ -73,8 +73,7 @@
                         },
                         "idx": {
                             "type": "number",
-                            "description": "The 1-based index of the test case to which the file belongs. For example, 1 for the first test case. If omitted, the tool will assume the request is for a general problem file (if applicable, though usually test case specific). It's highly recommended to provide this for test case related files.",
-                            "minimum": 1
+                            "description": "The 1-based index of the test case to which the file belongs. For example, 1 for the first test case. If omitted, the tool will assume the request is for a general problem file (if applicable, though usually test case specific). It's highly recommended to provide this for test case related files."
                         }
                     }
                 },
