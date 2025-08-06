@@ -20,7 +20,7 @@ import Container from '@mui/material/Container';
 import React from 'react';
 import { Problem } from '../../utils/types';
 import AcCongrats from './acCongrats';
-import CphFlex from './cphFlex';
+import CphFlex from './base/cphFlex';
 import NoTcs from './noTcs';
 import TcView from './tcView';
 

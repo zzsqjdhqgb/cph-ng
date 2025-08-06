@@ -35,9 +35,9 @@ import {
 } from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
-import CphFlex from './cphFlex';
-import CphLink from './cphLink';
-import CphText from './cphText';
+import CphFlex from './base/cphFlex';
+import CphLink from './base/cphLink';
+import CphText from './base/cphText';
 
 interface ProblemTitleProps {
     problem: Problem;

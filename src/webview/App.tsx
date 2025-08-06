@@ -26,7 +26,7 @@ import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
 import { GetProblemMsg } from './msgs';
-import ErrorBoundary from './components/errorBoundary';
+import ErrorBoundary from './components/base/errorBoundary';
 
 i18n.use(initReactI18next).init({
     resources: {

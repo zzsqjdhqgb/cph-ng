@@ -18,7 +18,7 @@
 import Box from '@mui/material/Box';
 import React from 'react';
 import { Problem } from '../../utils/types';
-import CphFlex from './cphFlex';
+import CphFlex from './base/cphFlex';
 import ProblemActions from './problemActions';
 import ProblemTitle from './problemTitle';
 import TcsView from './tcsView';

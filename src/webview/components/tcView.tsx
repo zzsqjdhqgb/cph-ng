@@ -34,10 +34,10 @@ import {
     UpdateTcMsg,
 } from '../msgs';
 import CphButton from './cphButton';
-import CphFlex from './cphFlex';
-import CphText from './cphText';
+import CphFlex from './base/cphFlex';
+import CphText from './base/cphText';
 import TcDataView from './tcDataView';
-import ErrorBoundary from './errorBoundary';
+import ErrorBoundary from './base/errorBoundary';
 
 interface TcViewProp {
     tc: TC;

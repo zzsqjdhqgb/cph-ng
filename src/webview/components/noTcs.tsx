@@ -17,8 +17,8 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import CphFlex from './cphFlex';
-import CphText from './cphText';
+import CphFlex from './base/cphFlex';
+import CphText from './base/cphText';
 
 const NoTcs = () => {
     const { t } = useTranslation();

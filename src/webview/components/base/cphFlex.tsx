@@ -17,7 +17,7 @@
 
 import Box, { BoxProps } from '@mui/material/Box';
 import React from 'react';
-import { delProps } from '../utils';
+import { delProps } from '../../utils';
 
 interface CphFlexProps extends BoxProps {
     smallGap?: boolean;

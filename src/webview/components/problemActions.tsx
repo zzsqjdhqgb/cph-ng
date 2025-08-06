@@ -38,7 +38,7 @@ import {
     StopTcsMsg,
 } from '../msgs';
 import CphButton from './cphButton';
-import CphFlex from './cphFlex';
+import CphFlex from './base/cphFlex';
 
 interface ProblemActionsProps {
     problem: Problem;

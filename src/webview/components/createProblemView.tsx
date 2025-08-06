@@ -22,7 +22,7 @@ import Container from '@mui/material/Container';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CreateProblemMsg } from '../msgs';
-import CphFlex from './cphFlex';
+import CphFlex from './base/cphFlex';
 
 const CreateProblemView = () => {
     const { t } = useTranslation();

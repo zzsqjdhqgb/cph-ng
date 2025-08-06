@@ -29,11 +29,11 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { OpenFileMsg } from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
-import CphFlex from './cphFlex';
-import CphLink from './cphLink';
-import CphText from './cphText';
+import CphFlex from './base/cphFlex';
+import CphLink from './base/cphLink';
+import CphText from './base/cphText';
 import { TCIO } from '../../utils/types';
-import ErrorBoundary from './errorBoundary';
+import ErrorBoundary from './base/errorBoundary';
 
 interface OutputActions {
     onSetAnswer: () => void;
