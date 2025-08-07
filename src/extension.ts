@@ -140,7 +140,7 @@ class ExtensionManager {
                         clearInterval(this.compatibleTimer);
                     }
                 }
-            }, 1000);
+            }, 1000 * 60);
             context.subscriptions.push({
                 dispose: () => clearInterval(this.compatibleTimer),
             });

@@ -8,6 +8,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: add constrain to time limit
 - **feat**: add tips when there is no problem
 - **fix**: translation mistakes
+- **fix**: use longer interval for CPH checks
 
 ## 0.0.9
 
