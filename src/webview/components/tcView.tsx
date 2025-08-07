@@ -53,7 +53,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
             type: 'updateTc',
             idx: idx,
             tc,
-        } as UpdateTcMsg);
+        } satisfies UpdateTcMsg);
 
     return (
         <ErrorBoundary>
@@ -114,7 +114,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                         : e.ctrlKey
                                           ? true
                                           : undefined,
-                                } as RunTcMsg);
+                                } satisfies RunTcMsg);
                             }}
                         />
                         <CphButton
@@ -126,7 +126,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 vscode.postMessage({
                                     type: 'delTc',
                                     idx: idx,
-                                } as DelTcMsg);
+                                } satisfies DelTcMsg);
                             }}
                         />
                     </CphFlex>
@@ -153,7 +153,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             type: 'chooseTcFile',
                                             idx: idx,
                                             label: 'stdin',
-                                        } as ChooseTcFileMsg)
+                                        } satisfies ChooseTcFileMsg)
                                     }
                                 />
                                 <TcDataView
@@ -171,7 +171,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             type: 'chooseTcFile',
                                             idx: idx,
                                             label: 'answer',
-                                        } as ChooseTcFileMsg);
+                                        } satisfies ChooseTcFileMsg);
                                     }}
                                 />
                             </CphFlex>
@@ -197,7 +197,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                                     vscode.postMessage({
                                                         type: 'compareTc',
                                                         idx: idx,
-                                                    } as CompareTcMsg);
+                                                    } satisfies CompareTcMsg);
                                                 },
                                             }}
                                         />

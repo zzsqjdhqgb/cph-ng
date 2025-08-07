@@ -58,7 +58,7 @@ const CreateProblemView = ({ canImport }: CreateProblemProps) => {
                                 onClick={() => {
                                     vscode.postMessage({
                                         type: 'importProblem',
-                                    } as ImportProblemMsg);
+                                    } satisfies ImportProblemMsg);
                                 }}
                             >
                                 {t('createProblemView.importButton')}

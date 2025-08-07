@@ -59,7 +59,7 @@ export class CphCapable {
             })),
             timeLimit: cphProblem.timeLimit,
             srcPath: cphProblem.srcPath,
-        } as Problem;
+        } satisfies Problem;
         this.logger.info('Converted CphProblem to Problem', { problem });
         return problem;
     }
@@ -71,7 +71,7 @@ export class CphCapable {
         try {
             const data = await readFile(probFile);
             const problem = CphCapable.toProblem(
-                JSON.parse(data.toString()) as CphProblem,
+                JSON.parse(data.toString()) satisfies CphProblem,
             );
             this.logger.debug('Loaded problem from file', {
                 probFile,

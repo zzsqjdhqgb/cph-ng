@@ -93,7 +93,7 @@ export class Runner {
                         stderr: stderr.trim(),
                         time: endTime - startTime,
                     },
-                } as RunnerResult);
+                } satisfies RunnerResult);
             };
 
             child.on('close', (code, signal) => {

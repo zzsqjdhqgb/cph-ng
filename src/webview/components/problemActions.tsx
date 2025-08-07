@@ -67,7 +67,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         onClick={() => {
                             vscode.postMessage({
                                 type: 'addTc',
-                            } as AddTcMsg);
+                            } satisfies AddTcMsg);
                         }}
                     />
                     <CphButton
@@ -77,7 +77,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         onClick={() => {
                             vscode.postMessage({
                                 type: 'loadTcs',
-                            } as LoadTcsMsg);
+                            } satisfies LoadTcsMsg);
                         }}
                     />
                     {hasRunning ? (
@@ -89,7 +89,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             onClick={() => {
                                 vscode.postMessage({
                                     type: 'stopTcs',
-                                } as StopTcsMsg);
+                                } satisfies StopTcsMsg);
                             }}
                         />
                     ) : (
@@ -106,7 +106,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                         : e.ctrlKey
                                           ? true
                                           : undefined,
-                                } as RunTcsMsg);
+                                } satisfies RunTcsMsg);
                             }}
                         />
                     )}

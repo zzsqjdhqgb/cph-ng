@@ -49,7 +49,7 @@ class Companion {
                 this.logger.debug('Received request', requestData);
                 try {
                     const problem = CphCapable.toProblem(
-                        JSON.parse(requestData) as CphProblem,
+                        JSON.parse(requestData) satisfies CphProblem,
                     );
                     const workspaceFolder =
                         vscode.workspace.workspaceFolders?.[0].uri.fsPath;

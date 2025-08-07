@@ -159,7 +159,7 @@ const TcDataView = ({
                                     vscode.postMessage({
                                         type: 'openFile',
                                         path: internalValue.path,
-                                    } as OpenFileMsg);
+                                    } satisfies OpenFileMsg);
                                 }}
                             >
                                 {basename(internalValue.path)}

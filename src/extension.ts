@@ -86,7 +86,7 @@ class ExtensionManager {
             context.subscriptions.push(
                 vscode.window.registerWebviewViewProvider(
                     SidebarProvider.viewType,
-                    this.sidebarProvider as vscode.WebviewViewProvider,
+                    this.sidebarProvider satisfies vscode.WebviewViewProvider,
                     {
                         webviewOptions: {
                             retainContextWhenHidden:
@@ -135,7 +135,7 @@ class ExtensionManager {
                         { modal: true },
                         { title: vscode.l10n.t('OK') },
                         { title: vscode.l10n.t('Ignore') },
-                    )) as vscode.MessageItem;
+                    )) satisfies vscode.MessageItem;
                     if (result.title === vscode.l10n.t('Ignore')) {
                         clearInterval(this.compatibleTimer);
                     }

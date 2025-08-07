@@ -71,7 +71,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
             url: editedUrl,
             timeLimit: editedTimeLimit,
             isSpecialJudge: editedIsSpecialJudge,
-        } as EditProblemDetailsMsg);
+        } satisfies EditProblemDetailsMsg);
     };
 
     return (
@@ -116,7 +116,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                         vscode.postMessage({
                                             type: 'openFile',
                                             path: problem.checkerPath!,
-                                        } as OpenFileMsg);
+                                        } satisfies OpenFileMsg);
                                     }}
                                 >
                                     {t('problemTitle.specialJudge')}
@@ -130,7 +130,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                 vscode.postMessage({
                                     type: 'openFile',
                                     path: problem.srcPath,
-                                } as OpenFileMsg);
+                                } satisfies OpenFileMsg);
                             }}
                         >
                             {basename(problem.srcPath)}
@@ -203,7 +203,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                             onClick={() => {
                                 vscode.postMessage({
                                     type: 'chooseCheckerFile',
-                                } as ChooseCheckerFileMsg);
+                                } satisfies ChooseCheckerFileMsg);
                             }}
                         >
                             {t('problemTitle.dialog.field.chooseCheckerFile')}

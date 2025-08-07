@@ -487,7 +487,7 @@ export class CphNg {
             try {
                 this.problem = JSON.parse(
                     gunzipSync(data).toString(),
-                ) as Problem;
+                ) satisfies Problem;
                 this.logger.info(
                     'Problem loaded',
                     { problem: this._problem },
@@ -531,9 +531,9 @@ export class CphNg {
                     .replace(/^\s*\/\*\s*/, '')
                     .replace(/\s*\*\/\s*$/, '')
                     .trim();
-                const embeddedProblem = JSON.parse(
+                const embeddedProblem: EmbeddedProblem = JSON.parse(
                     gunzipSync(Buffer.from(embeddedData, 'base64')).toString(),
-                ) as EmbeddedProblem;
+                );
                 this.problem = {
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,

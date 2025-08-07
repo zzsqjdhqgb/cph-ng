@@ -51,7 +51,7 @@ const Tips = () => {
                 vscode.postMessage({
                     type: 'openSettings',
                     item: 'cph-ng.sidebar.showAcGif',
-                } as OpenSettingsMsg),
+                } satisfies OpenSettingsMsg),
         },
         {
             msg: t('tipMessage7'),
@@ -59,7 +59,7 @@ const Tips = () => {
                 vscode.postMessage({
                     type: 'openSettings',
                     item: 'cph-ng.sidebar.hiddenStatuses',
-                } as OpenSettingsMsg),
+                } satisfies OpenSettingsMsg),
         },
     ];
     const [idx, setIdx] = useState(
