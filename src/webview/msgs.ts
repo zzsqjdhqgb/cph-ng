@@ -20,6 +20,9 @@ import { TC } from '../utils/types';
 export interface CreateProblemMsg {
     type: 'createProblem';
 }
+export interface ImportProblemMsg {
+    type: 'importProblem';
+}
 export interface GetProblemMsg {
     type: 'getProblem';
 }

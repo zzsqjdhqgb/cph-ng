@@ -39,6 +39,7 @@ i18n.use(initReactI18next).init({
 
 const App = () => {
     const [problem, setProblem] = useState<Problem | undefined>();
+    const [canImport, setCanImport] = useState<boolean>(false);
     useEffect(() => {
         i18n.changeLanguage(language);
         window.onmessage = (e) => {
@@ -46,6 +47,7 @@ const App = () => {
             switch (msg.type) {
                 case 'problem':
                     setProblem(msg.problem);
+                    setCanImport(msg.canImport);
                     break;
                 default:
                     console.error('Unknown message type:', msg.type);
@@ -66,7 +68,7 @@ const App = () => {
                 {problem ? (
                     <ProblemView problem={problem} />
                 ) : (
-                    <CreateProblemView />
+                    <CreateProblemView canImport={canImport} />
                 )}
             </ErrorBoundary>
         </ThemeProvider>

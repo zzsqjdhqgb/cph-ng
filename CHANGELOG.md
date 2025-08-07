@@ -9,6 +9,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: add tips when there is no problem
 - **fix**: translation mistakes
 - **fix**: use longer interval for CPH checks
+- **fix**: use manual cph import
 
 ## 0.0.9
 

@@ -156,6 +156,15 @@ class ExtensionManager {
             );
             context.subscriptions.push(
                 vscode.commands.registerCommand(
+                    'cph-ng.importProblem',
+                    async () => {
+                        this.sidebarProvider.focus();
+                        await this.cphNg.importProblem();
+                    },
+                ),
+            );
+            context.subscriptions.push(
+                vscode.commands.registerCommand(
                     'cph-ng.runTestCases',
                     async () => {
                         this.sidebarProvider.focus();
@@ -218,16 +227,26 @@ class ExtensionManager {
     private updateContext() {
         this.logger.trace('updateContext');
         const hasProblem = !!this.cphNg.problem;
+        const canImport = this.cphNg.canImport;
         const isRunning =
             this.cphNg.problem?.tcs.some((tc) =>
                 isRunningVerdict(tc.result?.verdict),
             ) || false;
 
-        this.logger.debug('Context update', { hasProblem, isRunning });
+        this.logger.debug('Context update', {
+            hasProblem,
+            canImport,
+            isRunning,
+        });
         vscode.commands.executeCommand(
             'setContext',
             'cph-ng.hasProblem',
             hasProblem,
+        );
+        vscode.commands.executeCommand(
+            'setContext',
+            'cph-ng.canImport',
+            canImport,
         );
         vscode.commands.executeCommand(
             'setContext',
@@ -294,26 +313,29 @@ class ExtensionManager {
                             );
                         }
                     } catch {
+                        this.cphNg.problem = undefined;
                         if (
                             !this.cphNg.problem &&
-                            Settings.cphCapable.autoImport
+                            Settings.cphCapable.enabled
                         ) {
-                            const problem = await CphCapable.loadProblem(
-                                CphCapable.getProbByCpp(filePath),
-                            );
-                            if (problem) {
-                                this.cphNg.problem = problem;
-                                this.cphNg.saveProblem();
-                                this.updateContext();
-                                return;
+                            try {
+                                await access(
+                                    CphCapable.getProbByCpp(filePath),
+                                    constants.R_OK,
+                                );
+                                this.cphNg.canImport = true;
+                            } catch {
+                                this.cphNg.canImport = false;
                             }
+                        } else {
+                            this.cphNg.canImport = false;
                         }
-                        this.cphNg.problem = undefined;
                         this.updateContext();
                     }
                 }
             } else {
                 this.cphNg.problem = undefined;
+                this.cphNg.canImport = false;
                 this.updateContext();
             }
         } catch (e) {

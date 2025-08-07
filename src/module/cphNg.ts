@@ -40,19 +40,15 @@ import {
     TCVerdicts,
     write2TcIo,
 } from '../utils/types.backend';
-import {
-    isExpandVerdict,
-    isRunningVerdict,
-    Problem,
-    TC,
-    TCIO,
-    TCVerdict,
-} from '../utils/types';
+import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
 import Result, { assignResult } from '../utils/result';
 import { renderTemplate } from '../utils/strTemplate';
-import { homedir, tmpdir } from 'os';
+import { CphCapable } from './cphCapable';
 
-type ProblemChangeCallback = (problem: Problem | undefined) => void;
+type ProblemChangeCallback = (
+    problem: Problem | undefined,
+    canImport: boolean,
+) => void;
 
 type DoCompileResult = Result<{
     outputPath: string;
@@ -68,6 +64,7 @@ type CompileResult = Result<{
 export class CphNg {
     private logger: Logger = new Logger('cphNg');
     private _problem?: Problem;
+    private _canImport: boolean;
     private compiler: Compiler;
     private runner: Runner;
     private checker: Checker;
@@ -76,6 +73,7 @@ export class CphNg {
 
     constructor() {
         this.logger.trace('constructor');
+        this._canImport = false;
         this.compiler = new Compiler();
         this.runner = new Runner();
         this.checker = new Checker();
@@ -91,12 +89,20 @@ export class CphNg {
         this.emitProblemChange();
     }
 
+    get canImport(): boolean {
+        return this._canImport;
+    }
+    set canImport(canImport: boolean) {
+        this._canImport = canImport;
+        this.emitProblemChange();
+    }
+
     public addProblemChangeListener(callback: ProblemChangeCallback) {
         this.onProblemChange.push(callback);
     }
     private emitProblemChange() {
         for (const callback of this.onProblemChange) {
-            callback(this._problem);
+            callback(this._problem, this._canImport);
         }
     }
 
@@ -410,6 +416,55 @@ export class CphNg {
         } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to create problem: {msg}', {
+                    msg: (e as Error).message,
+                }),
+            );
+        }
+    }
+    public async importProblem(): Promise<void> {
+        try {
+            const activeEditor = vscode.window.activeTextEditor;
+            if (!activeEditor) {
+                io.warn(
+                    vscode.l10n.t(
+                        'No active editor found. Please open a file to create a problem.',
+                    ),
+                );
+                return;
+            }
+            const filePath = activeEditor.document.fileName;
+            if (this._problem && this._problem.srcPath === filePath) {
+                io.warn(
+                    vscode.l10n.t(
+                        'Problem already exists for this file: {file}.',
+                        { file: basename(filePath) },
+                    ),
+                );
+                return;
+            }
+            const probFile = CphCapable.getProbByCpp(filePath);
+            try {
+                await access(probFile, constants.R_OK);
+                const problem = await CphCapable.loadProblem(probFile);
+                if (!problem) {
+                    io.warn(
+                        vscode.l10n.t('Failed to import file.', {
+                            file: basename(filePath),
+                        }),
+                    );
+                }
+                this.problem = problem;
+            } catch {
+                io.warn(
+                    vscode.l10n.t('File {file} does not exists.', {
+                        file: probFile,
+                    }),
+                );
+            }
+            this.saveProblem();
+        } catch (e) {
+            io.error(
+                vscode.l10n.t('Failed to import problem: {msg}.', {
                     msg: (e as Error).message,
                 }),
             );

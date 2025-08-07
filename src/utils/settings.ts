@@ -79,8 +79,8 @@ class CphCapableSection extends SettingsSection {
     constructor() {
         super('cphCapable');
     }
-    get autoImport(): boolean {
-        return this.get('autoImport') as boolean;
+    get enabled(): boolean {
+        return this.get('enabled') as boolean;
     }
 }
 

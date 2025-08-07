@@ -221,10 +221,10 @@
             {
                 "title": "%cph-ng.configuration.cphCapable.title%",
                 "properties": {
-                    "cph-ng.cphCapable.autoImport": {
+                    "cph-ng.cphCapable.enabled": {
                         "type": "boolean",
                         "default": true,
-                        "markdownDescription": "%cph-ng.configuration.cphCapable.properties.autoImport.markdownDescription%"
+                        "markdownDescription": "%cph-ng.configuration.cphCapable.properties.enabled.markdownDescription%"
                     }
                 }
             },
@@ -336,6 +336,11 @@
                 "icon": "$(rocket)"
             },
             {
+                "command": "cph-ng.importProblem",
+                "title": "%cph-ng.commands.importProblem%",
+                "icon": "$(desktop-download)"
+            },
+            {
                 "command": "cph-ng.runTestCases",
                 "title": "%cph-ng.commands.runTestCases%",
                 "icon": "$(run-all)"
@@ -362,7 +367,12 @@
             {
                 "command": "cph-ng.createProblem",
                 "key": "ctrl+alt+b",
-                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem"
+                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem && !cph-ng.canImport"
+            },
+            {
+                "command": "cph-ng.importProblem",
+                "key": "ctrl+alt+b",
+                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem && cph-ng.canImport"
             },
             {
                 "command": "cph-ng.runTestCases",

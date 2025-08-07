@@ -32,9 +32,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         private helper: CphNg,
     ) {
         this.logger.trace('constructor', { _extensionUri });
-        helper.addProblemChangeListener((problem) => {
-            this.logger.debug('Problem change listener triggered', { problem });
-            this._view?.webview.postMessage({ type: 'problem', problem });
+        helper.addProblemChangeListener((problem, canImport) => {
+            this.logger.debug('Problem change listener triggered', {
+                problem,
+                canImport,
+            });
+            this._view?.webview.postMessage({
+                type: 'problem',
+                problem,
+                canImport,
+            });
         });
     }
 
@@ -62,6 +69,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                 switch (msg.type) {
                     case 'createProblem':
                         await this.helper.createProblem();
+                        break;
+                    case 'importProblem':
+                        await this.helper.importProblem();
                         break;
                     case 'getProblem':
                         await this.helper.getProblem();

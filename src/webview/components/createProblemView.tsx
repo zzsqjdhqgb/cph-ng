@@ -21,11 +21,16 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CreateProblemMsg } from '../msgs';
+import { CreateProblemMsg, ImportProblemMsg } from '../msgs';
 import CphFlex from './base/cphFlex';
 import Tips from './tips';
+import InputIcon from '@mui/icons-material/Input';
 
-const CreateProblemView = () => {
+interface CreateProblemProps {
+    canImport: boolean;
+}
+
+const CreateProblemView = ({ canImport }: CreateProblemProps) => {
     const { t } = useTranslation();
     return (
         <Container>
@@ -40,20 +45,38 @@ const CreateProblemView = () => {
                         variant={'outlined'}
                         severity={'warning'}
                     >
-                        {t('createProblemView.alert')}
+                        {canImport
+                            ? t('createProblemView.importAlert')
+                            : t('createProblemView.createAlert')}
                     </Alert>
-                    <Button
-                        fullWidth
-                        variant={'contained'}
-                        endIcon={<SendIcon />}
-                        onClick={() => {
-                            vscode.postMessage({
-                                type: 'createProblem',
-                            } as CreateProblemMsg);
-                        }}
-                    >
-                        {t('createProblemView.button')}
-                    </Button>
+                    <CphFlex>
+                        {canImport && (
+                            <Button
+                                fullWidth
+                                variant={'contained'}
+                                endIcon={<InputIcon />}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'importProblem',
+                                    } as ImportProblemMsg);
+                                }}
+                            >
+                                {t('createProblemView.importButton')}
+                            </Button>
+                        )}
+                        <Button
+                            fullWidth
+                            variant={canImport ? 'outlined' : 'contained'}
+                            endIcon={<SendIcon />}
+                            onClick={() => {
+                                vscode.postMessage({
+                                    type: 'createProblem',
+                                } as CreateProblemMsg);
+                            }}
+                        >
+                            {t('createProblemView.createButton')}
+                        </Button>
+                    </CphFlex>
                 </CphFlex>
                 {showTips && <Tips />}
             </CphFlex>

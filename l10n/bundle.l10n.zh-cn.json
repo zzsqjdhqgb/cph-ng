@@ -37,6 +37,8 @@
     "Failed to choose test case file: {msg}": "选择测试用例文件失败：{msg}",
     "Failed to compare test case: {msg}": "比较测试用例失败：{msg}",
     "Failed to create problem: {msg}": "创建题目失败：{msg}",
+    "Failed to import file.": "导入文件失败。",
+    "Failed to import problem: {msg}.": "导入题目失败：{msg}。",
     "Failed to load problem: {msg}": "加载题目失败：{msg}",
     "Failed to load test cases: {msg}": "加载测试用例失败：{msg}",
     "Failed to run checker: {msg}": "运行检查器失败：{msg}",
