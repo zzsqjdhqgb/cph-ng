@@ -304,10 +304,8 @@ class ExtensionManager {
                         'is not the current file',
                         { filePath },
                     );
-                    try {
-                        await this.cphNg.loadProblem(filePath);
-                    } catch {
-                        this.cphNg.problem = undefined;
+                    await this.cphNg.loadProblem(filePath);
+                    if (this.cphNg.problem === undefined) {
                         if (
                             !this.cphNg.problem &&
                             Settings.cphCapable.enabled
