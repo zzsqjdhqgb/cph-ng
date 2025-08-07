@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.0.10
 
 - **fix**: problem title in small screens
 - **fix**: add constrain to time limit
@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: translation mistakes
 - **fix**: use longer interval for CPH checks
 - **fix**: use manual cph import
+- **chore**: upgrade dependencies
 
 ## 0.0.9
 
