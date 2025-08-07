@@ -361,6 +361,10 @@
             {
                 "command": "cph-ng.deleteProblem",
                 "title": "%cph-ng.commands.deleteProblem%"
+            },
+            {
+                "command": "cph-ng.exportToEmbedded",
+                "title": "%cph-ng.commands.exportToEmbedded%"
             }
         ],
         "keybindings": [

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, mkdir, rm } from 'fs/promises';
+import { access, constants, mkdir, readFile, rm } from 'fs/promises';
 import { extname, join } from 'path';
 import * as vscode from 'vscode';
 import Companion from './module/companion';
@@ -205,6 +205,14 @@ class ExtensionManager {
                     },
                 ),
             );
+            context.subscriptions.push(
+                vscode.commands.registerCommand(
+                    'cph-ng.exportToEmbedded',
+                    async () => {
+                        await this.cphNg.exportToEmbedded();
+                    },
+                ),
+            );
 
             this.updateContext();
             this.logger.info('CPH-NG extension activated successfully');
@@ -297,21 +305,7 @@ class ExtensionManager {
                         { filePath },
                     );
                     try {
-                        await access(
-                            await this.cphNg.getBinByCpp(filePath),
-                            constants.R_OK,
-                        );
-                        try {
-                            await this.cphNg.loadProblem(
-                                await this.cphNg.getBinByCpp(filePath),
-                            );
-                        } catch (e) {
-                            io.error(
-                                vscode.l10n.t('Failed to load problem: {msg}', {
-                                    msg: (e as Error).message,
-                                }),
-                            );
-                        }
+                        await this.cphNg.loadProblem(filePath);
                     } catch {
                         this.cphNg.problem = undefined;
                         if (

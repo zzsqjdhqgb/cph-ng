@@ -71,3 +71,13 @@ export interface Problem {
     checkerPath?: string;
     checkerHash?: string;
 }
+export interface EmbeddedProblem {
+    name: string;
+    url?: string;
+    tcs: {
+        stdin: string;
+        answer: string;
+    }[];
+    timeLimit: number;
+    spjCode?: string;
+}

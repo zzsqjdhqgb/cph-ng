@@ -19,6 +19,7 @@ import AdmZip from 'adm-zip';
 import { SHA256 } from 'crypto-js';
 import {
     access,
+    appendFile,
     constants,
     mkdir,
     readdir,
@@ -40,7 +41,13 @@ import {
     TCVerdicts,
     write2TcIo,
 } from '../utils/types.backend';
-import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
+import {
+    EmbeddedProblem,
+    isExpandVerdict,
+    isRunningVerdict,
+    Problem,
+    TC,
+} from '../utils/types';
 import Result, { assignResult } from '../utils/result';
 import { renderTemplate } from '../utils/strTemplate';
 import { CphCapable } from './cphCapable';
@@ -60,6 +67,11 @@ type CompileResult = Result<{
     checkerOutputPath?: string;
     checkerHash?: string;
 }>;
+
+const EMBEDDED_HEADER =
+    '////////////////////// CPH-NG DATA STARTS //////////////////////';
+const EMBEDDED_FOOTER =
+    '/////////////////////// CPH-NG DATA ENDS ///////////////////////';
 
 export class CphNg {
     private logger: Logger = new Logger('cphNg');
@@ -119,12 +131,8 @@ export class CphNg {
             ['extname', extname(cppFile)],
             ['basenameNoExt', basename(cppFile, extname(cppFile))],
         ]);
-        try {
-            await access(dirname(dir), constants.F_OK);
-        } catch {
-            await mkdir(dirname(dir), { recursive: true });
-        }
-        return join(dir);
+        await mkdir(dirname(dir), { recursive: true });
+        return dir;
     }
 
     public checkProblem() {
@@ -473,27 +481,105 @@ export class CphNg {
     public async getProblem() {
         this.emitProblemChange();
     }
-    public async loadProblem(binFile: string): Promise<void> {
-        this.logger.trace('loadProblem', { binFile });
+    private async loadProblemFromBin(binFile: string): Promise<void> {
         try {
             const data = await readFile(binFile);
-            this.problem = JSON.parse(
-                gunzipSync(data).toString('utf8'),
-            ) as Problem;
-            this.logger.info(
-                'Problem loaded',
-                { problem: this._problem },
-                'from',
-                binFile,
-            );
-        } catch (e) {
-            io.warn(
-                vscode.l10n.t('Parse problem file {file} failed: {msg}.', {
-                    file: basename(binFile),
-                    msg: (e as Error).message,
-                }),
-            );
+            try {
+                this.problem = JSON.parse(
+                    gunzipSync(data).toString(),
+                ) as Problem;
+                this.logger.info(
+                    'Problem loaded',
+                    { problem: this._problem },
+                    'from',
+                    binFile,
+                );
+            } catch (e) {
+                io.warn(
+                    vscode.l10n.t('Parse problem file {file} failed: {msg}.', {
+                        file: basename(binFile),
+                        msg: (e as Error).message,
+                    }),
+                );
+                this.problem = undefined;
+            }
+        } catch {
             this.problem = undefined;
+        }
+    }
+    private async loadProblemFromEmbedded(cppFile: string): Promise<void> {
+        try {
+            const cppData = (await readFile(cppFile)).toString();
+            const startIdx = cppData.indexOf(EMBEDDED_HEADER);
+            const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
+            if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
+                if (startIdx !== -1 || endIdx !== -1) {
+                    io.warn(
+                        vscode.l10n.t('Invalid embedded data in {file}.', {
+                            file: basename(cppFile),
+                        }),
+                    );
+                }
+                this.problem = undefined;
+                return;
+            }
+            try {
+                const embeddedData = cppData
+                    .substring(startIdx + EMBEDDED_HEADER.length, endIdx)
+                    .replaceAll('\r', '')
+                    .replaceAll('\n', '')
+                    .replace(/^\s*\/\*\s*/, '')
+                    .replace(/\s*\*\/\s*$/, '')
+                    .trim();
+                const embeddedProblem = JSON.parse(
+                    gunzipSync(Buffer.from(embeddedData, 'base64')).toString(),
+                ) as EmbeddedProblem;
+                this.problem = {
+                    name: embeddedProblem.name,
+                    url: embeddedProblem.url,
+                    srcPath: cppFile,
+                    tcs: embeddedProblem.tcs.map((embeddedTc) => ({
+                        stdin: { useFile: false, data: embeddedTc.stdin },
+                        answer: { useFile: false, data: embeddedTc.answer },
+                        isExpand: false,
+                    })),
+                    timeLimit: embeddedProblem.timeLimit,
+                };
+                if (embeddedProblem.spjCode) {
+                    this.problem.isSpecialJudge = true;
+                    this.problem.checkerPath = join(
+                        dirname(cppFile),
+                        basename(cppFile, extname(cppFile)) +
+                            '.spj' +
+                            extname(cppFile),
+                    );
+                    await writeFile(
+                        this.problem.checkerPath,
+                        embeddedProblem.spjCode,
+                    );
+                }
+                this.saveProblem();
+            } catch (e) {
+                io.warn(
+                    vscode.l10n.t(
+                        'Parse embedded data in file {file} failed: {msg}.',
+                        {
+                            file: basename(cppFile),
+                            msg: (e as Error).message,
+                        },
+                    ),
+                );
+                this.problem = undefined;
+            }
+        } catch {
+            this.problem = undefined;
+        }
+    }
+    public async loadProblem(cppFile: string): Promise<void> {
+        this.logger.trace('loadProblem', { cppFile });
+        await this.loadProblemFromBin(await this.getBinByCpp(cppFile));
+        if (this.problem === undefined) {
+            await this.loadProblemFromEmbedded(cppFile);
         }
     }
     public async editProblemDetails(
@@ -529,6 +615,63 @@ export class CphNg {
         } catch (e) {
             io.error(
                 vscode.l10n.t('Failed to save problem: {msg}', {
+                    msg: (e as Error).message,
+                }),
+            );
+        }
+    }
+    public async exportToEmbedded(): Promise<void> {
+        this.logger.trace('exportToEmbedded');
+        if (!this.checkProblem()) {
+            return;
+        }
+        const problem = this._problem!;
+        try {
+            const embeddedProblem: EmbeddedProblem = {
+                name: problem.name,
+                url: problem.url,
+                tcs: await Promise.all(
+                    problem.tcs.map(async (tc) => ({
+                        stdin: await tcIo2Str(tc.stdin),
+                        answer: await tcIo2Str(tc.answer),
+                    })),
+                ),
+                timeLimit: problem.timeLimit,
+            };
+            if (problem.checkerPath) {
+                embeddedProblem.spjCode = (
+                    await readFile(problem.checkerPath)
+                ).toString();
+            }
+            const embeddedData =
+                gzipSync(Buffer.from(JSON.stringify(embeddedProblem)))
+                    .toString('base64')
+                    .match(/.{1,64}/g)
+                    ?.join('\n') || '';
+            const cppFile = problem.srcPath;
+            let cppData = (await readFile(cppFile)).toString();
+            const startIdx = cppData.indexOf(EMBEDDED_HEADER);
+            const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
+            if (startIdx !== -1 && endIdx !== -1) {
+                cppData =
+                    cppData.substring(0, startIdx) +
+                    cppData.substring(endIdx + EMBEDDED_FOOTER.length);
+            }
+            cppData = cppData.trim();
+            cppData += [
+                '',
+                '',
+                EMBEDDED_HEADER,
+                '/*',
+                embeddedData,
+                ' */',
+                EMBEDDED_FOOTER,
+                '',
+            ].join('\n');
+            await writeFile(cppFile, cppData);
+        } catch (e) {
+            io.error(
+                vscode.l10n.t('Failed to export problem: {msg}.', {
                     msg: (e as Error).message,
                 }),
             );

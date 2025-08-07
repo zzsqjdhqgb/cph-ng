@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.0.11
+
+- **feat**: import and export from embedded data
+
 ## 0.0.10
 
 - **fix**: problem title in small screens
