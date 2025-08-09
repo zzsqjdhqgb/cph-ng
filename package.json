@@ -200,6 +200,11 @@
                         "type": "boolean",
                         "default": false,
                         "markdownDescription": "%cph-ng.configuration.problem.properties.deleteAfterUnzip.markdownDescription%"
+                    },
+                    "cph-ng.problem.clearBeforeLoad": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.clearBeforeLoad.markdownDescription%"
                     }
                 }
             },

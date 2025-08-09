@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## 0.0.11
 
 - **feat**: import and export from embedded data
+- **feat**: add option to clear test cases before loading new ones
 
 ## 0.0.10
 

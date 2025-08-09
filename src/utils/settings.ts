@@ -148,6 +148,9 @@ class ProblemSection extends SettingsSection {
     get deleteAfterUnzip(): boolean {
         return this.get('deleteAfterUnzip') as boolean;
     }
+    get clearBeforeLoad(): boolean {
+        return this.get('clearBeforeLoad') as boolean;
+    }
 }
 
 class SidebarSection extends SettingsSection {

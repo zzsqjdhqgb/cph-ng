@@ -908,9 +908,13 @@ export class CphNg {
             }
             const selectedTCs = chosenIdx.map((idx) => tcs[idx.value]);
             this.logger.info(`User selected ${selectedTCs.length} test cases`);
-            selectedTCs.forEach((tc) => {
-                problem.tcs.push(tc);
-            });
+            if (Settings.problem.clearBeforeLoad) {
+                problem.tcs = selectedTCs;
+            } else {
+                selectedTCs.forEach((tc) => {
+                    problem.tcs.push(tc);
+                });
+            }
             this.saveProblem();
         } catch (e) {
             io.error(
