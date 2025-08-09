@@ -320,7 +320,22 @@ export class CphNg {
             }
             result.stdout = await write2TcIo(result.stdout, runData.stdout);
 
-            result.stderr = { useFile: false, data: runData.stderr };
+            if (
+                Settings.runner.stderrThreshold !== -1 &&
+                runData.stderr.length >= Settings.runner.stderrThreshold
+            ) {
+                result.stderr = {
+                    useFile: true,
+                    path: join(
+                        Settings.cache.directory,
+                        'out',
+                        `${this.getTCHash(tc)}.err`,
+                    ),
+                };
+            } else {
+                result.stderr.useFile = false;
+            }
+            result.stderr = await write2TcIo(result.stderr, runData.stderr);
             this.emitProblemChange();
 
             if (assignResult(result, runResult)) {

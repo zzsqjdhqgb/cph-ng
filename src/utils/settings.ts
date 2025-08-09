@@ -100,6 +100,9 @@ class RunnerSection extends SettingsSection {
     get timeAddition(): number {
         return this.get('timeAddition') as number;
     }
+    get stderrThreshold(): number {
+        return this.get('stderrThreshold') as number;
+    }
 }
 
 class ComparingSection extends SettingsSection {

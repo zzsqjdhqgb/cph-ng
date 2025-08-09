@@ -135,6 +135,11 @@
                         "type": "number",
                         "default": 1000,
                         "markdownDescription": "%cph-ng.configuration.runner.properties.timeAddition.markdownDescription%"
+                    },
+                    "cph-ng.runner.stderrThreshold": {
+                        "type": "number",
+                        "default": 1000,
+                        "markdownDescription": "%cph-ng.configuration.runner.properties.stderrThreshold.markdownDescription%"
                     }
                 }
             },
