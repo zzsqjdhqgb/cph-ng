@@ -2,9 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.0.12
 
 - **feat**: add stderrThreshold configuration to control stderr output handling
+- **fix**: do not create .cph-ng folder when there is no problem saved
 
 ## 0.0.11
 

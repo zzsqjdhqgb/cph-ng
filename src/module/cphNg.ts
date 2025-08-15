@@ -131,7 +131,6 @@ export class CphNg {
             ['extname', extname(cppFile)],
             ['basenameNoExt', basename(cppFile, extname(cppFile))],
         ]);
-        await mkdir(dirname(dir), { recursive: true });
         return dir;
     }
 
@@ -623,6 +622,7 @@ export class CphNg {
             const binPath = await this.getBinByCpp(problem.srcPath);
             this.logger.info('Saving problem', { problem }, 'to', binPath);
             this.emitProblemChange();
+            await mkdir(dirname(binPath), { recursive: true });
             return writeFile(
                 binPath,
                 gzipSync(Buffer.from(JSON.stringify(problem))),
