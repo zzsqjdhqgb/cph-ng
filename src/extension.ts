@@ -295,6 +295,14 @@ class ExtensionManager {
                 this.logger.debug('Test case file is active', { filePath });
             } else if (this.cphNg.problem?.checker?.path === filePath) {
                 this.logger.debug('Checker file is active', { filePath });
+            } else if (
+                this.cphNg.problem?.bfCompare?.bruteForce?.path === filePath
+            ) {
+                this.logger.debug('Brute force file is active', { filePath });
+            } else if (
+                this.cphNg.problem?.bfCompare?.generator?.path === filePath
+            ) {
+                this.logger.debug('Generator file is active', { filePath });
             } else if (['.cpp', '.c'].includes(extname(filePath))) {
                 this.logger.debug('C/C++ file is active', { filePath });
                 if (this.cphNg.problem?.src.path !== filePath) {
