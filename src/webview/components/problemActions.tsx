@@ -123,8 +123,25 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         larger={true}
                         name={t('problemActions.bfCompare')}
                         icon={CompareArrowsIcon}
-                        loading={problem.bfCompare?.running}
                         onClick={() => setBfCompareDialogOpen(true)}
+                        sx={
+                            problem.bfCompare?.running
+                                ? {
+                                      'animation': 'pulse 1s infinite',
+                                      '@keyframes pulse': {
+                                          '0%': {
+                                              opacity: 1,
+                                          },
+                                          '50%': {
+                                              opacity: 0.2,
+                                          },
+                                          '100%': {
+                                              opacity: 1,
+                                          },
+                                      },
+                                  }
+                                : undefined
+                        }
                     />
                     <CphButton
                         larger={true}
