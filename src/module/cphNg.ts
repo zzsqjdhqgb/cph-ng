@@ -97,7 +97,7 @@ export class CphNg {
         return this._problem;
     }
     set problem(problem: Problem | undefined) {
-        this.saveProblem();
+        this._problem && this.saveProblem();
         this.runAbortController && this.runAbortController.abort();
         this._problem = problem;
         this.emitProblemChange();
