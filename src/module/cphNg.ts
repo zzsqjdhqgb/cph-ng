@@ -240,8 +240,9 @@ export class CphNg {
             const compileResult = await this.doCompile(problem.src, compile);
             if (compileResult.verdict !== TCVerdicts.UKE) {
                 return compileResult;
-            } else if (!problem.checker) {
-                problem.src.hash = compileResult.data!.hash;
+            }
+            problem.src.hash = compileResult.data!.hash;
+            if (!problem.checker) {
                 return compileResult;
             }
 
