@@ -31,7 +31,6 @@ export interface EditProblemDetailsMsg {
     title: string;
     url: string;
     timeLimit: number;
-    isSpecialJudge: boolean;
 }
 export interface DelProblemMsg {
     type: 'delProblem';
@@ -76,8 +75,11 @@ export interface OpenFileMsg {
     type: 'openFile';
     path: string;
 }
-export interface ChooseCheckerFileMsg {
-    type: 'chooseCheckerFile';
+export interface ChooseCheckerMsg {
+    type: 'chooseChecker';
+}
+export interface RemoveCheckerMsg {
+    type: 'removeChecker';
 }
 export interface StartChatMsg {
     type: 'startChat';

@@ -293,14 +293,14 @@ class ExtensionManager {
                     .includes(filePath)
             ) {
                 this.logger.debug('Test case file is active', { filePath });
-            } else if (this.cphNg.problem?.checkerPath === filePath) {
+            } else if (this.cphNg.problem?.checker?.path === filePath) {
                 this.logger.debug('Checker file is active', { filePath });
             } else if (['.cpp', '.c'].includes(extname(filePath))) {
                 this.logger.debug('C/C++ file is active', { filePath });
-                if (this.cphNg.problem?.srcPath !== filePath) {
+                if (this.cphNg.problem?.src.path !== filePath) {
                     this.logger.trace(
                         'Last source file',
-                        this.cphNg.problem?.srcPath,
+                        this.cphNg.problem?.src.path,
                         'is not the current file',
                         { filePath },
                     );

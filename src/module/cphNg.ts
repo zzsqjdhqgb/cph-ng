@@ -43,6 +43,7 @@ import {
 } from '../utils/types.backend';
 import {
     EmbeddedProblem,
+    FileWithHash,
     isExpandVerdict,
     isRunningVerdict,
     Problem,
@@ -169,7 +170,7 @@ export class CphNg {
     private getTCHash(tc: TC) {
         const problem = this._problem!;
         return SHA256(
-            `${problem.srcPath}-${
+            `${problem.src.path}-${
                 tc.stdin.useFile ? tc.stdin.path : tc.stdin.data
             }`,
         )
@@ -178,37 +179,36 @@ export class CphNg {
     }
 
     private async doCompile(
-        srcPath: string,
-        srcHash?: string,
+        file: FileWithHash,
         compile?: boolean,
     ): Promise<DoCompileResult> {
-        this.logger.trace('doCompile', { srcPath, srcHash });
-        const hash = SHA256((await readFile(srcPath)).toString()).toString();
-        const outputPath = await this.compiler.getExecutablePath(srcPath);
+        this.logger.trace('doCompile', file);
+        const hash = SHA256((await readFile(file.path)).toString()).toString();
+        const outputPath = await this.compiler.getExecutablePath(file.path);
         const hasOutputFile = async () =>
             await access(outputPath, constants.X_OK)
                 .then(() => true)
                 .catch(() => false);
 
         if (
-            (srcHash !== hash ||
+            (file.hash !== hash ||
                 !(await hasOutputFile()) ||
                 compile === true) &&
             compile !== false
         ) {
             this.logger.info('Source hash mismatch or output file missing', {
-                srcHash,
+                file,
                 hash,
                 outputPath,
             });
             const compileResult = await this.compiler.compile(
-                srcPath,
+                file.path,
                 outputPath,
                 this.runAbortController!,
             );
             if (!(await hasOutputFile())) {
                 this.logger.error('Compilation failed, output file not found', {
-                    srcPath,
+                    file,
                     outputPath,
                 });
                 return {
@@ -217,7 +217,7 @@ export class CphNg {
                 };
             }
         }
-        this.logger.debug('Compilation successful', { srcPath, outputPath });
+        this.logger.debug('Compilation successful', { file, outputPath });
         return {
             verdict: TCVerdicts.UKE,
             msg: '',
@@ -232,45 +232,40 @@ export class CphNg {
         try {
             const problem = this._problem!;
             const editor = vscode.window.visibleTextEditors.find(
-                (editor) => editor.document.fileName === problem.srcPath,
+                (editor) => editor.document.fileName === problem.src.path,
             );
             if (editor) {
                 await editor.document.save();
             }
-            const compileResult = await this.doCompile(
-                problem.srcPath,
-                problem.srcHash,
-                compile,
-            );
+            const compileResult = await this.doCompile(problem.src, compile);
             if (compileResult.verdict !== TCVerdicts.UKE) {
                 return compileResult;
-            } else if (!problem.isSpecialJudge) {
-                problem.srcHash = compileResult.data!.hash;
+            } else if (!problem.checker) {
+                problem.src.hash = compileResult.data!.hash;
                 return compileResult;
             }
 
             try {
-                await access(problem.checkerPath!, constants.X_OK);
+                await access(problem.checker.path, constants.X_OK);
                 return {
                     verdict: TCVerdicts.UKE,
                     msg: '',
                     data: {
                         outputPath: compileResult.data!.outputPath,
                         hash: compileResult.data!.hash,
-                        checkerOutputPath: problem.checkerPath,
+                        checkerOutputPath: problem.checker?.path,
                     },
                 };
             } catch {}
 
             const checkerCompileResult = await this.doCompile(
-                problem.checkerPath!,
-                problem.checkerHash,
+                problem.checker,
                 compile,
             );
             if (checkerCompileResult.verdict !== TCVerdicts.UKE) {
                 return checkerCompileResult;
             }
-            problem.checkerHash = checkerCompileResult.data!.hash;
+            problem.checker.hash = checkerCompileResult.data!.hash;
             return {
                 verdict: TCVerdicts.UKE,
                 msg: '',
@@ -419,7 +414,7 @@ export class CphNg {
                 return;
             }
             const filePath = activeEditor.document.fileName;
-            if (this._problem && this._problem.srcPath === filePath) {
+            if (this._problem && this._problem.src.path === filePath) {
                 io.warn(
                     vscode.l10n.t(
                         'Problem already exists for this file: {file}.',
@@ -430,7 +425,7 @@ export class CphNg {
             }
             this.problem = {
                 name: basename(filePath, extname(filePath)),
-                srcPath: filePath,
+                src: { path: filePath },
                 tcs: [],
                 timeLimit: Settings.problem.defaultTimeLimit,
             };
@@ -455,7 +450,7 @@ export class CphNg {
                 return;
             }
             const filePath = activeEditor.document.fileName;
-            if (this._problem && this._problem.srcPath === filePath) {
+            if (this._problem && this._problem.src.path === filePath) {
                 io.warn(
                     vscode.l10n.t(
                         'Problem already exists for this file: {file}.',
@@ -551,7 +546,7 @@ export class CphNg {
                 this.problem = {
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,
-                    srcPath: cppFile,
+                    src: { path: cppFile },
                     tcs: embeddedProblem.tcs.map((embeddedTc) => ({
                         stdin: { useFile: false, data: embeddedTc.stdin },
                         answer: { useFile: false, data: embeddedTc.answer },
@@ -560,15 +555,16 @@ export class CphNg {
                     timeLimit: embeddedProblem.timeLimit,
                 };
                 if (embeddedProblem.spjCode) {
-                    this.problem.isSpecialJudge = true;
-                    this.problem.checkerPath = join(
-                        dirname(cppFile),
-                        basename(cppFile, extname(cppFile)) +
-                            '.spj' +
-                            extname(cppFile),
-                    );
+                    this.problem.checker = {
+                        path: join(
+                            dirname(cppFile),
+                            basename(cppFile, extname(cppFile)) +
+                                '.spj' +
+                                extname(cppFile),
+                        ),
+                    };
                     await writeFile(
-                        this.problem.checkerPath,
+                        this.problem.checker?.path,
                         embeddedProblem.spjCode,
                     );
                 }
@@ -600,7 +596,6 @@ export class CphNg {
         title: string,
         url: string,
         timeLimit: number,
-        isSpecialJudge?: boolean,
     ): Promise<void> {
         if (!this.checkProblem()) {
             return;
@@ -609,7 +604,6 @@ export class CphNg {
         problem.name = title;
         problem.url = url;
         problem.timeLimit = timeLimit;
-        problem.isSpecialJudge = isSpecialJudge;
         this.saveProblem();
     }
     public async saveProblem(): Promise<void> {
@@ -619,7 +613,7 @@ export class CphNg {
                 return;
             }
             const problem = this._problem!;
-            const binPath = await this.getBinByCpp(problem.srcPath);
+            const binPath = await this.getBinByCpp(problem.src.path);
             this.logger.info('Saving problem', { problem }, 'to', binPath);
             this.emitProblemChange();
             await mkdir(dirname(binPath), { recursive: true });
@@ -653,9 +647,9 @@ export class CphNg {
                 ),
                 timeLimit: problem.timeLimit,
             };
-            if (problem.checkerPath) {
+            if (problem.checker?.path) {
                 embeddedProblem.spjCode = (
-                    await readFile(problem.checkerPath)
+                    await readFile(problem.checker?.path)
                 ).toString();
             }
             const embeddedData =
@@ -663,7 +657,7 @@ export class CphNg {
                     .toString('base64')
                     .match(/.{1,64}/g)
                     ?.join('\n') || '';
-            const cppFile = problem.srcPath;
+            const cppFile = problem.src.path;
             let cppData = (await readFile(cppFile)).toString();
             const startIdx = cppData.indexOf(EMBEDDED_HEADER);
             const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
@@ -698,7 +692,7 @@ export class CphNg {
             return;
         }
         const problem = this._problem!;
-        const binPath = await this.getBinByCpp(problem.srcPath);
+        const binPath = await this.getBinByCpp(problem.src.path);
 
         try {
             await access(binPath, constants.F_OK);
@@ -779,7 +773,7 @@ export class CphNg {
                     );
                     return;
                 }
-                const cppPath = problem.srcPath;
+                const cppPath = problem.src.path;
                 folderPath = renderTemplate(Settings.problem.unzipFolder, [
                     [
                         'workspace',
@@ -979,8 +973,6 @@ export class CphNg {
             return;
         }
         const compileData = compileResult.data!;
-        problem.srcHash = compileData.hash;
-        problem.checkerHash = compileData.checkerHash;
 
         await this.run(
             compileData.outputPath,
@@ -1033,8 +1025,6 @@ export class CphNg {
             return;
         }
         const compileData = compileResult.data!;
-        problem.srcHash = compileData.hash;
-        problem.checkerHash = compileData.checkerHash;
         for (const tc of problem.tcs) {
             tc.result!.verdict = TCVerdicts.CPD;
         }
@@ -1190,7 +1180,7 @@ export class CphNg {
         problem.tcs.splice(idx, 1);
         this.saveProblem();
     }
-    public async chooseCheckerFile(): Promise<void> {
+    public async chooseChecker(): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -1208,6 +1198,15 @@ export class CphNg {
         if (!checkerFileUri) {
             return;
         }
-        problem.checkerPath = checkerFileUri[0].fsPath;
+        problem.checker = { path: checkerFileUri[0].fsPath };
+        this.saveProblem();
+    }
+    public async removeChecker(): Promise<void> {
+        if (!this.checkProblem()) {
+            return;
+        }
+        const problem = this._problem!;
+        problem.checker = undefined;
+        this.saveProblem();
     }
 }

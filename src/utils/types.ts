@@ -45,13 +45,13 @@ export type TCIO =
     | { useFile: true; path: string }
     | { useFile: false; data: string };
 
-export type TCResult = {
+export interface TCResult {
     verdict: TCVerdict;
     time: number;
     stdout: TCIO;
     stderr: TCIO;
     msg: string;
-};
+}
 
 export interface TC {
     stdin: TCIO;
@@ -60,16 +60,17 @@ export interface TC {
     result?: TCResult;
 }
 
+export interface FileWithHash {
+    path: string;
+    hash?: string;
+}
 export interface Problem {
     name: string;
     url?: string;
     tcs: TC[];
     timeLimit: number;
-    srcPath: string;
-    srcHash?: string;
-    isSpecialJudge?: boolean;
-    checkerPath?: string;
-    checkerHash?: string;
+    src: FileWithHash;
+    checker?: FileWithHash;
 }
 export interface EmbeddedProblem {
     name: string;

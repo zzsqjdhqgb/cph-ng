@@ -83,7 +83,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             editProblemDetailsMsg.title,
                             editProblemDetailsMsg.url,
                             editProblemDetailsMsg.timeLimit,
-                            editProblemDetailsMsg.isSpecialJudge,
                         );
                         break;
                     case 'delProblem':
@@ -143,8 +142,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             });
                         }
                         break;
-                    case 'chooseCheckerFile':
-                        await this.helper.chooseCheckerFile();
+                    case 'chooseChecker':
+                        await this.helper.chooseChecker();
+                        break;
+                    case 'removeChecker':
+                        await this.helper.removeChecker();
                         break;
                     case 'startChat':
                         await vscode.commands.executeCommand(

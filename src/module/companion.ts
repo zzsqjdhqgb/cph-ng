@@ -64,28 +64,31 @@ class Companion {
                         return;
                     }
 
-                    problem.srcPath = join(
-                        workspaceFolder.toString(),
-                        this.getProblemFileName(problem.name),
+                    problem.src = {
+                        path: join(
+                            workspaceFolder.toString(),
+                            this.getProblemFileName(problem.name),
+                        ),
+                    };
+                    this.logger.info(
+                        'Created problem source path',
+                        problem.src.path,
                     );
-                    this.logger.info('Created problem source path', {
-                        srcPath: problem.srcPath,
-                    });
 
                     try {
-                        await access(problem.srcPath);
+                        await access(problem.src.path);
                         this.logger.debug('Source file already exists', {
-                            srcPath: problem.srcPath,
+                            srcPath: problem.src.path,
                         });
                     } catch {
                         this.logger.info('Creating new source file', {
-                            srcPath: problem.srcPath,
+                            srcPath: problem.src.path,
                         });
                         await this.createSourceFile(problem);
                     }
 
                     const document = await vscode.workspace.openTextDocument(
-                        problem.srcPath,
+                        problem.src.path,
                     );
                     this.logger.info('Opened document', {
                         document: document.fileName,
@@ -147,9 +150,9 @@ class Companion {
                         ['timeLimit', problem.timeLimit.toString()],
                         ['url', problem.url || ''],
                     ]);
-                    await writeFile(problem.srcPath, renderedTemplate);
+                    await writeFile(problem.src.path, renderedTemplate);
                     this.logger.info('Template applied successfully', {
-                        srcPath: problem.srcPath,
+                        srcPath: problem.src.path,
                     });
                 } catch (e) {
                     this.logger.warn('Template file error', e);
@@ -159,16 +162,16 @@ class Companion {
                             { msg: (e as Error).message },
                         ),
                     );
-                    await writeFile(problem.srcPath, '');
+                    await writeFile(problem.src.path, '');
                     this.logger.info('Created empty source file', {
-                        srcPath: problem.srcPath,
+                        srcPath: problem.src.path,
                     });
                 }
             } else {
                 this.logger.info(
                     'No template file configured, creating empty file',
                 );
-                await writeFile(problem.srcPath, '');
+                await writeFile(problem.src.path, '');
             }
         } catch (e) {
             this.logger.error('Failed to create source file', e);

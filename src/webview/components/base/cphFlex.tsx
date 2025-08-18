@@ -18,6 +18,7 @@
 import Box, { BoxProps } from '@mui/material/Box';
 import React from 'react';
 import { delProps } from '../../utils';
+import Stack from '@mui/material/Stack';
 
 interface CphFlexProps extends BoxProps {
     smallGap?: boolean;
@@ -27,18 +28,16 @@ interface CphFlexProps extends BoxProps {
 
 const CphFlex = (props: CphFlexProps) => {
     return (
-        <Box
+        <Stack
             alignItems={props.alignStart ? 'flex-start' : 'center'}
-            display={'flex'}
             flexDirection={props.column ? 'column' : 'row'}
             gap={props.smallGap ? 0.5 : 1}
             width={'100%'}
             minWidth={0}
             {...delProps(props, ['smallGap', 'column', 'alignStart'])}
         >
-            {' '}
             {props.children}
-        </Box>
+        </Stack>
     );
 };
 

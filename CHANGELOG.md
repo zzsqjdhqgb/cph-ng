@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **refactor**: enhance checker UI
+
 ## 0.0.12
 
 - **feat**: add stderrThreshold configuration to control stderr output handling

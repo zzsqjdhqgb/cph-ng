@@ -58,7 +58,7 @@ export class CphCapable {
                 isExpand: false,
             })),
             timeLimit: cphProblem.timeLimit,
-            srcPath: cphProblem.srcPath,
+            src: { path: cphProblem.srcPath },
         } satisfies Problem;
         this.logger.info('Converted CphProblem to Problem', { problem });
         return problem;

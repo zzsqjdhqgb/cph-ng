@@ -17,27 +17,30 @@
 
 import EditIcon from '@mui/icons-material/Edit';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
 import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import CloseIcon from '@mui/icons-material/Close';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
 import {
-    ChooseCheckerFileMsg,
+    ChooseCheckerMsg,
     EditProblemDetailsMsg,
     OpenFileMsg,
+    RemoveCheckerMsg,
 } from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
+import Typography from '@mui/material/Typography';
 
 interface ProblemTitleProps {
     problem: Problem;
@@ -50,14 +53,12 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
     const [editedTitle, setEditedTitle] = useState('');
     const [editedUrl, setEditedUrl] = useState('');
     const [editedTimeLimit, setEditedTimeLimit] = useState(0);
-    const [editedIsSpecialJudge, setEditedIsSpecialJudge] = useState(false);
 
     useEffect(() => {
         setEditedTitle(problem.name);
         setEditedUrl(problem.url || '');
         setEditedTimeLimit(problem.timeLimit);
-        setEditedIsSpecialJudge(problem.isSpecialJudge || false);
-    }, [problem.name, problem.url, problem.timeLimit, problem.isSpecialJudge]);
+    }, [problem.name, problem.url, problem.timeLimit]);
 
     const handleEditTitle = () => {
         setEditDialogOpen(true);
@@ -70,7 +71,6 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
             title: editedTitle,
             url: editedUrl,
             timeLimit: editedTimeLimit,
-            isSpecialJudge: editedIsSpecialJudge,
         } satisfies EditProblemDetailsMsg);
     };
 
@@ -107,15 +107,15 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         {t('problemTitle.timeLimit', {
                             time: problem.timeLimit,
                         })}
-                        {problem.isSpecialJudge && (
+                        {problem.checker && (
                             <>
                                 &emsp;
                                 <CphLink
-                                    name={problem.checkerPath!}
+                                    name={problem.checker.path!}
                                     onClick={() => {
                                         vscode.postMessage({
                                             type: 'openFile',
-                                            path: problem.checkerPath!,
+                                            path: problem.checker!.path,
                                         } satisfies OpenFileMsg);
                                     }}
                                 >
@@ -125,15 +125,15 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         )}
                         &emsp;
                         <CphLink
-                            name={problem.srcPath}
+                            name={problem.src.path}
                             onClick={() => {
                                 vscode.postMessage({
                                     type: 'openFile',
-                                    path: problem.srcPath,
+                                    path: problem.src.path,
                                 } satisfies OpenFileMsg);
                             }}
                         >
-                            {basename(problem.srcPath)}
+                            {basename(problem.src.path)}
                         </CphLink>
                     </CphText>
                 </CphFlex>
@@ -184,31 +184,49 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         fullWidth
                         type={'number'}
                     />
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={editedIsSpecialJudge}
-                                onChange={(e) =>
-                                    setEditedIsSpecialJudge(e.target.checked)
-                                }
-                                color={'primary'}
+                    <CphFlex>
+                        <Typography>
+                            {t('problemTitle.dialog.field.specialJudge')}
+                        </Typography>
+                        {problem.checker ? (
+                            <>
+                                <CphLink
+                                    name={problem.checker.path}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'openFile',
+                                            path: problem.checker!.path,
+                                        } satisfies OpenFileMsg);
+                                    }}
+                                >
+                                    {basename(problem.checker.path)}
+                                </CphLink>
+                                <CphButton
+                                    icon={CloseIcon}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'removeChecker',
+                                        } satisfies RemoveCheckerMsg);
+                                    }}
+                                    name={t(
+                                        'problemTitle.dialog.button.removeChecker',
+                                    )}
+                                />
+                            </>
+                        ) : (
+                            <CphButton
+                                icon={FileOpenIcon}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'chooseChecker',
+                                    } satisfies ChooseCheckerMsg);
+                                }}
+                                name={t(
+                                    'problemTitle.dialog.button.chooseChecker',
+                                )}
                             />
-                        }
-                        label={t('problemTitle.dialog.field.specialJudge')}
-                    />
-                    {editedIsSpecialJudge && (
-                        <Button
-                            variant={'contained'}
-                            color={'primary'}
-                            onClick={() => {
-                                vscode.postMessage({
-                                    type: 'chooseCheckerFile',
-                                } satisfies ChooseCheckerFileMsg);
-                            }}
-                        >
-                            {t('problemTitle.dialog.field.chooseCheckerFile')}
-                        </Button>
-                    )}
+                        )}
+                    </CphFlex>
                 </DialogContent>
                 <DialogActions>
                     <Button
