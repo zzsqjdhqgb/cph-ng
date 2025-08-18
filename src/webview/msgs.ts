@@ -75,11 +75,21 @@ export interface OpenFileMsg {
     type: 'openFile';
     path: string;
 }
-export interface ChooseCheckerMsg {
-    type: 'chooseChecker';
+export type FileTypes = 'checker' | 'generator' | 'bruteForce';
+export interface ChooseFileMsg {
+    type: 'chooseFile';
+    file: FileTypes;
 }
-export interface RemoveCheckerMsg {
-    type: 'removeChecker';
+export interface RemoveFileMsg {
+    type: 'removeFile';
+    file: FileTypes;
+}
+export interface StartBfCompareMsg {
+    type: 'startBfCompare';
+    compile?: boolean;
+}
+export interface StopBfCompareMsg {
+    type: 'stopBfCompare';
 }
 export interface StartChatMsg {
     type: 'startChat';

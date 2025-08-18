@@ -19,7 +19,6 @@ import AdmZip from 'adm-zip';
 import { SHA256 } from 'crypto-js';
 import {
     access,
-    appendFile,
     constants,
     mkdir,
     readdir,
@@ -52,6 +51,7 @@ import {
 import Result, { assignResult } from '../utils/result';
 import { renderTemplate } from '../utils/strTemplate';
 import { CphCapable } from './cphCapable';
+import { FileTypes } from '../webview/msgs';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
@@ -97,6 +97,7 @@ export class CphNg {
         return this._problem;
     }
     set problem(problem: Problem | undefined) {
+        this.saveProblem();
         this.runAbortController && this.runAbortController.abort();
         this._problem = problem;
         this.emitProblemChange();
@@ -295,11 +296,10 @@ export class CphNg {
             const runResult = await this.runner.runExecutable(
                 outputPath,
                 problem.timeLimit,
-                tc,
+                tc.stdin,
                 abortController,
             );
-            const runData = runResult.data!;
-            result.time = runData.time;
+            result.time = runResult.time;
             result.verdict = TCVerdicts.JGD;
             if (tc.answer.useFile) {
                 result.stdout = {
@@ -313,11 +313,11 @@ export class CphNg {
             } else {
                 result.stdout.useFile = false;
             }
-            result.stdout = await write2TcIo(result.stdout, runData.stdout);
+            result.stdout = await write2TcIo(result.stdout, runResult.stdout);
 
             if (
                 Settings.runner.stderrThreshold !== -1 &&
-                runData.stderr.length >= Settings.runner.stderrThreshold
+                runResult.stderr.length >= Settings.runner.stderrThreshold
             ) {
                 result.stderr = {
                     useFile: true,
@@ -330,7 +330,7 @@ export class CphNg {
             } else {
                 result.stderr.useFile = false;
             }
-            result.stderr = await write2TcIo(result.stderr, runData.stderr);
+            result.stderr = await write2TcIo(result.stderr, runResult.stderr);
             this.emitProblemChange();
 
             if (assignResult(result, runResult)) {
@@ -343,14 +343,14 @@ export class CphNg {
                     result,
                     checkerOutputPath
                         ? await this.checker.runChecker(
-                              checkerOutputPath!,
+                              checkerOutputPath,
                               tc,
                               abortController,
                           )
                         : await this.compareOutputs(
-                              runData.stdout,
+                              runResult.stdout,
                               await tcIo2Str(tc.answer),
-                              runData.stderr,
+                              runResult.stderr,
                           ),
                 );
             }
@@ -949,6 +949,7 @@ export class CphNg {
             return;
         }
         const problem = this._problem!;
+        this.runAbortController && this.runAbortController.abort();
         this.runAbortController = new AbortController();
 
         const tc = problem.tcs[idx];
@@ -965,8 +966,7 @@ export class CphNg {
 
         const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg =
-                compileResult.msg || vscode.l10n.t('Compilation failed');
+            io.compilationMsg = compileResult.msg;
             result.verdict = TCVerdicts.CE;
             tc.isExpand = true;
             this.saveProblem();
@@ -992,14 +992,7 @@ export class CphNg {
         if (!problem.tcs.length) {
             return;
         }
-        if (this.runAbortController) {
-            io.warn(
-                vscode.l10n.t(
-                    'Test cases already running. Please stop them first.',
-                ),
-            );
-            return;
-        }
+        this.runAbortController && this.runAbortController.abort();
         this.runAbortController = new AbortController();
 
         for (const tc of problem.tcs) {
@@ -1016,8 +1009,7 @@ export class CphNg {
 
         const compileResult = await this.compile(compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg =
-                compileResult.msg || vscode.l10n.t('Compilation failed');
+            io.compilationMsg = compileResult.msg;
             for (const tc of problem.tcs) {
                 tc.result!.verdict = TCVerdicts.CE;
             }
@@ -1181,7 +1173,7 @@ export class CphNg {
         problem.tcs.splice(idx, 1);
         this.saveProblem();
     }
-    public async chooseChecker(): Promise<void> {
+    public async chooseFile(fileType: FileTypes): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -1191,23 +1183,226 @@ export class CphNg {
             canSelectFolders: false,
             canSelectMany: false,
             filters: {
-                [vscode.l10n.t('Available files')]: ['exe', '', 'c', 'cpp'],
+                [vscode.l10n.t('Available files')]: ['exe', 'c', 'cpp'],
                 [vscode.l10n.t('All files')]: ['*'],
             },
-            openLabel: vscode.l10n.t('Select Checker File'),
+            openLabel: vscode.l10n.t('Select {fileType} File', {
+                fileType:
+                    fileType === 'checker'
+                        ? vscode.l10n.t('Checker')
+                        : fileType === 'generator'
+                          ? vscode.l10n.t('Generator')
+                          : vscode.l10n.t('Brute Force'),
+            }),
         });
         if (!checkerFileUri) {
             return;
         }
-        problem.checker = { path: checkerFileUri[0].fsPath };
+        if (fileType === 'checker') {
+            problem.checker = { path: checkerFileUri[0].fsPath };
+        } else if (fileType === 'generator') {
+            if (!problem.bfCompare) {
+                problem.bfCompare = { running: false, msg: '' };
+            }
+            problem.bfCompare.generator = { path: checkerFileUri[0].fsPath };
+        } else {
+            if (!problem.bfCompare) {
+                problem.bfCompare = { running: false, msg: '' };
+            }
+            problem.bfCompare.bruteForce = { path: checkerFileUri[0].fsPath };
+        }
         this.saveProblem();
     }
-    public async removeChecker(): Promise<void> {
+    public async removeFile(fileType: FileTypes): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
         const problem = this._problem!;
-        problem.checker = undefined;
+        if (fileType === 'checker') {
+            problem.checker = undefined;
+        } else if (fileType === 'generator') {
+            if (problem.bfCompare) {
+                problem.bfCompare.generator = undefined;
+            }
+        } else {
+            problem.bfCompare && (problem.bfCompare.bruteForce = undefined);
+        }
+        this.saveProblem();
+    }
+    public async startBfCompare(compile?: boolean): Promise<void> {
+        if (!this.checkProblem()) {
+            return;
+        }
+        const problem = this._problem!;
+        if (!problem.bfCompare) {
+            problem.bfCompare = { running: false, msg: '' };
+        }
+        if (problem.bfCompare.running) {
+            io.warn(
+                vscode.l10n.t('Brute Force comparison is already running.'),
+            );
+            return;
+        }
+        if (!problem.bfCompare.generator || !problem.bfCompare.bruteForce) {
+            io.warn(
+                vscode.l10n.t(
+                    'Please choose both generator and brute force files first.',
+                ),
+            );
+            return;
+        }
+        this.runAbortController && this.runAbortController.abort();
+        this.runAbortController = new AbortController();
+
+        const cleanUp = () => {
+            problem.bfCompare!.running = false;
+            this.runAbortController = undefined;
+            this.saveProblem();
+        };
+
+        problem.bfCompare.running = true;
+        problem.bfCompare.msg = vscode.l10n.t('Compiling solution...');
+        this.emitProblemChange();
+        const solutionCompileResult = await this.compile(compile);
+        if (solutionCompileResult.verdict !== TCVerdicts.UKE) {
+            io.compilationMsg = solutionCompileResult.msg;
+            problem.bfCompare.msg = vscode.l10n.t(
+                'Solution compilation failed.',
+            );
+            cleanUp();
+            return;
+        }
+
+        problem.bfCompare.msg = vscode.l10n.t('Compiling generator...');
+        this.emitProblemChange();
+        const generatorCompileResult = await this.doCompile(
+            problem.bfCompare.generator,
+            compile,
+        );
+        if (generatorCompileResult.verdict !== TCVerdicts.UKE) {
+            io.compilationMsg = generatorCompileResult.msg;
+            problem.bfCompare.msg = vscode.l10n.t(
+                'Generator compilation failed.',
+            );
+            cleanUp();
+            return;
+        }
+
+        problem.bfCompare.msg = vscode.l10n.t('Compiling brute force...');
+        this.emitProblemChange();
+        const bruteForceCompileResult = await this.doCompile(
+            problem.bfCompare.bruteForce,
+            compile,
+        );
+        if (bruteForceCompileResult.verdict !== TCVerdicts.UKE) {
+            io.compilationMsg = bruteForceCompileResult.msg;
+            problem.bfCompare.msg = vscode.l10n.t(
+                'Brute force compilation failed.',
+            );
+            cleanUp();
+            return;
+        }
+
+        let cnt = 0;
+        while (true) {
+            cnt++;
+            if (this.runAbortController.signal.aborted) {
+                problem.bfCompare.msg = vscode.l10n.t(
+                    'Brute Force comparison stopped by user.',
+                );
+                break;
+            }
+
+            problem.bfCompare.msg = vscode.l10n.t(
+                '#{cnt} Running generator...',
+                { cnt },
+            );
+            this.emitProblemChange();
+            const generatorRunResult = await this.runner.runExecutable(
+                generatorCompileResult.data!.outputPath,
+                114514, // TODO
+                { useFile: false, data: '' },
+                this.runAbortController,
+            );
+            if (generatorRunResult.verdict !== TCVerdicts.UKE) {
+                problem.bfCompare.msg = vscode.l10n.t(
+                    'Generator run failed: {msg}',
+                    {
+                        msg: generatorRunResult.msg,
+                    },
+                );
+                break;
+            }
+
+            problem.bfCompare.msg = vscode.l10n.t(
+                '#{cnt} Running brute force...',
+                { cnt },
+            );
+            this.emitProblemChange();
+            const bruteForceRunResult = await this.runner.runExecutable(
+                bruteForceCompileResult.data!.outputPath,
+                114514, // TODO
+                { useFile: false, data: generatorRunResult.stdout },
+                this.runAbortController,
+            );
+            if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
+                problem.bfCompare.msg = vscode.l10n.t(
+                    'Brute force run failed: {msg}',
+                    {
+                        msg: bruteForceRunResult.msg,
+                    },
+                );
+                break;
+            }
+
+            problem.bfCompare.msg = vscode.l10n.t(
+                '#{cnt} Running solution...',
+                { cnt },
+            );
+            this.emitProblemChange();
+            const tempTc: TC = {
+                stdin: { useFile: false, data: generatorRunResult.stdout },
+                answer: {
+                    useFile: false,
+                    data: bruteForceRunResult.stdout,
+                },
+                isExpand: true,
+                result: {
+                    verdict: TCVerdicts.CP,
+                    stdout: { useFile: false, data: '' },
+                    stderr: { useFile: false, data: '' },
+                    time: 0,
+                    msg: '',
+                },
+            } satisfies TC;
+            await this.run(
+                solutionCompileResult.data!.outputPath,
+                tempTc,
+                solutionCompileResult.data!.checkerOutputPath,
+            );
+            if (tempTc.result?.verdict !== TCVerdicts.AC) {
+                problem.tcs.push(tempTc);
+                problem.bfCompare.msg = vscode.l10n.t(
+                    'Found a difference in #{cnt} run.',
+                    { cnt },
+                );
+                break;
+            }
+        }
+        cleanUp();
+    }
+
+    public async stopBfCompare(): Promise<void> {
+        if (!this.checkProblem()) {
+            return;
+        }
+        const problem = this._problem!;
+        if (!problem.bfCompare || !problem.bfCompare.running) {
+            io.warn(vscode.l10n.t('Brute Force comparison is not running.'));
+            return;
+        }
+        this.runAbortController && this.runAbortController.abort();
+        problem.bfCompare.running = false;
         this.saveProblem();
     }
 }

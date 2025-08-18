@@ -21,15 +21,15 @@ import { dirname } from 'path';
 import * as vscode from 'vscode';
 import Settings from '../utils/settings';
 import { TCVerdicts } from '../utils/types.backend';
-import { TC, TCVerdict } from '../utils/types';
+import { TCIO, TCVerdict } from '../utils/types';
 import Result from '../utils/result';
 import { Logger } from '../utils/io';
 
-type RunnerResult = Result<{
+type RunnerResult = Result<undefined> & {
     time: number;
     stdout: string;
     stderr: string;
-}>;
+};
 
 export class Runner {
     private logger: Logger = new Logger('runner');
@@ -37,13 +37,13 @@ export class Runner {
     public async runExecutable(
         executablePath: string,
         timeLimit: number,
-        tc: TC,
+        stdin: TCIO,
         abortController: AbortController,
     ): Promise<RunnerResult> {
         this.logger.trace('runExecutable', {
             executablePath,
             timeLimit,
-            tc,
+            stdin,
         });
         this.logger.info('Running executable', executablePath);
         return new Promise((resolve) => {
@@ -88,11 +88,9 @@ export class Runner {
                 resolve({
                     verdict,
                     msg,
-                    data: {
-                        stdout: stdout.trim(),
-                        stderr: stderr.trim(),
-                        time: endTime - startTime,
-                    },
+                    stdout: stdout.trim(),
+                    stderr: stderr.trim(),
+                    time: endTime - startTime,
                 } satisfies RunnerResult);
             };
 
@@ -131,8 +129,8 @@ export class Runner {
                 );
             });
 
-            if (tc.stdin.useFile) {
-                const inputStream = createReadStream(tc.stdin.path, {
+            if (stdin.useFile) {
+                const inputStream = createReadStream(stdin.path, {
                     encoding: 'utf8',
                 });
 
@@ -156,10 +154,10 @@ export class Runner {
                     );
                 });
             } else {
-                child.stdin.write(tc.stdin.data);
+                child.stdin.write(stdin.data);
                 child.stdin.end();
                 this.logger.debug('Input written to stdin', {
-                    stdin: tc.stdin.data,
+                    stdin: stdin.data,
                 });
             }
         });

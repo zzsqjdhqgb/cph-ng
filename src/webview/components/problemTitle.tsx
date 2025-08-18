@@ -24,16 +24,15 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import CloseIcon from '@mui/icons-material/Close';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import TextField from '@mui/material/TextField';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
 import {
-    ChooseCheckerMsg,
+    ChooseFileMsg,
     EditProblemDetailsMsg,
     OpenFileMsg,
-    RemoveCheckerMsg,
+    RemoveFileMsg,
 } from '../msgs';
 import { basename } from '../utils';
 import CphButton from './cphButton';
@@ -205,8 +204,9 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                     icon={CloseIcon}
                                     onClick={() => {
                                         vscode.postMessage({
-                                            type: 'removeChecker',
-                                        } satisfies RemoveCheckerMsg);
+                                            type: 'removeFile',
+                                            file: 'checker',
+                                        } satisfies RemoveFileMsg);
                                     }}
                                     name={t(
                                         'problemTitle.dialog.button.removeChecker',
@@ -218,8 +218,9 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                 icon={FileOpenIcon}
                                 onClick={() => {
                                     vscode.postMessage({
-                                        type: 'chooseChecker',
-                                    } satisfies ChooseCheckerMsg);
+                                        type: 'chooseFile',
+                                        file: 'checker',
+                                    } satisfies ChooseFileMsg);
                                 }}
                                 name={t(
                                     'problemTitle.dialog.button.chooseChecker',

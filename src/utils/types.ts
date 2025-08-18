@@ -64,6 +64,14 @@ export interface FileWithHash {
     path: string;
     hash?: string;
 }
+
+export interface BFCompare {
+    generator?: FileWithHash;
+    bruteForce?: FileWithHash;
+    running: boolean;
+    msg: string;
+}
+
 export interface Problem {
     name: string;
     url?: string;
@@ -71,6 +79,7 @@ export interface Problem {
     timeLimit: number;
     src: FileWithHash;
     checker?: FileWithHash;
+    bfCompare?: BFCompare;
 }
 export interface EmbeddedProblem {
     name: string;

@@ -15,8 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
@@ -32,13 +37,21 @@ import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, Problem } from '../../utils/types';
 import {
     AddTcMsg,
+    ChooseFileMsg,
     DelProblemMsg,
     LoadTcsMsg,
+    OpenFileMsg,
+    RemoveFileMsg,
     RunTcsMsg,
+    StartBfCompareMsg,
+    StopBfCompareMsg,
     StopTcsMsg,
 } from '../msgs';
 import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
+import CphLink from './base/cphLink';
+import Typography from '@mui/material/Typography';
+import { basename } from '../utils';
 
 interface ProblemActionsProps {
     problem: Problem;
@@ -47,14 +60,10 @@ interface ProblemActionsProps {
 const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const { t } = useTranslation();
     const [isDelDialogOpen, setDelDialogOpen] = useState(false);
+    const [isBfCompareDialogOpen, setBfCompareDialogOpen] = useState(false);
     const hasRunning = problem.tcs.some((tc) =>
         isRunningVerdict(tc.result?.verdict),
     );
-
-    const handleDel = () => {
-        vscode.postMessage({ type: 'delProblem' } as DelProblemMsg);
-        setDelDialogOpen(false);
-    };
 
     return (
         <>
@@ -112,6 +121,13 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                     )}
                     <CphButton
                         larger={true}
+                        name={t('problemActions.bfCompare')}
+                        icon={CompareArrowsIcon}
+                        loading={problem.bfCompare?.running}
+                        onClick={() => setBfCompareDialogOpen(true)}
+                    />
+                    <CphButton
+                        larger={true}
                         name={t('problemActions.deleteProblem')}
                         icon={DeleteForeverIcon}
                         color={'error'}
@@ -123,10 +139,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                 open={isDelDialogOpen}
                 onClose={() => setDelDialogOpen(false)}
             >
-                <DialogTitle>{t('problemActions.dialog.title')}</DialogTitle>
+                <DialogTitle>{t('problemActions.delDialog.title')}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {t('problemActions.dialog.content')}
+                        {t('problemActions.delDialog.content')}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
@@ -134,16 +150,170 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         onClick={() => setDelDialogOpen(false)}
                         color={'primary'}
                     >
-                        {t('problemActions.dialog.cancel')}
+                        {t('problemActions.delDialog.cancel')}
                     </Button>
                     <Button
-                        onClick={handleDel}
+                        onClick={() => {
+                            vscode.postMessage({
+                                type: 'delProblem',
+                            } as DelProblemMsg);
+                            setDelDialogOpen(false);
+                        }}
                         color={'primary'}
                         autoFocus
                     >
-                        {t('problemActions.dialog.confirm')}
+                        {t('problemActions.delDialog.confirm')}
                     </Button>
                 </DialogActions>
+            </Dialog>
+            <Dialog
+                fullWidth
+                maxWidth='lg'
+                open={isBfCompareDialogOpen}
+                onClose={() => setBfCompareDialogOpen(false)}
+            >
+                <DialogTitle>
+                    {t('problemActions.bfCompareDialog.title')}
+                </DialogTitle>
+                <CphButton
+                    name={t('problemActions.bfCompareDialog.close')}
+                    onClick={() => setBfCompareDialogOpen(false)}
+                    sx={(theme) => ({
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: theme.palette.grey[500],
+                    })}
+                    icon={CloseIcon}
+                />
+                <DialogContent>
+                    <CphFlex column>
+                        <CphFlex>
+                            <Typography>
+                                {t('problemActions.bfCompareDialog.generator')}
+                            </Typography>
+                            {problem.bfCompare?.generator ? (
+                                <>
+                                    <CphLink
+                                        name={problem.bfCompare.generator.path}
+                                        onClick={() => {
+                                            vscode.postMessage({
+                                                type: 'openFile',
+                                                path: problem.bfCompare!
+                                                    .generator!.path,
+                                            } satisfies OpenFileMsg);
+                                        }}
+                                    >
+                                        {basename(
+                                            problem.bfCompare.generator.path,
+                                        )}
+                                    </CphLink>
+                                    <CphButton
+                                        icon={CloseIcon}
+                                        onClick={() => {
+                                            vscode.postMessage({
+                                                type: 'removeFile',
+                                                file: 'generator',
+                                            } satisfies RemoveFileMsg);
+                                        }}
+                                        name={t(
+                                            'problemActions.bfCompareDialog.button.removeGenerator',
+                                        )}
+                                    />
+                                </>
+                            ) : (
+                                <CphButton
+                                    icon={FileOpenIcon}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'chooseFile',
+                                            file: 'generator',
+                                        } satisfies ChooseFileMsg);
+                                    }}
+                                    name={t(
+                                        'problemActions.bfCompareDialog.button.chooseGenerator',
+                                    )}
+                                />
+                            )}
+                        </CphFlex>
+                        <CphFlex>
+                            <Typography>
+                                {t('problemActions.bfCompareDialog.bruteForce')}
+                            </Typography>
+                            {problem.bfCompare?.bruteForce ? (
+                                <>
+                                    <CphLink
+                                        name={problem.bfCompare.bruteForce.path}
+                                        onClick={() => {
+                                            vscode.postMessage({
+                                                type: 'openFile',
+                                                path: problem.bfCompare!
+                                                    .bruteForce!.path,
+                                            } satisfies OpenFileMsg);
+                                        }}
+                                    >
+                                        {basename(
+                                            problem.bfCompare.bruteForce.path,
+                                        )}
+                                    </CphLink>
+                                    <CphButton
+                                        icon={CloseIcon}
+                                        onClick={() => {
+                                            vscode.postMessage({
+                                                type: 'removeFile',
+                                                file: 'bruteForce',
+                                            } satisfies RemoveFileMsg);
+                                        }}
+                                        name={t(
+                                            'problemActions.bfCompareDialog.button.removeBruteForce',
+                                        )}
+                                    />
+                                </>
+                            ) : (
+                                <CphButton
+                                    icon={FileOpenIcon}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'chooseFile',
+                                            file: 'bruteForce',
+                                        } satisfies ChooseFileMsg);
+                                    }}
+                                    name={t(
+                                        'problemActions.bfCompareDialog.button.chooseBruteForce',
+                                    )}
+                                />
+                            )}
+                        </CphFlex>
+                        <CphFlex>{problem.bfCompare?.msg}</CphFlex>
+                        {problem.bfCompare?.running ? (
+                            <CphButton
+                                name={t('problemActions.bfCompareDialog.stop')}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'stopBfCompare',
+                                    } as StopBfCompareMsg);
+                                }}
+                                icon={StopCircleIcon}
+                                color={'warning'}
+                            />
+                        ) : (
+                            <CphButton
+                                name={t('problemActions.bfCompareDialog.run')}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'startBfCompare',
+                                    } as StartBfCompareMsg);
+                                }}
+                                icon={PlayCircleIcon}
+                                color={'success'}
+                                disabled={
+                                    !problem.bfCompare?.generator ||
+                                    !problem.bfCompare?.bruteForce
+                                }
+                            />
+                        )}
+                    </CphFlex>
+                </DialogContent>
             </Dialog>
         </>
     );

@@ -142,11 +142,22 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                             });
                         }
                         break;
-                    case 'chooseChecker':
-                        await this.helper.chooseChecker();
+                    case 'chooseFile':
+                        const chooseFileMsg = msg as msgs.ChooseFileMsg;
+                        await this.helper.chooseFile(chooseFileMsg.file);
                         break;
-                    case 'removeChecker':
-                        await this.helper.removeChecker();
+                    case 'removeFile':
+                        const removeFileMsg = msg as msgs.RemoveFileMsg;
+                        await this.helper.removeFile(removeFileMsg.file);
+                        break;
+                    case 'startBfCompare':
+                        const startBfCompareMsg = msg as msgs.StartBfCompareMsg;
+                        await this.helper.startBfCompare(
+                            startBfCompareMsg.compile,
+                        );
+                        break;
+                    case 'stopBfCompare':
+                        await this.helper.stopBfCompare();
                         break;
                     case 'startChat':
                         await vscode.commands.executeCommand(

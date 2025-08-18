@@ -4,6 +4,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 ## [Unreleased]
 
+- **feat**: add support for brute force comparison
 - **refactor**: enhance checker UI
 
 ## 0.0.12
