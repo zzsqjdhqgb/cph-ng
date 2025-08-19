@@ -12,6 +12,7 @@
     "Brute Force": "暴力",
     "Brute Force comparison is already running.": "对拍已经在运行中。",
     "Brute Force comparison is not running.": "对拍未在运行。",
+    "Brute Force comparison stopped by user, {cnt} runs completed.": "对拍已被用户停止，已完成 {cnt} 次运行。",
     "Brute Force comparison stopped by user.": "对拍已被用户停止。",
     "Brute force compilation failed.": "暴力解法编译失败。",
     "Brute force run failed: {msg}": "暴力解法运行失败：{msg}",

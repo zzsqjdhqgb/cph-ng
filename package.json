@@ -164,6 +164,21 @@
                 }
             },
             {
+                "title": "%cph-ng.configuration.bfCompare.title%",
+                "properties": {
+                    "cph-ng.bfCompare.generatorTimeLimit": {
+                        "type": "number",
+                        "default": 10,
+                        "markdownDescription": "%cph-ng.configuration.bfCompare.properties.generatorTimeLimit.markdownDescription%"
+                    },
+                    "cph-ng.bfCompare.bruteForceTimeLimit": {
+                        "type": "number",
+                        "default": 60,
+                        "markdownDescription": "%cph-ng.configuration.bfCompare.properties.bruteForceTimeLimit.markdownDescription%"
+                    }
+                }
+            },
+            {
                 "title": "%cph-ng.configuration.problem.title%",
                 "properties": {
                     "cph-ng.problem.defaultTimeLimit": {

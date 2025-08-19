@@ -1256,6 +1256,12 @@ export class CphNg {
 
         const cleanUp = () => {
             problem.bfCompare!.running = false;
+            if (this.runAbortController?.signal.aborted) {
+                problem.bfCompare!.msg = vscode.l10n.t(
+                    'Brute Force comparison stopped by user, {cnt} runs completed.',
+                    { cnt },
+                );
+            }
             this.runAbortController = undefined;
             this.saveProblem();
         };
@@ -1287,6 +1293,7 @@ export class CphNg {
             cleanUp();
             return;
         }
+        problem.bfCompare.generator.hash = generatorCompileResult.data!.hash;
 
         problem.bfCompare.msg = vscode.l10n.t('Compiling brute force...');
         this.emitProblemChange();
@@ -1302,6 +1309,7 @@ export class CphNg {
             cleanUp();
             return;
         }
+        problem.bfCompare.bruteForce.hash = bruteForceCompileResult.data!.hash;
 
         let cnt = 0;
         while (true) {
@@ -1320,17 +1328,19 @@ export class CphNg {
             this.emitProblemChange();
             const generatorRunResult = await this.runner.runExecutable(
                 generatorCompileResult.data!.outputPath,
-                114514, // TODO
+                Settings.bfCompare.generatorTimeLimit,
                 { useFile: false, data: '' },
                 this.runAbortController,
             );
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
-                problem.bfCompare.msg = vscode.l10n.t(
-                    'Generator run failed: {msg}',
-                    {
-                        msg: generatorRunResult.msg,
-                    },
-                );
+                if (generatorRunResult.verdict !== TCVerdicts.RJ) {
+                    problem.bfCompare.msg = vscode.l10n.t(
+                        'Generator run failed: {msg}',
+                        {
+                            msg: generatorRunResult.msg,
+                        },
+                    );
+                }
                 break;
             }
 
@@ -1341,17 +1351,19 @@ export class CphNg {
             this.emitProblemChange();
             const bruteForceRunResult = await this.runner.runExecutable(
                 bruteForceCompileResult.data!.outputPath,
-                114514, // TODO
+                Settings.bfCompare.bruteForceTimeLimit,
                 { useFile: false, data: generatorRunResult.stdout },
                 this.runAbortController,
             );
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
-                problem.bfCompare.msg = vscode.l10n.t(
-                    'Brute force run failed: {msg}',
-                    {
-                        msg: bruteForceRunResult.msg,
-                    },
-                );
+                if (generatorRunResult.verdict !== TCVerdicts.RJ) {
+                    problem.bfCompare.msg = vscode.l10n.t(
+                        'Brute force run failed: {msg}',
+                        {
+                            msg: bruteForceRunResult.msg,
+                        },
+                    );
+                }
                 break;
             }
 
@@ -1381,11 +1393,13 @@ export class CphNg {
                 solutionCompileResult.data!.checkerOutputPath,
             );
             if (tempTc.result?.verdict !== TCVerdicts.AC) {
-                problem.tcs.push(tempTc);
-                problem.bfCompare.msg = vscode.l10n.t(
-                    'Found a difference in #{cnt} run.',
-                    { cnt },
-                );
+                if (tempTc.result?.verdict !== TCVerdicts.RJ) {
+                    problem.tcs.push(tempTc);
+                    problem.bfCompare.msg = vscode.l10n.t(
+                        'Found a difference in #{cnt} run.',
+                        { cnt },
+                    );
+                }
                 break;
             }
         }

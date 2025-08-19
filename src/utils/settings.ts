@@ -120,6 +120,18 @@ class ComparingSection extends SettingsSection {
     }
 }
 
+class BFCompareSection extends SettingsSection {
+    constructor() {
+        super('bfCompare');
+    }
+    get generatorTimeLimit(): number {
+        return this.get('generatorTimeLimit') as number;
+    }
+    get bruteForceTimeLimit(): number {
+        return this.get('bruteForceTimeLimit') as number;
+    }
+}
+
 class ProblemSection extends SettingsSection {
     constructor() {
         super('problem');
@@ -184,6 +196,7 @@ export default class Settings {
     static companion = new CompanionSection();
     static runner = new RunnerSection();
     static comparing = new ComparingSection();
+    static bfCompare = new BFCompareSection();
     static problem = new ProblemSection();
     static sidebar = new SidebarSection();
 }
