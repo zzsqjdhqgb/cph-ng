@@ -1026,31 +1026,35 @@ export class CphNg {
 
         let hasExpandStatus = false;
         for (const tc of problem.tcs) {
-            if (this.runAbortController.signal.aborted) {
-                tc.result!.verdict = TCVerdicts.SK;
-            } else {
-                await this.run(
-                    compileData.outputPath,
-                    tc,
-                    compileData.checkerOutputPath,
-                );
-                if (!hasExpandStatus) {
-                    tc.isExpand = isExpandVerdict(tc.result!.verdict);
-                    this.emitProblemChange();
-                    hasExpandStatus = tc.isExpand;
+            if (this.runAbortController?.signal.aborted) {
+                if (this.runAbortController.signal.reason === 'onlyOne') {
+                    this.runAbortController = new AbortController();
+                } else {
+                    tc.result!.verdict = TCVerdicts.SK;
+                    continue;
                 }
+            }
+            await this.run(
+                compileData.outputPath,
+                tc,
+                compileData.checkerOutputPath,
+            );
+            if (!hasExpandStatus) {
+                tc.isExpand = isExpandVerdict(tc.result!.verdict);
+                this.emitProblemChange();
+                hasExpandStatus = tc.isExpand;
             }
         }
         this.saveProblem();
         this.runAbortController = undefined;
     }
-    public async stopTcs(): Promise<void> {
+    public async stopTcs(onlyOne: boolean): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
         const problem = this._problem!;
         if (this.runAbortController) {
-            this.runAbortController.abort();
+            this.runAbortController.abort(onlyOne ? 'onlyOne' : undefined);
         } else {
             for (const tc of problem.tcs) {
                 if (isRunningVerdict(tc.result!.verdict)) {

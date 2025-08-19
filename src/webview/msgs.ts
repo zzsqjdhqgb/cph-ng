@@ -41,6 +41,7 @@ export interface RunTcsMsg {
 }
 export interface StopTcsMsg {
     type: 'stopTcs';
+    onlyOne: boolean;
 }
 export interface AddTcMsg {
     type: 'addTc';

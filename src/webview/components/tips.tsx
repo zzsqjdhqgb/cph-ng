@@ -61,6 +61,7 @@ const Tips = () => {
                     item: 'cph-ng.sidebar.hiddenStatuses',
                 } satisfies OpenSettingsMsg),
         },
+        { msg: t('tipMessage8') },
     ];
     const [idx, setIdx] = useState(
         Math.floor(Math.random() * tipMessages.length),

@@ -8,6 +8,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: use relative path in .cph-ng folder to avoid files with same
   filename in different sub-folders
 - **refactor**: enhance checker UI
+- **feat**: allow user to stop only current test case when running all test
+  cases
 
 ## 0.0.12
 

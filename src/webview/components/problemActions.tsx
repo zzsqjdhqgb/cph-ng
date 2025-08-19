@@ -95,9 +95,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             name={t('problemActions.stopTcs')}
                             icon={PlaylistRemoveIcon}
                             color={'warning'}
-                            onClick={() => {
+                            onClick={(e) => {
                                 vscode.postMessage({
                                     type: 'stopTcs',
+                                    onlyOne: e.ctrlKey,
                                 } satisfies StopTcsMsg);
                             }}
                         />
