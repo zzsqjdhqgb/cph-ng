@@ -26,7 +26,7 @@ import {
     unlink,
     writeFile,
 } from 'fs/promises';
-import { basename, dirname, extname, join } from 'path';
+import { basename, dirname, extname, join, relative } from 'path';
 import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { Checker } from '../core/checker';
@@ -120,18 +120,17 @@ export class CphNg {
         }
     }
 
-    public async getBinByCpp(cppFile: string): Promise<string> {
+    public async getBinByCpp(cppPath: string): Promise<string> {
+        const workspaceFolder = vscode.workspace.workspaceFolders
+            ? vscode.workspace.workspaceFolders[0].uri.fsPath
+            : '';
         const dir = renderTemplate(Settings.problem.problemFilePath, [
-            [
-                'workspace',
-                vscode.workspace.workspaceFolders
-                    ? vscode.workspace.workspaceFolders[0].uri.fsPath
-                    : '',
-            ],
-            ['dirname', dirname(cppFile)],
-            ['basename', basename(cppFile)],
-            ['extname', extname(cppFile)],
-            ['basenameNoExt', basename(cppFile, extname(cppFile))],
+            ['workspace', workspaceFolder],
+            ['dirname', dirname(cppPath)],
+            ['relativeDirname', relative(workspaceFolder, dirname(cppPath))],
+            ['basename', basename(cppPath)],
+            ['extname', extname(cppPath)],
+            ['basenameNoExt', basename(cppPath, extname(cppPath))],
         ]);
         return dir;
     }
@@ -775,14 +774,16 @@ export class CphNg {
                     return;
                 }
                 const cppPath = problem.src.path;
+                const workspaceFolder = vscode.workspace.workspaceFolders
+                    ? vscode.workspace.workspaceFolders[0].uri.fsPath
+                    : '';
                 folderPath = renderTemplate(Settings.problem.unzipFolder, [
-                    [
-                        'workspace',
-                        vscode.workspace.workspaceFolders
-                            ? vscode.workspace.workspaceFolders[0].uri.fsPath
-                            : '',
-                    ],
+                    ['workspace', workspaceFolder],
                     ['dirname', dirname(cppPath)],
+                    [
+                        'relativeDirname',
+                        relative(workspaceFolder, dirname(cppPath)),
+                    ],
                     ['basename', basename(cppPath)],
                     ['extname', extname(cppPath)],
                     ['basenameNoExt', basename(cppPath, extname(cppPath))],

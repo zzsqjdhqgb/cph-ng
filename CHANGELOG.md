@@ -5,6 +5,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: add support for brute force comparison
+- **feat**: use relative path in .cph-ng folder to avoid files with same
+  filename in different sub-folders
 - **refactor**: enhance checker UI
 
 ## 0.0.12
