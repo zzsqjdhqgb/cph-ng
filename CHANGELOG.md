@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.1.0
 
 - **feat**: add support for brute force comparison
 - **feat**: use relative path in .cph-ng folder to avoid files with same
