@@ -29,7 +29,7 @@
     "problemActions.deleteProblem": "删除题目",
     "problemActions.loadTcs": "加载测试用例",
     "problemActions.runTcs": "运行所有测试用例",
-    "problemActions.stopTcs": "停止所有测试用例",
+    "problemActions.stopTcs": "停止运行测试用例",
     "problemTitle.dialog.button.chooseChecker": "选择特殊评判",
     "problemTitle.dialog.button.removeChecker": "移除特殊评判",
     "problemTitle.dialog.cancel": "取消",
