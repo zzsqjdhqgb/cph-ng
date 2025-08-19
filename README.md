@@ -31,6 +31,7 @@ This is the next generation of the
 | Store Result and Time   | ❌                    | ✅                       |
 | Cache compiled program  | ❌                    | ✅ [^2]                  |
 | SPJ support             | ❌                    | ✅                       |
+| Brute Force Compare     | ❌                    | ✅                       |
 
 [^1]: They are: AC PC PE WA TLE OLE RE CE SE SK RJ
 
