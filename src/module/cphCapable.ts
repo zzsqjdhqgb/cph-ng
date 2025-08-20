@@ -20,6 +20,7 @@ import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
 import { Logger } from '../utils/io';
 import { Problem } from '../utils/types';
+import { version } from '../../package.json';
 
 export interface CphProblem {
     name: string;
@@ -50,6 +51,7 @@ export class CphCapable {
     public static toProblem(cphProblem: CphProblem): Problem {
         this.logger.trace('toProblem', { cphProblem });
         const problem = {
+            version,
             name: cphProblem.name,
             url: cphProblem.url,
             tcs: cphProblem.tests.map((test) => ({

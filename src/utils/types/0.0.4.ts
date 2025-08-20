@@ -15,49 +15,39 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-export interface TCVerdict {
+export interface TestCaseVerdict {
     name: string;
     fullName: string;
     color: string;
 }
 
-export type TCIO =
+export type TestCaseIO =
     | { useFile: true; path: string }
     | { useFile: false; data: string };
 
-export interface TCResult {
-    verdict: TCVerdict;
+export interface TestCaseResult {
+    verdict: TestCaseVerdict;
     time: number;
-    stdout: TCIO;
-    stderr: TCIO;
-    msg: string;
+    stdout: TestCaseIO;
+    stderr: TestCaseIO;
+    message: string;
 }
 
-export interface TC {
-    stdin: TCIO;
-    answer: TCIO;
+export interface TestCase {
+    stdin: TestCaseIO;
+    answer: TestCaseIO;
     isExpand: boolean;
-    result?: TCResult;
+    result?: TestCaseResult;
 }
 
 export interface Problem {
     name: string;
     url?: string;
-    tcs: TC[];
+    testCases: TestCase[];
     timeLimit: number;
     srcPath: string;
     srcHash?: string;
     isSpecialJudge?: boolean;
     checkerPath?: string;
     checkerHash?: string;
-}
-export interface EmbeddedProblem {
-    name: string;
-    url?: string;
-    tcs: {
-        stdin: string;
-        answer: string;
-    }[];
-    timeLimit: number;
-    spjCode?: string;
 }

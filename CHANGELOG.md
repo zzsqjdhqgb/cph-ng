@@ -2,6 +2,12 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.1.2
+
+- **fix**: prevent the window from becoming unresponsive when old problem data
+  is present
+- **feat**: support more old versions of problem files
+
 ## 0.1.1
 
 - **fix**: an issue with cannot delete problem
