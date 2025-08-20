@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: an issue with cannot delete problem
+
 ## 0.1.0
 
 - **feat**: add support for brute force comparison

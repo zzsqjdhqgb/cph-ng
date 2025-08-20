@@ -177,7 +177,7 @@ class ExtensionManager {
                     'cph-ng.stopTestCases',
                     async () => {
                         this.sidebarProvider.focus();
-                        await this.cphNg.stopTcs();
+                        await this.cphNg.stopTcs(false);
                     },
                 ),
             );

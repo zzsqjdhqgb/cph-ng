@@ -697,6 +697,7 @@ export class CphNg {
         try {
             await access(binPath, constants.F_OK);
             await unlink(binPath);
+            this._problem = undefined;
         } catch {
             io.warn(
                 vscode.l10n.t('Problem file {file} not found.', {
