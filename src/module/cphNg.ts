@@ -52,6 +52,8 @@ import Result, { assignResult } from '../utils/result';
 import { renderTemplate } from '../utils/strTemplate';
 import { CphCapable } from './cphCapable';
 import { FileTypes } from '../webview/msgs';
+import { migration, OldProblem } from '../utils/migration';
+import { version } from '../../package.json';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
@@ -424,6 +426,7 @@ export class CphNg {
                 return;
             }
             this.problem = {
+                version,
                 name: basename(filePath, extname(filePath)),
                 src: { path: filePath },
                 tcs: [],
@@ -494,9 +497,11 @@ export class CphNg {
         try {
             const data = await readFile(binFile);
             try {
-                this.problem = JSON.parse(
-                    gunzipSync(data).toString(),
-                ) satisfies Problem;
+                this.problem = migration(
+                    JSON.parse(
+                        gunzipSync(data).toString(),
+                    ) satisfies OldProblem,
+                );
                 this.logger.info(
                     'Problem loaded',
                     { problem: this._problem },
@@ -544,6 +549,7 @@ export class CphNg {
                     gunzipSync(Buffer.from(embeddedData, 'base64')).toString(),
                 );
                 this.problem = {
+                    version,
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,
                     src: { path: cppFile },

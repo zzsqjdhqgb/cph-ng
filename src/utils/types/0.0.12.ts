@@ -15,30 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-export const isRunningVerdict = (verdict?: TCVerdict): boolean => {
-    return (
-        verdict !== undefined &&
-        ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
-    );
-};
-
-export const isExpandVerdict = (verdict?: TCVerdict): boolean => {
-    return !(
-        (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
-        isRunningVerdict(verdict)
-    );
-};
-
-export class TCVerdict {
+export interface TCVerdict {
     name: string;
     fullName: string;
     color: string;
-
-    constructor(name: string, fullName: string, color: string) {
-        this.name = name;
-        this.fullName = fullName;
-        this.color = color;
-    }
 }
 
 export type TCIO =
@@ -60,27 +40,16 @@ export interface TC {
     result?: TCResult;
 }
 
-export interface FileWithHash {
-    path: string;
-    hash?: string;
-}
-
-export interface BFCompare {
-    generator?: FileWithHash;
-    bruteForce?: FileWithHash;
-    running: boolean;
-    msg: string;
-}
-
 export interface Problem {
-    version: string;
     name: string;
     url?: string;
     tcs: TC[];
     timeLimit: number;
-    src: FileWithHash;
-    checker?: FileWithHash;
-    bfCompare?: BFCompare;
+    srcPath: string;
+    srcHash?: string;
+    isSpecialJudge?: boolean;
+    checkerPath?: string;
+    checkerHash?: string;
 }
 export interface EmbeddedProblem {
     name: string;

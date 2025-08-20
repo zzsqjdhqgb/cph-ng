@@ -43,7 +43,6 @@ jobs:
                   fetch-depth: 0
                   token: ${{ secrets.GITHUB_TOKEN }}
 
-            # 验证版本格式 (仅在发布时)
             - name: Validate version format
               if: github.event_name == 'workflow_dispatch'
               run: |
@@ -54,37 +53,25 @@ jobs:
                     exit 1
                   fi
 
-            # 检查 CHANGELOG 中最新版本是否与输入版本匹配 (仅在发布时)
-            - name: Check CHANGELOG for latest version
+            - name: Check version consistency
               if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
-
-                  # 获取 CHANGELOG.md 中第一个具体版本号（跳过 [Unreleased] 等）
+                  PACKAGE_VERSION=$(node -p "require('./package.json').version")
                   LATEST_VERSION=$(grep -E '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -1 | sed 's/^## //')
 
-                  if [ -z "$LATEST_VERSION" ]; then
-                    echo "Error: No version found in CHANGELOG.md"
-                    echo "Please add a changelog entry for version $VERSION"
-                    echo ""
-                    echo "Expected format in CHANGELOG.md:"
-                    echo "## $VERSION"
-                    echo ""
-                    echo "- Your changes here"
+                  echo "Version comparison:"
+                  echo "Input version: $VERSION"
+                  echo "package.json version: $PACKAGE_VERSION"
+                  echo "CHANGELOG.md version: $LATEST_VERSION"
+                  echo ""
+
+                  if [ -z "$LATEST_VERSION" ] || [ "$VERSION" != "$PACKAGE_VERSION" ] || [ "$VERSION" != "$LATEST_VERSION" ]; then
+                    echo "Version mismatch"
                     exit 1
                   fi
 
-                  if [ "$VERSION" != "$LATEST_VERSION" ]; then
-                    echo "Error: Version mismatch!"
-                    echo "Input version: $VERSION"
-                    echo "Latest version in CHANGELOG.md: $LATEST_VERSION"
-                    echo ""
-                    echo "The version you want to publish ($VERSION) must be the latest version in CHANGELOG.md"
-                    echo "Please update CHANGELOG.md to make $VERSION the first version entry"
-                    exit 1
-                  fi
-
-                  echo "✅ Version $VERSION matches the latest version in CHANGELOG.md"
+                  echo "Versions match"
 
             - uses: pnpm/action-setup@v4
               name: Install pnpm
@@ -98,7 +85,6 @@ jobs:
                   node-version: 22
                   cache: 'pnpm'
 
-            # 高级缓存策略
             - name: Cache dependencies
               uses: actions/cache@v4
               with:
@@ -114,45 +100,30 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            # 创建版本分支和更新版本 (仅在发布时)
-            - name: Create version branch and bump version
+            - name: Create version branch and tag
               if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
                   BRANCH_NAME="release/v${VERSION}"
 
-                  # 配置 git
                   git config --local user.email "action@github.com"
                   git config --local user.name "GitHub Action"
 
-                  # 创建并切换到新分支
                   git checkout -b "$BRANCH_NAME"
-
-                  # 更新版本号
-                  pnpm version "$VERSION" --no-git-tag-version
-
-                  # 提交版本更改
-                  git add package.json
-                  git commit -m "chore: bump version to v${VERSION}"
-
-                  # 推送分支
                   git push origin "$BRANCH_NAME"
 
-                  # 创建并推送标签
                   git tag "v${VERSION}"
                   git push origin "v${VERSION}"
 
             - name: Build
               run: pnpm package
 
-            # 提取 CHANGELOG 内容 (仅在发布时)
             - name: Extract changelog for version
               if: github.event_name == 'workflow_dispatch'
               id: changelog
               run: |
                   VERSION="${{ github.event.inputs.version }}"
 
-                  # 提取该版本的 changelog 内容
                   CHANGELOG_CONTENT=$(awk "/^## $VERSION\$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
 
                   if [ -z "$CHANGELOG_CONTENT" ]; then
@@ -160,14 +131,12 @@ jobs:
                     CHANGELOG_CONTENT="- No changelog content available"
                   fi
 
-                  # 输出到 GitHub Actions 变量，处理多行内容
                   echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_OUTPUT
                   echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
 
                   echo "✅ Extracted changelog content for version $VERSION"
 
-            # 发布到 VS Code Marketplace (仅在发布时)
             - name: Publish to VS Code Marketplace
               if: github.event_name == 'workflow_dispatch'
               run: |
@@ -179,7 +148,6 @@ jobs:
               env:
                   VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
-            # 创建 GitHub Release (仅在发布时)
             - name: Create GitHub Release
               if: github.event_name == 'workflow_dispatch'
               uses: softprops/action-gh-release@v2
@@ -202,7 +170,6 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            # 上传构建产物 (始终执行)
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
@@ -212,13 +179,11 @@ jobs:
                   path: ./*.vsix
                   if-no-files-found: error
 
-            # 构建证明 (始终执行)
             - name: Generate build provenance
               uses: actions/attest-build-provenance@v2
               with:
                   subject-path: ./*.vsix
 
-            # 上传失败日志
             - name: Upload logs on failure
               if: failure()
               uses: actions/upload-artifact@v4

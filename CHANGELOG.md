@@ -2,9 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.1.1 [Unreleased]
 
 - **fix**: an issue with cannot delete problem
+- **feat**: add support for migration from old problem files
 
 ## 0.1.0
 
