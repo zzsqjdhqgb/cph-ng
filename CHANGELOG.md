@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: an issue with cannot delete problem
 - **feat**: add support for migration from old problem files
+- **fix**: do not trim stdout and stderr
 
 ## 0.1.0
 

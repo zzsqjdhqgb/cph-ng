@@ -88,8 +88,8 @@ export class Runner {
                 resolve({
                     verdict,
                     msg,
-                    stdout: stdout.trim(),
-                    stderr: stderr.trim(),
+                    stdout,
+                    stderr,
                     time: endTime - startTime,
                 } satisfies RunnerResult);
             };
