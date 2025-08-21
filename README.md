@@ -18,8 +18,8 @@ This is the next generation of the
 
 ## Comparison with CPH
 
-| Feature                 | CPH                   | CPH-NG                   |
-| ----------------------- | --------------------- | ------------------------ |
+| Feature                 | CPH                  | CPH-NG                  |
+| ----------------------- | -------------------- | ----------------------- |
 | Automatic Compilation   | ✅                    | ✅                       |
 | Intelligent Judge       | ✅                    | ✅                       |
 | Competitive Companion   | ✅                    | ✅                       |
