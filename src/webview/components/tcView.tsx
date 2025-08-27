@@ -131,95 +131,92 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                         />
                     </CphFlex>
                 </AccordionSummary>
-                {tc.isExpand && (
-                    <AccordionDetails>
-                        <CphFlex column>
-                            <CphFlex
-                                smallGap
-                                column
-                            >
-                                <TcDataView
-                                    label={t('tcView.stdin')}
-                                    value={tc.stdin}
-                                    onBlur={(value) => {
-                                        tc.stdin = {
-                                            useFile: false,
-                                            data: value,
-                                        };
-                                        emitUpdate();
-                                    }}
-                                    onChooseFile={() =>
-                                        vscode.postMessage({
-                                            type: 'chooseTcFile',
-                                            idx: idx,
-                                            label: 'stdin',
-                                        } satisfies ChooseTcFileMsg)
-                                    }
-                                />
-                                <TcDataView
-                                    label={t('tcView.answer')}
-                                    value={tc.answer}
-                                    onBlur={(value) => {
-                                        tc.answer = {
-                                            useFile: false,
-                                            data: value,
-                                        };
-                                        emitUpdate();
-                                    }}
-                                    onChooseFile={() => {
-                                        vscode.postMessage({
-                                            type: 'chooseTcFile',
-                                            idx: idx,
-                                            label: 'answer',
-                                        } satisfies ChooseTcFileMsg);
-                                    }}
-                                />
-                            </CphFlex>
-                            {tc.result && (
-                                <>
-                                    <Divider />
-                                    <CphFlex
-                                        smallGap
-                                        column
-                                    >
-                                        <TcDataView
-                                            label={t('tcView.stdout')}
-                                            value={tc.result.stdout}
-                                            readOnly={true}
-                                            outputActions={{
-                                                onSetAnswer: () => {
-                                                    tc.answer =
-                                                        tc.result!.stdout;
-                                                    tc.result = undefined;
-                                                    emitUpdate();
-                                                },
-                                                onCompare: () => {
-                                                    vscode.postMessage({
-                                                        type: 'compareTc',
-                                                        idx: idx,
-                                                    } satisfies CompareTcMsg);
-                                                },
-                                            }}
-                                        />
-                                        <TcDataView
-                                            label={t('tcView.stderr')}
-                                            value={tc.result.stderr}
-                                            readOnly={true}
-                                        />
-                                        <TcDataView
-                                            label={t('tcView.message')}
-                                            value={{
-                                                useFile: false,
-                                                data: tc.result.msg,
-                                            }}
-                                            readOnly={true}
-                                        />
-                                    </CphFlex>
-                                </>
-                            )}
+                <AccordionDetails>
+                    <CphFlex column>
+                        <CphFlex
+                            smallGap
+                            column
+                        >
+                            <TcDataView
+                                label={t('tcView.stdin')}
+                                value={tc.stdin}
+                                onBlur={(value) => {
+                                    tc.stdin = {
+                                        useFile: false,
+                                        data: value,
+                                    };
+                                    emitUpdate();
+                                }}
+                                onChooseFile={() =>
+                                    vscode.postMessage({
+                                        type: 'chooseTcFile',
+                                        idx: idx,
+                                        label: 'stdin',
+                                    } satisfies ChooseTcFileMsg)
+                                }
+                            />
+                            <TcDataView
+                                label={t('tcView.answer')}
+                                value={tc.answer}
+                                onBlur={(value) => {
+                                    tc.answer = {
+                                        useFile: false,
+                                        data: value,
+                                    };
+                                    emitUpdate();
+                                }}
+                                onChooseFile={() => {
+                                    vscode.postMessage({
+                                        type: 'chooseTcFile',
+                                        idx: idx,
+                                        label: 'answer',
+                                    } satisfies ChooseTcFileMsg);
+                                }}
+                            />
                         </CphFlex>
-                    </AccordionDetails>
-                )}
+                        {tc.result && (
+                            <>
+                                <Divider />
+                                <CphFlex
+                                    smallGap
+                                    column
+                                >
+                                    <TcDataView
+                                        label={t('tcView.stdout')}
+                                        value={tc.result.stdout}
+                                        readOnly={true}
+                                        outputActions={{
+                                            onSetAnswer: () => {
+                                                tc.answer = tc.result!.stdout;
+                                                tc.result = undefined;
+                                                emitUpdate();
+                                            },
+                                            onCompare: () => {
+                                                vscode.postMessage({
+                                                    type: 'compareTc',
+                                                    idx: idx,
+                                                } satisfies CompareTcMsg);
+                                            },
+                                        }}
+                                    />
+                                    <TcDataView
+                                        label={t('tcView.stderr')}
+                                        value={tc.result.stderr}
+                                        readOnly={true}
+                                    />
+                                    <TcDataView
+                                        label={t('tcView.message')}
+                                        value={{
+                                            useFile: false,
+                                            data: tc.result.msg,
+                                        }}
+                                        readOnly={true}
+                                    />
+                                </CphFlex>
+                            </>
+                        )}
+                    </CphFlex>
+                </AccordionDetails>
             </Accordion>
         </ErrorBoundary>
     );
