@@ -25,16 +25,31 @@ import Settings from '../utils/settings';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types';
 
+type OnCreateProblem = (
+    problem: Problem,
+    document: vscode.TextDocument,
+) => void;
+
+type CphSubmitEmpty = {
+    empty: true;
+};
+type CphSubmitData = {
+    empty: false;
+    problemName: string;
+    url: string;
+    sourceCode: string;
+    languageId: number;
+};
+type CphSubmitResponse = CphSubmitEmpty | CphSubmitData;
+
 class Companion {
     private logger: Logger = new Logger('companion');
     server: Server;
+    private isSubmitting = false;
+    private pendingSubmitData?: Exclude<CphSubmitResponse, { empty: true }>;
+    private pendingSubmitResolve?: () => void;
 
-    constructor(
-        onCreateProblem: (
-            problem: Problem,
-            document: vscode.TextDocument,
-        ) => void,
-    ) {
+    constructor(onCreateProblem: OnCreateProblem) {
         this.logger.trace('constructor', {
             onCreateProblem,
         });
@@ -47,67 +62,21 @@ class Companion {
 
             request.on('close', async () => {
                 this.logger.debug('Received request', requestData);
-                try {
-                    const problem = CphCapable.toProblem(
-                        JSON.parse(requestData) satisfies CphProblem,
-                    );
-                    const workspaceFolder =
-                        vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-
-                    if (!workspaceFolder) {
-                        this.logger.warn('No workspace folder found');
-                        io.info(
-                            vscode.l10n.t(
-                                'No workspace folder found. Please open a workspace folder.',
-                            ),
-                        );
-                        return;
-                    }
-
-                    problem.src = {
-                        path: join(
-                            workspaceFolder.toString(),
-                            this.getProblemFileName(problem.name),
-                        ),
-                    };
-                    this.logger.info(
-                        'Created problem source path',
-                        problem.src.path,
-                    );
-
-                    try {
-                        await access(problem.src.path);
-                        this.logger.debug('Source file already exists', {
-                            srcPath: problem.src.path,
-                        });
-                    } catch {
-                        this.logger.info('Creating new source file', {
-                            srcPath: problem.src.path,
-                        });
-                        await this.createSourceFile(problem);
-                    }
-
-                    const document = await vscode.workspace.openTextDocument(
-                        problem.src.path,
-                    );
-                    this.logger.info('Opened document', {
-                        document: document.fileName,
-                    });
-                    onCreateProblem(problem, document);
-                } catch (e) {
-                    this.logger.warn('Parse data from companion failed', e);
-                    io.warn(
-                        vscode.l10n.t(
-                            'Parse data from companion failed: {msg}.',
-                            {
-                                msg: (e as Error).message,
-                            },
-                        ),
-                    );
+                if (request.url === '/') {
+                    await this.processProblem(requestData, onCreateProblem);
+                    response.statusCode = 200;
+                } else if (request.url === '/getSubmit') {
+                    response.statusCode = 200;
+                    response.write(JSON.stringify(await this.processSubmit()));
+                } else {
+                    response.statusCode = 404;
                 }
+                response.end(() => {
+                    if (request.url === '/getSubmit') {
+                        this.pendingSubmitResolve?.();
+                    }
+                });
             });
-
-            response.end();
         });
 
         this.server.on('error', (e) => {
@@ -129,6 +98,165 @@ class Companion {
     public dispose() {
         this.logger.trace('dispose');
         this.server.close();
+    }
+
+    private async processProblem(
+        requestData: string,
+        onCreateProblem: OnCreateProblem,
+    ) {
+        this.logger.trace('processProblem', { requestData });
+        try {
+            const problem = CphCapable.toProblem(
+                JSON.parse(requestData) satisfies CphProblem,
+            );
+            const workspaceFolder =
+                vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
+            if (!workspaceFolder) {
+                this.logger.warn('No workspace folder found');
+                io.info(
+                    vscode.l10n.t(
+                        'No workspace folder found. Please open a workspace folder.',
+                    ),
+                );
+                return;
+            }
+
+            problem.src = {
+                path: join(
+                    workspaceFolder.toString(),
+                    this.getProblemFileName(problem.name),
+                ),
+            };
+            this.logger.info('Created problem source path', problem.src.path);
+
+            try {
+                await access(problem.src.path);
+                this.logger.debug('Source file already exists', {
+                    srcPath: problem.src.path,
+                });
+            } catch {
+                this.logger.info('Creating new source file', {
+                    srcPath: problem.src.path,
+                });
+                await this.createSourceFile(problem);
+            }
+
+            const document = await vscode.workspace.openTextDocument(
+                problem.src.path,
+            );
+            this.logger.info('Opened document', {
+                document: document.fileName,
+            });
+            onCreateProblem(problem, document);
+        } catch (e) {
+            this.logger.warn('Parse data from companion failed', e);
+            io.warn(
+                vscode.l10n.t('Parse data from companion failed: {msg}.', {
+                    msg: (e as Error).message,
+                }),
+            );
+        }
+    }
+
+    public async submit(problem?: Problem): Promise<void> {
+        this.logger.trace('submit', { problem });
+        if (!problem) {
+            return;
+        }
+        const languageList = {
+            'GNU G++17 7.3.0': 54,
+            'GNU G++20 13.2 (64 bit, winlibs)': 89,
+            'GNU G++23 14.2 (64 bit, msys2)': 91,
+        };
+        if (this.isSubmitting) {
+            io.warn(vscode.l10n.t('A submission is already in progress.'));
+            return Promise.reject(new Error('Submission already in progress'));
+        }
+
+        let submitLanguageId = Settings.companion.submitLanguage;
+        if (!Object.values(languageList).includes(submitLanguageId)) {
+            const choice = await vscode.window.showQuickPick(
+                Object.keys(languageList),
+                { placeHolder: vscode.l10n.t('Choose submission language') },
+            );
+            if (!choice) {
+                io.info(vscode.l10n.t('Submission cancelled.'));
+                return;
+            }
+            submitLanguageId =
+                languageList[choice as keyof typeof languageList];
+            Settings.companion.submitLanguage = submitLanguageId;
+        }
+
+        const sourceCode = await readFile(problem.src.path, 'utf-8');
+        this.logger.info('Read source code for submission', {
+            srcPath: problem.src.path,
+            sourceCode,
+        });
+        if (sourceCode.trim() === '') {
+            io.warn(
+                vscode.l10n.t('Source code is empty. Submission cancelled.'),
+            );
+            return;
+        }
+        const requestData: Exclude<CphSubmitResponse, { empty: true }> = {
+            empty: false,
+            problemName: problem.name,
+            url: problem.url || '',
+            sourceCode:
+                sourceCode +
+                (Settings.companion.addTimestamp
+                    ? `\n// Submitted via cph-ng at ${new Date().toISOString()}`
+                    : ''),
+            languageId: submitLanguageId,
+        };
+        this.logger.debug('Submission data', requestData);
+
+        this.isSubmitting = true;
+        return await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: vscode.l10n.t('Waiting response from cph-submit...'),
+                cancellable: true,
+            },
+            async (_, token) =>
+                new Promise<void>((resolve, _) => {
+                    this.pendingSubmitData = requestData;
+
+                    const cleanup = () => {
+                        this.isSubmitting = false;
+                        this.pendingSubmitData = undefined;
+                        this.pendingSubmitResolve = undefined;
+                    };
+                    this.pendingSubmitResolve = () => {
+                        this.logger.info(
+                            'Submission payload consumed by companion',
+                        );
+                        cleanup();
+                        resolve();
+                    };
+
+                    token.onCancellationRequested(() => {
+                        io.warn(vscode.l10n.t('Submission cancelled.'));
+                        cleanup();
+                        resolve();
+                    });
+                }),
+        );
+    }
+
+    private async processSubmit(): Promise<CphSubmitResponse> {
+        this.logger.trace('processSubmit');
+        const data = this.pendingSubmitData;
+        if (data) {
+            this.logger.debug('Pending submission data found', data);
+            this.logger.info('Serving pending submission to companion');
+            this.pendingSubmitData = undefined;
+            return data;
+        }
+        this.logger.trace('No pending submission data');
+        return { empty: true };
     }
 
     private async createSourceFile(problem: Problem): Promise<void> {

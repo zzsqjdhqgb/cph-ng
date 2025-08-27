@@ -81,6 +81,7 @@ class ExtensionManager {
             this.sidebarProvider = new SidebarProvider(
                 context.extensionUri,
                 this.cphNg,
+                this.companion,
             );
 
             context.subscriptions.push(
@@ -202,6 +203,14 @@ class ExtensionManager {
                     'cph-ng.deleteProblem',
                     async () => {
                         await this.cphNg.delProblem();
+                    },
+                ),
+            );
+            context.subscriptions.push(
+                vscode.commands.registerCommand(
+                    'cph-ng.submitToCodeforces',
+                    async () => {
+                        await this.companion.submit(this.cphNg.problem);
                     },
                 ),
             );

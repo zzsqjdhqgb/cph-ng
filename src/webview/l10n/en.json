@@ -30,6 +30,7 @@
     "problemActions.loadTcs": "Load Test Cases",
     "problemActions.runTcs": "Run All Test Cases",
     "problemActions.stopTcs": "Stop Test Case",
+    "problemActions.submitToCodeforces": "Submit to Codeforces",
     "problemTitle.dialog.button.chooseChecker": "Choose Checker",
     "problemTitle.dialog.button.removeChecker": "Remove Checker",
     "problemTitle.dialog.cancel": "Cancel",

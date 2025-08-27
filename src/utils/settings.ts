@@ -35,6 +35,16 @@ class SettingsSection {
         this.logger.debug(`Setting value for ${this.name}.${key}:`, value);
         return value;
     }
+    protected set(key: string, value: unknown): Thenable<void> {
+        this.logger.trace(`Setting setting: ${this.name}.${key}`, value);
+        return vscode.workspace
+            .getConfiguration('cph-ng')
+            .update(
+                `${this.name}.${key}`,
+                value,
+                vscode.ConfigurationTarget.Global,
+            );
+    }
 }
 
 class CompilationSection extends SettingsSection {
@@ -90,6 +100,15 @@ class CompanionSection extends SettingsSection {
     }
     get listenPort(): number {
         return this.get('listenPort') as number;
+    }
+    get submitLanguage(): number {
+        return this.get('submitLanguage') as number;
+    }
+    set submitLanguage(value: number) {
+        this.set('submitLanguage', value);
+    }
+    get addTimestamp(): number {
+        return this.get('addTimestamp') as number;
     }
 }
 

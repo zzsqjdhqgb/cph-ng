@@ -1,7 +1,0 @@
-onlyBuiltDependencies:
-    - '@vscode/vsce-sign'
-    - core-js-pure
-    - keytar
-overrides:
-    competitive-programming-helper-ng: 'link:'
-    elements: link:../.local/share/pnpm/global/5/node_modules/@vscode-elements/elements

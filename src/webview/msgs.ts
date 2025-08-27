@@ -92,6 +92,9 @@ export interface StartBfCompareMsg {
 export interface StopBfCompareMsg {
     type: 'stopBfCompare';
 }
+export interface SubmitToCodeforcesMsg {
+    type: 'submitToCodeforces';
+}
 export interface StartChatMsg {
     type: 'startChat';
 }

@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.1.4
+
+- **feat**: submit to codeforces
+
 ## 0.1.3
 
 - **fix**: fixed OLE logic

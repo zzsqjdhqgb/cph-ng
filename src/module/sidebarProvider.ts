@@ -21,6 +21,7 @@ import Settings from '../utils/settings';
 import * as msgs from '../webview/msgs';
 import { io, Logger } from '../utils/io';
 import { access, constants } from 'fs/promises';
+import Companion from './companion';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphNgSidebar';
@@ -30,6 +31,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private helper: CphNg,
+        private companion: Companion,
     ) {
         this.logger.trace('constructor', { _extensionUri });
         helper.addProblemChangeListener((problem, canImport) => {
@@ -159,6 +161,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'stopBfCompare':
                         await this.helper.stopBfCompare();
+                        break;
+                    case 'submitToCodeforces':
+                        await this.companion.submit(this.helper.problem);
                         break;
                     case 'startChat':
                         await vscode.commands.executeCommand(

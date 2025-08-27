@@ -17,6 +17,7 @@
 
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
+import BackupIcon from '@mui/icons-material/Backup';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
@@ -46,6 +47,7 @@ import {
     StartBfCompareMsg,
     StopBfCompareMsg,
     StopTcsMsg,
+    SubmitToCodeforcesMsg,
 } from '../msgs';
 import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
@@ -144,6 +146,20 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                 : undefined
                         }
                     />
+                    {problem.url &&
+                        new URL(problem.url).hostname === 'codeforces.com' && (
+                            <CphButton
+                                larger={true}
+                                name={t('problemActions.submitToCodeforces')}
+                                icon={BackupIcon}
+                                color={'success'}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'submitToCodeforces',
+                                    } satisfies SubmitToCodeforcesMsg);
+                                }}
+                            />
+                        )}
                     <CphButton
                         larger={true}
                         name={t('problemActions.deleteProblem')}

@@ -260,6 +260,28 @@
                         "type": "number",
                         "default": 27121,
                         "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
+                    },
+                    "cph-ng.companion.submitLanguage": {
+                        "type": "number",
+                        "default": -1,
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.submitLanguage.markdownDescription%",
+                        "enum": [
+                            -1,
+                            54,
+                            89,
+                            91
+                        ],
+                        "markdownEnumDescriptions": [
+                            "%cph-ng.configuration.companion.properties.submitLanguage.enumDescriptions.-1%",
+                            "%cph-ng.configuration.companion.properties.submitLanguage.enumDescriptions.54%",
+                            "%cph-ng.configuration.companion.properties.submitLanguage.enumDescriptions.89%",
+                            "%cph-ng.configuration.companion.properties.submitLanguage.enumDescriptions.91%"
+                        ]
+                    },
+                    "cph-ng.companion.addTimestamp": {
+                        "type": "boolean",
+                        "default": true,
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.addTimestamp.markdownDescription%"
                     }
                 }
             },
@@ -386,6 +408,10 @@
             {
                 "command": "cph-ng.deleteProblem",
                 "title": "%cph-ng.commands.deleteProblem%"
+            },
+            {
+                "command": "cph-ng.submitToCodeforces",
+                "title": "%cph-ng.commands.submitToCodeforces%"
             },
             {
                 "command": "cph-ng.exportToEmbedded",

@@ -12,5 +12,13 @@
         "^@mui/[^/]+/esm$",
         "^@mui/[^/]+/esm/[^/]+$"
     ],
-    "cSpell.words": ["divyanshuagrawal", "TCIO", "testlib"]
+    "cSpell.words": [
+        "Codeforces",
+        "divyanshuagrawal",
+        "Kattis",
+        "msys",
+        "TCIO",
+        "testlib",
+        "winlibs"
+    ]
 }

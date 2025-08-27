@@ -18,20 +18,20 @@ This is the next generation of the
 
 ## Comparison with CPH
 
-| Feature                 | CPH                  | CPH-NG                  |
-| ----------------------- | -------------------- | ----------------------- |
-| Automatic Compilation   | ✅                    | ✅                       |
-| Intelligent Judge       | ✅                    | ✅                       |
-| Competitive Companion   | ✅                    | ✅                       |
-| Local Problem Support   | ✅                    | ✅                       |
-| Language Support        | ✅ C/C++ and 8 others | ❌ Only C/C++            |
-| Auto-submit Integration | ✅                    | ❌                       |
-| Load Local Testcases    | ❌                    | ✅                       |
-| Supported Result        | ❌ Only 3             | ✅ AC and 10 others [^1] |
-| Store Result and Time   | ❌                    | ✅                       |
-| Cache compiled program  | ❌                    | ✅ [^2]                  |
-| SPJ support             | ❌                    | ✅                       |
-| Brute Force Compare     | ❌                    | ✅                       |
+| Feature                 | CPH                      | CPH-NG                   |
+| ----------------------- | ------------------------ | ------------------------ |
+| Automatic Compilation   | ✅                       | ✅                       |
+| Intelligent Judge       | ✅                       | ✅                       |
+| Competitive Companion   | ✅                       | ✅                       |
+| Local Problem Support   | ✅                       | ✅                       |
+| Language Support        | ✅ C/C++ and 8 others    | ❌ Only C/C++            |
+| Auto-submit Integration | ✅ Codeforces and Kattis | ❌ Only Codeforces       |
+| Load Local Testcases    | ❌                       | ✅                       |
+| Supported Result        | ❌ Only 3                | ✅ AC and 10 others [^1] |
+| Store Result and Time   | ❌                       | ✅                       |
+| Cache compiled program  | ❌                       | ✅ [^2]                  |
+| SPJ support             | ❌                       | ✅                       |
+| Brute Force Compare     | ❌                       | ✅                       |
 
 [^1]: They are: AC PC PE WA TLE OLE RE CE SE SK RJ
 
