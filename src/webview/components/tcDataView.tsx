@@ -122,7 +122,7 @@ const TcDataView = ({
     };
 
     const commonStyle: CSSProperties = {
-        fontFamily: 'monospace',
+        fontFamily,
         width: '100%',
         overflow: 'auto',
         scrollbarWidth: 'thin',

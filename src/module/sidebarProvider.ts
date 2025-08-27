@@ -243,6 +243,7 @@ window.hiddenStatuses = ${JSON.stringify(Settings.sidebar.hiddenStatuses)};
 window.partyUri = '${Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''}';
 window.language = '${vscode.env.language}';
 window.showTips = '${Settings.sidebar.showTips}';
+window.fontFamily = \`${Settings.sidebar.fontFamily}\`;
 </script>
 </body>
 </html>`;

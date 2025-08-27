@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **feat**: submit to codeforces
 - **docs**: add zh-CN readme
+- **feat**: customize font family
 
 ## 0.1.3
 

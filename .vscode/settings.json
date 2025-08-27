@@ -13,9 +13,12 @@
         "^@mui/[^/]+/esm/[^/]+$"
     ],
     "cSpell.words": [
+        "Cascadia",
         "Codeforces",
+        "Consolas",
         "divyanshuagrawal",
         "Kattis",
+        "Monaspace",
         "msys",
         "TCIO",
         "testlib",

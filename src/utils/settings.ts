@@ -206,6 +206,9 @@ class SidebarSection extends SettingsSection {
     get showTips(): boolean {
         return this.get('showTips') as boolean;
     }
+    get fontFamily(): string {
+        return this.get('fontFamily') as string;
+    }
 }
 
 export default class Settings {

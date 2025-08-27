@@ -56,6 +56,7 @@
     "cph-ng.configuration.sidebar.properties.retainWhenHidden.markdownDescription": "如果为 `true`，即使侧边栏视图被隐藏，它也将**保持活动并保留其状态**。如果为 `false`，侧边栏在隐藏时将被释放，并在再次显示时重新创建，这可能会影响性能或导致短暂的视觉闪烁。设置此项时请考虑你的工作流程和系统资源。",
     "cph-ng.configuration.sidebar.properties.showAcGif.markdownDescription": "启用后，每当问题成功被通过（收到“通过”判决）时，侧边栏中将显示一个**祝贺 GIF**。这为成功的提交提供了视觉反馈。",
     "cph-ng.configuration.sidebar.properties.showTips.markdownDescription": "启用后，一个**随机提示**会在没有题目的时候显示。",
+    "cph-ng.configuration.sidebar.properties.fontFamily.markdownDescription": "设置侧边栏中样例文本的**字体系列**。你可以指定多个字体作为备用列表，用逗号分隔。系统上可用的第一个字体将被使用。例如：`Monaspace, 'Cascadia Code', 'Source Code Pro', Consolas, 'Ubuntu Mono', monospace`。这允许你根据个人喜好自定义文本的外观。",
     "cph-ng.configuration.sidebar.title": "侧边栏",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.AC": "通过",
     "cph-ng.sidebar.hiddenStatuses.enumDescriptions.CE": "编译错误",
