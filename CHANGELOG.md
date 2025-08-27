@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: the expand animation of test case view
+- **refactor**: extract the embedded data function
 
 ## 0.1.4
 

@@ -54,6 +54,12 @@ import { CphCapable } from './cphCapable';
 import { FileTypes } from '../webview/msgs';
 import { migration, OldProblem } from '../utils/migration';
 import { version } from '../../package.json';
+import {
+    EMBEDDED_FOOTER,
+    EMBEDDED_HEADER,
+    buildEmbeddedBlock,
+    extractEmbedded,
+} from '../utils/embedded';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
@@ -70,11 +76,6 @@ type CompileResult = Result<{
     checkerOutputPath?: string;
     checkerHash?: string;
 }>;
-
-const EMBEDDED_HEADER =
-    '////////////////////// CPH-NG DATA STARTS //////////////////////';
-const EMBEDDED_FOOTER =
-    '/////////////////////// CPH-NG DATA ENDS ///////////////////////';
 
 export class CphNg {
     private logger: Logger = new Logger('cphNg');
@@ -525,9 +526,10 @@ export class CphNg {
     private async loadProblemFromEmbedded(cppFile: string): Promise<void> {
         try {
             const cppData = (await readFile(cppFile)).toString();
-            const startIdx = cppData.indexOf(EMBEDDED_HEADER);
-            const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
-            if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
+            const embeddedProblem = extractEmbedded(cppData);
+            if (!embeddedProblem) {
+                const startIdx = cppData.indexOf(EMBEDDED_HEADER);
+                const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
                 if (startIdx !== -1 || endIdx !== -1) {
                     io.warn(
                         vscode.l10n.t('Invalid embedded data in {file}.', {
@@ -539,16 +541,6 @@ export class CphNg {
                 return;
             }
             try {
-                const embeddedData = cppData
-                    .substring(startIdx + EMBEDDED_HEADER.length, endIdx)
-                    .replaceAll('\r', '')
-                    .replaceAll('\n', '')
-                    .replace(/^\s*\/\*\s*/, '')
-                    .replace(/\s*\*\/\s*$/, '')
-                    .trim();
-                const embeddedProblem: EmbeddedProblem = JSON.parse(
-                    gunzipSync(Buffer.from(embeddedData, 'base64')).toString(),
-                );
                 this.problem = {
                     version,
                     name: embeddedProblem.name,
@@ -624,7 +616,7 @@ export class CphNg {
             this.logger.info('Saving problem', { problem }, 'to', binPath);
             this.emitProblemChange();
             await mkdir(dirname(binPath), { recursive: true });
-            return writeFile(
+            await writeFile(
                 binPath,
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
@@ -659,11 +651,6 @@ export class CphNg {
                     await readFile(problem.checker?.path)
                 ).toString();
             }
-            const embeddedData =
-                gzipSync(Buffer.from(JSON.stringify(embeddedProblem)))
-                    .toString('base64')
-                    .match(/.{1,64}/g)
-                    ?.join('\n') || '';
             const cppFile = problem.src.path;
             let cppData = (await readFile(cppFile)).toString();
             const startIdx = cppData.indexOf(EMBEDDED_HEADER);
@@ -674,16 +661,7 @@ export class CphNg {
                     cppData.substring(endIdx + EMBEDDED_FOOTER.length);
             }
             cppData = cppData.trim();
-            cppData += [
-                '',
-                '',
-                EMBEDDED_HEADER,
-                '/*',
-                embeddedData,
-                ' */',
-                EMBEDDED_FOOTER,
-                '',
-            ].join('\n');
+            cppData += buildEmbeddedBlock(embeddedProblem);
             await writeFile(cppFile, cppData);
         } catch (e) {
             io.error(
@@ -700,7 +678,6 @@ export class CphNg {
         }
         const problem = this._problem!;
         const binPath = await this.getBinByCpp(problem.src.path);
-
         try {
             await access(binPath, constants.F_OK);
             await unlink(binPath);
@@ -1099,17 +1076,14 @@ export class CphNg {
             });
             if (fileUri && fileUri[0]) {
                 const path = fileUri[0].fsPath;
-                if (
-                    (option === 'stdin' || option === 'answer') &&
-                    Settings.problem.foundMatchTestCaseBehavior !== 'never'
-                ) {
-                    const isInput = option === 'stdin';
-                    const mainExt = extname(path);
-                    const pairExt = isInput ? ['.ans', '.out'] : ['.in'];
-                    tc[isInput ? 'stdin' : 'answer'] = {
-                        useFile: true,
-                        path,
-                    };
+                const isInput = option === 'stdin';
+                const mainExt = extname(path);
+                const pairExt = isInput ? ['.ans', '.out'] : ['.in'];
+                tc[isInput ? 'stdin' : 'answer'] = {
+                    useFile: true,
+                    path,
+                };
+                if (Settings.problem.foundMatchTestCaseBehavior !== 'never') {
                     for (const ext of pairExt) {
                         const pairPath = path.replace(mainExt, ext);
                         if (
@@ -1141,10 +1115,6 @@ export class CphNg {
                             }
                         }
                     }
-                } else {
-                    throw new Error(
-                        vscode.l10n.t('Unknown option: {option}.', { option }),
-                    );
                 }
                 this.saveProblem();
             }
