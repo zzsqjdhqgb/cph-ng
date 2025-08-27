@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## 0.1.4
 
 - **feat**: submit to codeforces
+- **docs**: add zh-CN readme
 
 ## 0.1.3
 

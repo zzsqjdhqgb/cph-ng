@@ -1,9 +1,15 @@
 # CPH NG
 
-> [!WARNING]
-> This extension is a work in progress and may have bugs, incomplete features and break changes without notice.
+[简体中文](https://github.com/langningchen/cph-ng/blob/main/README.zh-CN.md) | English
 
-> Quickly compile, run and judge competitive programming problems in VS Code. Automatically download testcases , or write & test your own problems.
+![](https://vsmarketplacebadges.dev/version-short/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/installs/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/downloads/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/rating-star/langningchen.cph-ng.svg)
+
+> [!WARNING]  
+> This extension is a work in progress and may have bugs, incomplete features
+> and break changes without notice.
+
+> Quickly compile, run and judge competitive programming problems in VS Code.
+> Automatically download testcases , or write & test your own problems.
 
 This is the next generation of the
 [Competitive Programming Helper](https://github.com/agrawal-d/cph).
