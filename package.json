@@ -13,7 +13,7 @@
         "url": "https://github.com/langningchen/cph-ng"
     },
     "engines": {
-        "vscode": "^1.102.0"
+        "vscode": "^1.103.0"
     },
     "categories": [
         "Other"
