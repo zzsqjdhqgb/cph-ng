@@ -1169,7 +1169,7 @@ export class CphNg {
                 [vscode.l10n.t('Available files')]: ['exe', 'c', 'cpp'],
                 [vscode.l10n.t('All files')]: ['*'],
             },
-            openLabel: vscode.l10n.t('Select {fileType} File', {
+            title: vscode.l10n.t('Select {fileType} File', {
                 fileType:
                     fileType === 'checker'
                         ? vscode.l10n.t('Checker')

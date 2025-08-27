@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: the expand animation of test case view
 - **refactor**: extract the embedded data function
+- **feat**: add localization for folder selection
 
 ## 0.1.4
 

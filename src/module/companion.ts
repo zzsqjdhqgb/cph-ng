@@ -109,22 +109,31 @@ class Companion {
             const problem = CphCapable.toProblem(
                 JSON.parse(requestData) satisfies CphProblem,
             );
-            const workspaceFolder =
-                vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+            const folder = await vscode.window
+                .showOpenDialog({
+                    canSelectFolders: true,
+                    canSelectFiles: false,
+                    canSelectMany: false,
+                    title: vscode.l10n.t(
+                        'Select a folder to save the problem source file',
+                    ),
+                })
+                .then((uris) => uris?.[0]);
 
-            if (!workspaceFolder) {
-                this.logger.warn('No workspace folder found');
+            if (!folder) {
+                this.logger.warn('No folder selected');
                 io.info(
                     vscode.l10n.t(
-                        'No workspace folder found. Please open a workspace folder.',
+                        'No folder selected, problem creation cancelled.',
                     ),
                 );
                 return;
             }
 
+            this.logger.trace('Using folder', { folder });
             problem.src = {
                 path: join(
-                    workspaceFolder.toString(),
+                    folder.toString(),
                     this.getProblemFileName(problem.name),
                 ),
             };
