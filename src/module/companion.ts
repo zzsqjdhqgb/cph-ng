@@ -24,6 +24,7 @@ import { io, Logger } from '../utils/io';
 import Settings from '../utils/settings';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types';
+import { FolderChooser } from '../utils/folderChooser';
 
 type OnCreateProblem = (
     problem: Problem,
@@ -109,16 +110,11 @@ class Companion {
             const problem = CphCapable.toProblem(
                 JSON.parse(requestData) satisfies CphProblem,
             );
-            const folder = await vscode.window
-                .showOpenDialog({
-                    canSelectFolders: true,
-                    canSelectFiles: false,
-                    canSelectMany: false,
-                    title: vscode.l10n.t(
-                        'Select a folder to save the problem source file',
-                    ),
-                })
-                .then((uris) => uris?.[0]);
+            const folder = await FolderChooser.chooseFolder(
+                vscode.l10n.t(
+                    'Select a folder to save the problem source file',
+                ),
+            );
 
             if (!folder) {
                 this.logger.warn('No folder selected');
@@ -132,10 +128,10 @@ class Companion {
 
             this.logger.trace('Using folder', { folder });
             problem.src = {
-                path: join(
-                    folder.toString(),
+                path: vscode.Uri.joinPath(
+                    folder,
                     this.getProblemFileName(problem.name),
-                ),
+                ).toString(),
             };
             this.logger.info('Created problem source path', problem.src.path);
 

@@ -83,6 +83,7 @@
     "No folder selected, problem creation cancelled.": "未选择文件夹，题目创建已取消。",
     "No problem found. Please create a problem first.": "未找到题目，请先创建一个题目。",
     "No test cases found in the zip file.": "在 ZIP 压缩文件中未找到测试用例。",
+    "No workspace folder is open.": "未打开任何工作区文件夹。",
     "OK": "确认",
     "Output Limit Exceeded": "输出超限",
     "Parse data from companion failed: {msg}.": "从伴侣解析数据失败：{msg}。",

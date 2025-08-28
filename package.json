@@ -99,6 +99,24 @@
         },
         "configuration": [
             {
+                "title": "%cph-ng.configuration.basic.title%",
+                "properties": {
+                    "cph-ng.basic.folderOpener": {
+                        "type": "string",
+                        "default": "tree",
+                        "enum": [
+                            "tree",
+                            "flat"
+                        ],
+                        "markdownDescription": "%cph-ng.configuration.basic.properties.folderOpener.markdownDescription%",
+                        "markdownEnumDescriptions": [
+                            "%cph-ng.configuration.basic.properties.folderOpener.enumDescriptions.tree%",
+                            "%cph-ng.configuration.basic.properties.folderOpener.enumDescriptions.flat%"
+                        ]
+                    }
+                }
+            },
+            {
                 "title": "%cph-ng.configuration.compilation.title%",
                 "properties": {
                     "cph-ng.compilation.cCompiler": {

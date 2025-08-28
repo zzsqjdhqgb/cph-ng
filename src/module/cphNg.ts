@@ -60,6 +60,7 @@ import {
     buildEmbeddedBlock,
     extractEmbedded,
 } from '../utils/embedded';
+import { FolderChooser } from '../utils/folderChooser';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
@@ -785,19 +786,14 @@ export class CphNg {
                 }
             } else if (option === 'folder') {
                 this.logger.debug('Loading test cases from folder');
-                const folderUri = await vscode.window.showOpenDialog({
-                    canSelectFiles: false,
-                    canSelectFolders: true,
-                    canSelectMany: false,
-                    title: vscode.l10n.t(
-                        'Choose a folder containing test cases',
-                    ),
-                });
+                const folderUri = await FolderChooser.chooseFolder(
+                    vscode.l10n.t('Choose a folder containing test cases'),
+                );
                 if (!folderUri) {
                     this.logger.debug('User cancelled folder selection');
                     return;
                 }
-                folderPath = folderUri[0].fsPath;
+                folderPath = folderUri.fsPath;
                 this.logger.info('Using folder:', folderPath);
             } else {
                 const errorMsg = vscode.l10n.t('Unknown option: {option}.', {

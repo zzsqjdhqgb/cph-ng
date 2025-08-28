@@ -47,6 +47,15 @@ class SettingsSection {
     }
 }
 
+class BasicSection extends SettingsSection {
+    constructor() {
+        super('basic');
+    }
+    get folderOpener(): 'tree' | 'flat' {
+        return this.get('folderOpener') as 'tree' | 'flat';
+    }
+}
+
 class CompilationSection extends SettingsSection {
     constructor() {
         super('compilation');
@@ -212,6 +221,7 @@ class SidebarSection extends SettingsSection {
 }
 
 export default class Settings {
+    static basic = new BasicSection();
     static compilation = new CompilationSection();
     static cache = new CacheSection();
     static cphCapable = new CphCapableSection();
