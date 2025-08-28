@@ -44,19 +44,19 @@ function main() {
         }
 
         // Copy pre-commit hook
-        const sourceHook = path.join('scripts', 'pre-commit');
-        const targetHook = path.join(hooksDir, 'pre-commit');
+        const preCommitSource = path.join('scripts', 'pre-commit');
+        const preCommitTarget = path.join(hooksDir, 'pre-commit');
 
-        if (!fs.existsSync(sourceHook)) {
-            log(`❌ Source hook not found: ${sourceHook}`, 'red');
+        if (!fs.existsSync(preCommitSource)) {
+            log(`✌ Source hook not found: ${preCommitSource}`, 'red');
             process.exit(1);
         }
 
-        fs.copyFileSync(sourceHook, targetHook);
+        fs.copyFileSync(preCommitSource, preCommitTarget);
 
         // Make it executable (works on Unix-like systems)
         try {
-            fs.chmodSync(targetHook, 0o755);
+            fs.chmodSync(preCommitTarget, 0o755);
         } catch (error) {
             log(
                 `⚠️  Could not make hook executable: ${error.message}`,
@@ -69,10 +69,41 @@ function main() {
         }
 
         log(`✅ Pre-commit hook installed successfully!`, 'green');
-        log(`📍 Location: ${targetHook}`, 'blue');
+        log(`📍 Location: ${preCommitTarget}`, 'blue');
+
+        // Copy commit-msg hook for commitlint
+        const commitMsgSource = path.join('scripts', 'commit-msg');
+        const commitMsgTarget = path.join(hooksDir, 'commit-msg');
+
+        if (fs.existsSync(commitMsgSource)) {
+            fs.copyFileSync(commitMsgSource, commitMsgTarget);
+            try {
+                fs.chmodSync(commitMsgTarget, 0o755);
+            } catch (error) {
+                log(
+                    `⚠️  Could not make commit-msg hook executable: ${error.message}`,
+                    'yellow',
+                );
+                log(
+                    '  You may need to run: chmod +x .git/hooks/commit-msg',
+                    'yellow',
+                );
+            }
+            log(`✅ commit-msg hook installed successfully!`, 'green');
+            log(`📍 Location: ${commitMsgTarget}`, 'blue');
+        } else {
+            log(
+                `⚠️  commit-msg hook source not found: ${commitMsgSource}`,
+                'yellow',
+            );
+        }
         log('', 'reset');
         log(
-            'The hook will now check translation completeness before each commit.',
+            'The pre-commit hook checks translation completeness and formats code.',
+            'reset',
+        );
+        log(
+            'The commit-msg hook validates your commit message with commitlint.',
             'reset',
         );
         log(

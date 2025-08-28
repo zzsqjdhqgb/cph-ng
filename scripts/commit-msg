@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+if command -v git >/dev/null 2>&1; then
+  REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+fi
+
+MSG_FILE="$1"
+
+if command -v pnpm >/dev/null 2>&1; then
+  PNPM_BIN=pnpm
+else
+  PNPM_BIN=npx
+fi
+
+if [ -f "$MSG_FILE" ]; then
+  $PNPM_BIN commitlint --edit "$MSG_FILE"
+  STATUS=$?
+else
+  echo "commit-msg: cannot find commit message file: $MSG_FILE" >&2
+  STATUS=1
+fi
+
+exit $STATUS
