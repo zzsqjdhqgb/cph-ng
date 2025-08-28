@@ -133,7 +133,7 @@ class Companion {
                 path: vscode.Uri.joinPath(
                     folder,
                     this.getProblemFileName(problem.name),
-                ).toString(),
+                ).fsPath,
             };
             this.logger.info('Created problem source path', problem.src.path);
 
