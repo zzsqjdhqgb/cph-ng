@@ -1,18 +1,6 @@
-name: Build & Publish
+name: Release
 
 on:
-    push:
-        branches:
-            - main
-        paths-ignore:
-            - '*.md'
-            - 'LICENSE'
-            - '.gitignore'
-    pull_request:
-        paths-ignore:
-            - '*.md'
-            - 'LICENSE'
-            - '.gitignore'
     workflow_dispatch:
         inputs:
             version:
@@ -30,11 +18,9 @@ permissions:
     attestations: write
 
 jobs:
-    build-and-publish:
+    release:
         runs-on: ubuntu-latest
-        environment:
-            ${{ github.event_name == 'workflow_dispatch' && 'production' || ''
-            }}
+        environment: production
 
         steps:
             - name: Checkout
@@ -44,7 +30,6 @@ jobs:
                   token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Validate version format
-              if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
                   if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
@@ -54,7 +39,6 @@ jobs:
                   fi
 
             - name: Check version consistency
-              if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
                   PACKAGE_VERSION=$(node -p "require('./package.json').version")
@@ -73,35 +57,13 @@ jobs:
 
                   echo "Versions match"
 
-            - uses: pnpm/action-setup@v4
-              name: Install pnpm
+            - name: Setup Node + PNPM
+              uses: ./.github/actions/setup-node-pnpm
               with:
-                  version: 10
-                  run_install: false
-
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: 'pnpm'
-
-            - name: Cache dependencies
-              uses: actions/cache@v4
-              with:
-                  path: |
-                      ~/.pnpm-store
-                      node_modules
-                  key:
-                      ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml')
-                      }}
-                  restore-keys: |
-                      ${{ runner.os }}-pnpm-
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+                  node-version: '22'
+                  pnpm-version: '10'
 
             - name: Create version branch and tag
-              if: github.event_name == 'workflow_dispatch'
               run: |
                   VERSION="${{ github.event.inputs.version }}"
                   BRANCH_NAME="release/v${VERSION}"
@@ -115,16 +77,15 @@ jobs:
                   git tag "v${VERSION}"
                   git push origin "v${VERSION}"
 
-            - name: Build
+            - name: Package extension
               run: pnpm package
 
             - name: Extract changelog for version
-              if: github.event_name == 'workflow_dispatch'
               id: changelog
               run: |
                   VERSION="${{ github.event.inputs.version }}"
 
-                  CHANGELOG_CONTENT=$(awk "/^## $VERSION\$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
+                  CHANGELOG_CONTENT=$(awk "/^## $VERSION$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
 
                   if [ -z "$CHANGELOG_CONTENT" ]; then
                     echo "Warning: No changelog content found for version $VERSION"
@@ -135,10 +96,7 @@ jobs:
                   echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
 
-                  echo "✅ Extracted changelog content for version $VERSION"
-
             - name: Publish to VS Code Marketplace
-              if: github.event_name == 'workflow_dispatch'
               run: |
                   if [ "${{ github.event.inputs.pre-release }}" = "true" ]; then
                     pnpm run publish --pre-release
@@ -149,7 +107,6 @@ jobs:
                   VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
             - name: Create GitHub Release
-              if: github.event_name == 'workflow_dispatch'
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: v${{ github.event.inputs.version }}
@@ -173,9 +130,7 @@ jobs:
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
-                  name:
-                      extension-${{ github.event_name == 'workflow_dispatch' &&
-                      github.event.inputs.version || github.sha }}
+                  name: extension-${{ github.event.inputs.version }}
                   path: ./*.vsix
                   if-no-files-found: error
 
@@ -183,13 +138,3 @@ jobs:
               uses: actions/attest-build-provenance@v2
               with:
                   subject-path: ./*.vsix
-
-            - name: Upload logs on failure
-              if: failure()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: build-logs-${{ github.sha }}
-                  path: |
-                      .pnpm-debug.log*
-                      npm-debug.log*
-                  if-no-files-found: ignore

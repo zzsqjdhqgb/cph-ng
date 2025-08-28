@@ -1,0 +1,43 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+        paths-ignore:
+            - '*.md'
+            - 'LICENSE'
+            - '.gitignore'
+    pull_request:
+        branches: [main]
+        paths-ignore:
+            - '*.md'
+            - 'LICENSE'
+            - '.gitignore'
+
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    issues: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Setup Node + PNPM
+              uses: ./.github/actions/setup-node-pnpm
+              with:
+                  node-version: '22'
+                  pnpm-version: '10'
+
+            - name: Lint
+              run: pnpm lint
+
+            - name: Build
+              run: pnpm compile
+
+            - name: Comment linked issues (on push success)
+              if: success() && github.event_name == 'push'
+              uses: ./.github/actions/comment-linked-issues
