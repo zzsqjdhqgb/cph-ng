@@ -1,6 +1,6 @@
 name: Feature Request
 description: A new feature or enhancement
-labels: enhancement, needs-triage
+labels: enhancement
 assignees: langningchen
 title: 'feat: '
 body:
