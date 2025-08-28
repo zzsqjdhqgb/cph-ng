@@ -300,6 +300,11 @@
                         "type": "boolean",
                         "default": true,
                         "markdownDescription": "%cph-ng.configuration.companion.properties.addTimestamp.markdownDescription%"
+                    },
+                    "cph-ng.companion.chooseSaveFolder": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.chooseSaveFolder.markdownDescription%"
                     }
                 }
             },

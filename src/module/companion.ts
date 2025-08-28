@@ -110,11 +110,13 @@ class Companion {
             const problem = CphCapable.toProblem(
                 JSON.parse(requestData) satisfies CphProblem,
             );
-            const folder = await FolderChooser.chooseFolder(
-                vscode.l10n.t(
-                    'Select a folder to save the problem source file',
-                ),
-            );
+            const folder = Settings.companion.chooseSaveFolder
+                ? await FolderChooser.chooseFolder(
+                      vscode.l10n.t(
+                          'Select a folder to save the problem source file',
+                      ),
+                  )
+                : vscode.workspace.workspaceFolders?.[0].uri;
 
             if (!folder) {
                 this.logger.warn('No folder selected');

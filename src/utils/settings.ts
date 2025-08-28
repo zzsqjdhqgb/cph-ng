@@ -119,6 +119,9 @@ class CompanionSection extends SettingsSection {
     get addTimestamp(): number {
         return this.get('addTimestamp') as number;
     }
+    get chooseSaveFolder(): boolean {
+        return this.get('chooseSaveFolder') as boolean;
+    }
 }
 
 class RunnerSection extends SettingsSection {
