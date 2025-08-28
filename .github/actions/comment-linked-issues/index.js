@@ -42,10 +42,7 @@ module.exports = async function run({ github, context, core }) {
 
     const issues = Array.from(issueSet);
     const shaLinks = commits
-        .map(
-            (c) =>
-                `- ${c.id.substring(0, 7)}: https://github.com/${owner}/${repo}/commit/${c.id}`,
-        )
+        .map((c) => `- ${c.id.substring(0, 7)}: ${c.message.split('\n')[0]}`)
         .join('\n');
     const runId = process.env.GITHUB_RUN_ID;
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
@@ -70,7 +67,8 @@ module.exports = async function run({ github, context, core }) {
                 `${mention} 👋 The CI build has passed.\n\n` +
                 `Related commits:\n${shaLinks}\n\n` +
                 `Workflow run details: ${runUrl}\n\n` +
-                `Please try these changes to see if they resolve your issue. If the problem persists, please reply in this issue.`;
+                `Please download the \`vsix\` artifact from the workflow run and install it in your VS Code instance to test the changes.\n\n` +
+                `If the problem persists, please reply in this issue.`;
 
             const { data: comments } = await github.rest.issues.listComments({
                 owner,
