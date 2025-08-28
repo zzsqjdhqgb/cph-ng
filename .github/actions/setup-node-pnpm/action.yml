@@ -1,7 +1,5 @@
 name: Setup Node and PNPM
-description:
-    Checkout repo, setup PNPM and Node.js (with pnpm cache), then install
-    dependencies
+description: Setup PNPM and Node.js (with pnpm cache), then install dependencies
 inputs:
     node-version:
         description: Node.js version to use
@@ -14,11 +12,6 @@ inputs:
 runs:
     using: composite
     steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-          with:
-              fetch-depth: 0
-
         - name: Setup PNPM
           uses: pnpm/action-setup@v4
           with:
