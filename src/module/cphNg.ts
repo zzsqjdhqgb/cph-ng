@@ -250,8 +250,7 @@ export class CphNg {
                 return compileResult;
             }
 
-            try {
-                await access(problem.checker.path, constants.X_OK);
+            if (!['.c', '.cpp'].includes(extname(problem.checker.path))) {
                 return {
                     verdict: TCVerdicts.UKE,
                     msg: '',
@@ -261,7 +260,7 @@ export class CphNg {
                         checkerOutputPath: problem.checker?.path,
                     },
                 };
-            } catch {}
+            }
 
             const checkerCompileResult = await this.doCompile(
                 problem.checker,

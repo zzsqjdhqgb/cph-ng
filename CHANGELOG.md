@@ -8,6 +8,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **refactor**: extract the embedded data function
 - **feat**: implement folder chooser utility and add configuration options for
   folder selection method
+- **fix**: improve checker path validation by checking file extensions
 
 ## 0.1.4
 
