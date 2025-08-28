@@ -9,7 +9,7 @@
  * @param {{ github: GitHubWithGraphQL; context: ActionsContext; core: Core }} deps
  * @returns {Promise<void>}
  */
-export default async function run({ github, context, core }) {
+module.exports = async function run({ github, context, core }) {
     if (context.eventName !== 'push') {
         core.info('Not a push event; skipping comments.');
         return;
@@ -128,4 +128,4 @@ export default async function run({ github, context, core }) {
             );
         }
     }
-}
+};
