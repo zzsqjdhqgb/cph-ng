@@ -146,20 +146,32 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                 : undefined
                         }
                     />
-                    {problem.url &&
-                        new URL(problem.url).hostname === 'codeforces.com' && (
-                            <CphButton
-                                larger={true}
-                                name={t('problemActions.submitToCodeforces')}
-                                icon={BackupIcon}
-                                color={'success'}
-                                onClick={() => {
-                                    vscode.postMessage({
-                                        type: 'submitToCodeforces',
-                                    } satisfies SubmitToCodeforcesMsg);
-                                }}
-                            />
-                        )}
+                    {(() => {
+                        if (!problem.url) return null;
+                        try {
+                            if (
+                                new URL(problem.url).hostname ===
+                                'codeforces.com'
+                            ) {
+                                return (
+                                    <CphButton
+                                        larger={true}
+                                        name={t(
+                                            'problemActions.submitToCodeforces',
+                                        )}
+                                        icon={BackupIcon}
+                                        color={'success'}
+                                        onClick={() => {
+                                            vscode.postMessage({
+                                                type: 'submitToCodeforces',
+                                            } satisfies SubmitToCodeforcesMsg);
+                                        }}
+                                    />
+                                );
+                            }
+                        } catch {}
+                        return null;
+                    })()}
                     <CphButton
                         larger={true}
                         name={t('problemActions.deleteProblem')}
