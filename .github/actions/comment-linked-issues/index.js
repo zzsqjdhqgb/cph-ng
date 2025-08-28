@@ -103,6 +103,26 @@ module.exports = async function run({ github, context, core }) {
                 }
             }
 
+            const labelName = 'waiting-for-release';
+            const hasLabel =
+                Array.isArray(issue.labels) &&
+                issue.labels.some((l) =>
+                    typeof l === 'string'
+                        ? l === labelName
+                        : l?.name === labelName,
+                );
+            if (hasLabel) {
+                core.info(`Issue #${number} already has label '${labelName}'.`);
+            } else {
+                await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: number,
+                    labels: [labelName],
+                });
+                core.info(`Added label '${labelName}' to issue #${number}.`);
+            }
+
             const exists = comments.some(
                 (c) => c.body && c.body.includes(`<!-- ${currentMarker} -->`),
             );
