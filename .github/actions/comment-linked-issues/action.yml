@@ -8,62 +8,6 @@ runs:
           uses: actions/github-script@v7
           with:
               script: |
-                  if (context.eventName !== 'push') {
-                    core.info('Not a push event; skipping comments.');
-                    return;
-                  }
-
-                  const owner = context.repo.owner;
-                  const repo = context.repo.repo;
-                  const commits = context.payload.commits || [];
-
-                  const issueSet = new Set();
-
-                  function collectIssuesFromMessage(msg) {
-                    if (!msg) return;
-                    for (const m of msg.matchAll(/#(\d+)/g)) {
-                      issueSet.add(Number(m[1]));
-                    }
-                  }
-
-                  for (const c of commits) {
-                    collectIssuesFromMessage(c.message || '');
-                  }
-
-                  if (issueSet.size === 0) {
-                    core.info('No linked issues found in commit messages.');
-                    return;
-                  }
-
-                  const issues = Array.from(issueSet);
-                  const shaLinks = commits.map(c => `- ${c.id.substring(0,7)}: https://github.com/${owner}/${repo}/commit/${c.id}`).join('\n');
-                  const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-
-                  for (const number of issues) {
-                    try {
-                      // Skip PRs; only comment on issues
-                      const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number: number });
-                      if (issue.pull_request) {
-                        core.info(`#${number} is a pull request; skipping.`);
-                        continue;
-                      }
-
-                      const mention = issue.user?.login ? `@${issue.user.login}` : '';
-                      const body = `<!-- cph-ng-ci-notify:${process.env.GITHUB_RUN_ID} -->\n` +
-                        `${mention} 👋 The CI build has passed.\n\n` +
-                        `Related commits:\n${shaLinks}\n\n` +
-                        `Workflow run details: ${runUrl}\n\n` +
-                        `Please try these changes to see if they resolve your issue. If the problem persists, please reply in this issue.`;
-
-                      const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number, per_page: 100 });
-                      const exists = comments.some(c => c.body && c.body.includes(`cph-ng-ci-notify:${process.env.GITHUB_RUN_ID}`));
-                      if (exists) {
-                        core.info(`Comment for issue #${number} already exists for this run.`);
-                        continue;
-                      }
-                      await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
-                      core.info(`Commented on issue #${number}.`);
-                    } catch (err) {
-                      core.warning(`Failed to comment on issue #${number}: ${err.message}`);
-                    }
-                  }
+                  const path = require('path');
+                  const run = require(path.join(process.env.GITHUB_WORKSPACE, '.github', 'actions', 'comment-linked-issues', 'index.js'));
+                  await run({ github, context, core });

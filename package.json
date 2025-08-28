@@ -500,6 +500,10 @@
         "check-translations": "node scripts/pre-commit"
     },
     "devDependencies": {
+        "@actions/core": "^1.11.1",
+        "@actions/github": "^6.0.0",
+        "@octokit/rest": "^21.0.2",
+        "@octokit/webhooks-types": "^7.5.0",
         "@babel/preset-react": "^7.27.1",
         "@commitlint/cli": "^19.8.1",
         "@commitlint/config-conventional": "^19.8.1",
