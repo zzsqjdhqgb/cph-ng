@@ -1,0 +1,54 @@
+name: Feature Request
+description: A new feature or enhancement
+labels: enhancement, needs-triage
+type: Feature
+assignees: langningchen
+title: 'feat: '
+body:
+    - type: markdown
+      attributes:
+          value:
+              Thank you for suggesting a feature! Please provide as much detail
+              as possible to help us understand the problem, evaluate the
+              request, and implement a solution.
+    - type: input
+      attributes:
+          label: Summary
+          description: A short, descriptive title for the feature request.
+          placeholder: Brief summary of the requested feature
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Proposed Solution
+          description:
+              Describe a possible implementation, API changes, or how the
+              feature might work.
+          placeholder:
+              Describe the proposed approach, examples, or expected behavior.
+    - type: dropdown
+      attributes:
+          label: Priority
+          description: How important is this feature for your workflow?
+          options:
+              - label: Low
+                value: low
+              - label: Medium
+                value: medium
+              - label: High
+                value: high
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Benefits / Impact
+          description:
+              Describe the expected benefits, impact on users, or metrics.
+          placeholder: Expected improvements and any measurable outcomes.
+    - type: textarea
+      attributes:
+          label: Additional Context / Screenshots
+          description:
+              Add any other context, design mockups, or screenshots that would
+              help.
+          placeholder: Links or screenshots here

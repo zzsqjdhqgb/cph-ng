@@ -1,0 +1,61 @@
+name: Bug Report
+description: Something isn't working as expected
+labels: bug, needs-triage
+type: Bug
+assignees: langningchen
+title: 'bug: '
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for taking the time to report a bug! Please fill in the
+              information below to help us reproduce and fix the issue.
+              Before submitting, please search the existing issues to see if
+              someone else has already reported the same bug.
+    - type: input
+      attributes:
+          label: Extension Version
+          description:
+              The version of the extension you are using, you can find it in the
+              VSCode extensions panel.
+          placeholder: 0.1.0
+      validations:
+          required: true
+    - type: input
+      attributes:
+          label: VSCode Version
+          description:
+              The version of VSCode you are using, you can find it in the Help >
+              About menu. Click `Copy` to copy the version to your clipboard.
+          placeholder: |
+              Version: 1.104.0-insider (user setup) 
+              Commit: 4a31639f5f6e1ba6f2521ca73430f3d59eb97524
+              Date: 2025-08-27T07:48:03.836Z
+              Electron: 37.2.3
+              ElectronBuildId: 12035395
+              Chromium: 138.0.7204.100
+              Node.js: 22.17.0
+              V8: 13.8.500258-electron.0
+              OS: Windows_NT x64 10.0.19045
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Description
+          description: Describe the bug
+          placeholder: A clear and concise description of what the bug is.
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Reproduction Steps
+          description: Describe the steps to reproduce the behavior
+          placeholder: Steps to reproduce the behavior
+    - type: textarea
+      attributes:
+          label: Log Output
+          description:
+              If applicable, add log output to help explain your problem. You
+              can find the logs in the VSCode output panel. Make sure to not
+              include any sensitive information.
+          placeholder: Log output here
