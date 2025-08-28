@@ -30,12 +30,9 @@ body:
           label: Priority
           description: How important is this feature for your workflow?
           options:
-              - label: Low
-                value: low
-              - label: Medium
-                value: medium
-              - label: High
-                value: high
+              - Low
+              - Medium
+              - High
       validations:
           required: true
     - type: textarea
