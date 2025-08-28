@@ -16,6 +16,7 @@ module.exports = async function run({ github, context, core }) {
         const owner = context.repo.owner;
         const repo = context.repo.repo;
         const labelName = 'waiting-for-release';
+        const releasedLabelName = 'released';
 
         core.info(
             `Fetching open issues labeled '${labelName}' to comment and close for release v${version}...`,
@@ -45,8 +46,6 @@ module.exports = async function run({ github, context, core }) {
 
                 const body = [
                     `🎉 Version v${version} has been released: ${releaseUrl}`,
-                    '',
-                    'This issue was labeled `waiting-for-release` and is now being closed with the official release.',
                     'If the problem persists, please reopen this issue or file a new one.',
                 ].join('\n');
 
@@ -62,6 +61,38 @@ module.exports = async function run({ github, context, core }) {
                     issue_number: issue.number,
                     state: 'closed',
                 });
+
+                try {
+                    await github.rest.issues.removeLabel({
+                        owner,
+                        repo,
+                        issue_number: issue.number,
+                        name: labelName,
+                    });
+                    core.info(
+                        `Removed label '${labelName}' from #${issue.number}.`,
+                    );
+                } catch (removeErr) {
+                    if (removeErr.status === 404) {
+                        core.info(
+                            `Label '${labelName}' not present on #${issue.number}, skipping removal.`,
+                        );
+                    } else {
+                        core.warning(
+                            `Failed to remove label '${labelName}' from #${issue.number}: ${removeErr.message}`,
+                        );
+                    }
+                }
+
+                await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    labels: [releasedLabelName],
+                });
+                core.info(
+                    `Added label '${releasedLabelName}' to #${issue.number}.`,
+                );
                 core.info(`Commented and closed #${issue.number}.`);
             } catch (err) {
                 core.warning(
