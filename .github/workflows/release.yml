@@ -16,6 +16,7 @@ permissions:
     packages: write
     id-token: write
     attestations: write
+    issues: write
 
 jobs:
     release:
@@ -138,3 +139,9 @@ jobs:
               uses: actions/attest-build-provenance@v2
               with:
                   subject-path: ./*.vsix
+
+            - name: Close waiting-for-release issues
+              if: success() && github.event.inputs.pre-release != 'true'
+              uses: ./.github/actions/close-waiting-issues
+              env:
+                  VERSION: ${{ github.event.inputs.version }}
