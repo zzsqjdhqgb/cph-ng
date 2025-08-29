@@ -92,22 +92,91 @@ This is the next generation of the
 
 ```
 cph-ng/
-├── src/                    # Extension source code
-│   ├── extension.ts        # Main extension entry point
-│   ├── cphNg.ts           # Core CPH-NG functionality
-│   ├── compiler.ts        # Compilation logic
-│   ├── runner.ts          # Test case execution
-│   └── webview/           # React webview components
-│       ├── App.tsx        # Main webview app
-│       ├── components/    # React components
-│       └── l10n/          # Webview translations
-├── l10n/                  # Extension runtime translations
-├── scripts/               # Development scripts and hooks
-├── package.json           # Extension manifest and dependencies
-├── package.nls.json       # Configuration translations (English)
-├── package.nls.zh.json    # Configuration translations (Chinese)
-└── webpack.config.mjs     # Build configuration
+├── src/                           # VS Code extension backend (TypeScript)
+│   ├── extension.ts               # Extension entry point (activation)
+│   ├── ai/                        # LLM helpers
+│   │   ├── llmFileReader.ts       # Read files via LLM
+│   │   └── llmTcRunner.ts         # Run test cases via LLM
+│   ├── core/                      # Core judging pipeline
+│   │   ├── checker.ts             # Output comparison / checker logic
+│   │   ├── compiler.ts            # Compilation logic
+│   │   └── runner.ts              # Test case execution
+│   ├── module/                    # Feature modules
+│   │   ├── companion.ts           # Competitive Companion integration
+│   │   ├── cphCapable.ts          # CPH capability checks / helpers
+│   │   ├── cphNg.ts               # CPH-NG core wiring
+│   │   └── sidebarProvider.ts     # Sidebar (view) provider
+│   └── utils/                     # Shared utilities
+│       ├── embedded.ts            # Import/export embedded data
+│       ├── folderChooser.ts       # Folder choosing strategies
+│       ├── io.ts                  # Logging / filesystem helpers
+│       ├── migration.ts           # Migration from old problem files
+│       ├── result.ts              # Result types & helpers
+│       ├── settings.ts            # Configuration management
+│       ├── strTemplate.ts         # String templating utilities
+│       ├── types.backend.ts       # Backend-only types
+│       ├── types.ts               # Shared types
+│       └── types/                 # Versioned problem schema definitions
+│           ├── 0.0.1.ts
+│           ├── 0.0.3.ts
+│           ├── 0.0.4.ts
+│           ├── 0.0.5.ts
+│           └── 0.1.0.ts
+├── webview/                       # React-based webview UI
+│   ├── App.tsx                    # Main webview app
+│   ├── msgs.ts                    # Message contracts between webview & ext
+│   ├── styles.css                 # Webview styles
+│   ├── utils.ts                   # Webview utilities
+│   ├── vscode.d.ts                # VS Code API typings for webview
+│   ├── components/                # React components
+│   │   ├── acCongrats.tsx
+│   │   ├── cphButton.tsx
+│   │   ├── createProblemView.tsx
+│   │   ├── noTcs.tsx
+│   │   ├── problemActions.tsx
+│   │   ├── problemTitle.tsx
+│   │   ├── problemView.tsx
+│   │   ├── tcDataView.tsx
+│   │   ├── tcsView.tsx
+│   │   ├── tcView.tsx
+│   │   ├── tips.tsx
+│   │   └── base/
+│   │       ├── cphFlex.tsx
+│   │       ├── cphLink.tsx
+│   │       ├── cphText.tsx
+│   │       └── errorBoundary.tsx
+│   └── l10n/                      # Webview translations
+│       ├── en.json
+│       └── zh.json
+├── l10n/                          # Extension runtime translations
+│   └── bundle.l10n.zh-cn.json
+├── res/                           # Static assets
+│   ├── cph-ng.png
+│   ├── panel-view-icon.svg
+│   └── party.gif
+├── scripts/                       # Dev scripts & git hooks
+│   ├── commit-msg
+│   ├── install-hooks.js
+│   └── pre-commit
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── README.zh-CN.md
+├── commitlint.config.js           # Commit linting rules
+├── eslint.config.mjs              # ESLint config
+├── package.json                   # Extension manifest & deps
+├── package.nls.json               # Manifest translations (English)
+├── package.nls.zh.json            # Manifest translations (Chinese)
+├── pnpm-lock.yaml
+├── tsconfig.json                  # TypeScript compiler options
+└── webpack.config.mjs             # Build configuration
 ```
+
+Key files:
+- [src/extension.ts](src/extension.ts) — extension activation entry.
+- [src/module/cphNg.ts](src/module/cphNg.ts) — CPH‑NG core wiring.
+- [src/core/compiler.ts](src/core/compiler.ts), [src/core/runner.ts](src/core/runner.ts), [src/core/checker.ts](src/core/checker.ts) — compile/run/check pipeline.
+- [webview/App.tsx](webview/App.tsx) — main React webview app.
 
 ### Translation Management
 
