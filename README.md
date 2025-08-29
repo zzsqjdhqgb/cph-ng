@@ -2,8 +2,6 @@
 
 [简体中文](https://github.com/langningchen/cph-ng/blob/main/README.zh-CN.md) | English
 
-![](https://vsmarketplacebadges.dev/version-short/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/installs/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/downloads/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/rating-star/langningchen.cph-ng.svg)
-
 > [!WARNING]  
 > This extension is a work in progress and may have bugs, incomplete features
 > and break changes without notice.
