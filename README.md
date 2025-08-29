@@ -2,10 +2,6 @@
 
 [简体中文](https://github.com/langningchen/cph-ng/blob/main/README.zh-CN.md) | English
 
-> [!WARNING]  
-> This extension is a work in progress and may have bugs, incomplete features
-> and break changes without notice.
-
 > Quickly compile, run and judge competitive programming problems in VS Code.
 > Automatically download testcases , or write & test your own problems.
 
