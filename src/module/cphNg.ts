@@ -345,6 +345,8 @@ export class CphNg {
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
                 result.verdict = TCVerdicts.TLE;
+            } else if (result.memory && result.memory > problem.memoryLimit) {
+                result.verdict = TCVerdicts.MLE;
             } else {
                 result.verdict = TCVerdicts.CMP;
                 this.emitProblemChange();
@@ -440,6 +442,7 @@ export class CphNg {
                 src: { path: filePath },
                 tcs: [],
                 timeLimit: Settings.problem.defaultTimeLimit,
+                memoryLimit: Settings.problem.defaultMemoryLimit,
             };
             this.saveProblem();
         } catch (e) {
@@ -559,6 +562,7 @@ export class CphNg {
                         isExpand: false,
                     })),
                     timeLimit: embeddedProblem.timeLimit,
+                    memoryLimit: embeddedProblem.memoryLimit,
                 };
                 if (embeddedProblem.spjCode) {
                     this.problem.checker = {
@@ -602,6 +606,7 @@ export class CphNg {
         title: string,
         url: string,
         timeLimit: number,
+        memoryLimit: number,
     ): Promise<void> {
         if (!this.checkProblem()) {
             return;
@@ -610,6 +615,7 @@ export class CphNg {
         problem.name = title;
         problem.url = url;
         problem.timeLimit = timeLimit;
+        problem.memoryLimit = memoryLimit;
         this.saveProblem();
     }
     public async saveProblem(): Promise<void> {
@@ -652,6 +658,7 @@ export class CphNg {
                     })),
                 ),
                 timeLimit: problem.timeLimit,
+                memoryLimit: problem.memoryLimit,
             };
             if (problem.checker?.path) {
                 embeddedProblem.spjCode = (

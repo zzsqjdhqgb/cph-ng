@@ -283,6 +283,7 @@ class Companion {
                     const renderedTemplate = renderTemplate(template, [
                         ['title', problem.name],
                         ['timeLimit', problem.timeLimit.toString()],
+                        ['memoryLimit', problem.memoryLimit.toString()],
                         ['url', problem.url || ''],
                     ]);
                     await writeFile(problem.src.path, renderedTemplate);

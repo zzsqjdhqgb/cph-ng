@@ -51,7 +51,7 @@ export class CphCapable {
     public static toProblem(cphProblem: CphProblem): Problem {
         this.logger.trace('toProblem', { cphProblem });
         const problem = {
-            version,
+            version: version as Problem['version'],
             name: cphProblem.name,
             url: cphProblem.url,
             tcs: cphProblem.tests.map((test) => ({
@@ -60,6 +60,7 @@ export class CphCapable {
                 isExpand: false,
             })),
             timeLimit: cphProblem.timeLimit,
+            memoryLimit: cphProblem.memoryLimit,
             src: { path: cphProblem.srcPath },
         } satisfies Problem;
         this.logger.info('Converted CphProblem to Problem', { problem });

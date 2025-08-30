@@ -79,6 +79,7 @@ export interface Problem {
     url?: string;
     tcs: TC[];
     timeLimit: number;
+    memoryLimit: number;
     src: FileWithHash;
     checker?: FileWithHash;
     bfCompare?: BFCompare;
@@ -91,5 +92,6 @@ export interface EmbeddedProblem {
         answer: string;
     }[];
     timeLimit: number;
+    memoryLimit: number;
     spjCode?: string;
 }
