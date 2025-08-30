@@ -81,7 +81,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
             );
         } else {
             token.onCancellationRequested(async () => {
-                await this.cphNg.stopTcs();
+                await this.cphNg.stopTcs(false);
             });
 
             if (idx) {
