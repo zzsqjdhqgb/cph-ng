@@ -33,7 +33,7 @@ export class Logger {
         const messageData = args
             .map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg)))
             .join(' ');
-        return `[${this.module.padEnd(10, ' ')}] ${messageData}`;
+        return `[${this.module}] ${messageData}`;
     }
     public trace(...args: any[]) {
         outputChannel.trace(this.message(...args));
@@ -53,7 +53,7 @@ export class Logger {
 }
 
 export class Io {
-    private logger: Logger = new Logger('IO');
+    private logger: Logger = new Logger('io');
     private _compilationMsg = '';
 
     public info(msg: string, ...args: any) {
