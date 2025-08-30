@@ -4,6 +4,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
+#include <shlwapi.h>
+#include <cstdio>
+#include <cstring>
 #else
 #include <sys/resource.h>
 #include <unistd.h>
@@ -15,33 +18,19 @@ extern "C" int original_main();
 int main()
 {
     using clock = std::chrono::high_resolution_clock;
+    auto startTime = clock::now();
 #ifdef _WIN32
-    STARTUPINFO si = {sizeof(si)};
-    PROCESS_INFORMATION pi;
-    auto startTime = clock::now();
-    if (CreateProcess(NULL, "original.exe", NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
+    int status = original_main();
+    auto endTime = clock::now();
+
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
     {
-        WaitForSingleObject(pi.hProcess, INFINITE);
-        auto endTime = clock::now();
-        PROCESS_MEMORY_COUNTERS memInfo;
-        if (GetProcessMemoryInfo(pi.hProcess, &memInfo, sizeof(memInfo)))
-        {
-            long long peakMem = memInfo.PeakWorkingSetSize / 1024;
-            std::cerr << "-----CPH DATA STARTS-----{\"time\":" << std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count()
-                      << ",\"memory\":" << peakMem << "}-----";
-        }
-        DWORD exitCode;
-        GetExitCodeProcess(pi.hProcess, &exitCode);
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-        return exitCode;
+        std::cerr << "-----CPH DATA STARTS-----{\"time\":" << std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count()
+                  << ",\"memory\":" << pmc.PeakWorkingSetSize / 1024 << "}-----";
     }
-    else
-    {
-        return 1;
-    }
+    return status;
 #else
-    auto startTime = clock::now();
     pid_t pid = fork();
     if (pid == 0)
     {
