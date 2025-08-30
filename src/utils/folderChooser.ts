@@ -90,7 +90,7 @@ export class FolderChooser {
         if (!selected) {
             return null;
         }
-        return vscode.Uri.file(selected.description);
+        return vscode.Uri.file(selected.details);
     }
 
     static async chooseFolder(title: string): Promise<vscode.Uri | null> {
