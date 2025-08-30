@@ -308,6 +308,7 @@ export class CphNg {
                 abortController,
             );
             result.time = runResult.time;
+            result.memory = runResult.memory ?? undefined;
             result.verdict = TCVerdicts.JGD;
             if (tc.answer.useFile) {
                 result.stdout = {
@@ -434,7 +435,7 @@ export class CphNg {
                 return;
             }
             this.problem = {
-                version,
+                version: version as Problem['version'],
                 name: basename(filePath, extname(filePath)),
                 src: { path: filePath },
                 tcs: [],
@@ -548,7 +549,7 @@ export class CphNg {
             }
             try {
                 this.problem = {
-                    version,
+                    version: version as Problem['version'],
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,
                     src: { path: cppFile },
@@ -944,7 +945,6 @@ export class CphNg {
             verdict: TCVerdicts.CP,
             stdout: { useFile: false, data: '' },
             stderr: { useFile: false, data: '' },
-            time: 0,
             msg: '',
         };
         tc.isExpand = false;
@@ -987,7 +987,6 @@ export class CphNg {
                 verdict: TCVerdicts.CP,
                 stdout: { useFile: false, data: '' },
                 stderr: { useFile: false, data: '' },
-                time: 0,
                 msg: '',
             };
             tc.isExpand = false;
@@ -1367,7 +1366,6 @@ export class CphNg {
                     verdict: TCVerdicts.CP,
                     stdout: { useFile: false, data: '' },
                     stderr: { useFile: false, data: '' },
-                    time: 0,
                     msg: '',
                 },
             } satisfies TC;

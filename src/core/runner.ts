@@ -27,6 +27,7 @@ import { Logger } from '../utils/io';
 
 type RunnerResult = Result<undefined> & {
     time: number;
+    memory: number | null;
     stdout: string;
     stderr: string;
 };
@@ -86,6 +87,7 @@ export class Runner {
                     duration: endTime - startTime,
                 });
                 let time = endTime - startTime;
+                let memory: number | null = null;
                 const match = stderr.match(
                     /-----CPH DATA STARTS-----(\{.*\})-----/,
                 );
@@ -93,6 +95,7 @@ export class Runner {
                     try {
                         const data = JSON.parse(match[1]);
                         time = data.time / 1000.0;
+                        memory = data.memory / 1024.0;
                     } catch (e) {
                         this.logger.error('Failed to parse wrapper data', e);
                     }
@@ -104,6 +107,7 @@ export class Runner {
                     stdout,
                     stderr,
                     time,
+                    memory,
                 } satisfies RunnerResult);
             };
 

@@ -88,13 +88,24 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 <CphText>{tc.result?.verdict.name}</CphText>
                             </Tooltip>
                         </CphFlex>
-                        {tc.result?.time ? (
+                        {tc.result?.time !== undefined ? (
                             <Chip
                                 label={t('tcView.time', {
-                                    time: tc.result.time,
+                                    time: tc.result.time.toFixed(1),
                                 })}
                                 size={'small'}
                                 sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
+                            />
+                        ) : (
+                            <></>
+                        )}
+                        {tc.result?.memory !== undefined ? (
+                            <Chip
+                                label={t('tcView.memory', {
+                                    memory: tc.result.memory.toFixed(1),
+                                })}
+                                size={'small'}
+                                sx={{ fontSize: '0.8rem' }}
                             />
                         ) : (
                             <></>

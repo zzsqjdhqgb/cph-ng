@@ -51,6 +51,7 @@
     "tcDataView.snackbar.message": "Copied",
     "tcView.answer": "Answer",
     "tcView.delete": "Delete",
+    "tcView.memory": "{{memory}} MB",
     "tcView.message": "Message",
     "tcView.run": "Run",
     "tcView.stderr": "Error",

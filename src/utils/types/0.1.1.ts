@@ -47,8 +47,7 @@ export type TCIO =
 
 export interface TCResult {
     verdict: TCVerdict;
-    time?: number;
-    memory?: number;
+    time: number;
     stdout: TCIO;
     stderr: TCIO;
     msg: string;
@@ -74,7 +73,7 @@ export interface BFCompare {
 }
 
 export interface Problem {
-    version: '0.2.0';
+    version: '0.1.1';
     name: string;
     url?: string;
     tcs: TC[];

@@ -51,6 +51,7 @@
     "tcDataView.snackbar.message": "已复制",
     "tcView.answer": "答案",
     "tcView.delete": "删除",
+    "tcView.memory": "{{memory}} MB",
     "tcView.message": "消息",
     "tcView.run": "运行",
     "tcView.stderr": "错误",

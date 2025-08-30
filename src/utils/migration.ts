@@ -15,7 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Problem } from './types';
+import { Problem, Problem as Problem_0_2_0 } from './types';
+import { Problem as Problem_0_1_1 } from './types/0.1.1';
 import { Problem as Problem_0_0_5 } from './types/0.0.5';
 import { Problem as Problem_0_1_0 } from './types/0.1.0';
 import { Problem as Problem_0_0_4 } from './types/0.0.4';
@@ -26,7 +27,8 @@ import { Logger } from './io';
 const logger: Logger = new Logger('migration');
 
 export type OldProblem =
-    | Problem
+    | Problem_0_2_0
+    | Problem_0_1_1
     | Problem_0_1_0
     | Problem_0_0_5
     | Problem_0_0_4
@@ -34,11 +36,16 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
-    '0.1.0': (problem: Problem_0_1_0): Problem =>
+    '0.1.1': (problem: Problem_0_1_1): Problem_0_2_0 =>
+        ({
+            ...problem,
+            version: '0.2.0',
+        }) satisfies Problem_0_2_0,
+    '0.1.0': (problem: Problem_0_1_0): Problem_0_1_1 =>
         ({
             ...problem,
             version: '0.1.1',
-        }) satisfies Problem,
+        }) satisfies Problem_0_1_1,
     '0.0.5': (problem: Problem_0_0_5): Problem_0_1_0 =>
         ({
             ...problem,
