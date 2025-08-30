@@ -57,4 +57,4 @@ body:
               If applicable, add log output to help explain your problem. You
               can find the logs in the VSCode output panel. Make sure to not
               include any sensitive information.
-          placeholder: Log output here
+          placeholder: Log output here, please wrap with code block (```)
