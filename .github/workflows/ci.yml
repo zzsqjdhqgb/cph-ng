@@ -32,8 +32,20 @@ jobs:
               run: pnpm lint
 
             - name: Build
-              run: pnpm compile
+              run: pnpm package
 
             - name: Comment linked issues (on push success)
               if: success() && github.event_name == 'push'
               uses: ./.github/actions/comment-linked-issues
+
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: extension-${{ github.run_id }}
+                  path: ./*.vsix
+                  if-no-files-found: error
+
+            - name: Generate build provenance
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-path: ./*.vsix
