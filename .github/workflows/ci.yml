@@ -1,52 +1,52 @@
 name: CI
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 concurrency:
-    group: ci-${{ github.ref }}
-    cancel-in-progress: true
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
-    contents: read
-    issues: write
-    attestations: write
+  contents: read
+  issues: write
+  attestations: write
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - name: Setup Node + PNPM
-              uses: ./.github/actions/setup-node-pnpm
-              with:
-                  node-version: '22'
-                  pnpm-version: '10'
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node + PNPM
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
+          pnpm-version: '10'
 
-            - name: Lint
-              run: pnpm lint
+      - name: Lint
+        run: pnpm lint
 
-            - name: Build
-              run: pnpm package
+      - name: Build
+        run: pnpm package
 
-            - name: Comment linked issues (on push success)
-              if: success() && github.event_name == 'push'
-              uses: ./.github/actions/comment-linked-issues
+      - name: Comment linked issues (on push success)
+        if: success() && github.event_name == 'push'
+        uses: ./.github/actions/comment-linked-issues
 
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: extension-${{ github.run_id }}
-                  path: ./*.vsix
-                  if-no-files-found: error
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ github.run_id }}
+          path: ./*.vsix
+          if-no-files-found: error
 
-            - name: Generate build provenance
-              uses: actions/attest-build-provenance@v2
-              with:
-                  subject-path: ./*.vsix
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ./*.vsix

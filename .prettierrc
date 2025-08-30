@@ -13,21 +13,9 @@
     "endOfLine": "lf",
     "overrides": [
         {
-            "files": "*.tsx",
+            "files": "*.yml",
             "options": {
-                "parser": "typescript"
-            }
-        },
-        {
-            "files": "*.ts",
-            "options": {
-                "parser": "typescript"
-            }
-        },
-        {
-            "files": "*.js",
-            "options": {
-                "parser": "babel"
+                "tabWidth": 2
             }
         }
     ],

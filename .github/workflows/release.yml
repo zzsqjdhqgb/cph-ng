@@ -1,147 +1,147 @@
 name: Release
 
 on:
-    workflow_dispatch:
-        inputs:
-            version:
-                description: 'Version to publish (e.g., 1.0.0)'
-                required: true
-            pre-release:
-                type: boolean
-                required: true
-                description: 'Whether this is a pre-release version'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+      pre-release:
+        type: boolean
+        required: true
+        description: 'Whether this is a pre-release version'
 
 permissions:
-    contents: write
-    packages: write
-    id-token: write
-    attestations: write
-    issues: write
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+  issues: write
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
-        environment: production
+  release:
+    runs-on: ubuntu-latest
+    environment: production
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  token: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Validate version format
-              run: |
-                  VERSION="${{ github.event.inputs.version }}"
-                  if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-                    echo "Error: Version format is invalid. Expected format: x.y.z (numbers only)"
-                    echo "Examples: 1.0.0, 2.1.3, 10.5.12"
-                    exit 1
-                  fi
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Version format is invalid. Expected format: x.y.z (numbers only)"
+            echo "Examples: 1.0.0, 2.1.3, 10.5.12"
+            exit 1
+          fi
 
-            - name: Check version consistency
-              run: |
-                  VERSION="${{ github.event.inputs.version }}"
-                  PACKAGE_VERSION=$(node -p "require('./package.json').version")
-                  LATEST_VERSION=$(grep -E '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -1 | sed 's/^## //')
+      - name: Check version consistency
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          LATEST_VERSION=$(grep -E '^## [0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -1 | sed 's/^## //')
 
-                  echo "Version comparison:"
-                  echo "Input version: $VERSION"
-                  echo "package.json version: $PACKAGE_VERSION"
-                  echo "CHANGELOG.md version: $LATEST_VERSION"
-                  echo ""
+          echo "Version comparison:"
+          echo "Input version: $VERSION"
+          echo "package.json version: $PACKAGE_VERSION"
+          echo "CHANGELOG.md version: $LATEST_VERSION"
+          echo ""
 
-                  if [ -z "$LATEST_VERSION" ] || [ "$VERSION" != "$PACKAGE_VERSION" ] || [ "$VERSION" != "$LATEST_VERSION" ]; then
-                    echo "Version mismatch"
-                    exit 1
-                  fi
+          if [ -z "$LATEST_VERSION" ] || [ "$VERSION" != "$PACKAGE_VERSION" ] || [ "$VERSION" != "$LATEST_VERSION" ]; then
+            echo "Version mismatch"
+            exit 1
+          fi
 
-                  echo "Versions match"
+          echo "Versions match"
 
-            - name: Setup Node + PNPM
-              uses: ./.github/actions/setup-node-pnpm
-              with:
-                  node-version: '22'
-                  pnpm-version: '10'
+      - name: Setup Node + PNPM
+        uses: ./.github/actions/setup-node-pnpm
+        with:
+          node-version: '22'
+          pnpm-version: '10'
 
-            - name: Create version branch and tag
-              run: |
-                  VERSION="${{ github.event.inputs.version }}"
-                  BRANCH_NAME="release/v${VERSION}"
+      - name: Create version branch and tag
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          BRANCH_NAME="release/v${VERSION}"
 
-                  git config --local user.email "action@github.com"
-                  git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
 
-                  git checkout -b "$BRANCH_NAME"
-                  git push origin "$BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
 
-                  git tag "v${VERSION}"
-                  git push origin "v${VERSION}"
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
 
-            - name: Package extension
-              run: pnpm package
+      - name: Package extension
+        run: pnpm package
 
-            - name: Extract changelog for version
-              id: changelog
-              run: |
-                  VERSION="${{ github.event.inputs.version }}"
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
 
-                  CHANGELOG_CONTENT=$(awk "/^## $VERSION$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
+          CHANGELOG_CONTENT=$(awk "/^## $VERSION$/{flag=1; next} /^## /{flag=0} flag" CHANGELOG.md | sed '/^$/d' | head -20)
 
-                  if [ -z "$CHANGELOG_CONTENT" ]; then
-                    echo "Warning: No changelog content found for version $VERSION"
-                    CHANGELOG_CONTENT="- No changelog content available"
-                  fi
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            echo "Warning: No changelog content found for version $VERSION"
+            CHANGELOG_CONTENT="- No changelog content available"
+          fi
 
-                  echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_OUTPUT
-                  echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
-                  echo "EOF" >> $GITHUB_OUTPUT
+          echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
-            - name: Publish to VS Code Marketplace
-              run: |
-                  if [ "${{ github.event.inputs.pre-release }}" = "true" ]; then
-                    pnpm run publish --pre-release
-                  else
-                    pnpm run publish
-                  fi
-              env:
-                  VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Publish to VS Code Marketplace
+        run: |
+          if [ "${{ github.event.inputs.pre-release }}" = "true" ]; then
+            pnpm run publish --pre-release
+          else
+            pnpm run publish
+          fi
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
-            - name: Create GitHub Release
-              uses: softprops/action-gh-release@v2
-              with:
-                  tag_name: v${{ github.event.inputs.version }}
-                  name: v${{ github.event.inputs.version }}
-                  files: ./*.vsix
-                  prerelease: ${{ github.event.inputs.pre-release == 'true' }}
-                  generate_release_notes: false
-                  body: |
-                      🎉 New release v${{ github.event.inputs.version }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
+          files: ./*.vsix
+          prerelease: ${{ github.event.inputs.pre-release == 'true' }}
+          generate_release_notes: false
+          body: |
+            🎉 New release v${{ github.event.inputs.version }}
 
-                      ## What's Changed
-                      ${{ steps.changelog.outputs.CHANGELOG_CONTENT }}
+            ## What's Changed
+            ${{ steps.changelog.outputs.CHANGELOG_CONTENT }}
 
-                      ${{ github.event.inputs.pre-release == 'true' && '⚠️ **This is a pre-release version.**' || '' }}
+            ${{ github.event.inputs.pre-release == 'true' && '⚠️ **This is a pre-release version.**' || '' }}
 
-                      ## Installation
-                      Download the `.vsix` file below and install it manually in VS Code, or install from the marketplace.
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ## Installation
+            Download the `.vsix` file below and install it manually in VS Code, or install from the marketplace.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: extension-${{ github.event.inputs.version }}
-                  path: ./*.vsix
-                  if-no-files-found: error
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ github.event.inputs.version }}
+          path: ./*.vsix
+          if-no-files-found: error
 
-            - name: Generate build provenance
-              uses: actions/attest-build-provenance@v2
-              with:
-                  subject-path: ./*.vsix
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ./*.vsix
 
-            - name: Close waiting-for-release issues
-              if: success() && github.event.inputs.pre-release != 'true'
-              uses: ./.github/actions/close-waiting-issues
-              env:
-                  VERSION: ${{ github.event.inputs.version }}
+      - name: Close waiting-for-release issues
+        if: success() && github.event.inputs.pre-release != 'true'
+        uses: ./.github/actions/close-waiting-issues
+        env:
+          VERSION: ${{ github.event.inputs.version }}

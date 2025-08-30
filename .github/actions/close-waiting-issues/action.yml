@@ -1,15 +1,15 @@
 name: Close Waiting Issues
 description:
-    Comment and close issues labeled 'waiting-for-release' after a successful
-    release
+  Comment and close issues labeled 'waiting-for-release' after a successful
+  release
 inputs: {}
 runs:
-    using: composite
-    steps:
-        - name: Comment and close labeled issues
-          uses: actions/github-script@v7
-          with:
-              script: |
-                  const path = require('path');
-                  const run = require(path.join(process.env.GITHUB_WORKSPACE, '.github', 'actions', 'close-waiting-issues', 'index.js'));
-                  await run({ github, context, core });
+  using: composite
+  steps:
+    - name: Comment and close labeled issues
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const path = require('path');
+          const run = require(path.join(process.env.GITHUB_WORKSPACE, '.github', 'actions', 'close-waiting-issues', 'index.js'));
+          await run({ github, context, core });
