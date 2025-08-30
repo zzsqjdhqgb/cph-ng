@@ -13,7 +13,7 @@ concurrency:
 permissions:
   contents: read
   issues: write
-  attestations: write
+  id-token: write
 
 jobs:
   build:
