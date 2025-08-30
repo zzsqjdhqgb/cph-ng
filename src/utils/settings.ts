@@ -72,8 +72,17 @@ class CompilationSection extends SettingsSection {
     get cppArgs(): string {
         return this.get('cppArgs') as string;
     }
+    get objcopy(): string {
+        return this.get('objcopy') as string;
+    }
     get timeout(): number {
         return this.get('timeout') as number;
+    }
+    get useWrapper(): boolean {
+        return this.get('useWrapper') as boolean;
+    }
+    get useHook(): string {
+        return this.get('useHook') as string;
     }
 }
 

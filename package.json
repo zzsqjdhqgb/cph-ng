@@ -13,7 +13,7 @@
         "url": "https://github.com/langningchen/cph-ng"
     },
     "engines": {
-        "vscode": "^1.103.0"
+        "vscode": "^1.100.0"
     },
     "categories": [
         "Other"
@@ -139,10 +139,25 @@
                         "default": "-O2 -std=c++14 -Wall -DCPH",
                         "markdownDescription": "%cph-ng.configuration.compilation.properties.cppArgs.markdownDescription%"
                     },
+                    "cph-ng.compilation.objcopy": {
+                        "type": "string",
+                        "default": "objcopy",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.objcopy.markdownDescription%"
+                    },
                     "cph-ng.compilation.timeout": {
                         "type": "number",
                         "default": 10000,
                         "markdownDescription": "%cph-ng.configuration.compilation.properties.timeout.markdownDescription%"
+                    },
+                    "cph-ng.compilation.useWrapper": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.useWrapper.markdownDescription%"
+                    },
+                    "cph-ng.compilation.useHook": {
+                        "type": "boolean",
+                        "default": false,
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.useHook.markdownDescription%"
                     }
                 }
             },
@@ -502,18 +517,18 @@
     "devDependencies": {
         "@actions/core": "^1.11.1",
         "@actions/github": "^6.0.0",
-        "@octokit/rest": "^21.0.2",
-        "@octokit/webhooks-types": "^7.5.0",
         "@babel/preset-react": "^7.27.1",
         "@commitlint/cli": "^19.8.1",
         "@commitlint/config-conventional": "^19.8.1",
+        "@octokit/rest": "^21.0.2",
+        "@octokit/webhooks-types": "^7.5.0",
         "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
         "@types/adm-zip": "^0.5.7",
         "@types/crypto-js": "^4.2.2",
         "@types/mocha": "^10.0.10",
         "@types/node": "~24.3.0",
         "@types/speed-measure-webpack-plugin": "^1.3.6",
-        "@types/vscode": "1.103.0",
+        "@types/vscode": "1.100.0",
         "@types/webpack": "^5.28.5",
         "@typescript-eslint/eslint-plugin": "^8.41.0",
         "@typescript-eslint/parser": "^8.41.0",

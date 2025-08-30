@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: implement wrapper and hook functionality for compilation process
+
 ## 0.1.7
 
 - **fix**: remove SVG badges from README to fix publishing

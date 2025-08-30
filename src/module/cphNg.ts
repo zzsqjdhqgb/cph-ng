@@ -88,10 +88,10 @@ export class CphNg {
     private onProblemChange: ProblemChangeCallback[];
     private runAbortController?: AbortController;
 
-    constructor() {
+    constructor(_extensionUri: vscode.Uri) {
         this.logger.trace('constructor');
         this._canImport = false;
-        this.compiler = new Compiler();
+        this.compiler = new Compiler(_extensionUri);
         this.runner = new Runner();
         this.checker = new Checker();
         this.onProblemChange = [];
@@ -185,6 +185,7 @@ export class CphNg {
     private async doCompile(
         file: FileWithHash,
         compile?: boolean,
+        useWrapper: boolean = false,
     ): Promise<DoCompileResult> {
         this.logger.trace('doCompile', file);
         const hash = SHA256((await readFile(file.path)).toString()).toString();
@@ -209,6 +210,7 @@ export class CphNg {
                 file.path,
                 outputPath,
                 this.runAbortController!,
+                useWrapper,
             );
             if (!(await hasOutputFile())) {
                 this.logger.error('Compilation failed, output file not found', {
@@ -241,7 +243,11 @@ export class CphNg {
             if (editor) {
                 await editor.document.save();
             }
-            const compileResult = await this.doCompile(problem.src, compile);
+            const compileResult = await this.doCompile(
+                problem.src,
+                compile,
+                Settings.compilation.useWrapper,
+            );
             if (compileResult.verdict !== TCVerdicts.UKE) {
                 return compileResult;
             }

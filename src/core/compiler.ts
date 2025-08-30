@@ -29,6 +29,8 @@ const execAsync = promisify(exec);
 export class Compiler {
     private logger: Logger = new Logger('compiler');
 
+    constructor(private readonly _extensionUri: vscode.Uri) {}
+
     public async getExecutablePath(filePath: string): Promise<string> {
         this.logger.trace('getExecutablePath', { filePath });
         try {
@@ -52,25 +54,9 @@ export class Compiler {
         filePath: string,
         outputPath: string,
         abortController: AbortController,
+        useWrapper: boolean,
     ): Promise<string> {
-        this.logger.trace('compile', { filePath, outputPath });
-        const ext = extname(filePath);
-        let compileCommand = '';
-
-        switch (ext) {
-            case '.cpp':
-                compileCommand = `${Settings.compilation.cppCompiler} ${Settings.compilation.cppArgs} "${filePath}" -o "${outputPath}"`;
-                break;
-            case '.c':
-                compileCommand = `${Settings.compilation.cCompiler} ${Settings.compilation.cArgs} "${filePath}" -o "${outputPath}"`;
-                break;
-            default:
-                this.logger.warn('Unsupported file type', { type: ext });
-                return vscode.l10n.t('Unsupported file type: {type}.', {
-                    type: ext,
-                });
-        }
-
+        this.logger.trace('compile', { filePath, outputPath, useWrapper });
         try {
             await access(outputPath, constants.F_OK);
             this.logger.debug('Output file exists, removing it', {
@@ -82,10 +68,80 @@ export class Compiler {
                 outputPath,
             });
         }
+        const ext = extname(filePath);
 
+        let compileCommands = [''];
+        if (ext !== '.cpp' && ext !== '.c') {
+            this.logger.warn('Unsupported file type', { type: ext });
+            return vscode.l10n.t('Unsupported file type: {type}.', {
+                type: ext,
+            });
+        }
+        const wrapperPath = join(this._extensionUri.fsPath, 'res', 'wrapper.c');
+        const hookPath = join(this._extensionUri.fsPath, 'res', 'hook.c');
+        const isCpp = ext === '.cpp';
+        const prefix = isCpp
+            ? `${Settings.compilation.cppCompiler} ${Settings.compilation.cppArgs}`
+            : `${Settings.compilation.cCompiler} ${Settings.compilation.cArgs}`;
+        if (useWrapper) {
+            const compiler = isCpp
+                ? Settings.compilation.cppCompiler
+                : Settings.compilation.cCompiler;
+            const obj = `${outputPath}.o`;
+            const wrapperObj = `${outputPath}.wrapper.o`;
+            const linkObjects = [obj, wrapperObj];
+            const compileCommands = [
+                `${prefix} "${filePath}" -c -o "${obj}"`,
+                `${compiler} -fPIC -c "${wrapperPath}" -o "${wrapperObj}"`,
+            ];
+            if (Settings.compilation.useHook) {
+                const hookObj = `${outputPath}.hook.o`;
+                linkObjects.push(hookObj);
+                compileCommands.push(
+                    `${compiler} -fPIC -Wno-attributes -c "${hookPath}" -o "${hookObj}"`,
+                );
+            }
+            const postCommands = [
+                `${Settings.compilation.objcopy} --redefine-sym main=original_main "${obj}"`,
+                `${prefix} ${linkObjects.map((o) => `"${o}"`).join(' ')} -o "${outputPath}"` +
+                    (type() === 'Linux' ? ' -ldl' : ''),
+            ];
+            this.logger.info('Starting compilation', {
+                compileCommands,
+                postCommands,
+            });
+            const results = await Promise.all(
+                compileCommands.map((cmd) =>
+                    execAsync(cmd, {
+                        timeout: Settings.compilation.timeout,
+                        cwd: dirname(filePath),
+                        signal: abortController.signal,
+                    }),
+                ),
+            );
+            for (const cmd of postCommands) {
+                results.push(
+                    await execAsync(cmd, {
+                        timeout: Settings.compilation.timeout,
+                        cwd: dirname(filePath),
+                        signal: abortController.signal,
+                    }),
+                );
+            }
+            this.logger.debug('Compilation completed successfully', {
+                filePath,
+                outputPath,
+            });
+            return results
+                .map((result) => (result.stderr ? result.stderr.trim() : ''))
+                .filter((msg) => msg)
+                .join('\n\n');
+        }
         try {
-            this.logger.info('Starting compilation', { compileCommand });
-            const { stderr } = await execAsync(compileCommand, {
+            this.logger.info('Starting compilation', { compileCommands });
+            const command = `${prefix} "${filePath}" -o "${outputPath}"`;
+            this.logger.debug('Executing compile command', { command });
+            const { stderr } = await execAsync(command, {
                 timeout: Settings.compilation.timeout,
                 cwd: dirname(filePath),
                 signal: abortController.signal,

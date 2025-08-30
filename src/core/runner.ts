@@ -85,12 +85,25 @@ export class Runner {
                     msg,
                     duration: endTime - startTime,
                 });
+                let time = endTime - startTime;
+                const match = stderr.match(
+                    /-----CPH DATA STARTS-----(\{.*\})-----/,
+                );
+                if (match) {
+                    try {
+                        const data = JSON.parse(match[1]);
+                        time = data.time / 1000.0;
+                    } catch (e) {
+                        this.logger.error('Failed to parse wrapper data', e);
+                    }
+                    stderr = stderr.replace(match[0], '').trimEnd();
+                }
                 resolve({
                     verdict,
                     msg,
                     stdout,
                     stderr,
-                    time: endTime - startTime,
+                    time,
                 } satisfies RunnerResult);
             };
 

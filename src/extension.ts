@@ -73,7 +73,7 @@ class ExtensionManager {
                 await vscode.window.showTextDocument(document);
                 this.updateContext();
             });
-            this.cphNg = new CphNg();
+            this.cphNg = new CphNg(context.extensionUri);
             this.cphNg.addProblemChangeListener(() => {
                 this.logger.trace('Problem change detected');
                 this.updateContext();

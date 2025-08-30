@@ -21,8 +21,9 @@
         "Kattis",
         "Monaspace",
         "msys",
+        "objcopy",
         "TCIO",
         "testlib",
-        "winlibs"
+        "winlibs",
     ]
 }
