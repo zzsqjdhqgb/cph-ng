@@ -104,7 +104,7 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                     </CphText>
                     <CphText fontSize={'0.8rem'}>
                         {t('problemTitle.timeLimit', {
-                            time: problem.timeLimit.toFixed(1),
+                            time: problem.timeLimit,
                         })}
                         {problem.checker && (
                             <>

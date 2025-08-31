@@ -91,7 +91,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                         {tc.result?.time ? (
                             <Chip
                                 label={t('tcView.time', {
-                                    time: tc.result.time,
+                                    time: tc.result.time.toFixed(1),
                                 })}
                                 size={'small'}
                                 sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
