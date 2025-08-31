@@ -212,6 +212,13 @@ export class CphNg {
                 this.runAbortController!,
                 useWrapper,
             );
+            if (this.runAbortController?.signal.aborted) {
+                this.logger.warn('Compilation aborted by user', { file });
+                return {
+                    verdict: TCVerdicts.RJ,
+                    msg: vscode.l10n.t('Compilation aborted by user.'),
+                };
+            }
             if (!(await hasOutputFile())) {
                 this.logger.error('Compilation failed, output file not found', {
                     file,

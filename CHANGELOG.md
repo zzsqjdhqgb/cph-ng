@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: implement wrapper and hook functionality for compilation process
+- **fix**: add message for compilation aborted by user
 
 ## 0.1.7
 
