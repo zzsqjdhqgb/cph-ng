@@ -77,8 +77,12 @@ export class Compiler {
                 type: ext,
             });
         }
-        const wrapperPath = join(this._extensionUri.fsPath, 'res', 'wrapper.c');
-        const hookPath = join(this._extensionUri.fsPath, 'res', 'hook.c');
+        const wrapperPath = join(
+            this._extensionUri.fsPath,
+            'res',
+            'wrapper.cpp',
+        );
+        const hookPath = join(this._extensionUri.fsPath, 'res', 'hook.cpp');
         const isCpp = ext === '.cpp';
         const prefix = isCpp
             ? `${Settings.compilation.cppCompiler} ${Settings.compilation.cppArgs}`
