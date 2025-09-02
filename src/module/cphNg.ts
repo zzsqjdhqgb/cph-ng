@@ -188,7 +188,11 @@ export class CphNg {
         useWrapper: boolean = false,
     ): Promise<DoCompileResult> {
         this.logger.trace('doCompile', file);
-        const hash = SHA256((await readFile(file.path)).toString()).toString();
+        const hash = SHA256(
+            (await readFile(file.path)).toString() +
+                Settings.compilation.cppCompiler +
+                Settings.compilation.cppArgs,
+        ).toString();
         const outputPath = await this.compiler.getExecutablePath(file.path);
         const hasOutputFile = async () =>
             await access(outputPath, constants.X_OK)
