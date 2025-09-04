@@ -29,6 +29,7 @@
     "Choose {type} file": "选择 {type} 文件",
     "Comparing": "正在比较",
     "Compilation Error": "编译错误",
+    "Compilation aborted by user.": "编译已被用户中止。",
     "Compiled": "已编译",
     "Compiling": "正在编译",
     "Compiling brute force...": "正在编译暴力解法...",

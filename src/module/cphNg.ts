@@ -188,7 +188,11 @@ export class CphNg {
         useWrapper: boolean = false,
     ): Promise<DoCompileResult> {
         this.logger.trace('doCompile', file);
-        const hash = SHA256((await readFile(file.path)).toString()).toString();
+        const hash = SHA256(
+            (await readFile(file.path)).toString() +
+                Settings.compilation.cppCompiler +
+                Settings.compilation.cppArgs,
+        ).toString();
         const outputPath = await this.compiler.getExecutablePath(file.path);
         const hasOutputFile = async () =>
             await access(outputPath, constants.X_OK)
@@ -212,6 +216,13 @@ export class CphNg {
                 this.runAbortController!,
                 useWrapper,
             );
+            if (this.runAbortController?.signal.aborted) {
+                this.logger.warn('Compilation aborted by user', { file });
+                return {
+                    verdict: TCVerdicts.RJ,
+                    msg: vscode.l10n.t('Compilation aborted by user.'),
+                };
+            }
             if (!(await hasOutputFile())) {
                 this.logger.error('Compilation failed, output file not found', {
                     file,
