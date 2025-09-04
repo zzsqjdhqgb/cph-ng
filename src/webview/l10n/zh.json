@@ -49,6 +49,7 @@
     "tcDataView.loadFile": "从文件加载",
     "tcDataView.setAnswer": "设为答案",
     "tcDataView.snackbar.message": "已复制",
+    "tcDataView.toggleFile": "切换是否保存文件",
     "tcView.answer": "答案",
     "tcView.delete": "删除",
     "tcView.message": "消息",

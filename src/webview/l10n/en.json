@@ -49,6 +49,7 @@
     "tcDataView.loadFile": "Load from file",
     "tcDataView.setAnswer": "Set as answer",
     "tcDataView.snackbar.message": "Copied",
+    "tcDataView.toggleFile": "Toggle Save to File",
     "tcView.answer": "Answer",
     "tcView.delete": "Delete",
     "tcView.message": "Message",
