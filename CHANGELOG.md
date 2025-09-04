@@ -7,6 +7,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: ignore empty request data in companion
 - **fix**: show or hide compilation channel based on message content
 - **feat**: add file toggle
+- **fix**: improve folder selection display in quick pick
 
 ## 0.1.8
 
