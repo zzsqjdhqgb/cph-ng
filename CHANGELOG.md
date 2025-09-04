@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: ignore empty request data in companion
+
 ## 0.1.8
 
 - **feat**: implement wrapper and hook functionality for compilation process
