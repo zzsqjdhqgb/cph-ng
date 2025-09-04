@@ -87,7 +87,11 @@ export class Io {
         this.logger.info('Setting compilation message', msg);
         compilationChannel.clear();
         compilationChannel.appendLine(msg);
-        compilationChannel.show();
+        if (msg.trim()) {
+            compilationChannel.show();
+        } else {
+            compilationChannel.hide();
+        }
         this._compilationMsg = msg;
     }
 

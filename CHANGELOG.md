@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: ignore empty request data in companion
+- **fix**: show or hide compilation channel based on message content
 
 ## 0.1.8
 
