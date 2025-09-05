@@ -131,6 +131,9 @@ class CompanionSection extends SettingsSection {
     get chooseSaveFolder(): boolean {
         return this.get('chooseSaveFolder') as boolean;
     }
+    get showPanel(): number {
+        return this.get('showPanel') as number;
+    }
 }
 
 class RunnerSection extends SettingsSection {
