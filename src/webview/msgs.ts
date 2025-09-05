@@ -71,7 +71,7 @@ export interface CompareTcMsg {
 export interface ToggleTcFileMsg {
     type: 'toggleTcFile';
     idx: number;
-    ext: string;
+    label: 'stdin' | 'answer' | 'stdout' | 'stderr';
 }
 export interface DelTcMsg {
     type: 'delTc';

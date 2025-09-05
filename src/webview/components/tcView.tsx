@@ -157,7 +157,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                     vscode.postMessage({
                                         type: 'toggleTcFile',
                                         idx,
-                                        ext: 'in',
+                                        label: 'stdin',
                                     } satisfies ToggleTcFileMsg);
                                 }}
                             />
@@ -182,7 +182,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                     vscode.postMessage({
                                         type: 'toggleTcFile',
                                         idx,
-                                        ext: 'ans',
+                                        label: 'answer',
                                     } satisfies ToggleTcFileMsg);
                                 }}
                             />
@@ -215,7 +215,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             vscode.postMessage({
                                                 type: 'toggleTcFile',
                                                 idx,
-                                                ext: 'out',
+                                                label: 'stdout',
                                             } satisfies ToggleTcFileMsg);
                                         }}
                                     />
@@ -227,7 +227,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             vscode.postMessage({
                                                 type: 'toggleTcFile',
                                                 idx,
-                                                ext: 'err',
+                                                label: 'stderr',
                                             } satisfies ToggleTcFileMsg);
                                         }}
                                     />

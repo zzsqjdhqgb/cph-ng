@@ -1244,15 +1244,31 @@ export class CphNg {
             );
         }
     }
-    public async toggleTcFile(idx: number, ext: string): Promise<void> {
+    public async toggleTcFile(
+        idx: number,
+        label: 'stdin' | 'answer' | 'stdout' | 'stderr',
+    ): Promise<void> {
         if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
         const problem = this._problem!;
         const tc = problem.tcs[idx];
-        if (tc.stdin.useFile) {
-            tc.stdin = { useFile: false, data: await tcIo2Str(tc.stdin) };
+        const isInputOrAnswer = label === 'stdin' || label === 'answer';
+        const fileIo = isInputOrAnswer ? tc[label] : tc.result![label];
+        if (fileIo.useFile) {
+            const data = await tcIo2Str(fileIo);
+            if (isInputOrAnswer) {
+                tc[label] = { useFile: false, data };
+            } else {
+                tc.result![label] = { useFile: false, data };
+            }
         } else {
+            const ext = {
+                stdin: 'in',
+                answer: 'ans',
+                stdout: 'out',
+                stderr: 'err',
+            }[label];
             const tempFilePath = await vscode.window
                 .showSaveDialog({
                     defaultUri: vscode.Uri.file(
@@ -1267,8 +1283,12 @@ export class CphNg {
             if (!tempFilePath) {
                 return;
             }
-            await writeFile(tempFilePath, tc.stdin.data || '');
-            tc.stdin = { useFile: true, path: tempFilePath };
+            await writeFile(tempFilePath, fileIo.data || '');
+            if (isInputOrAnswer) {
+                tc[label] = { useFile: true, path: tempFilePath };
+            } else {
+                tc.result![label] = { useFile: true, path: tempFilePath };
+            }
         }
         this.saveProblem();
     }

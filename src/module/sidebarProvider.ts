@@ -130,7 +130,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         const toggleTcFileMsg = msg as msgs.ToggleTcFileMsg;
                         this.helper.toggleTcFile(
                             toggleTcFileMsg.idx,
-                            toggleTcFileMsg.ext,
+                            toggleTcFileMsg.label,
                         );
                         break;
                     case 'delTc':
