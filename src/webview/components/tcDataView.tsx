@@ -141,7 +141,7 @@ const TcDataView = ({
     };
 
     if (!value.useFile && !value.data && readOnly) {
-        return <></>;
+        return null;
     }
     return (
         <ErrorBoundary>

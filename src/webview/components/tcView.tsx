@@ -89,7 +89,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 <CphText>{tc.result?.verdict.name}</CphText>
                             </Tooltip>
                         </CphFlex>
-                        {tc.result?.time !== undefined ? (
+                        {tc.result?.time !== undefined && (
                             <Chip
                                 label={t('tcView.time', {
                                     time: tc.result.time.toFixed(1),
@@ -97,8 +97,6 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 size={'small'}
                                 sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
                             />
-                        ) : (
-                            <></>
                         )}
                         <CphButton
                             name={t('tcView.run')}
