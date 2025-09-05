@@ -304,7 +304,7 @@ export class CphNg {
                 if (match) {
                     try {
                         const data = JSON.parse(match[1]);
-                        time = data.time / 1000.0;
+                        time = Math.max(data.time, 1) / 1000.0;
                     } catch (e) {
                         this.logger.error('Failed to parse wrapper data', e);
                     }
@@ -1055,7 +1055,6 @@ export class CphNg {
 
         const compileResult = await this.compile(srcLang, compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg = compileResult.msg;
             result.verdict = TCVerdicts.CE;
             tc.isExpand = true;
             this.saveProblem();
@@ -1097,7 +1096,6 @@ export class CphNg {
 
         const compileResult = await this.compile(srcLang, compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg = compileResult.msg;
             for (const tc of problem.tcs) {
                 tc.result!.verdict = TCVerdicts.CE;
             }
@@ -1380,7 +1378,6 @@ export class CphNg {
         this.emitProblemChange();
         const solutionCompileResult = await this.compile(srcLang, compile);
         if (solutionCompileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg = solutionCompileResult.msg;
             problem.bfCompare.msg = vscode.l10n.t(
                 'Solution compilation failed.',
             );
@@ -1396,7 +1393,6 @@ export class CphNg {
             compile,
         );
         if (generatorCompileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg = generatorCompileResult.msg;
             problem.bfCompare.msg = vscode.l10n.t(
                 'Generator compilation failed.',
             );
@@ -1413,7 +1409,6 @@ export class CphNg {
             compile,
         );
         if (bruteForceCompileResult.verdict !== TCVerdicts.UKE) {
-            io.compilationMsg = bruteForceCompileResult.msg;
             problem.bfCompare.msg = vscode.l10n.t(
                 'Brute force compilation failed.',
             );

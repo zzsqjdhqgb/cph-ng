@@ -94,9 +94,7 @@ export class LangJava extends Lang {
                 path: src.path,
                 classPath,
             });
-
             io.compilationMsg = result.stderr.trim();
-
             return {
                 verdict: await access(classPath, constants.R_OK)
                     .then(() => TCVerdicts.UKE)

@@ -96,9 +96,7 @@ export class LangC extends Lang {
                 path: src.path,
                 outputPath,
             });
-
             io.compilationMsg = result.stderr.trim();
-
             return {
                 verdict: await access(outputPath, constants.X_OK)
                     .then(() => TCVerdicts.UKE)
