@@ -139,6 +139,26 @@
                         "default": "-O2 -std=c++14 -Wall -DCPH",
                         "markdownDescription": "%cph-ng.configuration.compilation.properties.cppArgs.markdownDescription%"
                     },
+                    "cph-ng.compilation.javaCompiler": {
+                        "type": "string",
+                        "default": "javac",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javaCompiler.markdownDescription%"
+                    },
+                    "cph-ng.compilation.javaArgs": {
+                        "type": "string",
+                        "default": "-cp .",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javaArgs.markdownDescription%"
+                    },
+                    "cph-ng.compilation.javaRunner": {
+                        "type": "string",
+                        "default": "java",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javaRunner.markdownDescription%"
+                    },
+                    "cph-ng.compilation.javaRunArgs": {
+                        "type": "string",
+                        "default": "",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javaRunArgs.markdownDescription%"
+                    },
                     "cph-ng.compilation.objcopy": {
                         "type": "string",
                         "default": "objcopy",
@@ -509,39 +529,39 @@
             {
                 "command": "cph-ng.createProblem",
                 "key": "ctrl+alt+b",
-                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem && !cph-ng.canImport"
+                "when": "!cph-ng.hasProblem && !cph-ng.canImport"
             },
             {
                 "command": "cph-ng.importProblem",
                 "key": "ctrl+alt+b",
-                "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem && cph-ng.canImport"
+                "when": "!cph-ng.hasProblem && cph-ng.canImport"
             },
             {
                 "command": "cph-ng.runTestCases",
                 "key": "ctrl+alt+b",
-                "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning"
+                "when": "cph-ng.hasProblem && !cph-ng.isRunning"
             },
             {
                 "command": "cph-ng.stopTestCases",
                 "key": "ctrl+alt+b",
-                "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning"
+                "when": "cph-ng.hasProblem && cph-ng.isRunning"
             }
         ],
         "menus": {
             "editor/title": [
                 {
                     "command": "cph-ng.createProblem",
-                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && !cph-ng.hasProblem",
+                    "when": "!cph-ng.hasProblem",
                     "group": "navigation"
                 },
                 {
                     "command": "cph-ng.runTestCases",
-                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && !cph-ng.isRunning",
+                    "when": "cph-ng.hasProblem && !cph-ng.isRunning",
                     "group": "navigation"
                 },
                 {
                     "command": "cph-ng.stopTestCases",
-                    "when": "resourceExtname =~ /\\.(cpp|c)$/ && cph-ng.hasProblem && cph-ng.isRunning",
+                    "when": "cph-ng.hasProblem && cph-ng.isRunning",
                     "group": "navigation"
                 }
             ]
