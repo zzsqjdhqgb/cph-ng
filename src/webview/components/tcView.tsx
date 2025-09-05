@@ -89,7 +89,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 <CphText>{tc.result?.verdict.name}</CphText>
                             </Tooltip>
                         </CphFlex>
-                        {tc.result?.time ? (
+                        {tc.result?.time !== undefined ? (
                             <Chip
                                 label={t('tcView.time', {
                                     time: tc.result.time.toFixed(1),

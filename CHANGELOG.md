@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: improve folder selection display in quick pick
 - **feat**: add showPanel setting to control visibility of the problem source
   file panel
+- **fix**: handle undefined time in tc result condition
 
 ## 0.1.8
 
