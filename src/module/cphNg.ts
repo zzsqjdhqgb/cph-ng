@@ -629,7 +629,7 @@ export class CphNg {
     }
     private async loadProblemFromEmbedded(cppFile: string): Promise<void> {
         try {
-            const cppData = (await readFile(cppFile)).toString();
+            const cppData = await readFile(cppFile, 'utf-8');
             const embeddedProblem = extractEmbedded(cppData);
             if (!embeddedProblem) {
                 const startIdx = cppData.indexOf(EMBEDDED_HEADER);
@@ -751,12 +751,13 @@ export class CphNg {
                 timeLimit: problem.timeLimit,
             };
             if (problem.checker?.path) {
-                embeddedProblem.spjCode = (
-                    await readFile(problem.checker?.path)
-                ).toString();
+                embeddedProblem.spjCode = await readFile(
+                    problem.checker?.path,
+                    'utf-8',
+                );
             }
             const cppFile = problem.src.path;
-            let cppData = (await readFile(cppFile)).toString();
+            let cppData = await readFile(cppFile, 'utf-8');
             const startIdx = cppData.indexOf(EMBEDDED_HEADER);
             const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
             if (startIdx !== -1 && endIdx !== -1) {

@@ -41,7 +41,7 @@ export class LangJava extends Lang {
         const classPath = join(classDir, className + '.class');
 
         const hash = SHA256(
-            (await readFile(src.path)).toString() +
+            (await readFile(src.path, 'utf-8')) +
                 Settings.compilation.javaCompiler +
                 Settings.compilation.javaArgs,
         ).toString();

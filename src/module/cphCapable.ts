@@ -71,9 +71,10 @@ export class CphCapable {
     ): Promise<Problem | undefined> {
         this.logger.trace('loadProblem', { probFile });
         try {
-            const data = await readFile(probFile);
             const problem = CphCapable.toProblem(
-                JSON.parse(data.toString()) satisfies CphProblem,
+                JSON.parse(
+                    await readFile(probFile, 'utf-8'),
+                ) satisfies CphProblem,
             );
             this.logger.debug('Loaded problem from file', {
                 probFile,

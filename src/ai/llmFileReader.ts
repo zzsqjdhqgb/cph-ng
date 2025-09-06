@@ -123,9 +123,7 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
 
         if (tcIo.useFile && tcIo.path) {
             try {
-                const fileContent = (await readFile(tcIo.path))
-                    .toString()
-                    .trim();
+                const fileContent = (await readFile(tcIo.path, 'utf-8')).trim();
                 if (fileContent) {
                     result.content.push(
                         new vscode.LanguageModelTextPart(

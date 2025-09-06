@@ -44,7 +44,7 @@ export class LangC extends Lang {
                 (type() === 'Windows_NT' ? '.exe' : ''),
         );
         const hash = SHA256(
-            (await readFile(src.path)).toString() +
+            (await readFile(src.path, 'utf-8')) +
                 Settings.compilation.cCompiler +
                 Settings.compilation.cArgs,
         ).toString();
