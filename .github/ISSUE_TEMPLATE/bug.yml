@@ -19,10 +19,10 @@ body:
         command palette by searching for `CPH-NG: Version Info`.'
       placeholder: |
         Version: 0.1.8
-        Commit: f629c3bdb1317c7d7743ec45566ddb24d8edfeeb
-        Build Time: 2025-09-06T06:54:54.945Z
+        Commit: 93c8d63f88ff6a8ce1bf389107ea060b6933f80f
+        Date: 2025-09-06T07:08:04.961Z
         Build By: Langning Chen
-        Run environment: 6.6.87.1-microsoft-standard-WSL2
+        OS: 6.6.87.1-microsoft-standard-WSL2
     validations:
       required: true
   - type: textarea
