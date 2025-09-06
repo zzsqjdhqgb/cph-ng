@@ -1,7 +1,9 @@
 // @ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
+import { exec, execSync } from 'child_process';
 import CopyPlugin from 'copy-webpack-plugin';
+import { writeFileSync } from 'fs';
 import path from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import { fileURLToPath } from 'url';
@@ -52,6 +54,26 @@ const extensionConfig = {
         libraryTarget: 'commonjs2',
     },
     externals: { vscode: 'commonjs vscode' },
+    plugins: [
+        {
+            apply: (compiler) => {
+                compiler.hooks.compile.tap('Build Info Plugin', () => {
+                    writeFileSync(
+                        path.join(__dirname, 'dist', 'generated.json'),
+                        JSON.stringify({
+                            commitHash: execSync('git rev-parse HEAD')
+                                .toString()
+                                .trim(),
+                            buildTime: new Date().toISOString(),
+                            buildBy: execSync('git config user.name')
+                                .toString()
+                                .trim(),
+                        }),
+                    );
+                });
+            },
+        },
+    ],
     ...shared,
 };
 

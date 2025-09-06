@@ -18,6 +18,8 @@
 import * as vscode from 'vscode';
 
 export let extensionUri: vscode.Uri;
+export let extensionPath: string;
 export const setExtensionUri = (uri: vscode.Uri) => {
     extensionUri = uri;
+    extensionPath = uri.fsPath;
 };

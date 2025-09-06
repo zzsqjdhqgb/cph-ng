@@ -27,8 +27,10 @@ import { SidebarProvider } from './module/sidebarProvider';
 import { isRunningVerdict } from './utils/types';
 import LlmTcRunner from './ai/llmTcRunner';
 import LlmFileReader from './ai/llmFileReader';
-import { setExtensionUri } from './utils/global';
+import { extensionPath, setExtensionUri } from './utils/global';
 import { Langs } from './core/langs/langs';
+import { version } from '../package.json';
+import { release } from 'os';
 
 class ExtensionManager {
     private logger: Logger = new Logger('extension');
@@ -141,8 +143,8 @@ class ExtensionManager {
                         { modal: true },
                         { title: vscode.l10n.t('OK') },
                         { title: vscode.l10n.t('Ignore') },
-                    )) satisfies vscode.MessageItem;
-                    if (result.title === vscode.l10n.t('Ignore')) {
+                    )) satisfies vscode.MessageItem | undefined;
+                    if (result?.title === vscode.l10n.t('Ignore')) {
                         clearInterval(this.compatibleTimer);
                     }
                 }
@@ -151,6 +153,30 @@ class ExtensionManager {
                 dispose: () => clearInterval(this.compatibleTimer),
             });
 
+            context.subscriptions.push(
+                vscode.commands.registerCommand(
+                    'cph-ng.versionInfo',
+                    async () => {
+                        const generated = await readFile(
+                            join(extensionPath, 'dist', 'generated.json'),
+                            'utf8',
+                        ).then((data) => JSON.parse(data));
+                        const msg = `Version: ${version}
+Commit: ${generated.commitHash}
+Date: ${generated.buildTime}
+Build By: ${generated.buildBy}
+OS: ${release()}`;
+                        const result = (await io.info(
+                            'CPH-NG',
+                            { modal: true, detail: msg },
+                            { title: vscode.l10n.t('Copy') },
+                        )) satisfies vscode.MessageItem | undefined;
+                        if (result?.title === vscode.l10n.t('Copy')) {
+                            await vscode.env.clipboard.writeText(msg);
+                        }
+                    },
+                ),
+            );
             context.subscriptions.push(
                 vscode.commands.registerCommand(
                     'cph-ng.createProblem',

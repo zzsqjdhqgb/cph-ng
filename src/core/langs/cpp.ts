@@ -21,7 +21,7 @@ import Settings from '../../utils/settings';
 import { Lang, LangCompileResult } from './lang';
 import { basename, extname, join } from 'path';
 import { type } from 'os';
-import { extensionUri } from '../../utils/global';
+import { extensionPath } from '../../utils/global';
 import { TCVerdicts } from '../../utils/types.backend';
 import * as vscode from 'vscode';
 import { SHA256 } from 'crypto-js';
@@ -93,7 +93,7 @@ export class LangCpp extends Lang {
                         compiler,
                         '-fPIC',
                         '-c',
-                        join(extensionUri.fsPath, 'res', 'wrapper.cpp'),
+                        join(extensionPath, 'res', 'wrapper.cpp'),
                         '-o',
                         wrapperObj,
                     ],
@@ -106,7 +106,7 @@ export class LangCpp extends Lang {
                         '-fPIC',
                         '-Wno-attributes',
                         '-c',
-                        join(extensionUri.fsPath, 'res', 'hook.cpp'),
+                        join(extensionPath, 'res', 'hook.cpp'),
                         '-o',
                         hookObj,
                     ]);

@@ -485,6 +485,10 @@
         ],
         "commands": [
             {
+                "command": "cph-ng.versionInfo",
+                "title": "CPH-NG: Version Info"
+            },
+            {
                 "command": "cph-ng.createProblem",
                 "title": "%cph-ng.commands.createProblem%",
                 "icon": "$(rocket)"
