@@ -1,15 +1,15 @@
 // @ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
-import { exec, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import CopyPlugin from 'copy-webpack-plugin';
-import { writeFileSync } from 'fs';
-import path from 'path';
+import { mkdir, mkdirSync, writeFileSync } from 'fs';
+import { dirname, join, resolve } from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 /** @type WebpackConfig */
 const shared = {
@@ -49,7 +49,7 @@ const extensionConfig = {
     target: 'node',
     entry: './src/extension.ts',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: resolve(__dirname, 'dist'),
         filename: 'extension.js',
         libraryTarget: 'commonjs2',
     },
@@ -58,8 +58,10 @@ const extensionConfig = {
         {
             apply: (compiler) => {
                 compiler.hooks.compile.tap('Build Info Plugin', () => {
+                    const jsonPath = join(__dirname, 'dist', 'generated.json');
+                    mkdirSync(dirname(jsonPath), { recursive: true });
                     writeFileSync(
-                        path.join(__dirname, 'dist', 'generated.json'),
+                        jsonPath,
                         JSON.stringify({
                             commitHash: execSync('git rev-parse HEAD')
                                 .toString()
@@ -82,7 +84,7 @@ const webviewConfig = {
     target: 'web',
     entry: './src/webview/App.tsx',
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: resolve(__dirname, 'dist'),
         filename: 'frontend.js',
         libraryTarget: 'window',
     },
