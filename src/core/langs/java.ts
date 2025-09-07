@@ -15,16 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, readFile, unlink } from 'fs/promises';
+import { access, constants } from 'fs/promises';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
 import { Lang, LangCompileResult } from './lang';
 import { basename, dirname, extname, join } from 'path';
 import { TCVerdicts } from '../../utils/types.backend';
 import * as vscode from 'vscode';
-import { SHA256 } from 'crypto-js';
 import { FileWithHash } from '../../utils/types';
-import { exists } from '../../utils/exec';
 
 export class LangJava extends Lang {
     private logger: Logger = new Logger('langJava');
@@ -37,34 +35,17 @@ export class LangJava extends Lang {
         this.logger.trace('compile', { src, forceCompile });
 
         const classDir = join(Settings.cache.directory, 'bin');
-        const className = basename(src.path, extname(src.path));
-        const classPath = join(classDir, className + '.class');
-
-        const hash = SHA256(
-            (await readFile(src.path, 'utf-8')) +
-                Settings.compilation.javaCompiler +
-                Settings.compilation.javaArgs,
-        ).toString();
-
-        if (
-            forceCompile === false ||
-            (forceCompile !== true &&
-                src.hash === hash &&
-                (await exists(classPath)))
-        ) {
+        const outputPath = join(classDir, basename(src.path, extname(src.path)) + '.class');
+        const { skip, hash } = await Lang.checkHash(
+            src, outputPath,
+            Settings.compilation.javaCompiler + Settings.compilation.javaArgs,
+            forceCompile);
+        if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
                 msg: '',
-                data: { outputPath: classPath, hash },
+                data: { outputPath, hash },
             };
-        }
-
-        try {
-            await unlink(classPath);
-        } catch {
-            this.logger.debug('Output file does not exist, skipping removal', {
-                classPath,
-            });
         }
 
         const {
@@ -92,15 +73,15 @@ export class LangJava extends Lang {
 
             this.logger.debug('Compilation completed successfully', {
                 path: src.path,
-                classPath,
+                outputPath,
             });
             io.compilationMsg = result.stderr.trim();
             return {
-                verdict: await access(classPath, constants.R_OK)
+                verdict: await access(outputPath, constants.R_OK)
                     .then(() => TCVerdicts.UKE)
                     .catch(() => TCVerdicts.CE),
                 msg: '',
-                data: { outputPath: classPath, hash },
+                data: { outputPath, hash },
             };
         } catch (e) {
             this.logger.error('Compilation failed', e);
@@ -117,11 +98,9 @@ export class LangJava extends Lang {
 
     public async runCommand(target: string): Promise<string[]> {
         this.logger.trace('runCommand', { target });
-        const classDir = dirname(target);
-        const className = basename(target, '.class');
         const { javaRunner: runner, javaRunArgs: runArgs } =
             Settings.compilation;
         const runArgsArray = runArgs.split(/\s+/).filter(Boolean);
-        return [runner, ...runArgsArray, '-cp', classDir, className];
+        return [runner, ...runArgsArray, '-cp', dirname(target), basename(target, '.class')];
     }
 }

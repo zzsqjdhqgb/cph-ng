@@ -19,15 +19,33 @@ import { spawn } from 'child_process';
 import Result from '../../utils/result';
 import { FileWithHash } from '../../utils/types';
 import { dirname } from 'path';
+import { SHA256 } from 'crypto-js';
+import { readFile, unlink } from 'fs/promises';
+import { exists } from '../../utils/exec';
 
-export type LangCompileResult = Result<{ outputPath: string; hash: string }>;
+export type LangCompileResult = Result<{ outputPath: string; hash: string; }>;
 export class Lang {
+    protected static async checkHash(src: FileWithHash, outputPath: string, additionalHash: string, forceCompile?: boolean) {
+        const hash = SHA256((await readFile(src.path, 'utf-8')) + additionalHash).toString();
+        if (
+            forceCompile === false ||
+            (forceCompile !== true &&
+                src.hash === hash &&
+                (await exists(outputPath)))
+        ) {
+            return { skip: true, hash };
+        }
+        try {
+            await unlink(outputPath);
+        } catch { }
+        return { skip: false, hash };
+    }
     protected static run(
         cmd: string[],
         srcPath: string,
         ac: AbortController,
         timeout: number,
-    ): Promise<{ stdout: string; stderr: string; code: number }> {
+    ): Promise<{ stdout: string; stderr: string; code: number; }> {
         return new Promise((resolve, reject) => {
             const child = spawn(cmd[0], cmd.slice(1), {
                 cwd: dirname(srcPath),

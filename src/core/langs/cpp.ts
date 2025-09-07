@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, readFile, unlink } from 'fs/promises';
+import { access, constants } from 'fs/promises';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
 import { Lang, LangCompileResult } from './lang';
@@ -24,9 +24,7 @@ import { type } from 'os';
 import { extensionPath } from '../../utils/global';
 import { TCVerdicts } from '../../utils/types.backend';
 import * as vscode from 'vscode';
-import { SHA256 } from 'crypto-js';
 import { FileWithHash } from '../../utils/types';
-import { exists } from '../../utils/exec';
 
 export class LangCpp extends Lang {
     private logger: Logger = new Logger('langCpp');
@@ -42,32 +40,19 @@ export class LangCpp extends Lang {
             Settings.cache.directory,
             'bin',
             basename(src.path, extname(src.path)) +
-                (type() === 'Windows_NT' ? '.exe' : ''),
+            (type() === 'Windows_NT' ? '.exe' : ''),
         );
-        const hash = SHA256(
-            (await readFile(src.path, 'utf-8')) +
-                Settings.compilation.cppCompiler +
-                Settings.compilation.cppArgs,
-        ).toString();
-
-        if (
-            forceCompile === false ||
-            (forceCompile !== true &&
-                src.hash === hash &&
-                (await exists(outputPath)))
-        ) {
+        const { skip, hash } = await Lang.checkHash(
+            src, outputPath,
+            Settings.compilation.cppCompiler + Settings.compilation.cppArgs +
+            Settings.compilation.useWrapper + Settings.compilation.useHook,
+            forceCompile);
+        if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
                 msg: '',
                 data: { outputPath, hash },
             };
-        }
-        try {
-            await unlink(outputPath);
-        } catch {
-            this.logger.debug('Output file does not exist, skipping removal', {
-                outputPath,
-            });
         }
 
         const {
