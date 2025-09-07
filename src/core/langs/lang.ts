@@ -22,10 +22,14 @@ import { dirname } from 'path';
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
 import { exists } from '../../utils/exec';
+import { Logger } from '../../utils/io';
 
 export type LangCompileResult = Result<{ outputPath: string; hash: string; }>;
+const logger = new Logger('lang');
+
 export class Lang {
     protected static async checkHash(src: FileWithHash, outputPath: string, additionalHash: string, forceCompile?: boolean) {
+        logger.trace('checkHash', { src, outputPath, additionalHash, forceCompile });
         const hash = SHA256((await readFile(src.path, 'utf-8')) + additionalHash).toString();
         if (
             forceCompile === false ||
@@ -33,11 +37,16 @@ export class Lang {
                 src.hash === hash &&
                 (await exists(outputPath)))
         ) {
+            logger.debug('Skipping compilation', { srcHash: src.hash, currentHash: hash, outputPath });
             return { skip: true, hash };
         }
         try {
             await unlink(outputPath);
-        } catch { }
+            logger.debug('Removed existing output file', { outputPath });
+        } catch {
+            logger.debug('No existing output file to remove', { outputPath });
+        }
+        logger.debug('Proceeding with compilation', { srcHash: src.hash, currentHash: hash, outputPath });
         return { skip: false, hash };
     }
     protected static run(
@@ -46,6 +55,7 @@ export class Lang {
         ac: AbortController,
         timeout: number,
     ): Promise<{ stdout: string; stderr: string; code: number; }> {
+        logger.trace('run', { cmd, srcPath, timeout });
         return new Promise((resolve, reject) => {
             const child = spawn(cmd[0], cmd.slice(1), {
                 cwd: dirname(srcPath),
