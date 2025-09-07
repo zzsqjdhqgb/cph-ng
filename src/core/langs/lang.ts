@@ -24,20 +24,36 @@ import { readFile, unlink } from 'fs/promises';
 import { exists } from '../../utils/exec';
 import { Logger } from '../../utils/io';
 
-export type LangCompileResult = Result<{ outputPath: string; hash: string; }>;
+export type LangCompileResult = Result<{ outputPath: string; hash: string }>;
 const logger = new Logger('lang');
 
 export class Lang {
-    protected static async checkHash(src: FileWithHash, outputPath: string, additionalHash: string, forceCompile?: boolean) {
-        logger.trace('checkHash', { src, outputPath, additionalHash, forceCompile });
-        const hash = SHA256((await readFile(src.path, 'utf-8')) + additionalHash).toString();
+    protected static async checkHash(
+        src: FileWithHash,
+        outputPath: string,
+        additionalHash: string,
+        forceCompile?: boolean,
+    ) {
+        logger.trace('checkHash', {
+            src,
+            outputPath,
+            additionalHash,
+            forceCompile,
+        });
+        const hash = SHA256(
+            (await readFile(src.path, 'utf-8')) + additionalHash,
+        ).toString();
         if (
             forceCompile === false ||
             (forceCompile !== true &&
                 src.hash === hash &&
                 (await exists(outputPath)))
         ) {
-            logger.debug('Skipping compilation', { srcHash: src.hash, currentHash: hash, outputPath });
+            logger.debug('Skipping compilation', {
+                srcHash: src.hash,
+                currentHash: hash,
+                outputPath,
+            });
             return { skip: true, hash };
         }
         try {
@@ -46,7 +62,11 @@ export class Lang {
         } catch {
             logger.debug('No existing output file to remove', { outputPath });
         }
-        logger.debug('Proceeding with compilation', { srcHash: src.hash, currentHash: hash, outputPath });
+        logger.debug('Proceeding with compilation', {
+            srcHash: src.hash,
+            currentHash: hash,
+            outputPath,
+        });
         return { skip: false, hash };
     }
     protected static run(
@@ -54,7 +74,7 @@ export class Lang {
         srcPath: string,
         ac: AbortController,
         timeout: number,
-    ): Promise<{ stdout: string; stderr: string; code: number; }> {
+    ): Promise<{ stdout: string; stderr: string }> {
         logger.trace('run', { cmd, srcPath, timeout });
         return new Promise((resolve, reject) => {
             const child = spawn(cmd[0], cmd.slice(1), {
@@ -71,7 +91,17 @@ export class Lang {
             }, timeout);
             child.on('close', (code) => {
                 clearTimeout(timer);
-                resolve({ stdout, stderr, code: code ?? 0 });
+                logger.debug('Process closed', { code, stdout, stderr });
+                if (code !== 0) {
+                    logger.error('Compilation failed', {
+                        code,
+                        stdout,
+                        stderr,
+                    });
+                    reject(new Error(stderr));
+                } else {
+                    resolve({ stdout, stderr });
+                }
             });
             child.on('error', (e: Error) => {
                 clearTimeout(timer);

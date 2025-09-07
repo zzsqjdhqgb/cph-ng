@@ -35,11 +35,16 @@ export class LangJava extends Lang {
         this.logger.trace('compile', { src, forceCompile });
 
         const classDir = join(Settings.cache.directory, 'bin');
-        const outputPath = join(classDir, basename(src.path, extname(src.path)) + '.class');
+        const outputPath = join(
+            classDir,
+            basename(src.path, extname(src.path)) + '.class',
+        );
         const { skip, hash } = await Lang.checkHash(
-            src, outputPath,
+            src,
+            outputPath,
             Settings.compilation.javaCompiler + Settings.compilation.javaArgs,
-            forceCompile);
+            forceCompile,
+        );
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
@@ -92,7 +97,8 @@ export class LangJava extends Lang {
                     msg: vscode.l10n.t('Compilation aborted by user.'),
                 };
             }
-            return { verdict: TCVerdicts.CE, msg: (e as Error).message };
+            io.compilationMsg = (e as Error).message;
+            return { verdict: TCVerdicts.CE, msg: '' };
         }
     }
 
@@ -101,6 +107,12 @@ export class LangJava extends Lang {
         const { javaRunner: runner, javaRunArgs: runArgs } =
             Settings.compilation;
         const runArgsArray = runArgs.split(/\s+/).filter(Boolean);
-        return [runner, ...runArgsArray, '-cp', dirname(target), basename(target, '.class')];
+        return [
+            runner,
+            ...runArgsArray,
+            '-cp',
+            dirname(target),
+            basename(target, '.class'),
+        ];
     }
 }

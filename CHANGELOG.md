@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: time not captured using exit
+- **fix**: check command code when compiling
 
 ## 0.1.9
 

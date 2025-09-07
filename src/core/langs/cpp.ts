@@ -40,13 +40,17 @@ export class LangCpp extends Lang {
             Settings.cache.directory,
             'bin',
             basename(src.path, extname(src.path)) +
-            (type() === 'Windows_NT' ? '.exe' : ''),
+                (type() === 'Windows_NT' ? '.exe' : ''),
         );
         const { skip, hash } = await Lang.checkHash(
-            src, outputPath,
-            Settings.compilation.cppCompiler + Settings.compilation.cppArgs +
-            Settings.compilation.useWrapper + Settings.compilation.useHook,
-            forceCompile);
+            src,
+            outputPath,
+            Settings.compilation.cppCompiler +
+                Settings.compilation.cppArgs +
+                Settings.compilation.useWrapper +
+                Settings.compilation.useHook,
+            forceCompile,
+        );
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
@@ -127,9 +131,11 @@ export class LangCpp extends Lang {
                     Lang.run(cmd, src.path, ac, timeout),
                 ),
             );
+            this.logger.trace('Compile results', { compileResults });
             const postResults = await Promise.all(
                 postCommands.map((cmd) => Lang.run(cmd, src.path, ac, timeout)),
             );
+            this.logger.trace('Post-process results', { postResults });
             const results = [...compileResults, ...postResults];
 
             this.logger.debug('Compilation completed successfully', {
@@ -156,7 +162,8 @@ export class LangCpp extends Lang {
                     msg: vscode.l10n.t('Compilation aborted by user.'),
                 };
             }
-            return { verdict: TCVerdicts.CE, msg: (e as Error).message };
+            io.compilationMsg = (e as Error).message;
+            return { verdict: TCVerdicts.CE, msg: '' };
         }
     }
     public async runCommand(target: string): Promise<string[]> {

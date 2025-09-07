@@ -39,12 +39,14 @@ export class LangC extends Lang {
             Settings.cache.directory,
             'bin',
             basename(src.path, extname(src.path)) +
-            (type() === 'Windows_NT' ? '.exe' : ''),
+                (type() === 'Windows_NT' ? '.exe' : ''),
         );
         const { skip, hash } = await Lang.checkHash(
-            src, outputPath,
+            src,
+            outputPath,
             Settings.compilation.cCompiler + Settings.compilation.cArgs,
-            forceCompile);
+            forceCompile,
+        );
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
@@ -97,7 +99,8 @@ export class LangC extends Lang {
                     msg: vscode.l10n.t('Compilation aborted by user.'),
                 };
             }
-            return { verdict: TCVerdicts.CE, msg: (e as Error).message };
+            io.compilationMsg = (e as Error).message;
+            return { verdict: TCVerdicts.CE, msg: '' };
         }
     }
     public async runCommand(target: string): Promise<string[]> {
