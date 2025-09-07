@@ -25,6 +25,5 @@ int main()
     std::atexit(CPHNG::exit);
     CPHNG::start();
     int ret = original_main();
-    CPHNG::exit();
     return ret;
 }

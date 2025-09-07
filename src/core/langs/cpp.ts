@@ -132,9 +132,10 @@ export class LangCpp extends Lang {
                 ),
             );
             this.logger.trace('Compile results', { compileResults });
-            const postResults = await Promise.all(
-                postCommands.map((cmd) => Lang.run(cmd, src.path, ac, timeout)),
-            );
+            const postResults: typeof compileResults = [];
+            for (const cmd of postCommands) {
+                postResults.push(await Lang.run(cmd, src.path, ac, timeout));
+            }
             this.logger.trace('Post-process results', { postResults });
             const results = [...compileResults, ...postResults];
 
