@@ -1016,10 +1016,21 @@ export class CphNg {
         const fileIo = isInputOrAnswer ? tc[label] : tc.result![label];
         if (fileIo.useFile) {
             const data = await tcIo2Str(fileIo);
-            if (isInputOrAnswer) {
-                tc[label] = { useFile: false, data };
-            } else {
-                tc.result![label] = { useFile: false, data };
+            if (
+                data.length <= Settings.problem.maxInlineDataLength ||
+                (await io.confirm(
+                    vscode.l10n.t(
+                        'The file size is {size} bytes, which may be large. Are you sure you want to load it inline?',
+                        { size: data.length },
+                    ),
+                    true,
+                ))
+            ) {
+                if (isInputOrAnswer) {
+                    tc[label] = { useFile: false, data };
+                } else {
+                    tc.result![label] = { useFile: false, data };
+                }
             }
         } else {
             const ext = {

@@ -117,6 +117,7 @@
     "Testlib returned unknown exit code: {code}": "Testlib 返回了未知的退出代码：{code}",
     "Testlib run failed": "Testlib 运行失败",
     "Text files": "文本文件",
+    "The file size is {size} bytes, which may be large. Are you sure you want to load it inline?": "文件大小为 {size} 字节，可能较大。你确定要将其内联加载吗？",
     "The {fileType} data for test case {idx} is inline and not stored in a separate file. Content:": "测试用例 {idx} 的 {fileType} 数据是内联的，而不是存储在单独的文件中。内容：",
     "Time Limit Exceeded": "时间超限",
     "Time: {time}ms": "时间：{time}ms",

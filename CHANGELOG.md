@@ -6,6 +6,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: time not captured using exit
 - **fix**: check command code when compiling
+- **feat**: interactive problem support
+- **feat**: add max inline data length configuration
 
 ## 0.1.9
 

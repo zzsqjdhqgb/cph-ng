@@ -278,6 +278,11 @@
                         "type": "boolean",
                         "default": true,
                         "markdownDescription": "%cph-ng.configuration.problem.properties.clearBeforeLoad.markdownDescription%"
+                    },
+                    "cph-ng.problem.maxInlineDataLength": {
+                        "type": "number",
+                        "default": 65536,
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.maxInlineDataLength.markdownDescription%"
                     }
                 }
             },

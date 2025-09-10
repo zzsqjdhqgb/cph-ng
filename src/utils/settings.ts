@@ -221,6 +221,9 @@ class ProblemSection extends SettingsSection {
     get clearBeforeLoad(): boolean {
         return this.get('clearBeforeLoad') as boolean;
     }
+    get maxInlineDataLength(): number {
+        return this.get('maxInlineDataLength') as number;
+    }
 }
 
 class SidebarSection extends SettingsSection {
