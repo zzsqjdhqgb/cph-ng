@@ -112,7 +112,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                         ? false
                                         : e.ctrlKey
                                           ? true
-                                          : undefined,
+                                          : null,
                                 } satisfies RunTcMsg);
                             }}
                         />

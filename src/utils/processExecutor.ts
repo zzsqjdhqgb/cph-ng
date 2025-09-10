@@ -1,0 +1,181 @@
+import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import { dirname } from 'path';
+import { createReadStream } from 'fs';
+import { Logger } from './io';
+import { TCIO } from './types';
+import { pipeline } from 'stream/promises';
+import { cwd } from 'process';
+
+export interface ProcessExecutorOptions {
+    cmd: string[];
+    timeout?: number;
+    stdin?: TCIO;
+    ac?: AbortController;
+}
+
+export interface ProcessResult {
+    exitCode: number | null;
+    signal: NodeJS.Signals | null;
+    stdout: string;
+    stderr: string;
+    killed: boolean;
+    startTime: number;
+    endTime: number;
+}
+
+interface ProcessInfo {
+    child: ChildProcessWithoutNullStreams;
+    stdout: string;
+    stderr: string;
+    killed: boolean;
+    startTime: number;
+}
+
+export class ProcessExecutor {
+    private logger: Logger = new Logger('processExecutor');
+
+    public async execute(
+        options: ProcessExecutorOptions,
+    ): Promise<ProcessResult> {
+        const process = await this.createProcess(options);
+        if (options.stdin) {
+            const stdin = process.child.stdin;
+            if (options.stdin.useFile) {
+                pipeline(createReadStream(options.stdin.path), stdin);
+            } else {
+                stdin.write(options.stdin.data);
+                stdin.end();
+            }
+        }
+        return new Promise(async (resolve) => {
+            process.child.on('close', (code, signal) => {
+                resolve(this.createResult(process, code, signal));
+            });
+            process.child.on('error', (error) => {
+                resolve(this.createErrorResult(process, error));
+            });
+        });
+    }
+
+    public async executeWithPipe(
+        process1Options: ProcessExecutorOptions,
+        process2Options: ProcessExecutorOptions,
+    ): Promise<{ process1: ProcessResult; process2: ProcessResult }> {
+        const process1 = await this.createProcess(process1Options);
+        const process2 = await this.createProcess(process2Options);
+        pipeline(process2.child.stdout, process1.child.stdin);
+        pipeline(process1.child.stdout, process2.child.stdin);
+
+        return new Promise(async (resolve) => {
+            const results: {
+                process1?: ProcessResult;
+                process2?: ProcessResult;
+            } = {};
+            const checkCompletion = () => {
+                this.logger.trace('checkCompletion', {
+                    results,
+                });
+                if (results.process1 && results.process2) {
+                    resolve({
+                        process1: results.process1,
+                        process2: results.process2,
+                    });
+                }
+            };
+            process1.child.on('close', (code, signal) => {
+                results.process1 = this.createResult(process1, code, signal);
+                checkCompletion();
+            });
+            process2.child.on('close', (code, signal) => {
+                results.process2 = this.createResult(process2, code, signal);
+                checkCompletion();
+            });
+            process1.child.on('error', (error) => {
+                results.process1 = this.createErrorResult(process1, error);
+                process2.child.kill();
+                checkCompletion();
+            });
+            process2.child.on('error', (error) => {
+                results.process2 = this.createErrorResult(process2, error);
+                process1.child.kill();
+                checkCompletion();
+            });
+        });
+    }
+
+    private async createProcess(
+        options: ProcessExecutorOptions,
+    ): Promise<ProcessInfo> {
+        this.logger.trace('createProcess', options);
+        const { cmd, ac, timeout } = options;
+        const process: ProcessInfo = {
+            child: spawn(cmd[0], cmd.slice(1), {
+                cwd: cmd[0] ? dirname(cmd[0]) : cwd(),
+                signal: ac?.signal,
+            }),
+            stdout: '',
+            stderr: '',
+            killed: false,
+            startTime: Date.now(),
+        };
+        this.logger.info('Running executable', cmd, process.child.pid);
+        const timeoutId = setTimeout(() => {
+            this.logger.warn(
+                'Killing process',
+                process.child.pid,
+                'due to timeout',
+                timeout,
+            );
+            process.killed = true;
+            process.child.kill('SIGKILL');
+        }, timeout);
+        process.child.stdout.on('data', (data) => {
+            process.stdout += data.toString();
+        });
+        process.child.stderr.on('data', (data) => {
+            process.stderr += data.toString();
+        });
+        process.child.on('close', () => clearTimeout(timeoutId));
+        process.child.on('error', () => clearTimeout(timeoutId));
+        return process;
+    }
+
+    private createResult(
+        process: ProcessInfo,
+        exitCode: number | null,
+        signal: NodeJS.Signals | null,
+    ): ProcessResult {
+        this.logger.trace('createResult', { process, exitCode, signal });
+        this.logger.debug('Process close', {
+            pid: process.child.pid,
+            exitCode,
+            signal,
+        });
+        return {
+            exitCode,
+            signal,
+            ...process,
+            endTime: Date.now(),
+        } satisfies ProcessResult;
+    }
+
+    private createErrorResult(
+        process: ProcessInfo,
+        error: Error,
+    ): ProcessResult {
+        this.logger.trace('createErrorResult', { process, error });
+        this.logger.error('Process error', {
+            process: process.child.pid,
+            error,
+        });
+        return {
+            exitCode: null,
+            signal: null,
+            stdout: process.stdout,
+            stderr: process.stderr + error.message,
+            killed: process.killed,
+            startTime: process.startTime,
+            endTime: Date.now(),
+        };
+    }
+}

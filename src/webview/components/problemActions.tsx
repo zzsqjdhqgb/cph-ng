@@ -117,7 +117,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                         ? false
                                         : e.ctrlKey
                                           ? true
-                                          : undefined,
+                                          : null,
                                 } satisfies RunTcsMsg);
                             }}
                         />

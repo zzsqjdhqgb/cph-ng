@@ -16,7 +16,6 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import AdmZip from 'adm-zip';
-import { SHA256 } from 'crypto-js';
 import {
     access,
     constants,
@@ -29,25 +28,17 @@ import {
 import { basename, dirname, extname, join, relative } from 'path';
 import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
-import { Checker } from '../core/checker';
 import { io, Logger } from '../utils/io';
 import Settings from '../utils/settings';
-import {
-    tcIo2Path,
-    tcIo2Str,
-    TCVerdicts,
-    write2TcIo,
-} from '../utils/types.backend';
+import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import {
     EmbeddedProblem,
     isExpandVerdict,
     isRunningVerdict,
     Problem,
     TC,
-    TCIO,
-    TCVerdict,
 } from '../utils/types';
-import Result, { assignResult } from '../utils/result';
+import Result from '../utils/result';
 import { renderTemplate } from '../utils/strTemplate';
 import { CphCapable } from './cphCapable';
 import { FileTypes } from '../webview/msgs';
@@ -61,37 +52,32 @@ import {
 } from '../utils/embedded';
 import { FolderChooser } from '../utils/folderChooser';
 import { Lang, LangCompileResult } from '../core/langs/lang';
-import { createReadStream } from 'fs';
-import { spawn } from 'child_process';
 import { Langs } from '../core/langs/langs';
+import { Runner } from '../core/runner';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
     canImport: boolean,
 ) => void;
 
-type CompileResult = Result<{
+export type CompileResult = Result<{
     src: NonNullable<LangCompileResult['data']>;
     checker?: NonNullable<LangCompileResult['data']>;
+    interactor?: NonNullable<LangCompileResult['data']>;
 }>;
-type RunnerResult = Result<undefined> & {
-    time: number;
-    stdout: string;
-    stderr: string;
-};
 
 export class CphNg {
     private logger: Logger = new Logger('cphNg');
     private _problem?: Problem;
     private _canImport: boolean;
-    private checker: Checker;
+    private runner: Runner;
     private onProblemChange: ProblemChangeCallback[];
     private runAbortController?: AbortController;
 
     constructor() {
         this.logger.trace('constructor');
         this._canImport = false;
-        this.checker = new Checker();
+        this.runner = new Runner(this.emitProblemChange.bind(this));
         this.onProblemChange = [];
     }
 
@@ -169,20 +155,9 @@ export class CphNg {
         return true;
     }
 
-    private getTCHash(tc: TC) {
-        const problem = this._problem!;
-        return SHA256(
-            `${problem.src.path}-${
-                tc.stdin.useFile ? tc.stdin.path : tc.stdin.data
-            }`,
-        )
-            .toString()
-            .substring(64 - 6);
-    }
-
     private async compile(
         lang: Lang,
-        compile?: boolean,
+        compile: boolean | null,
     ): Promise<CompileResult> {
         try {
             const problem = this._problem!;
@@ -192,52 +167,64 @@ export class CphNg {
             if (editor) {
                 await editor.document.save();
             }
-            const compileResult = await lang.compile(
+
+            const result = await lang.compile(
                 problem.src,
                 this.runAbortController!,
                 compile,
+                { canUseWrapper: true },
             );
-            if (compileResult.verdict !== TCVerdicts.UKE) {
-                return { ...compileResult, data: { src: compileResult.data! } };
+            if (result.verdict !== TCVerdicts.UKE) {
+                return { ...result, data: undefined };
             }
-            problem.src.hash = compileResult.data!.hash;
-            if (!problem.checker) {
-                return { ...compileResult, data: { src: compileResult.data! } };
+            problem.src.hash = result.data!.hash;
+            const data: CompileResult['data'] = {
+                src: result.data!,
+            };
+            if (problem.checker) {
+                const checkerLang = Langs.getLang(problem.checker.path);
+                if (!checkerLang) {
+                    data.checker = {
+                        outputPath: problem.checker.path,
+                        hash: '',
+                    };
+                } else {
+                    const checkerResult = await checkerLang.compile(
+                        problem.checker,
+                        this.runAbortController!,
+                        compile,
+                    );
+                    if (checkerResult.verdict !== TCVerdicts.UKE) {
+                        return { ...checkerResult, data };
+                    }
+                    problem.checker.hash = checkerResult.data!.hash;
+                    data.checker = checkerResult.data!;
+                }
             }
-
-            const checkerLang = Langs.getLang(problem.checker.path);
-            if (!checkerLang) {
-                return {
-                    ...compileResult,
-                    data: {
-                        src: compileResult.data!,
-                        checker: { outputPath: problem.checker.path, hash: '' },
-                    },
-                };
+            if (problem.interactor) {
+                const interactorLang = Langs.getLang(problem.interactor.path);
+                if (!interactorLang) {
+                    data.interactor = {
+                        outputPath: problem.interactor.path,
+                        hash: '',
+                    };
+                } else {
+                    const interactorResult = await interactorLang.compile(
+                        problem.interactor,
+                        this.runAbortController!,
+                        compile,
+                    );
+                    if (interactorResult.verdict !== TCVerdicts.UKE) {
+                        return { ...interactorResult, data };
+                    }
+                    problem.interactor.hash = interactorResult.data!.hash;
+                    data.interactor = interactorResult.data!;
+                }
             }
-
-            const checkerCompileResult = await checkerLang.compile(
-                problem.checker,
-                this.runAbortController!,
-                compile,
-            );
-            if (checkerCompileResult.verdict !== TCVerdicts.UKE) {
-                return {
-                    ...checkerCompileResult,
-                    data: {
-                        src: compileResult.data!,
-                        checker: checkerCompileResult.data,
-                    },
-                };
-            }
-            problem.checker.hash = checkerCompileResult.data!.hash;
             return {
                 verdict: TCVerdicts.UKE,
                 msg: '',
-                data: {
-                    src: compileResult.data!,
-                    checker: checkerCompileResult.data,
-                },
+                data,
             };
         } catch (e) {
             return {
@@ -245,269 +232,6 @@ export class CphNg {
                 msg: (e as Error).message,
             };
         }
-    }
-    private async doRun(
-        runCommand: string[],
-        timeLimit: number,
-        stdin: TCIO,
-        abortController: AbortController,
-    ): Promise<RunnerResult> {
-        this.logger.trace('runExecutable', {
-            runCommand,
-            timeLimit,
-            stdin,
-        });
-        this.logger.info('Running executable', runCommand);
-        return new Promise((resolve) => {
-            const startTime = Date.now();
-            const child = spawn(runCommand[0], runCommand.slice(1), {
-                stdio: ['pipe', 'pipe', 'pipe'],
-                cwd: dirname(runCommand[0]),
-                signal: abortController.signal,
-            });
-
-            let stdout = '';
-            let stderr = '';
-            let killed = false;
-
-            const killTimeout = setTimeout(() => {
-                killed = true;
-                this.logger.warn('Killing process due to timeout', {
-                    runCommand,
-                    timeLimit,
-                });
-                child.kill('SIGKILL');
-            }, timeLimit + Settings.runner.timeAddition);
-
-            child.stdout.on('data', (data) => {
-                stdout += data.toString();
-                this.logger.debug('Process stdout', { data: data.toString() });
-            });
-
-            child.stderr.on('data', (data) => {
-                stderr += data.toString();
-                this.logger.debug('Process stderr', { data: data.toString() });
-            });
-
-            const commonResolve = (verdict: TCVerdict, msg: string) => {
-                const endTime = Date.now();
-                clearTimeout(killTimeout);
-                this.logger.debug('Process completed', {
-                    verdict,
-                    msg,
-                    duration: endTime - startTime,
-                });
-                let time = endTime - startTime;
-                const match = stderr.match(
-                    /-----CPH DATA STARTS-----(\{.*\})-----/,
-                );
-                if (match) {
-                    try {
-                        const data = JSON.parse(match[1]);
-                        time = Math.max(data.time, 1) / 1000.0;
-                    } catch (e) {
-                        this.logger.error('Failed to parse wrapper data', e);
-                    }
-                    stderr = stderr.replace(match[0], '').trimEnd();
-                }
-                resolve({
-                    verdict,
-                    msg,
-                    stdout,
-                    stderr,
-                    time,
-                } satisfies RunnerResult);
-            };
-
-            child.on('close', (code, signal) => {
-                if (killed) {
-                    commonResolve(
-                        TCVerdicts.TLE,
-                        vscode.l10n.t('Killed due to timeout'),
-                    );
-                } else if (code) {
-                    commonResolve(
-                        TCVerdicts.RE,
-                        vscode.l10n.t('Process exited with code: {code}.', {
-                            code,
-                        }),
-                    );
-                } else if (signal) {
-                    commonResolve(
-                        TCVerdicts.RE,
-                        vscode.l10n.t('Process exited with signal: {signal}.', {
-                            signal,
-                        }),
-                    );
-                } else {
-                    commonResolve(TCVerdicts.UKE, '');
-                }
-            });
-
-            child.on('error', (e: Error) => {
-                this.logger.error('Process error', e);
-                commonResolve(
-                    abortController.signal.aborted
-                        ? TCVerdicts.RJ
-                        : TCVerdicts.SE,
-                    e.message,
-                );
-            });
-
-            if (stdin.useFile) {
-                const inputStream = createReadStream(stdin.path, {
-                    encoding: 'utf8',
-                });
-
-                inputStream.on('data', (chunk) => {
-                    child.stdin.write(chunk);
-                    this.logger.debug('Writing to stdin', { chunk });
-                });
-
-                inputStream.on('end', () => {
-                    child.stdin.end();
-                    this.logger.debug('Input stream ended');
-                });
-
-                inputStream.on('error', (e: Error) => {
-                    this.logger.error('Input stream error', e);
-                    commonResolve(
-                        TCVerdicts.SE,
-                        vscode.l10n.t('Input file read failed: {msg}.', {
-                            msg: e.message,
-                        }),
-                    );
-                });
-            } else {
-                child.stdin.write(stdin.data);
-                child.stdin.end();
-                this.logger.debug('Input written to stdin', {
-                    stdin: stdin.data,
-                });
-            }
-        });
-    }
-    private async run(
-        lang: Lang,
-        tc: TC,
-        compileData: NonNullable<CompileResult['data']>,
-    ) {
-        const problem = this._problem!;
-        const result = tc.result!;
-        const abortController = this.runAbortController!;
-        try {
-            result.verdict = TCVerdicts.JG;
-            this.emitProblemChange();
-
-            const runResult = await this.doRun(
-                await lang.runCommand(compileData.src.outputPath),
-                problem.timeLimit,
-                tc.stdin,
-                abortController,
-            );
-            result.time = runResult.time;
-            result.verdict = TCVerdicts.JGD;
-            if (tc.answer.useFile) {
-                result.stdout = {
-                    useFile: true,
-                    path: join(
-                        Settings.cache.directory,
-                        'out',
-                        `${this.getTCHash(tc)}.out`,
-                    ),
-                };
-            } else {
-                result.stdout.useFile = false;
-            }
-            result.stdout = await write2TcIo(result.stdout, runResult.stdout);
-
-            if (
-                Settings.runner.stderrThreshold !== -1 &&
-                runResult.stderr.length >= Settings.runner.stderrThreshold
-            ) {
-                result.stderr = {
-                    useFile: true,
-                    path: join(
-                        Settings.cache.directory,
-                        'out',
-                        `${this.getTCHash(tc)}.err`,
-                    ),
-                };
-            } else {
-                result.stderr.useFile = false;
-            }
-            result.stderr = await write2TcIo(result.stderr, runResult.stderr);
-            this.emitProblemChange();
-
-            if (assignResult(result, runResult)) {
-            } else if (result.time && result.time > problem.timeLimit) {
-                result.verdict = TCVerdicts.TLE;
-            } else {
-                result.verdict = TCVerdicts.CMP;
-                this.emitProblemChange();
-                assignResult(
-                    result,
-                    compileData.checker
-                        ? await this.checker.runChecker(
-                              compileData.checker.outputPath,
-                              tc,
-                              abortController,
-                          )
-                        : await this.compareOutputs(
-                              runResult.stdout,
-                              await tcIo2Str(tc.answer),
-                              runResult.stderr,
-                          ),
-                );
-            }
-            this.emitProblemChange();
-        } catch (e) {
-            assignResult(result, {
-                verdict: TCVerdicts.SE,
-                msg: (e as Error).message,
-            });
-            this.emitProblemChange();
-        }
-    }
-    private async compareOutputs(
-        stdout: string,
-        answer: string,
-        stderr: string,
-    ): Promise<Result<{}>> {
-        this.logger.trace('compareOutputs', { stdout, answer, stderr });
-        if (!Settings.comparing.ignoreError && stderr) {
-            return { verdict: TCVerdicts.RE, msg: '' };
-        }
-        const fixedOutput = stdout
-            .trimEnd()
-            .split('\n')
-            .map((line) => line.trimEnd())
-            .join('\n');
-        const fixedAnswer = answer
-            .trimEnd()
-            .split('\n')
-            .map((line) => line.trimEnd())
-            .join('\n');
-        if (
-            Settings.comparing.oleSize &&
-            fixedOutput.length >=
-                fixedAnswer.length * Settings.comparing.oleSize
-        ) {
-            return { verdict: TCVerdicts.OLE, msg: '' };
-        }
-        const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
-        const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
-        this.logger.trace('Compressed data', {
-            compressOutput,
-            compressAnswer,
-        });
-        if (compressOutput !== compressAnswer) {
-            return { verdict: TCVerdicts.WA, msg: '' };
-        }
-        if (fixedOutput !== fixedAnswer && !Settings.comparing.regardPEAsAC) {
-            return { verdict: TCVerdicts.PE, msg: '' };
-        }
-        return { verdict: TCVerdicts.AC, msg: '' };
     }
 
     public async createProblem(): Promise<void> {
@@ -671,6 +395,20 @@ export class CphNg {
                         embeddedProblem.spjCode,
                     );
                 }
+                if (embeddedProblem.interactorCode) {
+                    this.problem.interactor = {
+                        path: join(
+                            dirname(cppFile),
+                            basename(cppFile, extname(cppFile)) +
+                                '.int' +
+                                extname(cppFile),
+                        ),
+                    };
+                    await writeFile(
+                        this.problem.interactor?.path,
+                        embeddedProblem.interactorCode,
+                    );
+                }
                 this.saveProblem();
             } catch (e) {
                 io.warn(
@@ -750,9 +488,15 @@ export class CphNg {
                 ),
                 timeLimit: problem.timeLimit,
             };
-            if (problem.checker?.path) {
+            if (problem.checker) {
                 embeddedProblem.spjCode = await readFile(
-                    problem.checker?.path,
+                    problem.checker.path,
+                    'utf-8',
+                );
+            }
+            if (problem.interactor) {
+                embeddedProblem.interactorCode = await readFile(
+                    problem.interactor.path,
                     'utf-8',
                 );
             }
@@ -1029,7 +773,7 @@ export class CphNg {
         problem.tcs[idx] = tc;
         this.saveProblem();
     }
-    public async runTc(idx: number, compile?: boolean): Promise<void> {
+    public async runTc(idx: number, compile: boolean | null): Promise<void> {
         this.logger.trace('runTestCase', { idx });
         if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
@@ -1064,12 +808,19 @@ export class CphNg {
         }
         const compileData = compileResult.data!;
 
-        await this.run(srcLang, tc, compileData);
+        await this.runner.run(
+            problem,
+            result,
+            this.runAbortController,
+            srcLang,
+            tc,
+            compileData,
+        );
         tc.isExpand = isExpandVerdict(result.verdict);
         this.saveProblem();
         this.runAbortController = undefined;
     }
-    public async runTcs(compile?: boolean): Promise<void> {
+    public async runTcs(compile: boolean | null): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -1120,7 +871,14 @@ export class CphNg {
                     continue;
                 }
             }
-            await this.run(srcLang, tc, compileData);
+            await this.runner.run(
+                problem,
+                tc.result!,
+                this.runAbortController,
+                srcLang,
+                tc,
+                compileData,
+            );
             if (!hasExpandStatus) {
                 tc.isExpand = isExpandVerdict(tc.result!.verdict);
                 this.emitProblemChange();
@@ -1311,12 +1069,12 @@ export class CphNg {
             canSelectFolders: false,
             canSelectMany: false,
             title: vscode.l10n.t('Select {fileType} File', {
-                fileType:
-                    fileType === 'checker'
-                        ? vscode.l10n.t('Checker')
-                        : fileType === 'generator'
-                          ? vscode.l10n.t('Generator')
-                          : vscode.l10n.t('Brute Force'),
+                fileType: {
+                    checker: vscode.l10n.t('Checker'),
+                    interactor: vscode.l10n.t('Interactor'),
+                    generator: vscode.l10n.t('Generator'),
+                    bruteForce: vscode.l10n.t('Brute Force'),
+                }[fileType],
             }),
         });
         if (!checkerFileUri) {
@@ -1324,6 +1082,8 @@ export class CphNg {
         }
         if (fileType === 'checker') {
             problem.checker = { path: checkerFileUri[0].fsPath };
+        } else if (fileType === 'interactor') {
+            problem.interactor = { path: checkerFileUri[0].fsPath };
         } else if (fileType === 'generator') {
             if (!problem.bfCompare) {
                 problem.bfCompare = { running: false, msg: '' };
@@ -1344,16 +1104,16 @@ export class CphNg {
         const problem = this._problem!;
         if (fileType === 'checker') {
             problem.checker = undefined;
+        } else if (fileType === 'interactor') {
+            problem.interactor = undefined;
         } else if (fileType === 'generator') {
-            if (problem.bfCompare) {
-                problem.bfCompare.generator = undefined;
-            }
+            problem.bfCompare && (problem.bfCompare.generator = undefined);
         } else {
             problem.bfCompare && (problem.bfCompare.bruteForce = undefined);
         }
         this.saveProblem();
     }
-    public async startBfCompare(compile?: boolean): Promise<void> {
+    public async startBfCompare(compile: boolean | null): Promise<void> {
         if (!this.checkProblem()) {
             return;
         }
@@ -1453,11 +1213,12 @@ export class CphNg {
                 { cnt },
             );
             this.emitProblemChange();
-            const generatorRunResult = await this.doRun(
+            const generatorRunResult = await this.runner.doRun(
                 [generatorCompileResult.data!.outputPath],
                 Settings.bfCompare.generatorTimeLimit,
                 { useFile: false, data: '' },
                 this.runAbortController,
+                undefined,
             );
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
@@ -1476,11 +1237,12 @@ export class CphNg {
                 { cnt },
             );
             this.emitProblemChange();
-            const bruteForceRunResult = await this.doRun(
+            const bruteForceRunResult = await this.runner.doRun(
                 [bruteForceCompileResult.data!.outputPath],
                 Settings.bfCompare.bruteForceTimeLimit,
                 { useFile: false, data: generatorRunResult.stdout },
                 this.runAbortController,
+                undefined,
             );
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
@@ -1514,7 +1276,14 @@ export class CphNg {
                     msg: '',
                 },
             } satisfies TC;
-            await this.run(srcLang, tempTc, solutionCompileResult.data!);
+            await this.runner.run(
+                problem,
+                tempTc.result!,
+                this.runAbortController,
+                srcLang,
+                tempTc,
+                solutionCompileResult.data!,
+            );
             if (tempTc.result?.verdict !== TCVerdicts.AC) {
                 if (tempTc.result?.verdict !== TCVerdicts.RJ) {
                     problem.tcs.push(tempTc);

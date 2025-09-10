@@ -37,7 +37,7 @@ export interface DelProblemMsg {
 }
 export interface RunTcsMsg {
     type: 'runTcs';
-    compile?: boolean;
+    compile: boolean | null;
 }
 export interface StopTcsMsg {
     type: 'stopTcs';
@@ -52,7 +52,7 @@ export interface LoadTcsMsg {
 export interface RunTcMsg {
     type: 'runTc';
     idx: number;
-    compile?: boolean;
+    compile: boolean | null;
 }
 export interface ChooseTcFileMsg {
     type: 'chooseTcFile';
@@ -81,7 +81,7 @@ export interface OpenFileMsg {
     type: 'openFile';
     path: string;
 }
-export type FileTypes = 'checker' | 'generator' | 'bruteForce';
+export type FileTypes = 'checker' | 'interactor' | 'generator' | 'bruteForce';
 export interface ChooseFileMsg {
     type: 'chooseFile';
     file: FileTypes;
@@ -92,7 +92,7 @@ export interface RemoveFileMsg {
 }
 export interface StartBfCompareMsg {
     type: 'startBfCompare';
-    compile?: boolean;
+    compile: boolean | null;
 }
 export interface StopBfCompareMsg {
     type: 'stopBfCompare';

@@ -15,24 +15,31 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { spawn } from 'child_process';
 import Result from '../../utils/result';
 import { FileWithHash } from '../../utils/types';
-import { dirname } from 'path';
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
 import { exists } from '../../utils/exec';
 import { Logger } from '../../utils/io';
+import { ProcessExecutor } from '../../utils/processExecutor';
 
 export type LangCompileResult = Result<{ outputPath: string; hash: string }>;
 const logger = new Logger('lang');
 
+export interface CompileAdditionalData {
+    canUseWrapper: boolean;
+}
+export const DefaultCompileAdditionalData: CompileAdditionalData = {
+    canUseWrapper: false,
+};
 export class Lang {
+    protected static executor: ProcessExecutor = new ProcessExecutor();
+
     protected static async checkHash(
         src: FileWithHash,
         outputPath: string,
         additionalHash: string,
-        forceCompile?: boolean,
+        forceCompile: boolean | null,
     ) {
         logger.trace('checkHash', {
             src,
@@ -69,51 +76,12 @@ export class Lang {
         });
         return { skip: false, hash };
     }
-    protected static run(
-        cmd: string[],
-        srcPath: string,
-        ac: AbortController,
-        timeout: number,
-    ): Promise<{ stdout: string; stderr: string }> {
-        logger.trace('run', { cmd, srcPath, timeout });
-        return new Promise((resolve, reject) => {
-            const child = spawn(cmd[0], cmd.slice(1), {
-                cwd: dirname(srcPath),
-                signal: ac.signal,
-            });
-            let stdout = '';
-            let stderr = '';
-            child.stdout.on('data', (data) => (stdout += data.toString()));
-            child.stderr.on('data', (data) => (stderr += data.toString()));
-            const timer = setTimeout(() => {
-                child.kill('SIGKILL');
-                reject(new Error('Compilation timeout'));
-            }, timeout);
-            child.on('close', (code) => {
-                clearTimeout(timer);
-                logger.debug('Process closed', { code, stdout, stderr });
-                if (code !== 0) {
-                    logger.error('Compilation failed', {
-                        code,
-                        stdout,
-                        stderr,
-                    });
-                    reject(new Error(stderr));
-                } else {
-                    resolve({ stdout, stderr });
-                }
-            });
-            child.on('error', (e: Error) => {
-                clearTimeout(timer);
-                reject(e);
-            });
-        });
-    }
     public extensions: string[] = [];
     public async compile(
         _src: FileWithHash,
         _ac: AbortController,
-        _forceCompile?: boolean,
+        _forceCompile: boolean | null,
+        _additionalData: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         throw new Error('Compile method not implemented.');
     }

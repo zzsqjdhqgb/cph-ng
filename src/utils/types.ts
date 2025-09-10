@@ -80,6 +80,7 @@ export interface Problem {
     timeLimit: number;
     src: FileWithHash;
     checker?: FileWithHash;
+    interactor?: FileWithHash;
     bfCompare?: BFCompare;
 }
 export interface EmbeddedProblem {
@@ -91,4 +92,5 @@ export interface EmbeddedProblem {
     }[];
     timeLimit: number;
     spjCode?: string;
+    interactorCode?: string;
 }

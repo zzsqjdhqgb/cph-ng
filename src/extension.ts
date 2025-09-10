@@ -200,7 +200,7 @@ OS: ${release()}`;
                     'cph-ng.runTestCases',
                     async () => {
                         this.sidebarProvider.focus();
-                        await this.cphNg.runTcs();
+                        await this.cphNg.runTcs(null);
                     },
                 ),
             );
@@ -335,6 +335,8 @@ OS: ${release()}`;
                 this.logger.debug('Test case file is active', { filePath });
             } else if (this.cphNg.problem?.checker?.path === filePath) {
                 this.logger.debug('Checker file is active', { filePath });
+            } else if (this.cphNg.problem?.interactor?.path === filePath) {
+                this.logger.debug('Interactor file is active', { filePath });
             } else if (
                 this.cphNg.problem?.bfCompare?.bruteForce?.path === filePath
             ) {

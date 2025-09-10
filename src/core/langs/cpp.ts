@@ -18,7 +18,12 @@
 import { access, constants } from 'fs/promises';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
-import { Lang, LangCompileResult } from './lang';
+import {
+    CompileAdditionalData,
+    DefaultCompileAdditionalData,
+    Lang,
+    LangCompileResult,
+} from './lang';
 import { basename, extname, join } from 'path';
 import { type } from 'os';
 import { extensionPath } from '../../utils/global';
@@ -32,7 +37,8 @@ export class LangCpp extends Lang {
     public async compile(
         src: FileWithHash,
         ac: AbortController,
-        forceCompile?: boolean,
+        forceCompile: boolean | null,
+        { canUseWrapper }: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
 
@@ -70,7 +76,7 @@ export class LangCpp extends Lang {
         try {
             const compileCommands: string[][] = [];
             const postCommands: string[][] = [];
-            if (useWrapper) {
+            if (canUseWrapper && useWrapper) {
                 const obj = `${outputPath}.o`;
                 const wrapperObj = `${outputPath}.wrapper.o`;
                 const linkObjects = [obj, wrapperObj];
@@ -128,13 +134,23 @@ export class LangCpp extends Lang {
 
             const compileResults = await Promise.all(
                 compileCommands.map((cmd) =>
-                    Lang.run(cmd, src.path, ac, timeout),
+                    Lang.executor.execute({
+                        cmd,
+                        ac,
+                        timeout,
+                    }),
                 ),
             );
             this.logger.trace('Compile results', { compileResults });
             const postResults: typeof compileResults = [];
             for (const cmd of postCommands) {
-                postResults.push(await Lang.run(cmd, src.path, ac, timeout));
+                postResults.push(
+                    await Lang.executor.execute({
+                        cmd,
+                        ac,
+                        timeout,
+                    }),
+                );
             }
             this.logger.trace('Post-process results', { postResults });
             const results = [...compileResults, ...postResults];

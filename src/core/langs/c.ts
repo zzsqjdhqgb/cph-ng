@@ -18,7 +18,12 @@
 import { access, constants } from 'fs/promises';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
-import { Lang, LangCompileResult } from './lang';
+import {
+    CompileAdditionalData,
+    DefaultCompileAdditionalData,
+    Lang,
+    LangCompileResult,
+} from './lang';
 import { basename, extname, join } from 'path';
 import { type } from 'os';
 import { TCVerdicts } from '../../utils/types.backend';
@@ -31,7 +36,8 @@ export class LangC extends Lang {
     public async compile(
         src: FileWithHash,
         ac: AbortController,
-        forceCompile?: boolean,
+        forceCompile: boolean | null,
+        _: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
 
@@ -71,12 +77,11 @@ export class LangC extends Lang {
 
             const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-            const result = await Lang.run(
-                [compiler, ...compilerArgs, src.path, '-o', outputPath],
-                src.path,
+            const result = await Lang.executor.execute({
+                cmd: [compiler, ...compilerArgs, src.path, '-o', outputPath],
                 ac,
                 timeout,
-            );
+            });
 
             this.logger.debug('Compilation completed successfully', {
                 path: src.path,

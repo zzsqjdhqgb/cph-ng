@@ -122,6 +122,22 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                 </CphLink>
                             </>
                         )}
+                        {problem.interactor && (
+                            <>
+                                &emsp;
+                                <CphLink
+                                    name={problem.interactor.path!}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'openFile',
+                                            path: problem.interactor!.path,
+                                        } satisfies OpenFileMsg);
+                                    }}
+                                >
+                                    {t('problemTitle.interact')}
+                                </CphLink>
+                            </>
+                        )}
                         &emsp;
                         <CphLink
                             name={problem.src.path}
@@ -224,6 +240,51 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                                 }}
                                 name={t(
                                     'problemTitle.dialog.button.chooseChecker',
+                                )}
+                            />
+                        )}
+                    </CphFlex>
+                    <CphFlex>
+                        <Typography>
+                            {t('problemTitle.dialog.field.interact')}
+                        </Typography>
+                        {problem.interactor ? (
+                            <>
+                                <CphLink
+                                    name={problem.interactor.path}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'openFile',
+                                            path: problem.interactor!.path,
+                                        } satisfies OpenFileMsg);
+                                    }}
+                                >
+                                    {basename(problem.interactor.path)}
+                                </CphLink>
+                                <CphButton
+                                    icon={CloseIcon}
+                                    onClick={() => {
+                                        vscode.postMessage({
+                                            type: 'removeFile',
+                                            file: 'interactor',
+                                        } satisfies RemoveFileMsg);
+                                    }}
+                                    name={t(
+                                        'problemTitle.dialog.button.removeInteractor',
+                                    )}
+                                />
+                            </>
+                        ) : (
+                            <CphButton
+                                icon={FileOpenIcon}
+                                onClick={() => {
+                                    vscode.postMessage({
+                                        type: 'chooseFile',
+                                        file: 'interactor',
+                                    } satisfies ChooseFileMsg);
+                                }}
+                                name={t(
+                                    'problemTitle.dialog.button.chooseInteractor',
                                 )}
                             />
                         )}
