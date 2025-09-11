@@ -2,14 +2,11 @@
 
 简体中文 | [English](https://github.com/langningchen/cph-ng/blob/main/README.md)
 
-![](https://vsmarketplacebadges.dev/version-short/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/installs/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/downloads/langningchen.cph-ng.svg) ![](https://vsmarketplacebadges.dev/rating-star/langningchen.cph-ng.svg)
-
-> [!WARNING]
-> 这个扩展正在开发中，可能存在 bug、功能不完整和不事先通知的重大变更。
-
 > 在 VS Code 中快速编译、运行和评测编程竞赛题目。可自动下载测试用例，或编写和测试自己的题目。
 
 这是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本。
+
+![](https://github.com/user-attachments/assets/b4c100c4-43e1-48e0-a0c0-02b7b45758ba)
 
 ## 功能特性
 
@@ -33,8 +30,8 @@
 | 支持的评测结果        | ⚠️ 仅 3 种               | ✅ AC 和其他 10 种 [^1] |
 | 存储评测结果和时间    | ❌                       | ✅                      |
 | 缓存已编译程序        | ❌                       | ✅ [^2]                 |
-| SPJ 支持              | ❌                       | ✅                      |
-| 暴力对比              | ❌                       | ✅                      |
+| 特殊评测和交互        | ❌                       | ✅                      |
+| 对拍                  | ❌                       | ✅                      |
 
 [^1]: 它们是：AC PC PE WA TLE OLE RE CE SE SK RJ
 
@@ -89,27 +86,6 @@
 - **`pnpm run check-translations`** - 检查翻译完整性
 - **`pnpm run install-hooks`** - 安装 Git 预提交钩子
 - **`pnpm run package`** - 将扩展打包为 `.vsix` 文件
-
-### 项目结构
-
-```
-cph-ng/
-├── src/                    # 扩展源代码
-│   ├── extension.ts        # 主扩展入口点
-│   ├── cphNg.ts           # CPH-NG 核心功能
-│   ├── compiler.ts        # 编译逻辑
-│   ├── runner.ts          # 测试用例执行
-│   └── webview/           # React webview 组件
-│       ├── App.tsx        # 主 webview 应用
-│       ├── components/    # React 组件
-│       └── l10n/          # Webview 翻译
-├── l10n/                  # 扩展运行时翻译
-├── scripts/               # 开发脚本和钩子
-├── package.json           # 扩展清单和依赖
-├── package.nls.json       # 配置翻译 (英文)
-├── package.nls.zh.json    # 配置翻译 (中文)
-└── webpack.config.mjs     # 构建配置
-```
 
 ### 翻译管理
 
@@ -172,7 +148,6 @@ cph-ng/
 - **日志**：查看 VS Code 输出面板 (CPH-NG 通道)
 - **编译**：查看输出面板 (CPH-NG 编译通道)
 
-<!-- prettier-ignore-start -->
 ## 许可证
 
 本项目遵循 [GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE) 许可协议。
@@ -184,4 +159,3 @@ cph-ng/
 ## 更新日志
 
 请参阅 [CHANGELOG.md](https://github.com/langningchen/cph-ng/blob/main/CHANGELOG.md)。
-<!-- prettier-ignore-end -->

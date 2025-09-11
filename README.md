@@ -3,10 +3,12 @@
 [简体中文](https://github.com/langningchen/cph-ng/blob/main/README.zh-CN.md) | English
 
 > Quickly compile, run and judge competitive programming problems in VS Code.
-> Automatically download testcases , or write & test your own problems.
+> Automatically download testcases, or write & test your own problems.
 
 This is the next generation of the
 [Competitive Programming Helper](https://github.com/agrawal-d/cph).
+
+![](https://github.com/user-attachments/assets/b4c100c4-43e1-48e0-a0c0-02b7b45758ba)
 
 ## Features
 
@@ -30,7 +32,7 @@ This is the next generation of the
 | Supported Result        | ⚠️ Only 3                | ✅ AC and 10 others [^1] |
 | Store Result and Time   | ❌                       | ✅                       |
 | Cache compiled program  | ❌                       | ✅ [^2]                  |
-| SPJ support             | ❌                       | ✅                       |
+| SPJ and interactive     | ❌                       | ✅                       |
 | Brute Force Compare     | ❌                       | ✅                       |
 
 [^1]: They are: AC PC PE WA TLE OLE RE CE SE SK RJ
@@ -87,96 +89,6 @@ This is the next generation of the
 - **`pnpm run check-translations`** - Check translation completeness
 - **`pnpm run install-hooks`** - Install Git pre-commit hooks
 - **`pnpm run package`** - Package the extension as `.vsix`
-
-### Project Structure
-
-```
-cph-ng/
-├── src/                           # VS Code extension backend (TypeScript)
-│   ├── extension.ts               # Extension entry point (activation)
-│   ├── ai/                        # LLM helpers
-│   │   ├── llmFileReader.ts       # Read files via LLM
-│   │   └── llmTcRunner.ts         # Run test cases via LLM
-│   ├── core/                      # Core judging pipeline
-│   │   ├── checker.ts             # Output comparison / checker logic
-│   │   ├── compiler.ts            # Compilation logic
-│   │   └── runner.ts              # Test case execution
-│   ├── module/                    # Feature modules
-│   │   ├── companion.ts           # Competitive Companion integration
-│   │   ├── cphCapable.ts          # CPH capability checks / helpers
-│   │   ├── cphNg.ts               # CPH-NG core wiring
-│   │   └── sidebarProvider.ts     # Sidebar (view) provider
-│   └── utils/                     # Shared utilities
-│       ├── embedded.ts            # Import/export embedded data
-│       ├── folderChooser.ts       # Folder choosing strategies
-│       ├── io.ts                  # Logging / filesystem helpers
-│       ├── migration.ts           # Migration from old problem files
-│       ├── result.ts              # Result types & helpers
-│       ├── settings.ts            # Configuration management
-│       ├── strTemplate.ts         # String templating utilities
-│       ├── types.backend.ts       # Backend-only types
-│       ├── types.ts               # Shared types
-│       └── types/                 # Versioned problem schema definitions
-│           ├── 0.0.1.ts
-│           ├── 0.0.3.ts
-│           ├── 0.0.4.ts
-│           ├── 0.0.5.ts
-│           └── 0.1.0.ts
-├── webview/                       # React-based webview UI
-│   ├── App.tsx                    # Main webview app
-│   ├── msgs.ts                    # Message contracts between webview & ext
-│   ├── styles.css                 # Webview styles
-│   ├── utils.ts                   # Webview utilities
-│   ├── vscode.d.ts                # VS Code API typings for webview
-│   ├── components/                # React components
-│   │   ├── acCongrats.tsx
-│   │   ├── cphButton.tsx
-│   │   ├── createProblemView.tsx
-│   │   ├── noTcs.tsx
-│   │   ├── problemActions.tsx
-│   │   ├── problemTitle.tsx
-│   │   ├── problemView.tsx
-│   │   ├── tcDataView.tsx
-│   │   ├── tcsView.tsx
-│   │   ├── tcView.tsx
-│   │   ├── tips.tsx
-│   │   └── base/
-│   │       ├── cphFlex.tsx
-│   │       ├── cphLink.tsx
-│   │       ├── cphText.tsx
-│   │       └── errorBoundary.tsx
-│   └── l10n/                      # Webview translations
-│       ├── en.json
-│       └── zh.json
-├── l10n/                          # Extension runtime translations
-│   └── bundle.l10n.zh-cn.json
-├── res/                           # Static assets
-│   ├── cph-ng.png
-│   ├── panel-view-icon.svg
-│   └── party.gif
-├── scripts/                       # Dev scripts & git hooks
-│   ├── commit-msg
-│   ├── install-hooks.js
-│   └── pre-commit
-├── CHANGELOG.md
-├── LICENSE
-├── README.md
-├── README.zh-CN.md
-├── commitlint.config.js           # Commit linting rules
-├── eslint.config.mjs              # ESLint config
-├── package.json                   # Extension manifest & deps
-├── package.nls.json               # Manifest translations (English)
-├── package.nls.zh.json            # Manifest translations (Chinese)
-├── pnpm-lock.yaml
-├── tsconfig.json                  # TypeScript compiler options
-└── webpack.config.mjs             # Build configuration
-```
-
-Key files:
-- [src/extension.ts](src/extension.ts) — extension activation entry.
-- [src/module/cphNg.ts](src/module/cphNg.ts) — CPH‑NG core wiring.
-- [src/core/compiler.ts](src/core/compiler.ts), [src/core/runner.ts](src/core/runner.ts), [src/core/checker.ts](src/core/checker.ts) — compile/run/check pipeline.
-- [webview/App.tsx](webview/App.tsx) — main React webview app.
 
 ### Translation Management
 
@@ -242,8 +154,7 @@ checking:
 
 ## License
 
-This project is licensed under the terms of the
-[GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).
+This project is licensed under the terms of the [GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).
 
 ## Known Issues
 
