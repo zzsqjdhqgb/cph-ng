@@ -18,9 +18,12 @@
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
-import { Logger } from '../utils/io';
+import { io, Logger } from '../utils/io';
 import { Problem } from '../utils/types';
 import { version } from '../../package.json';
+import { FolderChooser } from '../utils/folderChooser';
+import * as vscode from 'vscode';
+import { CphNg } from './cphNg';
 
 export interface CphProblem {
     name: string;
@@ -84,6 +87,74 @@ export class CphCapable {
         } catch (e) {
             this.logger.error('Failed to load problem', e);
             return undefined;
+        }
+    }
+
+    public static async importFromCph(): Promise<void> {
+        this.logger.trace('importFromCph');
+        const uri = await FolderChooser.chooseFolder(
+            vscode.l10n.t(
+                'Please select the .cph folder contains the problem files',
+            ),
+        );
+        if (!uri) {
+            this.logger.info('No folder selected, aborting import');
+            return;
+        }
+        this.logger.info('Selected folder for import', { uri });
+        const probFiles = await vscode.workspace.fs.readDirectory(uri);
+        this.logger.debug('Read directory contents', { probFiles });
+        const problems: Problem[] = [];
+        for (const [name, type] of probFiles) {
+            if (type === vscode.FileType.File && name.endsWith('.prob')) {
+                const probFilePath = join(uri.fsPath, name);
+                const problem = await this.loadProblem(probFilePath);
+                if (problem) {
+                    problems.push(problem);
+                    this.logger.info('Imported problem', { probFilePath });
+                } else {
+                    this.logger.warn('Failed to import problem', {
+                        probFilePath,
+                    });
+                }
+            }
+        }
+        if (problems.length === 0) {
+            io.info(
+                vscode.l10n.t('No problem files found in the selected folder.'),
+            );
+            return;
+        }
+        const chosenIdx = await vscode.window.showQuickPick(
+            problems.map((p, idx) => ({
+                label: p.name,
+                description: [
+                    vscode.l10n.t('Number of test cases: {cnt}', {
+                        cnt: p.tcs.length,
+                    }),
+                    p.checker ? vscode.l10n.t('Special Judge') : '',
+                    p.interactor ? vscode.l10n.t('Interactive') : '',
+                    p.bfCompare ? vscode.l10n.t('Brute Force Comparison') : '',
+                ]
+                    .join(' ')
+                    .trim(),
+                detail: p.url,
+                picked: true,
+                value: idx,
+            })),
+            {
+                canPickMany: true,
+                title: vscode.l10n.t('Select problems to import'),
+            },
+        );
+        if (!chosenIdx || chosenIdx.length === 0) {
+            this.logger.info('No problems selected for import, aborting');
+            return;
+        }
+        this.logger.info('Selected problems for import', { chosenIdx });
+        const selectedProblems = chosenIdx.map((idx) => problems[idx.value]);
+        for (const problem of selectedProblems) {
+            await CphNg.saveProblem(problem);
         }
     }
 }

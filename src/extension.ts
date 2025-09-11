@@ -179,6 +179,12 @@ OS: ${release()}`;
             );
             context.subscriptions.push(
                 vscode.commands.registerCommand(
+                    'cph-ng.importFromCph',
+                    async () => CphCapable.importFromCph(),
+                ),
+            );
+            context.subscriptions.push(
+                vscode.commands.registerCommand(
                     'cph-ng.createProblem',
                     async () => {
                         this.sidebarProvider.focus();

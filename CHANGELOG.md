@@ -8,6 +8,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: check command code when compiling
 - **feat**: interactive problem support
 - **feat**: add max inline data length configuration
+- **feat**: implement bulk import from CPH
 
 ## 0.1.9
 

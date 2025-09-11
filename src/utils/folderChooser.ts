@@ -23,7 +23,7 @@ import { join, relative } from 'path';
 export class FolderChooser {
     private static logger: Logger = new Logger('folderChooser');
 
-    static async getSubfoldersRecursively(
+    private static async getSubfoldersRecursively(
         folderUri: vscode.Uri,
     ): Promise<vscode.Uri[]> {
         this.logger.trace('getSubfoldersRecursively', { folderUri });
@@ -41,7 +41,7 @@ export class FolderChooser {
         return subfolders;
     }
 
-    static async chooseFolderWithDialog(
+    private static async chooseFolderWithDialog(
         title: string,
     ): Promise<vscode.Uri | null> {
         this.logger.trace('chooseFolderWithDialog', { title });
@@ -58,7 +58,7 @@ export class FolderChooser {
         }
     }
 
-    static async chooseFolderWithQuickPick(
+    private static async chooseFolderWithQuickPick(
         title: string,
     ): Promise<vscode.Uri | null> {
         this.logger.trace('chooseFolderWithQuickPick', { title });

@@ -67,7 +67,7 @@ export type CompileResult = Result<{
 }>;
 
 export class CphNg {
-    private logger: Logger = new Logger('cphNg');
+    private static logger: Logger = new Logger('cphNg');
     private _problem?: Problem;
     private _canImport: boolean;
     private runner: Runner;
@@ -75,7 +75,7 @@ export class CphNg {
     private runAbortController?: AbortController;
 
     constructor() {
-        this.logger.trace('constructor');
+        CphNg.logger.trace('constructor');
         this._canImport = false;
         this.runner = new Runner(this.emitProblemChange.bind(this));
         this.onProblemChange = [];
@@ -108,7 +108,7 @@ export class CphNg {
         }
     }
 
-    public async getBinByCpp(cppPath: string): Promise<string> {
+    public static async getBinByCpp(cppPath: string): Promise<string> {
         const workspaceFolder = vscode.workspace.workspaceFolders
             ? vscode.workspace.workspaceFolders[0].uri.fsPath
             : '';
@@ -124,9 +124,9 @@ export class CphNg {
     }
 
     public checkProblem() {
-        this.logger.trace('checkProblem');
+        CphNg.logger.trace('checkProblem');
         if (!this._problem) {
-            this.logger.warn('No problem found');
+            CphNg.logger.warn('No problem found');
             io.warn(
                 vscode.l10n.t(
                     'No problem found. Please create a problem first.',
@@ -134,15 +134,15 @@ export class CphNg {
             );
             return false;
         }
-        this.logger.debug('Problem exists', { problem: this._problem });
+        CphNg.logger.debug('Problem exists', { problem: this._problem });
         return true;
     }
     public checkIdx(idx: number) {
-        this.logger.trace('checkIdx', { idx });
+        CphNg.logger.trace('checkIdx', { idx });
         const problem = this._problem!;
         const max = problem.tcs.length - 1;
         if (idx < 0 || idx > max) {
-            this.logger.warn('Test case idx out of range', { idx, max });
+            CphNg.logger.warn('Test case idx out of range', { idx, max });
             io.warn(
                 vscode.l10n.t('Test case index {idx} out of range 0~{max}.', {
                     idx,
@@ -151,7 +151,7 @@ export class CphNg {
             );
             return false;
         }
-        this.logger.debug('Test case idx is valid', { idx });
+        CphNg.logger.debug('Test case idx is valid', { idx });
         return true;
     }
 
@@ -332,7 +332,7 @@ export class CphNg {
                         gunzipSync(data).toString(),
                     ) satisfies OldProblem,
                 );
-                this.logger.info(
+                CphNg.logger.info(
                     'Problem loaded',
                     { problem: this._problem },
                     'from',
@@ -427,8 +427,8 @@ export class CphNg {
         }
     }
     public async loadProblem(cppFile: string): Promise<void> {
-        this.logger.trace('loadProblem', { cppFile });
-        await this.loadProblemFromBin(await this.getBinByCpp(cppFile));
+        CphNg.logger.trace('loadProblem', { cppFile });
+        await this.loadProblemFromBin(await CphNg.getBinByCpp(cppFile));
         if (this.problem === undefined) {
             await this.loadProblemFromEmbedded(cppFile);
         }
@@ -447,16 +447,11 @@ export class CphNg {
         problem.timeLimit = timeLimit;
         this.saveProblem();
     }
-    public async saveProblem(): Promise<void> {
-        this.logger.trace('saveProblem');
+    public static async saveProblem(problem: Problem): Promise<void> {
+        CphNg.logger.trace('saveProblem', { problem });
         try {
-            if (!this.checkProblem()) {
-                return;
-            }
-            const problem = this._problem!;
-            const binPath = await this.getBinByCpp(problem.src.path);
-            this.logger.info('Saving problem', { problem }, 'to', binPath);
-            this.emitProblemChange();
+            const binPath = await CphNg.getBinByCpp(problem.src.path);
+            CphNg.logger.info('Saving problem', problem, 'to', binPath);
             await mkdir(dirname(binPath), { recursive: true });
             await writeFile(
                 binPath,
@@ -470,8 +465,17 @@ export class CphNg {
             );
         }
     }
+    public async saveProblem(): Promise<void> {
+        CphNg.logger.trace('saveProblem');
+        if (!this.checkProblem()) {
+            return;
+        }
+        const problem = this._problem!;
+        await CphNg.saveProblem(problem);
+        this.emitProblemChange();
+    }
     public async exportToEmbedded(): Promise<void> {
-        this.logger.trace('exportToEmbedded');
+        CphNg.logger.trace('exportToEmbedded');
         if (!this.checkProblem()) {
             return;
         }
@@ -521,12 +525,12 @@ export class CphNg {
         }
     }
     public async delProblem(): Promise<void> {
-        this.logger.trace('delProblem');
+        CphNg.logger.trace('delProblem');
         if (!this.checkProblem()) {
             return;
         }
         const problem = this._problem!;
-        const binPath = await this.getBinByCpp(problem.src.path);
+        const binPath = await CphNg.getBinByCpp(problem.src.path);
         try {
             await access(binPath, constants.F_OK);
             await unlink(binPath);
@@ -542,7 +546,7 @@ export class CphNg {
         }
     }
     public async addTc(): Promise<void> {
-        this.logger.trace('addTestCase');
+        CphNg.logger.trace('addTestCase');
         if (!this._problem) {
             return;
         }
@@ -554,14 +558,14 @@ export class CphNg {
         this.saveProblem();
     }
     public async loadTcs(): Promise<void> {
-        this.logger.trace('loadTestCases');
+        CphNg.logger.trace('loadTestCases');
         try {
             if (!this.checkProblem()) {
                 return;
             }
             const problem = this._problem!;
 
-            this.logger.debug('Showing test case loading options');
+            CphNg.logger.debug('Showing test case loading options');
             const option = (
                 await vscode.window.showQuickPick(
                     [
@@ -578,14 +582,14 @@ export class CphNg {
                 )
             )?.value;
             if (!option) {
-                this.logger.debug('User cancelled test case loading');
+                CphNg.logger.debug('User cancelled test case loading');
                 return;
             }
-            this.logger.info('User selected loading option:', option);
+            CphNg.logger.info('User selected loading option:', option);
 
             let folderPath = '';
             if (option === 'zip') {
-                this.logger.debug('Loading test cases from zip file');
+                CphNg.logger.debug('Loading test cases from zip file');
                 const zipFile = await vscode.window.showOpenDialog({
                     title: vscode.l10n.t(
                         'Choose a zip file containing test cases',
@@ -593,15 +597,15 @@ export class CphNg {
                     filters: { 'Zip files': ['zip'], 'All files': ['*'] },
                 });
                 if (!zipFile) {
-                    this.logger.debug('User cancelled zip file selection');
+                    CphNg.logger.debug('User cancelled zip file selection');
                     return;
                 }
                 const zipPath = zipFile[0].fsPath;
-                this.logger.info('Processing zip file:', zipPath);
+                CphNg.logger.info('Processing zip file:', zipPath);
                 const zipData = new AdmZip(zipPath);
                 const entries = zipData.getEntries();
                 if (!entries.length) {
-                    this.logger.warn('Empty zip file');
+                    CphNg.logger.warn('Empty zip file');
                     io.warn(
                         vscode.l10n.t('No test cases found in the zip file.'),
                     );
@@ -625,29 +629,29 @@ export class CphNg {
                     ['zipBasename', basename(zipPath)],
                     ['zipBasenameNoExt', basename(zipPath, extname(zipPath))],
                 ]);
-                this.logger.debug('Extracting zip to:', folderPath);
+                CphNg.logger.debug('Extracting zip to:', folderPath);
                 await mkdir(folderPath, { recursive: true });
                 zipData.extractAllTo(folderPath, true);
                 if (Settings.problem.deleteAfterUnzip) {
-                    this.logger.debug('Deleting zip file:', zipPath);
+                    CphNg.logger.debug('Deleting zip file:', zipPath);
                     await unlink(zipPath);
                 }
             } else if (option === 'folder') {
-                this.logger.debug('Loading test cases from folder');
+                CphNg.logger.debug('Loading test cases from folder');
                 const folderUri = await FolderChooser.chooseFolder(
                     vscode.l10n.t('Choose a folder containing test cases'),
                 );
                 if (!folderUri) {
-                    this.logger.debug('User cancelled folder selection');
+                    CphNg.logger.debug('User cancelled folder selection');
                     return;
                 }
                 folderPath = folderUri.fsPath;
-                this.logger.info('Using folder:', folderPath);
+                CphNg.logger.info('Using folder:', folderPath);
             } else {
                 const errorMsg = vscode.l10n.t('Unknown option: {option}.', {
                     option,
                 });
-                this.logger.error(errorMsg);
+                CphNg.logger.error(errorMsg);
                 throw new Error(errorMsg);
             }
 
@@ -665,13 +669,13 @@ export class CphNg {
             }
 
             const allFiles = await getAllFiles(folderPath);
-            this.logger.info(`Found ${allFiles.length} files in total`);
+            CphNg.logger.info(`Found ${allFiles.length} files in total`);
             const tcs: TC[] = [];
             for (const filePath of allFiles) {
                 const fileName = basename(filePath);
                 const ext = extname(fileName).toLowerCase();
                 if (ext === '.in') {
-                    this.logger.debug('Found input file:', fileName);
+                    CphNg.logger.debug('Found input file:', fileName);
                     tcs.push({
                         stdin: { useFile: true, path: filePath },
                         answer: { useFile: false, data: '' },
@@ -683,7 +687,7 @@ export class CphNg {
                 const fileName = basename(filePath);
                 const ext = extname(fileName).toLowerCase();
                 if (ext === '.ans' || ext === '.out') {
-                    this.logger.debug('Found answer file:', fileName);
+                    CphNg.logger.debug('Found answer file:', fileName);
                     const inputFile = join(
                         dirname(filePath),
                         fileName.replace(ext, '.in'),
@@ -696,12 +700,12 @@ export class CphNg {
                             useFile: true,
                             path: filePath,
                         };
-                        this.logger.debug('Matched answer with input:', {
+                        CphNg.logger.debug('Matched answer with input:', {
                             input: inputFile,
                             answer: filePath,
                         });
                     } else {
-                        this.logger.warn(
+                        CphNg.logger.warn(
                             'Answer file without matching input:',
                             fileName,
                         );
@@ -713,7 +717,7 @@ export class CphNg {
                     }
                 }
             }
-            this.logger.info(`Created ${tcs.length} test cases`);
+            CphNg.logger.info(`Created ${tcs.length} test cases`);
             const chosenIdx = await vscode.window.showQuickPick(
                 tcs.map((tc, idx) => ({
                     label: `${basename(
@@ -743,11 +747,11 @@ export class CphNg {
                 },
             );
             if (!chosenIdx) {
-                this.logger.debug('User cancelled test case selection');
+                CphNg.logger.debug('User cancelled test case selection');
                 return;
             }
             const selectedTCs = chosenIdx.map((idx) => tcs[idx.value]);
-            this.logger.info(`User selected ${selectedTCs.length} test cases`);
+            CphNg.logger.info(`User selected ${selectedTCs.length} test cases`);
             if (Settings.problem.clearBeforeLoad) {
                 problem.tcs = selectedTCs;
             } else {
@@ -765,7 +769,7 @@ export class CphNg {
         }
     }
     public async updateTc(idx: number, tc: TC): Promise<void> {
-        this.logger.trace('updateTestCase', { idx, tc });
+        CphNg.logger.trace('updateTestCase', { idx, tc });
         if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
@@ -774,7 +778,7 @@ export class CphNg {
         this.saveProblem();
     }
     public async runTc(idx: number, compile: boolean | null): Promise<void> {
-        this.logger.trace('runTestCase', { idx });
+        CphNg.logger.trace('runTestCase', { idx });
         if (!this.checkProblem() || !this.checkIdx(idx)) {
             return;
         }
