@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { basename, extname } from 'path';
 import * as vscode from 'vscode';
 import { io, Logger } from '../../utils/io';
-import { basename, extname } from 'path';
-import { Lang } from './lang';
-import { LangCpp } from './cpp';
 import { LangC } from './c';
+import { LangCpp } from './cpp';
 import { LangJava } from './java';
+import { Lang } from './lang';
 
 const logger = new Logger('langs');
 

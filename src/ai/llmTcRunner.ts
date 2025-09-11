@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { CphNg } from '../module/cphNg';
-import { TCIO } from '../utils/types';
 import { io } from '../utils/io';
+import { TCIO } from '../utils/types';
 
 interface CphTestRunnerParams {
     idx?: number;

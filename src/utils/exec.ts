@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { promisify } from 'util';
 import { exec } from 'child_process';
 import { access } from 'fs/promises';
+import { promisify } from 'util';
 
 export const execAsync = promisify(exec);
 export const exists = async (path: string): Promise<boolean> => {

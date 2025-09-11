@@ -1,7 +1,7 @@
+import { readFile } from 'fs/promises';
 import * as vscode from 'vscode';
 import { CphNg } from '../module/cphNg';
 import { TCIO } from '../utils/types';
-import { readFile } from 'fs/promises';
 
 interface LlmFileReaderParams {
     fileType: 'input' | 'output' | 'answer' | 'error';

@@ -15,16 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
-import Button from '@mui/material/Button';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
+import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
@@ -35,11 +36,10 @@ import {
     RemoveFileMsg,
 } from '../msgs';
 import { basename } from '../utils';
-import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
-import Typography from '@mui/material/Typography';
+import CphButton from './cphButton';
 
 interface ProblemTitleProps {
     problem: Problem;

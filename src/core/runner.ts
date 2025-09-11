@@ -18,17 +18,16 @@
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import * as vscode from 'vscode';
-import { io, Logger } from '../utils/io';
-import Settings from '../utils/settings';
-import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
-import { Problem, TC, TCIO, TCResult } from '../utils/types';
-import Result, { assignResult } from '../utils/result';
-import { Lang } from './langs/lang';
-import { Checker } from './checker';
 import { CompileResult } from '../module/cphNg';
+import { Logger } from '../utils/io';
 import { ProcessExecutor } from '../utils/processExecutor';
 import { ProcessResultHandler } from '../utils/processResultHandler';
+import Result, { assignResult } from '../utils/result';
+import Settings from '../utils/settings';
+import { Problem, TC, TCIO, TCResult } from '../utils/types';
+import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
+import { Checker } from './checker';
+import { Lang } from './langs/lang';
 
 type RunnerResult = Result<undefined> & {
     time: number;

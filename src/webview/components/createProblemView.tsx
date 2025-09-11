@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import InputIcon from '@mui/icons-material/Input';
 import SendIcon from '@mui/icons-material/Send';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
@@ -24,7 +25,6 @@ import { useTranslation } from 'react-i18next';
 import { CreateProblemMsg, ImportProblemMsg } from '../msgs';
 import CphFlex from './base/cphFlex';
 import Tips from './tips';
-import InputIcon from '@mui/icons-material/Input';
 
 interface CreateProblemProps {
     canImport: boolean;

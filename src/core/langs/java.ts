@@ -16,18 +16,18 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { access, constants } from 'fs/promises';
+import { basename, dirname, extname, join } from 'path';
+import * as vscode from 'vscode';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
+import { FileWithHash } from '../../utils/types';
+import { TCVerdicts } from '../../utils/types.backend';
 import {
     CompileAdditionalData,
     DefaultCompileAdditionalData,
     Lang,
     LangCompileResult,
 } from './lang';
-import { basename, dirname, extname, join } from 'path';
-import { TCVerdicts } from '../../utils/types.backend';
-import * as vscode from 'vscode';
-import { FileWithHash } from '../../utils/types';
 
 export class LangJava extends Lang {
     private logger: Logger = new Logger('langJava');

@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import TryIcon from '@mui/icons-material/Try';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import React, { useState } from 'react';
-import CphButton from './cphButton';
-import ShuffleIcon from '@mui/icons-material/Shuffle';
+import { useTranslation } from 'react-i18next';
+import { OpenSettingsMsg, StartChatMsg } from '../msgs';
 import CphFlex from './base/cphFlex';
 import CphText from './base/cphText';
-import { OpenSettingsMsg, StartChatMsg } from '../msgs';
-import TryIcon from '@mui/icons-material/Try';
-import { useTranslation } from 'react-i18next';
+import CphButton from './cphButton';
 
 type TipMessage = {
     msg: string;

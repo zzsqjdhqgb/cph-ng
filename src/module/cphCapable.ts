@@ -18,11 +18,11 @@
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
-import { io, Logger } from '../utils/io';
-import { Problem } from '../utils/types';
+import * as vscode from 'vscode';
 import { version } from '../../package.json';
 import { FolderChooser } from '../utils/folderChooser';
-import * as vscode from 'vscode';
+import { io, Logger } from '../utils/io';
+import { Problem } from '../utils/types';
 import { CphNg } from './cphNg';
 
 export interface CphProblem {

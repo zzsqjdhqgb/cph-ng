@@ -3,7 +3,7 @@
 
 import { execSync } from 'child_process';
 import CopyPlugin from 'copy-webpack-plugin';
-import { mkdir, mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import { fileURLToPath } from 'url';

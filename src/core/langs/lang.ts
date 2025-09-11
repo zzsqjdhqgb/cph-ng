@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Result from '../../utils/result';
-import { FileWithHash } from '../../utils/types';
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
 import { exists } from '../../utils/exec';
 import { Logger } from '../../utils/io';
 import { ProcessExecutor } from '../../utils/processExecutor';
+import Result from '../../utils/result';
+import { FileWithHash } from '../../utils/types';
 
 export type LangCompileResult = Result<{ outputPath: string; hash: string }>;
 const logger = new Logger('lang');

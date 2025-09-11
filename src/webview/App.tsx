@@ -21,12 +21,12 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 import { Problem } from '../utils/types';
+import ErrorBoundary from './components/base/errorBoundary';
 import CreateProblemView from './components/createProblemView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
 import { GetProblemMsg } from './msgs';
-import ErrorBoundary from './components/base/errorBoundary';
 
 i18n.use(initReactI18next).init({
     resources: {

@@ -17,14 +17,13 @@
 
 import { access, readFile, writeFile } from 'fs/promises';
 import { createServer, Server } from 'http';
-import { join } from 'path';
 import * as vscode from 'vscode';
-import { CphCapable, CphProblem } from './cphCapable';
+import { FolderChooser } from '../utils/folderChooser';
 import { io, Logger } from '../utils/io';
 import Settings from '../utils/settings';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types';
-import { FolderChooser } from '../utils/folderChooser';
+import { CphCapable, CphProblem } from './cphCapable';
 
 type OnCreateProblem = (
     problem: Problem,

@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
-import { TCIO, TCVerdict } from './types';
-import { readFile, writeFile } from 'fs/promises';
-import Settings from './settings';
-import { join } from 'path';
 import { SHA256 } from 'crypto-js';
+import { readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
+import * as vscode from 'vscode';
+import Settings from './settings';
+import { TCIO, TCVerdict } from './types';
 
 export class TCVerdicts {
     static UKE = new TCVerdict(

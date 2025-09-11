@@ -16,20 +16,20 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { access, constants } from 'fs/promises';
+import { type } from 'os';
+import { basename, extname, join } from 'path';
+import * as vscode from 'vscode';
+import { extensionPath } from '../../utils/global';
 import { io, Logger } from '../../utils/io';
 import Settings from '../../utils/settings';
+import { FileWithHash } from '../../utils/types';
+import { TCVerdicts } from '../../utils/types.backend';
 import {
     CompileAdditionalData,
     DefaultCompileAdditionalData,
     Lang,
     LangCompileResult,
 } from './lang';
-import { basename, extname, join } from 'path';
-import { type } from 'os';
-import { extensionPath } from '../../utils/global';
-import { TCVerdicts } from '../../utils/types.backend';
-import * as vscode from 'vscode';
-import { FileWithHash } from '../../utils/types';
 
 export class LangCpp extends Lang {
     private logger: Logger = new Logger('langCpp');

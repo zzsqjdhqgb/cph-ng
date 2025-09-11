@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
-import Settings from './settings';
-import { io, Logger } from './io';
 import { join, relative } from 'path';
+import * as vscode from 'vscode';
+import { io, Logger } from './io';
+import Settings from './settings';
 
 export class FolderChooser {
     private static logger: Logger = new Logger('folderChooser');

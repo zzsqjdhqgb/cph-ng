@@ -17,8 +17,8 @@
 
 import { homedir, tmpdir } from 'os';
 import * as vscode from 'vscode';
-import { renderTemplate } from './strTemplate';
 import { Logger } from './io';
+import { renderTemplate } from './strTemplate';
 
 class SettingsSection {
     private name: string;

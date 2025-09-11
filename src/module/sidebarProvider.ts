@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { access, constants } from 'fs/promises';
 import * as vscode from 'vscode';
-import { CphNg } from './cphNg';
+import { extensionUri } from '../utils/global';
+import { io, Logger } from '../utils/io';
 import Settings from '../utils/settings';
 import * as msgs from '../webview/msgs';
-import { io, Logger } from '../utils/io';
-import { access, constants } from 'fs/promises';
 import Companion from './companion';
-import { extensionUri } from '../utils/global';
+import { CphNg } from './cphNg';
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphNgSidebar';

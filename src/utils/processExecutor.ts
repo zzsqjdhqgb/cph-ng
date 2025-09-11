@@ -1,10 +1,10 @@
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
-import { dirname } from 'path';
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { createReadStream } from 'fs';
+import { dirname } from 'path';
+import { cwd } from 'process';
+import { pipeline } from 'stream/promises';
 import { Logger } from './io';
 import { TCIO } from './types';
-import { pipeline } from 'stream/promises';
-import { cwd } from 'process';
 
 export interface ProcessExecutorOptions {
     cmd: string[];

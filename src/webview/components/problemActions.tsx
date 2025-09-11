@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import PlayCircleIcon from '@mui/icons-material/PlayCircle';
-import StopCircleIcon from '@mui/icons-material/StopCircle';
-import BackupIcon from '@mui/icons-material/Backup';
-import FileOpenIcon from '@mui/icons-material/FileOpen';
-import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import BackupIcon from '@mui/icons-material/Backup';
+import CloseIcon from '@mui/icons-material/Close';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
@@ -33,6 +33,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Typography from '@mui/material/Typography';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, Problem } from '../../utils/types';
@@ -49,11 +50,10 @@ import {
     StopTcsMsg,
     SubmitToCodeforcesMsg,
 } from '../msgs';
-import CphButton from './cphButton';
+import { basename } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
-import Typography from '@mui/material/Typography';
-import { basename } from '../utils';
+import CphButton from './cphButton';
 
 interface ProblemActionsProps {
     problem: Problem;

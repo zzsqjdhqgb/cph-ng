@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Problem, Problem as Problem_0_1_1 } from './types';
-import { Problem as Problem_0_1_0 } from './types/0.1.0';
-import { Problem as Problem_0_0_5 } from './types/0.0.5';
-import { Problem as Problem_0_0_4 } from './types/0.0.4';
-import { Problem as Problem_0_0_3 } from './types/0.0.3';
-import { Problem as Problem_0_0_1 } from './types/0.0.1';
 import { Logger } from './io';
+import { Problem, Problem as Problem_0_1_1 } from './types';
+import { Problem as Problem_0_0_1 } from './types/0.0.1';
+import { Problem as Problem_0_0_3 } from './types/0.0.3';
+import { Problem as Problem_0_0_4 } from './types/0.0.4';
+import { Problem as Problem_0_0_5 } from './types/0.0.5';
+import { Problem as Problem_0_1_0 } from './types/0.1.0';
 
 const logger: Logger = new Logger('migration');
 

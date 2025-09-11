@@ -16,21 +16,21 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { access, constants, mkdir, readFile, rm } from 'fs/promises';
-import { extname, join } from 'path';
+import { release } from 'os';
+import { join } from 'path';
 import * as vscode from 'vscode';
+import { version } from '../package.json';
+import LlmFileReader from './ai/llmFileReader';
+import LlmTcRunner from './ai/llmTcRunner';
+import { Langs } from './core/langs/langs';
 import Companion from './module/companion';
 import { CphCapable } from './module/cphCapable';
 import { CphNg } from './module/cphNg';
+import { SidebarProvider } from './module/sidebarProvider';
+import { extensionPath, setExtensionUri } from './utils/global';
 import { io, Logger } from './utils/io';
 import Settings from './utils/settings';
-import { SidebarProvider } from './module/sidebarProvider';
 import { isRunningVerdict } from './utils/types';
-import LlmTcRunner from './ai/llmTcRunner';
-import LlmFileReader from './ai/llmFileReader';
-import { extensionPath, setExtensionUri } from './utils/global';
-import { Langs } from './core/langs/langs';
-import { version } from '../package.json';
-import { release } from 'os';
 
 class ExtensionManager {
     private logger: Logger = new Logger('extension');

@@ -34,11 +34,11 @@ import {
     ToggleTcFileMsg,
     UpdateTcMsg,
 } from '../msgs';
-import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
 import CphText from './base/cphText';
-import TcDataView from './tcDataView';
 import ErrorBoundary from './base/errorBoundary';
+import CphButton from './cphButton';
+import TcDataView from './tcDataView';
 
 interface TcViewProp {
     tc: TC;

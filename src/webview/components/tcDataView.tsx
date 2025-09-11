@@ -16,8 +16,8 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ClearIcon from '@mui/icons-material/Clear';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
+import ClearIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DifferenceIcon from '@mui/icons-material/Difference';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
@@ -27,14 +27,14 @@ import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
+import { TCIO } from '../../utils/types';
 import { OpenFileMsg } from '../msgs';
 import { basename } from '../utils';
-import CphButton from './cphButton';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
-import { TCIO } from '../../utils/types';
 import ErrorBoundary from './base/errorBoundary';
+import CphButton from './cphButton';
 
 interface OutputActions {
     onSetAnswer: () => void;

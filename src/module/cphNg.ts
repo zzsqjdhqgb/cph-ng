@@ -28,9 +28,22 @@ import {
 import { basename, dirname, extname, join, relative } from 'path';
 import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
+import { version } from '../../package.json';
+import { Lang, LangCompileResult } from '../core/langs/lang';
+import { Langs } from '../core/langs/langs';
+import { Runner } from '../core/runner';
+import {
+    buildEmbeddedBlock,
+    EMBEDDED_FOOTER,
+    EMBEDDED_HEADER,
+    extractEmbedded,
+} from '../utils/embedded';
+import { FolderChooser } from '../utils/folderChooser';
 import { io, Logger } from '../utils/io';
+import { migration, OldProblem } from '../utils/migration';
+import Result from '../utils/result';
 import Settings from '../utils/settings';
-import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
+import { renderTemplate } from '../utils/strTemplate';
 import {
     EmbeddedProblem,
     isExpandVerdict,
@@ -38,22 +51,9 @@ import {
     Problem,
     TC,
 } from '../utils/types';
-import Result from '../utils/result';
-import { renderTemplate } from '../utils/strTemplate';
-import { CphCapable } from './cphCapable';
+import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { FileTypes } from '../webview/msgs';
-import { migration, OldProblem } from '../utils/migration';
-import { version } from '../../package.json';
-import {
-    EMBEDDED_FOOTER,
-    EMBEDDED_HEADER,
-    buildEmbeddedBlock,
-    extractEmbedded,
-} from '../utils/embedded';
-import { FolderChooser } from '../utils/folderChooser';
-import { Lang, LangCompileResult } from '../core/langs/lang';
-import { Langs } from '../core/langs/langs';
-import { Runner } from '../core/runner';
+import { CphCapable } from './cphCapable';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,

@@ -16,12 +16,12 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
-import { tcIo2Path, TCVerdicts } from '../utils/types.backend';
-import { TC } from '../utils/types';
-import Result from '../utils/result';
 import { Logger } from '../utils/io';
 import { ProcessExecutor } from '../utils/processExecutor';
 import { ProcessResultHandler } from '../utils/processResultHandler';
+import Result from '../utils/result';
+import { TC } from '../utils/types';
+import { tcIo2Path, TCVerdicts } from '../utils/types.backend';
 
 export class Checker {
     private logger: Logger = new Logger('checker');
