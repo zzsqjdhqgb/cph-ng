@@ -50,6 +50,7 @@ export class ProcessResultHandler {
     public static toRunner(
         result: ProcessResult,
         abortController?: AbortController,
+        ignoreExitCode: boolean = false,
     ): Result<undefined> & { time: number; stdout: string; stderr: string } {
         const { wrapperData, cleanStderr } = this.extractWrapperData(
             result.stderr,
@@ -66,7 +67,11 @@ export class ProcessResultHandler {
         if (result.killed) {
             verdict = TCVerdicts.TLE;
             msg = vscode.l10n.t('Killed due to timeout');
-        } else if (result.exitCode !== null && result.exitCode !== 0) {
+        } else if (
+            !ignoreExitCode &&
+            result.exitCode !== null &&
+            result.exitCode !== 0
+        ) {
             verdict = TCVerdicts.RE;
             msg = vscode.l10n.t('Process exited with code: {code}.', {
                 code: result.exitCode,
@@ -96,7 +101,7 @@ export class ProcessResultHandler {
         result: ProcessResult,
         abortController?: AbortController,
     ): Result<undefined> {
-        const preResult = this.toRunner(result, abortController);
+        const preResult = this.toRunner(result, abortController, true);
         if (preResult.verdict !== TCVerdicts.UKE) {
             return preResult;
         }
