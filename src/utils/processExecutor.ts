@@ -37,6 +37,7 @@ export class ProcessExecutor {
     public async execute(
         options: ProcessExecutorOptions,
     ): Promise<ProcessResult> {
+        this.logger.trace('execute', options);
         const process = await this.createProcess(options);
         if (options.stdin) {
             const stdin = process.child.stdin;
@@ -119,24 +120,26 @@ export class ProcessExecutor {
             startTime: Date.now(),
         };
         this.logger.info('Running executable', cmd, process.child.pid);
-        const timeoutId = setTimeout(() => {
-            this.logger.warn(
-                'Killing process',
-                process.child.pid,
-                'due to timeout',
-                timeout,
-            );
-            process.killed = true;
-            process.child.kill('SIGKILL');
-        }, timeout);
+        if (timeout) {
+            const timeoutId = setTimeout(() => {
+                this.logger.warn(
+                    'Killing process',
+                    process.child.pid,
+                    'due to timeout',
+                    timeout,
+                );
+                process.killed = true;
+                process.child.kill('SIGKILL');
+            }, timeout);
+            process.child.on('close', () => clearTimeout(timeoutId));
+            process.child.on('error', () => clearTimeout(timeoutId));
+        }
         process.child.stdout.on('data', (data) => {
             process.stdout += data.toString();
         });
         process.child.stderr.on('data', (data) => {
             process.stderr += data.toString();
         });
-        process.child.on('close', () => clearTimeout(timeoutId));
-        process.child.on('error', () => clearTimeout(timeoutId));
         return process;
     }
 
