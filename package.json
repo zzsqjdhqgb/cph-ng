@@ -6,6 +6,15 @@
     "license": "AGPL-3.0-only",
     "publisher": "langningchen",
     "icon": "res/cph-ng.png",
+    "galleryBanner": {
+        "color": "#8adbae",
+        "theme": "dark"
+    },
+    "bugs": {
+        "url": "https://github.com/langningchen/cph-ng/issues",
+        "email": "i@langningchen.com"
+    },
+    "qna": "https://github.com/langningchen/cph-ng/discussions/categories/q-a",
     "pricing": "Free",
     "l10n": "./l10n",
     "repository": {
