@@ -27,6 +27,7 @@
     "problemActions.delDialog.content": "Are you sure you want to delete this problem? This action cannot be undone.",
     "problemActions.delDialog.title": "Confirm Deletion",
     "problemActions.deleteProblem": "Delete Problem",
+    "problemActions.easterEgg": "Easter egg",
     "problemActions.loadTcs": "Load Test Cases",
     "problemActions.runTcs": "Run All Test Cases",
     "problemActions.stopTcs": "Stop Test Case",

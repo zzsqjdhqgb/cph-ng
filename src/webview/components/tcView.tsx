@@ -23,6 +23,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, TC } from '../../utils/types';
@@ -67,14 +68,33 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                 }}
                 sx={{
                     borderLeft: `4px solid`,
-                    ...(tc.result?.verdict
-                        ? {
-                              borderLeftColor: `rgb(${tc.result.verdict.color})`,
-                              backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
-                          }
-                        : {
-                              borderLeftColor: 'transparent',
-                          }),
+                    ...(window.easterEgg
+                        ? (() => {
+                              const hash = MD5(JSON.stringify(tc)).words;
+                              let color = 0;
+                              for (let i = 0; i < hash.length; i++) {
+                                  color = (color << 4) + hash[i];
+                              }
+                              color =
+                                  (((color >> 16) & 0xff) << 16) |
+                                  (((color >> 8) & 0xff) << 8) |
+                                  (color & 0xff);
+                              const colorStr = color
+                                  .toString(16)
+                                  .padStart(6, '0');
+                              return {
+                                  borderLeftColor: `#${colorStr}`,
+                                  backgroundColor: `#${colorStr}20`,
+                              };
+                          })()
+                        : tc.result?.verdict
+                          ? {
+                                borderLeftColor: `rgb(${tc.result.verdict.color})`,
+                                backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
+                            }
+                          : {
+                                borderLeftColor: 'transparent',
+                            }),
                 }}
             >
                 <AccordionSummary

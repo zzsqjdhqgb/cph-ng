@@ -25,3 +25,6 @@ declare const hiddenStatuses: string[];
 declare const language: string;
 declare const showTips: boolean;
 declare const fontFamily: string;
+interface Window {
+    easterEgg?: boolean;
+}

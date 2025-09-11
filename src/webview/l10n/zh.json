@@ -27,6 +27,7 @@
     "problemActions.delDialog.content": "你确定要删除这个题目吗？此操作无法撤销。",
     "problemActions.delDialog.title": "确认删除",
     "problemActions.deleteProblem": "删除题目",
+    "problemActions.easterEgg": "彩蛋",
     "problemActions.loadTcs": "加载测试用例",
     "problemActions.runTcs": "运行所有测试用例",
     "problemActions.stopTcs": "停止运行测试用例",

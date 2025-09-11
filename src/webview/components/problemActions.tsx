@@ -34,7 +34,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, Problem } from '../../utils/types';
 import {
@@ -61,16 +61,31 @@ interface ProblemActionsProps {
 
 const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const { t } = useTranslation();
+    const [clickTime, setClickTime] = useState<number[]>([]);
     const [isDelDialogOpen, setDelDialogOpen] = useState(false);
     const [isBfCompareDialogOpen, setBfCompareDialogOpen] = useState(false);
     const hasRunning = problem.tcs.some((tc) =>
         isRunningVerdict(tc.result?.verdict),
     );
-
+    useEffect(() => {
+        if (clickTime.length == 10 && clickTime.at(-1)! - clickTime[0] < 5000) {
+            window.easterEgg = true;
+        }
+    }, [clickTime]);
     return (
         <>
             <Container>
-                <CphFlex smallGap>
+                <CphFlex
+                    smallGap
+                    onClick={() => {
+                        setClickTime((times) => {
+                            const now = Date.now();
+                            const newTimes = [...times, now];
+                            if (newTimes.length > 10) newTimes.shift();
+                            return newTimes;
+                        });
+                    }}
+                >
                     <CphButton
                         larger={true}
                         name={t('problemActions.addTc')}
@@ -179,6 +194,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         color={'error'}
                         onClick={() => setDelDialogOpen(true)}
                     />
+                    {window.easterEgg && (
+                        <div title={t('problemActions.easterEgg')}>🐰</div>
+                    )}
                 </CphFlex>
             </Container>
             <Dialog
