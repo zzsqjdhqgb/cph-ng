@@ -146,6 +146,15 @@ class CompanionSection extends SettingsSection {
     get showPanel(): number {
         return this.get('showPanel') as number;
     }
+    get shortCodeforcesName(): boolean {
+        return this.get('shortCodeforcesName') as boolean;
+    }
+    get shortLuoguName(): boolean {
+        return this.get('shortLuoguName') as boolean;
+    }
+    get shortAtCoderName(): boolean {
+        return this.get('shortAtCoderName') as boolean;
+    }
 }
 
 class RunnerSection extends SettingsSection {

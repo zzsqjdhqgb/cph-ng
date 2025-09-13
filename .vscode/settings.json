@@ -13,6 +13,7 @@
         "^@mui/[^/]+/esm/[^/]+$"
     ],
     "cSpell.words": [
+        "atcoder",
         "Cascadia",
         "Codeforces",
         "commitlint",
@@ -24,9 +25,11 @@
         "javac",
         "Kattis",
         "lezer",
+        "Luogu",
         "Monaspace",
         "msys",
         "objcopy",
+        "problemset",
         "TCIO",
         "testlib",
         "winlibs"

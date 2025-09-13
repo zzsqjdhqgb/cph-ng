@@ -135,7 +135,7 @@ class Companion {
             problem.src = {
                 path: vscode.Uri.joinPath(
                     folder,
-                    this.getProblemFileName(problem.name),
+                    this.getProblemFileName(problem.name, problem.url),
                 ).fsPath,
             };
             this.logger.info('Created problem source path', problem.src.path);
@@ -319,16 +319,53 @@ class Companion {
         }
     }
 
-    private getProblemFileName(name: string) {
-        this.logger.trace('getProblemFileName', {
-            name,
-        });
+    private getProblemFileName(name: string, url?: string) {
+        const ext: string = 'cpp'; // TODO: get from user settings
+        this.logger.trace('getProblemFileName', { name, url, ext });
+        const { shortCodeforcesName, shortLuoguName, shortAtCoderName } =
+            Settings.companion;
+        if (url) {
+            try {
+                const u = new URL(url);
+                if (u.host.includes('codeforces.com') && shortCodeforcesName) {
+                    const regexPatterns = [
+                        /\/contest\/(\d+)\/problem\/(\w+)/,
+                        /\/problemset\/problem\/(\d+)\/(\w+)/,
+                        /\/gym\/(\d+)\/problem\/(\w+)/,
+                    ];
+                    for (const regex of regexPatterns) {
+                        const match = url.match(regex);
+                        if (match) {
+                            return `${match[1]}${match[2]}.${ext}`;
+                        }
+                    }
+                }
+                if (u.host.includes('luogu.com.cn') && shortLuoguName) {
+                    const match = url.match(/problem\/(\w+)/);
+                    if (match) {
+                        return `${match[1]}.${ext}`;
+                    }
+                }
+                if (u.host.includes('atcoder.jp') && shortAtCoderName) {
+                    const match = url.match(/tasks\/(\w+)_(\w+)/);
+                    if (match) {
+                        return `${match[1]}${match[2]}.${ext}`;
+                    }
+                }
+            } catch (e) {
+                this.logger.warn(
+                    `Failed to parse URL: ${url}. Error: ${(e as Error).message}`,
+                    e,
+                );
+            }
+        }
         const words = name.match(/[\p{L}]+|[0-9]+/gu);
         const fileName =
             (words ? `${words.join('_')}` : `${name.replace(/\W+/g, '_')}`) +
-            '.cpp';
+            `.${ext}`;
         this.logger.debug('Generated problem file name', {
             originalName: name,
+            url,
             fileName,
         });
         return fileName;
