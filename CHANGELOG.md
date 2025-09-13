@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.1.10
 
 - **fix**: time not captured using exit
 - **fix**: check command code when compiling
@@ -11,6 +11,13 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: implement bulk import from CPH
 - **feat**: add short name settings for competitive programming platforms
 - **feat**: add natural-orderby for sorting test cases
+
+---
+
+**Versions above this line: patch changes are released as prerelease, minor
+changes are released as stable**
+
+---
 
 ## 0.1.9
 
