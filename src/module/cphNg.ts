@@ -25,6 +25,7 @@ import {
     unlink,
     writeFile,
 } from 'fs/promises';
+import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join, relative } from 'path';
 import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
@@ -718,8 +719,18 @@ export class CphNg {
                 }
             }
             CphNg.logger.info(`Created ${tcs.length} test cases`);
+            const orderedTcs = orderBy(tcs, [
+                (it) => (it.stdin.useFile ? 0 : 1),
+                (it) =>
+                    it.stdin.useFile
+                        ? basename(it.stdin.path)
+                        : it.answer.useFile
+                          ? basename(it.answer.path)
+                          : '',
+            ]);
+            CphNg.logger.debug('Ordered test cases for selection', orderedTcs);
             const chosenIdx = await vscode.window.showQuickPick(
-                tcs.map((tc, idx) => ({
+                orderedTcs.map((tc, idx) => ({
                     label: `${basename(
                         tc.stdin.useFile
                             ? tc.stdin.path
@@ -750,7 +761,7 @@ export class CphNg {
                 CphNg.logger.debug('User cancelled test case selection');
                 return;
             }
-            const selectedTCs = chosenIdx.map((idx) => tcs[idx.value]);
+            const selectedTCs = chosenIdx.map((idx) => orderedTcs[idx.value]);
             CphNg.logger.info(`User selected ${selectedTCs.length} test cases`);
             if (Settings.problem.clearBeforeLoad) {
                 problem.tcs = selectedTCs;

@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: add max inline data length configuration
 - **feat**: implement bulk import from CPH
 - **feat**: add short name settings for competitive programming platforms
+- **feat**: add natural-orderby for sorting test cases
 
 ## 0.1.9
 
