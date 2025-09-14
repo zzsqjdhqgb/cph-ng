@@ -2,6 +2,11 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: check command code when compiling
+- **refactor**: use static class member functions
+
 ## 0.1.10
 
 - **fix**: time not captured using exit

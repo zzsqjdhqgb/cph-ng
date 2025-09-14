@@ -68,6 +68,7 @@ export default class ExtensionManager {
                 'Cache directories created successfully',
             );
 
+            Companion.init();
             CphNg.addProblemChangeListener(() => {
                 ExtensionManager.logger.trace('Problem change detected');
                 ExtensionManager.updateContext();
