@@ -446,6 +446,7 @@ export default class CphNg {
     }
     public static async saveProblem(problem: Problem): Promise<void> {
         CphNg.logger.trace('saveProblem', { problem });
+        CphNg.emitProblemChange();
         try {
             const binPath = await CphNg.getBinByCpp(problem.src.path);
             CphNg.logger.info('Saving problem', problem, 'to', binPath);

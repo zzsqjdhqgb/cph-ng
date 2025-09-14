@@ -165,6 +165,9 @@ export class LangCpp extends Lang {
                 .map((result) => result.stderr.trim())
                 .filter((msg) => msg)
                 .join('\n\n');
+            if (results.some((res) => !!res.exitCode)) {
+                return { verdict: TCVerdicts.CE, msg: '' };
+            }
             return {
                 verdict: await access(outputPath, constants.X_OK)
                     .then(() => TCVerdicts.UKE)
