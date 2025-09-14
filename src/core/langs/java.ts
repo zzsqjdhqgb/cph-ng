@@ -18,8 +18,10 @@
 import { access, constants } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import * as vscode from 'vscode';
-import { io, Logger } from '../../utils/io';
-import Settings from '../../utils/settings';
+import Io from '../../helpers/io';
+import Logger from '../../helpers/logger';
+import ProcessExecutor from '../../helpers/processExecutor';
+import Settings from '../../modules/settings';
 import { FileWithHash } from '../../utils/types';
 import { TCVerdicts } from '../../utils/types.backend';
 import {
@@ -75,7 +77,7 @@ export class LangJava extends Lang {
 
             const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-            const result = await Lang.executor.execute({
+            const result = await ProcessExecutor.execute({
                 cmd: [compiler, ...compilerArgs, '-d', classDir, src.path],
                 ac,
                 timeout,
@@ -85,7 +87,7 @@ export class LangJava extends Lang {
                 path: src.path,
                 outputPath,
             });
-            io.compilationMsg = result.stderr.trim();
+            Io.compilationMsg = result.stderr.trim();
             return {
                 verdict: await access(outputPath, constants.R_OK)
                     .then(() => TCVerdicts.UKE)
@@ -102,7 +104,7 @@ export class LangJava extends Lang {
                     msg: vscode.l10n.t('Compilation aborted by user.'),
                 };
             }
-            io.compilationMsg = (e as Error).message;
+            Io.compilationMsg = (e as Error).message;
             return { verdict: TCVerdicts.CE, msg: '' };
         }
     }

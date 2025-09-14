@@ -17,24 +17,22 @@
 
 import { access, constants } from 'fs/promises';
 import * as vscode from 'vscode';
+import Io from '../helpers/io';
+import Logger from '../helpers/logger';
 import { extensionUri } from '../utils/global';
-import { io, Logger } from '../utils/io';
-import Settings from '../utils/settings';
 import * as msgs from '../webview/msgs';
 import Companion from './companion';
-import { CphNg } from './cphNg';
+import CphNg from './cphNg';
+import Settings from './settings';
 
-export class SidebarProvider implements vscode.WebviewViewProvider {
+export default class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphNgSidebar';
     private _view?: vscode.WebviewView;
     private logger: Logger = new Logger('sidebar');
 
-    constructor(
-        private helper: CphNg,
-        private companion: Companion,
-    ) {
+    constructor() {
         this.logger.trace('constructor');
-        helper.addProblemChangeListener((problem, canImport) => {
+        CphNg.addProblemChangeListener((problem, canImport) => {
             this.logger.debug('Problem change listener triggered', {
                 problem,
                 canImport,
@@ -70,72 +68,69 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             try {
                 switch (msg.type) {
                     case 'createProblem':
-                        await this.helper.createProblem();
+                        await CphNg.createProblem();
                         break;
                     case 'importProblem':
-                        await this.helper.importProblem();
+                        await CphNg.importProblem();
                         break;
                     case 'getProblem':
-                        await this.helper.getProblem();
+                        await CphNg.getProblem();
                         break;
                     case 'editProblemDetails':
                         const editProblemDetailsMsg =
                             msg as msgs.EditProblemDetailsMsg;
-                        await this.helper.editProblemDetails(
+                        await CphNg.editProblemDetails(
                             editProblemDetailsMsg.title,
                             editProblemDetailsMsg.url,
                             editProblemDetailsMsg.timeLimit,
                         );
                         break;
                     case 'delProblem':
-                        await this.helper.delProblem();
+                        await CphNg.delProblem();
                         break;
                     case 'addTc':
-                        await this.helper.addTc();
+                        await CphNg.addTc();
                         break;
                     case 'loadTcs':
-                        await this.helper.loadTcs();
+                        await CphNg.loadTcs();
                         break;
                     case 'updateTc':
                         const updateTcMsg = msg as msgs.UpdateTcMsg;
-                        await this.helper.updateTc(
-                            updateTcMsg.idx,
-                            updateTcMsg.tc,
-                        );
+                        await CphNg.updateTc(updateTcMsg.idx, updateTcMsg.tc);
                         break;
                     case 'runTc':
                         const runTcMsg = msg as msgs.RunTcMsg;
-                        await this.helper.runTc(runTcMsg.idx, runTcMsg.compile);
+                        await CphNg.runTc(runTcMsg.idx, runTcMsg.compile);
                         break;
                     case 'runTcs':
                         const runTcsMsg = msg as msgs.RunTcsMsg;
-                        await this.helper.runTcs(runTcsMsg.compile);
+                        await CphNg.runTcs(runTcsMsg.compile);
                         break;
                     case 'stopTcs':
                         const stopTcsMsg = msg as msgs.StopTcsMsg;
-                        await this.helper.stopTcs(stopTcsMsg.onlyOne);
+                        await CphNg.stopTcs(stopTcsMsg.onlyOne);
                         break;
                     case 'chooseTcFile':
                         const chooseTcFileMsg = msg as msgs.ChooseTcFileMsg;
-                        await this.helper.chooseTcFile(
+                        await CphNg.chooseTcFile(
                             chooseTcFileMsg.idx,
                             chooseTcFileMsg.label,
                         );
                         break;
                     case 'compareTc':
                         const compareTcMsg = msg as msgs.CompareTcMsg;
-                        this.helper.compareTc(compareTcMsg.idx);
+                        CphNg.compareTc(compareTcMsg.idx);
                         break;
                     case 'toggleTcFile':
                         const toggleTcFileMsg = msg as msgs.ToggleTcFileMsg;
-                        this.helper.toggleTcFile(
+                        CphNg.toggleTcFile(
                             toggleTcFileMsg.idx,
                             toggleTcFileMsg.label,
                         );
                         break;
                     case 'delTc':
                         const delTcMsg = msg as msgs.DelTcMsg;
-                        await this.helper.delTc(delTcMsg.idx);
+                        await CphNg.delTc(delTcMsg.idx);
                         break;
                     case 'openFile':
                         const openFileMsg = msg as msgs.OpenFileMsg;
@@ -154,23 +149,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         break;
                     case 'chooseFile':
                         const chooseFileMsg = msg as msgs.ChooseFileMsg;
-                        await this.helper.chooseFile(chooseFileMsg.file);
+                        await CphNg.chooseFile(chooseFileMsg.file);
                         break;
                     case 'removeFile':
                         const removeFileMsg = msg as msgs.RemoveFileMsg;
-                        await this.helper.removeFile(removeFileMsg.file);
+                        await CphNg.removeFile(removeFileMsg.file);
                         break;
                     case 'startBfCompare':
                         const startBfCompareMsg = msg as msgs.StartBfCompareMsg;
-                        await this.helper.startBfCompare(
-                            startBfCompareMsg.compile,
-                        );
+                        await CphNg.startBfCompare(startBfCompareMsg.compile);
                         break;
                     case 'stopBfCompare':
-                        await this.helper.stopBfCompare();
+                        await CphNg.stopBfCompare();
                         break;
                     case 'submitToCodeforces':
-                        await this.companion.submit(this.helper.problem);
+                        await Companion.submit(CphNg.problem);
                         break;
                     case 'startChat':
                         await vscode.commands.executeCommand(
@@ -193,7 +186,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                         this.logger.warn('Unknown message type:', msg.type);
                 }
             } catch (e) {
-                io.error(
+                Io.error(
                     vscode.l10n.t(
                         'Error occurred when handling message {msgType}: {msg}.',
                         {

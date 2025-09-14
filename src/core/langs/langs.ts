@@ -17,26 +17,26 @@
 
 import { basename, extname } from 'path';
 import * as vscode from 'vscode';
-import { io, Logger } from '../../utils/io';
+import Io from '../../helpers/io';
+import Logger from '../../helpers/logger';
 import { LangC } from './c';
 import { LangCpp } from './cpp';
 import { LangJava } from './java';
 import { Lang } from './lang';
 
-const logger = new Logger('langs');
-
-export class Langs {
+export default class Langs {
+    private static logger = new Logger('langs');
     public static langs: Lang[] = [new LangCpp(), new LangC(), new LangJava()];
     public static getLang(
         filePath: string,
         ignoreError: boolean = false,
     ): Lang | null {
-        logger.trace('getLang', { filePath });
+        Langs.logger.trace('getLang', { filePath });
         const ext = extname(filePath).toLowerCase().slice(1);
         const lang = this.langs.find((lang) => lang.extensions.includes(ext));
         if (!lang) {
             ignoreError ||
-                io.error(
+                Io.error(
                     vscode.l10n.t(
                         'Cannot determine the programming language of the source file: {file}.',
                         { file: basename(filePath) },

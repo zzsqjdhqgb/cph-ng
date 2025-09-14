@@ -1,12 +1,29 @@
+// Copyright (C) 2025 Langning Chen
+//
+// This file is part of cph-ng.
+//
+// cph-ng is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// cph-ng is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
+
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { createReadStream } from 'fs';
 import { dirname } from 'path';
 import { cwd } from 'process';
 import { pipeline } from 'stream/promises';
-import { Logger } from './io';
-import { TCIO } from './types';
+import Logger from '../helpers/logger';
+import { TCIO } from '../utils/types';
 
-export interface ProcessExecutorOptions {
+interface ProcessExecutorOptions {
     cmd: string[];
     timeout?: number;
     stdin?: TCIO;
@@ -31,10 +48,10 @@ interface ProcessInfo {
     startTime: number;
 }
 
-export class ProcessExecutor {
-    private logger: Logger = new Logger('processExecutor');
+export default class ProcessExecutor {
+    private static logger: Logger = new Logger('processExecutor');
 
-    public async execute(
+    public static async execute(
         options: ProcessExecutorOptions,
     ): Promise<ProcessResult> {
         this.logger.trace('execute', options);
@@ -58,7 +75,7 @@ export class ProcessExecutor {
         });
     }
 
-    public async executeWithPipe(
+    public static async executeWithPipe(
         process1Options: ProcessExecutorOptions,
         process2Options: ProcessExecutorOptions,
     ): Promise<{ process1: ProcessResult; process2: ProcessResult }> {
@@ -104,7 +121,7 @@ export class ProcessExecutor {
         });
     }
 
-    private async createProcess(
+    private static async createProcess(
         options: ProcessExecutorOptions,
     ): Promise<ProcessInfo> {
         this.logger.trace('createProcess', options);
@@ -143,7 +160,7 @@ export class ProcessExecutor {
         return process;
     }
 
-    private createResult(
+    private static createResult(
         process: ProcessInfo,
         exitCode: number | null,
         signal: NodeJS.Signals | null,
@@ -162,7 +179,7 @@ export class ProcessExecutor {
         } satisfies ProcessResult;
     }
 
-    private createErrorResult(
+    private static createErrorResult(
         process: ProcessInfo,
         error: Error,
     ): ProcessResult {

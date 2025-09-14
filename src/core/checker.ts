@@ -16,18 +16,17 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
-import { Logger } from '../utils/io';
-import { ProcessExecutor } from '../utils/processExecutor';
-import { ProcessResultHandler } from '../utils/processResultHandler';
+import Logger from '../helpers/logger';
+import ProcessExecutor from '../helpers/processExecutor';
+import { ProcessResultHandler } from '../helpers/processResultHandler';
 import Result from '../utils/result';
 import { TC } from '../utils/types';
 import { tcIo2Path, TCVerdicts } from '../utils/types.backend';
 
 export class Checker {
-    private logger: Logger = new Logger('checker');
-    private executor: ProcessExecutor = new ProcessExecutor();
+    private static logger: Logger = new Logger('checker');
 
-    public async runChecker(
+    public static async runChecker(
         checkerOutputPath: string,
         tc: TC,
         abortController: AbortController,
@@ -50,7 +49,7 @@ export class Checker {
                 [inputFile, outputFile, answerFile],
             );
 
-            const result = await this.executor.execute({
+            const result = await ProcessExecutor.execute({
                 cmd: [checkerOutputPath, inputFile, outputFile, answerFile],
                 ac: abortController,
             });

@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import * as vscode from 'vscode';
-import { CphNg } from '../module/cphNg';
+import CphNg from '../modules/cphNg';
 import { TCIO } from '../utils/types';
 
 interface LlmFileReaderParams {
@@ -9,12 +9,6 @@ interface LlmFileReaderParams {
 }
 
 class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
-    private cphNg: CphNg;
-
-    constructor(cphNg: CphNg) {
-        this.cphNg = cphNg;
-    }
-
     async prepareInvocation(
         options: vscode.LanguageModelToolInvocationPrepareOptions<LlmFileReaderParams>,
         _token: vscode.CancellationToken,
@@ -46,7 +40,7 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
         const { fileType, idx } = options.input;
         const result = new vscode.LanguageModelToolResult([]);
 
-        if (!this.cphNg.checkProblem()) {
+        if (!CphNg.checkProblem()) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
                     vscode.l10n.t(
@@ -57,11 +51,11 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
             return result;
         }
 
-        const problem = this.cphNg.problem!;
+        const problem = CphNg.problem!;
         let tcIo: TCIO | undefined;
 
         if (idx) {
-            if (!this.cphNg.checkIdx(idx - 1)) {
+            if (!CphNg.checkIdx(idx - 1)) {
                 result.content.push(
                     new vscode.LanguageModelTextPart(
                         vscode.l10n.t(

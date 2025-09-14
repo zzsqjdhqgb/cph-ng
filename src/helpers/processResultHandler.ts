@@ -16,12 +16,12 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
-import { Logger } from './io';
+import Logger from '../helpers/logger';
+import Settings from '../modules/settings';
+import Result from '../utils/result';
+import { TCVerdict } from '../utils/types';
+import { TCVerdicts } from '../utils/types.backend';
 import { ProcessResult } from './processExecutor';
-import Result from './result';
-import Settings from './settings';
-import { TCVerdict } from './types';
-import { TCVerdicts } from './types.backend';
 
 export interface WrapperData {
     time: number;

@@ -20,10 +20,11 @@ import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
 import * as vscode from 'vscode';
 import { version } from '../../package.json';
-import { FolderChooser } from '../utils/folderChooser';
-import { io, Logger } from '../utils/io';
+import FolderChooser from '../helpers/folderChooser';
+import Io from '../helpers/io';
+import Logger from '../helpers/logger';
 import { Problem } from '../utils/types';
-import { CphNg } from './cphNg';
+import CphNg from './cphNg';
 
 export interface CphProblem {
     name: string;
@@ -37,7 +38,7 @@ export interface CphProblem {
     local: boolean;
 }
 
-export class CphCapable {
+export default class CphCapable {
     private static logger: Logger = new Logger('cphCapable');
 
     public static getProbByCpp(cppFile: string): string {
@@ -120,7 +121,7 @@ export class CphCapable {
             }
         }
         if (problems.length === 0) {
-            io.info(
+            Io.info(
                 vscode.l10n.t('No problem files found in the selected folder.'),
             );
             return;

@@ -31,19 +31,19 @@ import * as vscode from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { version } from '../../package.json';
 import { Lang, LangCompileResult } from '../core/langs/lang';
-import { Langs } from '../core/langs/langs';
+import Langs from '../core/langs/langs';
 import { Runner } from '../core/runner';
+import FolderChooser from '../helpers/folderChooser';
+import Io from '../helpers/io';
+import Logger from '../helpers/logger';
 import {
     buildEmbeddedBlock,
     EMBEDDED_FOOTER,
     EMBEDDED_HEADER,
     extractEmbedded,
 } from '../utils/embedded';
-import { FolderChooser } from '../utils/folderChooser';
-import { io, Logger } from '../utils/io';
 import { migration, OldProblem } from '../utils/migration';
 import Result from '../utils/result';
-import Settings from '../utils/settings';
 import { renderTemplate } from '../utils/strTemplate';
 import {
     EmbeddedProblem,
@@ -54,7 +54,8 @@ import {
 } from '../utils/types';
 import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { FileTypes } from '../webview/msgs';
-import { CphCapable } from './cphCapable';
+import CphCapable from './cphCapable';
+import Settings from './settings';
 
 type ProblemChangeCallback = (
     problem: Problem | undefined,
@@ -67,45 +68,37 @@ export type CompileResult = Result<{
     interactor?: NonNullable<LangCompileResult['data']>;
 }>;
 
-export class CphNg {
+export default class CphNg {
     private static logger: Logger = new Logger('cphNg');
-    private _problem?: Problem;
-    private _canImport: boolean;
-    private runner: Runner;
-    private onProblemChange: ProblemChangeCallback[];
-    private runAbortController?: AbortController;
+    private static _problem?: Problem;
+    private static _canImport: boolean = false;
+    private static onProblemChange: ProblemChangeCallback[] = [];
+    private static runAbortController?: AbortController;
 
-    constructor() {
-        CphNg.logger.trace('constructor');
-        this._canImport = false;
-        this.runner = new Runner(this.emitProblemChange.bind(this));
-        this.onProblemChange = [];
+    static get problem(): Problem | undefined {
+        return CphNg._problem;
     }
-
-    get problem(): Problem | undefined {
-        return this._problem;
-    }
-    set problem(problem: Problem | undefined) {
-        this._problem && this.saveProblem();
-        this.runAbortController && this.runAbortController.abort();
-        this._problem = problem;
-        this.emitProblemChange();
+    static set problem(problem: Problem | undefined) {
+        CphNg._problem && CphNg.saveProblem(CphNg._problem);
+        CphNg.runAbortController && CphNg.runAbortController.abort();
+        CphNg._problem = problem;
+        CphNg.emitProblemChange();
     }
 
-    get canImport(): boolean {
-        return this._canImport;
+    static get canImport(): boolean {
+        return CphNg._canImport;
     }
-    set canImport(canImport: boolean) {
-        this._canImport = canImport;
-        this.emitProblemChange();
+    static set canImport(canImport: boolean) {
+        CphNg._canImport = canImport;
+        CphNg.emitProblemChange();
     }
 
-    public addProblemChangeListener(callback: ProblemChangeCallback) {
-        this.onProblemChange.push(callback);
+    public static addProblemChangeListener(callback: ProblemChangeCallback) {
+        CphNg.onProblemChange.push(callback);
     }
-    private emitProblemChange() {
-        for (const callback of this.onProblemChange) {
-            callback(this._problem, this._canImport);
+    public static emitProblemChange() {
+        for (const callback of CphNg.onProblemChange) {
+            callback(CphNg._problem, CphNg._canImport);
         }
     }
 
@@ -124,27 +117,27 @@ export class CphNg {
         return dir;
     }
 
-    public checkProblem() {
+    public static checkProblem() {
         CphNg.logger.trace('checkProblem');
-        if (!this._problem) {
+        if (!CphNg._problem) {
             CphNg.logger.warn('No problem found');
-            io.warn(
+            Io.warn(
                 vscode.l10n.t(
                     'No problem found. Please create a problem first.',
                 ),
             );
             return false;
         }
-        CphNg.logger.debug('Problem exists', { problem: this._problem });
+        CphNg.logger.debug('Problem exists', { problem: CphNg._problem });
         return true;
     }
-    public checkIdx(idx: number) {
+    public static checkIdx(idx: number) {
         CphNg.logger.trace('checkIdx', { idx });
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         const max = problem.tcs.length - 1;
         if (idx < 0 || idx > max) {
             CphNg.logger.warn('Test case idx out of range', { idx, max });
-            io.warn(
+            Io.warn(
                 vscode.l10n.t('Test case index {idx} out of range 0~{max}.', {
                     idx,
                     max,
@@ -156,12 +149,12 @@ export class CphNg {
         return true;
     }
 
-    private async compile(
+    private static async compile(
         lang: Lang,
         compile: boolean | null,
     ): Promise<CompileResult> {
         try {
-            const problem = this._problem!;
+            const problem = CphNg._problem!;
             const editor = vscode.window.visibleTextEditors.find(
                 (editor) => editor.document.fileName === problem.src.path,
             );
@@ -171,7 +164,7 @@ export class CphNg {
 
             const result = await lang.compile(
                 problem.src,
-                this.runAbortController!,
+                CphNg.runAbortController!,
                 compile,
                 { canUseWrapper: true },
             );
@@ -192,7 +185,7 @@ export class CphNg {
                 } else {
                     const checkerResult = await checkerLang.compile(
                         problem.checker,
-                        this.runAbortController!,
+                        CphNg.runAbortController!,
                         compile,
                     );
                     if (checkerResult.verdict !== TCVerdicts.UKE) {
@@ -212,7 +205,7 @@ export class CphNg {
                 } else {
                     const interactorResult = await interactorLang.compile(
                         problem.interactor,
-                        this.runAbortController!,
+                        CphNg.runAbortController!,
                         compile,
                     );
                     if (interactorResult.verdict !== TCVerdicts.UKE) {
@@ -235,11 +228,11 @@ export class CphNg {
         }
     }
 
-    public async createProblem(): Promise<void> {
+    public static async createProblem(): Promise<void> {
         try {
             const activeEditor = vscode.window.activeTextEditor;
             if (!activeEditor) {
-                io.warn(
+                Io.warn(
                     vscode.l10n.t(
                         'No active editor found. Please open a file to create a problem.',
                     ),
@@ -247,8 +240,8 @@ export class CphNg {
                 return;
             }
             const filePath = activeEditor.document.fileName;
-            if (this._problem && this._problem.src.path === filePath) {
-                io.warn(
+            if (CphNg._problem && CphNg._problem.src.path === filePath) {
+                Io.warn(
                     vscode.l10n.t(
                         'Problem already exists for this file: {file}.',
                         { file: basename(filePath) },
@@ -256,27 +249,27 @@ export class CphNg {
                 );
                 return;
             }
-            this.problem = {
+            CphNg.problem = {
                 version,
                 name: basename(filePath, extname(filePath)),
                 src: { path: filePath },
                 tcs: [],
                 timeLimit: Settings.problem.defaultTimeLimit,
             };
-            this.saveProblem();
+            CphNg.saveProblem(CphNg.problem);
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to create problem: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async importProblem(): Promise<void> {
+    public static async importProblem(): Promise<void> {
         try {
             const activeEditor = vscode.window.activeTextEditor;
             if (!activeEditor) {
-                io.warn(
+                Io.warn(
                     vscode.l10n.t(
                         'No active editor found. Please open a file to create a problem.',
                     ),
@@ -284,8 +277,8 @@ export class CphNg {
                 return;
             }
             const filePath = activeEditor.document.fileName;
-            if (this._problem && this._problem.src.path === filePath) {
-                io.warn(
+            if (CphNg._problem && CphNg._problem.src.path === filePath) {
+                Io.warn(
                     vscode.l10n.t(
                         'Problem already exists for this file: {file}.',
                         { file: basename(filePath) },
@@ -297,62 +290,65 @@ export class CphNg {
             try {
                 await access(probFile, constants.R_OK);
                 const problem = await CphCapable.loadProblem(probFile);
-                if (!problem) {
-                    io.warn(
+                if (problem) {
+                    CphNg.saveProblem(problem);
+                } else {
+                    Io.warn(
                         vscode.l10n.t('Failed to import file.', {
                             file: basename(filePath),
                         }),
                     );
                 }
-                this.problem = problem;
+                CphNg.problem = problem;
             } catch {
-                io.warn(
+                Io.warn(
                     vscode.l10n.t('File {file} does not exists.', {
                         file: probFile,
                     }),
                 );
             }
-            this.saveProblem();
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to import problem: {msg}.', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async getProblem() {
-        this.emitProblemChange();
+    public static async getProblem() {
+        CphNg.emitProblemChange();
     }
-    private async loadProblemFromBin(binFile: string): Promise<void> {
+    private static async loadProblemFromBin(binFile: string): Promise<void> {
         try {
             const data = await readFile(binFile);
             try {
-                this.problem = migration(
+                CphNg.problem = migration(
                     JSON.parse(
                         gunzipSync(data).toString(),
                     ) satisfies OldProblem,
                 );
                 CphNg.logger.info(
                     'Problem loaded',
-                    { problem: this._problem },
+                    { problem: CphNg._problem },
                     'from',
                     binFile,
                 );
             } catch (e) {
-                io.warn(
+                Io.warn(
                     vscode.l10n.t('Parse problem file {file} failed: {msg}.', {
                         file: basename(binFile),
                         msg: (e as Error).message,
                     }),
                 );
-                this.problem = undefined;
+                CphNg.problem = undefined;
             }
         } catch {
-            this.problem = undefined;
+            CphNg.problem = undefined;
         }
     }
-    private async loadProblemFromEmbedded(cppFile: string): Promise<void> {
+    private static async loadProblemFromEmbedded(
+        cppFile: string,
+    ): Promise<void> {
         try {
             const cppData = await readFile(cppFile, 'utf-8');
             const embeddedProblem = extractEmbedded(cppData);
@@ -360,17 +356,17 @@ export class CphNg {
                 const startIdx = cppData.indexOf(EMBEDDED_HEADER);
                 const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
                 if (startIdx !== -1 || endIdx !== -1) {
-                    io.warn(
+                    Io.warn(
                         vscode.l10n.t('Invalid embedded data in {file}.', {
                             file: basename(cppFile),
                         }),
                     );
                 }
-                this.problem = undefined;
+                CphNg.problem = undefined;
                 return;
             }
             try {
-                this.problem = {
+                CphNg.problem = {
                     version,
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,
@@ -383,7 +379,7 @@ export class CphNg {
                     timeLimit: embeddedProblem.timeLimit,
                 };
                 if (embeddedProblem.spjCode) {
-                    this.problem.checker = {
+                    CphNg.problem.checker = {
                         path: join(
                             dirname(cppFile),
                             basename(cppFile, extname(cppFile)) +
@@ -392,12 +388,12 @@ export class CphNg {
                         ),
                     };
                     await writeFile(
-                        this.problem.checker?.path,
+                        CphNg.problem.checker?.path,
                         embeddedProblem.spjCode,
                     );
                 }
                 if (embeddedProblem.interactorCode) {
-                    this.problem.interactor = {
+                    CphNg.problem.interactor = {
                         path: join(
                             dirname(cppFile),
                             basename(cppFile, extname(cppFile)) +
@@ -406,13 +402,13 @@ export class CphNg {
                         ),
                     };
                     await writeFile(
-                        this.problem.interactor?.path,
+                        CphNg.problem.interactor?.path,
                         embeddedProblem.interactorCode,
                     );
                 }
-                this.saveProblem();
+                CphNg.saveProblem(CphNg.problem);
             } catch (e) {
-                io.warn(
+                Io.warn(
                     vscode.l10n.t(
                         'Parse embedded data in file {file} failed: {msg}.',
                         {
@@ -421,32 +417,32 @@ export class CphNg {
                         },
                     ),
                 );
-                this.problem = undefined;
+                CphNg.problem = undefined;
             }
         } catch {
-            this.problem = undefined;
+            CphNg.problem = undefined;
         }
     }
-    public async loadProblem(cppFile: string): Promise<void> {
+    public static async loadProblem(cppFile: string): Promise<void> {
         CphNg.logger.trace('loadProblem', { cppFile });
-        await this.loadProblemFromBin(await CphNg.getBinByCpp(cppFile));
-        if (this.problem === undefined) {
-            await this.loadProblemFromEmbedded(cppFile);
+        await CphNg.loadProblemFromBin(await CphNg.getBinByCpp(cppFile));
+        if (CphNg.problem === undefined) {
+            await CphNg.loadProblemFromEmbedded(cppFile);
         }
     }
-    public async editProblemDetails(
+    public static async editProblemDetails(
         title: string,
         url: string,
         timeLimit: number,
     ): Promise<void> {
-        if (!this.checkProblem()) {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         problem.name = title;
         problem.url = url;
         problem.timeLimit = timeLimit;
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
     public static async saveProblem(problem: Problem): Promise<void> {
         CphNg.logger.trace('saveProblem', { problem });
@@ -459,28 +455,19 @@ export class CphNg {
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to save problem: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async saveProblem(): Promise<void> {
-        CphNg.logger.trace('saveProblem');
-        if (!this.checkProblem()) {
-            return;
-        }
-        const problem = this._problem!;
-        await CphNg.saveProblem(problem);
-        this.emitProblemChange();
-    }
-    public async exportToEmbedded(): Promise<void> {
+    public static async exportToEmbedded(): Promise<void> {
         CphNg.logger.trace('exportToEmbedded');
-        if (!this.checkProblem()) {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         try {
             const embeddedProblem: EmbeddedProblem = {
                 name: problem.name,
@@ -518,53 +505,53 @@ export class CphNg {
             cppData += buildEmbeddedBlock(embeddedProblem);
             await writeFile(cppFile, cppData);
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to export problem: {msg}.', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async delProblem(): Promise<void> {
+    public static async delProblem(): Promise<void> {
         CphNg.logger.trace('delProblem');
-        if (!this.checkProblem()) {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         const binPath = await CphNg.getBinByCpp(problem.src.path);
         try {
             await access(binPath, constants.F_OK);
             await unlink(binPath);
-            this._problem = undefined;
+            CphNg._problem = undefined;
         } catch {
-            io.warn(
+            Io.warn(
                 vscode.l10n.t('Problem file {file} not found.', {
                     file: basename(binPath),
                 }),
             );
         } finally {
-            this.problem = undefined;
+            CphNg.problem = undefined;
         }
     }
-    public async addTc(): Promise<void> {
+    public static async addTc(): Promise<void> {
         CphNg.logger.trace('addTestCase');
-        if (!this._problem) {
+        if (!CphNg._problem) {
             return;
         }
-        this._problem.tcs.push({
+        CphNg._problem.tcs.push({
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
             isExpand: false,
         });
-        this.saveProblem();
+        CphNg.saveProblem(CphNg._problem);
     }
-    public async loadTcs(): Promise<void> {
+    public static async loadTcs(): Promise<void> {
         CphNg.logger.trace('loadTestCases');
         try {
-            if (!this.checkProblem()) {
+            if (!CphNg.checkProblem()) {
                 return;
             }
-            const problem = this._problem!;
+            const problem = CphNg._problem!;
 
             CphNg.logger.debug('Showing test case loading options');
             const option = (
@@ -607,7 +594,7 @@ export class CphNg {
                 const entries = zipData.getEntries();
                 if (!entries.length) {
                     CphNg.logger.warn('Empty zip file');
-                    io.warn(
+                    Io.warn(
                         vscode.l10n.t('No test cases found in the zip file.'),
                     );
                     return;
@@ -770,32 +757,35 @@ export class CphNg {
                     problem.tcs.push(tc);
                 });
             }
-            this.saveProblem();
+            CphNg.saveProblem(problem);
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to load test cases: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async updateTc(idx: number, tc: TC): Promise<void> {
+    public static async updateTc(idx: number, tc: TC): Promise<void> {
         CphNg.logger.trace('updateTestCase', { idx, tc });
-        if (!this.checkProblem() || !this.checkIdx(idx)) {
+        if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         problem.tcs[idx] = tc;
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
-    public async runTc(idx: number, compile: boolean | null): Promise<void> {
+    public static async runTc(
+        idx: number,
+        compile: boolean | null,
+    ): Promise<void> {
         CphNg.logger.trace('runTestCase', { idx });
-        if (!this.checkProblem() || !this.checkIdx(idx)) {
+        if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
             return;
         }
-        const problem = this._problem!;
-        this.runAbortController && this.runAbortController.abort();
-        this.runAbortController = new AbortController();
+        const problem = CphNg._problem!;
+        CphNg.runAbortController && CphNg.runAbortController.abort();
+        CphNg.runAbortController = new AbortController();
         const srcLang = Langs.getLang(problem.src.path);
         if (!srcLang) {
             return;
@@ -810,41 +800,41 @@ export class CphNg {
             msg: '',
         };
         tc.isExpand = false;
-        this.emitProblemChange();
+        CphNg.emitProblemChange();
         const result = tc.result;
 
-        const compileResult = await this.compile(srcLang, compile);
+        const compileResult = await CphNg.compile(srcLang, compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
             result.verdict = TCVerdicts.CE;
             tc.isExpand = true;
-            this.saveProblem();
-            this.runAbortController = undefined;
+            CphNg.saveProblem(problem);
+            CphNg.runAbortController = undefined;
             return;
         }
         const compileData = compileResult.data!;
 
-        await this.runner.run(
+        await Runner.run(
             problem,
             result,
-            this.runAbortController,
+            CphNg.runAbortController,
             srcLang,
             tc,
             compileData,
         );
         tc.isExpand = isExpandVerdict(result.verdict);
-        this.saveProblem();
-        this.runAbortController = undefined;
+        CphNg.saveProblem(problem);
+        CphNg.runAbortController = undefined;
     }
-    public async runTcs(compile: boolean | null): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async runTcs(compile: boolean | null): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         if (!problem.tcs.length) {
             return;
         }
-        this.runAbortController && this.runAbortController.abort();
-        this.runAbortController = new AbortController();
+        CphNg.runAbortController && CphNg.runAbortController.abort();
+        CphNg.runAbortController = new AbortController();
         const srcLang = Langs.getLang(problem.src.path);
         if (!srcLang) {
             return;
@@ -859,75 +849,75 @@ export class CphNg {
             };
             tc.isExpand = false;
         }
-        this.emitProblemChange();
+        CphNg.emitProblemChange();
 
-        const compileResult = await this.compile(srcLang, compile);
+        const compileResult = await CphNg.compile(srcLang, compile);
         if (compileResult.verdict !== TCVerdicts.UKE) {
             for (const tc of problem.tcs) {
                 tc.result!.verdict = TCVerdicts.CE;
             }
-            this.saveProblem();
-            this.runAbortController = undefined;
+            CphNg.saveProblem(problem);
+            CphNg.runAbortController = undefined;
             return;
         }
         const compileData = compileResult.data!;
         for (const tc of problem.tcs) {
             tc.result!.verdict = TCVerdicts.CPD;
         }
-        this.emitProblemChange();
+        CphNg.emitProblemChange();
 
         let hasExpandStatus = false;
         for (const tc of problem.tcs) {
-            if (this.runAbortController?.signal.aborted) {
-                if (this.runAbortController.signal.reason === 'onlyOne') {
-                    this.runAbortController = new AbortController();
+            if (CphNg.runAbortController?.signal.aborted) {
+                if (CphNg.runAbortController.signal.reason === 'onlyOne') {
+                    CphNg.runAbortController = new AbortController();
                 } else {
                     tc.result!.verdict = TCVerdicts.SK;
                     continue;
                 }
             }
-            await this.runner.run(
+            await Runner.run(
                 problem,
                 tc.result!,
-                this.runAbortController,
+                CphNg.runAbortController,
                 srcLang,
                 tc,
                 compileData,
             );
             if (!hasExpandStatus) {
                 tc.isExpand = isExpandVerdict(tc.result!.verdict);
-                this.emitProblemChange();
+                CphNg.emitProblemChange();
                 hasExpandStatus = tc.isExpand;
             }
         }
-        this.saveProblem();
-        this.runAbortController = undefined;
+        CphNg.saveProblem(problem);
+        CphNg.runAbortController = undefined;
     }
-    public async stopTcs(onlyOne: boolean): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async stopTcs(onlyOne: boolean): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
-        if (this.runAbortController) {
-            this.runAbortController.abort(onlyOne ? 'onlyOne' : undefined);
+        const problem = CphNg._problem!;
+        if (CphNg.runAbortController) {
+            CphNg.runAbortController.abort(onlyOne ? 'onlyOne' : undefined);
         } else {
             for (const tc of problem.tcs) {
                 if (isRunningVerdict(tc.result!.verdict)) {
                     tc.result!.verdict = TCVerdicts.RJ;
                 }
             }
-            this.saveProblem();
+            CphNg.saveProblem(problem);
         }
     }
-    public async chooseTcFile(
+    public static async chooseTcFile(
         idx: number,
         option: 'stdin' | 'answer',
     ): Promise<void> {
         try {
-            if (!this.checkProblem() || !this.checkIdx(idx)) {
+            if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
                 return;
             }
-            const problem = this._problem!;
+            const problem = CphNg._problem!;
             const tc = problem.tcs[idx];
             const fileUri = await vscode.window.showOpenDialog({
                 canSelectFiles: true,
@@ -964,7 +954,7 @@ export class CphNg {
                             if (
                                 Settings.problem.foundMatchTestCaseBehavior ===
                                     'always' ||
-                                (await io.confirm(
+                                (await Io.confirm(
                                     vscode.l10n.t(
                                         'Found matching {found} file: {file}. Do you want to use it?',
                                         {
@@ -986,22 +976,22 @@ export class CphNg {
                         }
                     }
                 }
-                this.saveProblem();
+                CphNg.saveProblem(problem);
             }
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to choose test case file: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async compareTc(idx: number): Promise<void> {
+    public static async compareTc(idx: number): Promise<void> {
         try {
-            if (!this.checkProblem() || !this.checkIdx(idx)) {
+            if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
                 return;
             }
-            const problem = this._problem!;
+            const problem = CphNg._problem!;
             const tc = problem.tcs[idx];
             const leftFile = await tcIo2Path(tc.answer);
             const rightFile = await tcIo2Path(tc.result!.stdout);
@@ -1011,21 +1001,21 @@ export class CphNg {
                 vscode.Uri.file(rightFile),
             );
         } catch (e) {
-            io.error(
+            Io.error(
                 vscode.l10n.t('Failed to compare test case: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
         }
     }
-    public async toggleTcFile(
+    public static async toggleTcFile(
         idx: number,
         label: 'stdin' | 'answer' | 'stdout' | 'stderr',
     ): Promise<void> {
-        if (!this.checkProblem() || !this.checkIdx(idx)) {
+        if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         const tc = problem.tcs[idx];
         const isInputOrAnswer = label === 'stdin' || label === 'answer';
         const fileIo = isInputOrAnswer ? tc[label] : tc.result![label];
@@ -1033,7 +1023,7 @@ export class CphNg {
             const data = await tcIo2Str(fileIo);
             if (
                 data.length <= Settings.problem.maxInlineDataLength ||
-                (await io.confirm(
+                (await Io.confirm(
                     vscode.l10n.t(
                         'The file size is {size} bytes, which may be large. Are you sure you want to load it inline?',
                         { size: data.length },
@@ -1075,21 +1065,21 @@ export class CphNg {
                 tc.result![label] = { useFile: true, path: tempFilePath };
             }
         }
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
-    public async delTc(idx: number): Promise<void> {
-        if (!this.checkProblem() || !this.checkIdx(idx)) {
+    public static async delTc(idx: number): Promise<void> {
+        if (!CphNg.checkProblem() || !CphNg.checkIdx(idx)) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         problem.tcs.splice(idx, 1);
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
-    public async chooseFile(fileType: FileTypes): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async chooseFile(fileType: FileTypes): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         const checkerFileUri = await vscode.window.showOpenDialog({
             canSelectFiles: true,
             canSelectFolders: false,
@@ -1121,13 +1111,13 @@ export class CphNg {
             }
             problem.bfCompare.bruteForce = { path: checkerFileUri[0].fsPath };
         }
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
-    public async removeFile(fileType: FileTypes): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async removeFile(fileType: FileTypes): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         if (fileType === 'checker') {
             problem.checker = undefined;
         } else if (fileType === 'interactor') {
@@ -1137,32 +1127,32 @@ export class CphNg {
         } else {
             problem.bfCompare && (problem.bfCompare.bruteForce = undefined);
         }
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
-    public async startBfCompare(compile: boolean | null): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async startBfCompare(compile: boolean | null): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         if (!problem.bfCompare) {
             problem.bfCompare = { running: false, msg: '' };
         }
         if (problem.bfCompare.running) {
-            io.warn(
+            Io.warn(
                 vscode.l10n.t('Brute Force comparison is already running.'),
             );
             return;
         }
         if (!problem.bfCompare.generator || !problem.bfCompare.bruteForce) {
-            io.warn(
+            Io.warn(
                 vscode.l10n.t(
                     'Please choose both generator and brute force files first.',
                 ),
             );
             return;
         }
-        this.runAbortController && this.runAbortController.abort();
-        this.runAbortController = new AbortController();
+        CphNg.runAbortController && CphNg.runAbortController.abort();
+        CphNg.runAbortController = new AbortController();
         const srcLang = Langs.getLang(problem.src.path);
         if (!srcLang) {
             return;
@@ -1170,20 +1160,20 @@ export class CphNg {
 
         const cleanUp = () => {
             problem.bfCompare!.running = false;
-            if (this.runAbortController?.signal.aborted) {
+            if (CphNg.runAbortController?.signal.aborted) {
                 problem.bfCompare!.msg = vscode.l10n.t(
                     'Brute Force comparison stopped by user, {cnt} runs completed.',
                     { cnt },
                 );
             }
-            this.runAbortController = undefined;
-            this.saveProblem();
+            CphNg.runAbortController = undefined;
+            CphNg.saveProblem(problem);
         };
 
         problem.bfCompare.running = true;
         problem.bfCompare.msg = vscode.l10n.t('Compiling solution...');
-        this.emitProblemChange();
-        const solutionCompileResult = await this.compile(srcLang, compile);
+        CphNg.emitProblemChange();
+        const solutionCompileResult = await CphNg.compile(srcLang, compile);
         if (solutionCompileResult.verdict !== TCVerdicts.UKE) {
             problem.bfCompare.msg = vscode.l10n.t(
                 'Solution compilation failed.',
@@ -1193,10 +1183,10 @@ export class CphNg {
         }
 
         problem.bfCompare.msg = vscode.l10n.t('Compiling generator...');
-        this.emitProblemChange();
+        CphNg.emitProblemChange();
         const generatorCompileResult = await srcLang.compile(
             problem.bfCompare.generator,
-            this.runAbortController,
+            CphNg.runAbortController,
             compile,
         );
         if (generatorCompileResult.verdict !== TCVerdicts.UKE) {
@@ -1209,10 +1199,10 @@ export class CphNg {
         problem.bfCompare.generator.hash = generatorCompileResult.data!.hash;
 
         problem.bfCompare.msg = vscode.l10n.t('Compiling brute force...');
-        this.emitProblemChange();
+        CphNg.emitProblemChange();
         const bruteForceCompileResult = await srcLang.compile(
             problem.bfCompare.bruteForce,
-            this.runAbortController,
+            CphNg.runAbortController,
             compile,
         );
         if (bruteForceCompileResult.verdict !== TCVerdicts.UKE) {
@@ -1227,7 +1217,7 @@ export class CphNg {
         let cnt = 0;
         while (true) {
             cnt++;
-            if (this.runAbortController.signal.aborted) {
+            if (CphNg.runAbortController.signal.aborted) {
                 problem.bfCompare.msg = vscode.l10n.t(
                     'Brute Force comparison stopped by user.',
                 );
@@ -1238,12 +1228,12 @@ export class CphNg {
                 '#{cnt} Running generator...',
                 { cnt },
             );
-            this.emitProblemChange();
-            const generatorRunResult = await this.runner.doRun(
+            CphNg.emitProblemChange();
+            const generatorRunResult = await Runner.doRun(
                 [generatorCompileResult.data!.outputPath],
                 Settings.bfCompare.generatorTimeLimit,
                 { useFile: false, data: '' },
-                this.runAbortController,
+                CphNg.runAbortController,
                 undefined,
             );
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
@@ -1262,12 +1252,12 @@ export class CphNg {
                 '#{cnt} Running brute force...',
                 { cnt },
             );
-            this.emitProblemChange();
-            const bruteForceRunResult = await this.runner.doRun(
+            CphNg.emitProblemChange();
+            const bruteForceRunResult = await Runner.doRun(
                 [bruteForceCompileResult.data!.outputPath],
                 Settings.bfCompare.bruteForceTimeLimit,
                 { useFile: false, data: generatorRunResult.stdout },
-                this.runAbortController,
+                CphNg.runAbortController,
                 undefined,
             );
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
@@ -1286,7 +1276,7 @@ export class CphNg {
                 '#{cnt} Running solution...',
                 { cnt },
             );
-            this.emitProblemChange();
+            CphNg.emitProblemChange();
             const tempTc: TC = {
                 stdin: { useFile: false, data: generatorRunResult.stdout },
                 answer: {
@@ -1302,10 +1292,10 @@ export class CphNg {
                     msg: '',
                 },
             } satisfies TC;
-            await this.runner.run(
+            await Runner.run(
                 problem,
                 tempTc.result!,
-                this.runAbortController,
+                CphNg.runAbortController,
                 srcLang,
                 tempTc,
                 solutionCompileResult.data!,
@@ -1323,18 +1313,17 @@ export class CphNg {
         }
         cleanUp();
     }
-
-    public async stopBfCompare(): Promise<void> {
-        if (!this.checkProblem()) {
+    public static async stopBfCompare(): Promise<void> {
+        if (!CphNg.checkProblem()) {
             return;
         }
-        const problem = this._problem!;
+        const problem = CphNg._problem!;
         if (!problem.bfCompare || !problem.bfCompare.running) {
-            io.warn(vscode.l10n.t('Brute Force comparison is not running.'));
+            Io.warn(vscode.l10n.t('Brute Force comparison is not running.'));
             return;
         }
-        this.runAbortController && this.runAbortController.abort();
+        CphNg.runAbortController && CphNg.runAbortController.abort();
         problem.bfCompare.running = false;
-        this.saveProblem();
+        CphNg.saveProblem(problem);
     }
 }

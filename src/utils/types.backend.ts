@@ -19,7 +19,7 @@ import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import * as vscode from 'vscode';
-import Settings from './settings';
+import Settings from '../modules/settings';
 import { TCIO, TCVerdict } from './types';
 
 export class TCVerdicts {

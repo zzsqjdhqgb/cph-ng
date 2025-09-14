@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { CphNg } from '../module/cphNg';
-import { io } from '../utils/io';
+import Io from '../helpers/io';
+import CphNg from '../modules/cphNg';
 import { TCIO } from '../utils/types';
 
 interface CphTestRunnerParams {
@@ -8,12 +8,6 @@ interface CphTestRunnerParams {
 }
 
 class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
-    private cphNg: CphNg;
-
-    constructor(cphNg: CphNg) {
-        this.cphNg = cphNg;
-    }
-
     async prepareInvocation(
         options: vscode.LanguageModelToolInvocationPrepareOptions<CphTestRunnerParams>,
         _token: vscode.CancellationToken,
@@ -62,7 +56,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                     '\n```'
                   : vscode.l10n.t('(<empty>)');
 
-        if (!this.cphNg.checkProblem()) {
+        if (!CphNg.checkProblem()) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
                     vscode.l10n.t(
@@ -70,34 +64,34 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                     ),
                 ),
             );
-        } else if (idx && !this.cphNg.checkIdx(idx - 1)) {
+        } else if (idx && !CphNg.checkIdx(idx - 1)) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
                     vscode.l10n.t(
                         'Error: Test case {idx} not found. Valid test cases range from 1 to {max}.',
-                        { idx, max: this.cphNg.problem?.tcs.length },
+                        { idx, max: CphNg.problem?.tcs.length },
                     ),
                 ),
             );
         } else {
             token.onCancellationRequested(async () => {
-                await this.cphNg.stopTcs(false);
+                await CphNg.stopTcs(false);
             });
 
             if (idx) {
-                await this.cphNg.runTc(idx - 1);
+                await CphNg.runTc(idx - 1, null);
             } else {
-                await this.cphNg.runTcs();
+                await CphNg.runTcs(null);
             }
 
             const tcs = idx
-                ? [this.cphNg.problem!.tcs[idx - 1]]
-                : this.cphNg.problem!.tcs;
+                ? [CphNg.problem!.tcs[idx - 1]]
+                : CphNg.problem!.tcs;
             const outputParts: string[] = [];
             if (tcs[0].result!.verdict.name === 'CE') {
                 outputParts.push(vscode.l10n.t('Compilation Error'));
                 outputParts.push('');
-                outputParts.push(io.compilationMsg);
+                outputParts.push(Io.compilationMsg);
             } else {
                 outputParts.push(vscode.l10n.t('Test cases run successfully.'));
                 outputParts.push('');

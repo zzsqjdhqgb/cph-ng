@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Logger } from './io';
+import Logger from '../helpers/logger';
 
 const logger = new Logger('strTemplate');
 

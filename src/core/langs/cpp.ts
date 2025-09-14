@@ -19,9 +19,11 @@ import { access, constants } from 'fs/promises';
 import { type } from 'os';
 import { basename, extname, join } from 'path';
 import * as vscode from 'vscode';
+import Io from '../../helpers/io';
+import Logger from '../../helpers/logger';
+import ProcessExecutor from '../../helpers/processExecutor';
+import Settings from '../../modules/settings';
 import { extensionPath } from '../../utils/global';
-import { io, Logger } from '../../utils/io';
-import Settings from '../../utils/settings';
 import { FileWithHash } from '../../utils/types';
 import { TCVerdicts } from '../../utils/types.backend';
 import {
@@ -134,7 +136,7 @@ export class LangCpp extends Lang {
 
             const compileResults = await Promise.all(
                 compileCommands.map((cmd) =>
-                    Lang.executor.execute({
+                    ProcessExecutor.execute({
                         cmd,
                         ac,
                         timeout,
@@ -145,7 +147,7 @@ export class LangCpp extends Lang {
             const postResults: typeof compileResults = [];
             for (const cmd of postCommands) {
                 postResults.push(
-                    await Lang.executor.execute({
+                    await ProcessExecutor.execute({
                         cmd,
                         ac,
                         timeout,
@@ -159,7 +161,7 @@ export class LangCpp extends Lang {
                 path: src.path,
                 outputPath,
             });
-            io.compilationMsg = results
+            Io.compilationMsg = results
                 .map((result) => result.stderr.trim())
                 .filter((msg) => msg)
                 .join('\n\n');
@@ -179,7 +181,7 @@ export class LangCpp extends Lang {
                     msg: vscode.l10n.t('Compilation aborted by user.'),
                 };
             }
-            io.compilationMsg = (e as Error).message;
+            Io.compilationMsg = (e as Error).message;
             return { verdict: TCVerdicts.CE, msg: '' };
         }
     }

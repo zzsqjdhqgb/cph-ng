@@ -18,12 +18,12 @@
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import { CompileResult } from '../module/cphNg';
-import { Logger } from '../utils/io';
-import { ProcessExecutor } from '../utils/processExecutor';
-import { ProcessResultHandler } from '../utils/processResultHandler';
+import Logger from '../helpers/logger';
+import ProcessExecutor from '../helpers/processExecutor';
+import { ProcessResultHandler } from '../helpers/processResultHandler';
+import CphNg, { CompileResult } from '../modules/cphNg';
+import Settings from '../modules/settings';
 import Result, { assignResult } from '../utils/result';
-import Settings from '../utils/settings';
 import { Problem, TC, TCIO, TCResult } from '../utils/types';
 import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
 import { Checker } from './checker';
@@ -36,17 +36,9 @@ type RunnerResult = Result<undefined> & {
 };
 
 export class Runner {
-    private logger: Logger = new Logger('runner');
-    private checker: Checker;
-    private executor: ProcessExecutor;
+    private static logger: Logger = new Logger('runner');
 
-    constructor(private emitProblemChange: () => void) {
-        this.logger.trace('constructor');
-        this.checker = new Checker();
-        this.executor = new ProcessExecutor();
-    }
-
-    private getTCHash(problem: Problem, tc: TC) {
+    private static getTCHash(problem: Problem, tc: TC) {
         return SHA256(
             `${problem.src.path}-${
                 tc.stdin.useFile ? tc.stdin.path : tc.stdin.data
@@ -56,7 +48,7 @@ export class Runner {
             .substring(64 - 6);
     }
 
-    public async doRun(
+    public static async doRun(
         runCommand: string[],
         timeLimit: number,
         stdin: TCIO,
@@ -88,14 +80,14 @@ export class Runner {
         }
     }
 
-    private async runWithoutInteractor(
+    private static async runWithoutInteractor(
         cmd: string[],
         timeLimit: number,
         stdin: TCIO,
         abortController: AbortController,
     ): Promise<RunnerResult> {
         return ProcessResultHandler.toRunner(
-            await this.executor.execute({
+            await ProcessExecutor.execute({
                 cmd,
                 timeout: timeLimit + Settings.runner.timeAddition,
                 stdin,
@@ -105,7 +97,7 @@ export class Runner {
         );
     }
 
-    private async runWithInteractor(
+    private static async runWithInteractor(
         runCommand: string[],
         timeLimit: number,
         stdin: TCIO,
@@ -126,7 +118,7 @@ export class Runner {
         await writeFile(outputFile, '');
 
         const { process1: solResult, process2: intResult } =
-            await this.executor.executeWithPipe(
+            await ProcessExecutor.executeWithPipe(
                 {
                     cmd: runCommand,
                     timeout: timeLimit + Settings.runner.timeAddition,
@@ -156,7 +148,7 @@ export class Runner {
         } satisfies RunnerResult;
     }
 
-    public async run(
+    public static async run(
         problem: Problem,
         result: TCResult,
         abortController: AbortController,
@@ -166,7 +158,7 @@ export class Runner {
     ) {
         try {
             result.verdict = TCVerdicts.JG;
-            this.emitProblemChange();
+            CphNg.emitProblemChange();
 
             const runResult = await this.doRun(
                 await lang.runCommand(compileData.src.outputPath),
@@ -207,18 +199,18 @@ export class Runner {
                 result.stderr.useFile = false;
             }
             result.stderr = await write2TcIo(result.stderr, runResult.stderr);
-            this.emitProblemChange();
+            CphNg.emitProblemChange();
 
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
                 result.verdict = TCVerdicts.TLE;
             } else {
                 result.verdict = TCVerdicts.CMP;
-                this.emitProblemChange();
+                CphNg.emitProblemChange();
                 assignResult(
                     result,
                     compileData.checker
-                        ? await this.checker.runChecker(
+                        ? await Checker.runChecker(
                               compileData.checker.outputPath,
                               tc,
                               abortController,
@@ -230,13 +222,13 @@ export class Runner {
                           ),
                 );
             }
-            this.emitProblemChange();
+            CphNg.emitProblemChange();
         } catch (e) {
             assignResult(result, {
                 verdict: TCVerdicts.SE,
                 msg: (e as Error).message,
             });
-            this.emitProblemChange();
+            CphNg.emitProblemChange();
         }
     }
 }

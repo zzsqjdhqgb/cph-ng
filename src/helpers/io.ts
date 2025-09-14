@@ -16,59 +16,29 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
+import Logger from '../helpers/logger';
 
-const outputChannel = vscode.window.createOutputChannel('CPH-NG', {
-    log: true,
-});
 const compilationChannel = vscode.window.createOutputChannel(
     vscode.l10n.t('CPH-NG Compilation'),
 );
 
-export class Logger {
-    private module: string;
-    constructor(module: string) {
-        this.module = module;
-    }
-    private message(...args: any[]) {
-        const messageData = args
-            .map((arg) => (typeof arg === 'string' ? arg : JSON.stringify(arg)))
-            .join(' ');
-        return `[${this.module}] ${messageData}`;
-    }
-    public trace(...args: any[]) {
-        outputChannel.trace(this.message(...args));
-    }
-    public debug(...args: any[]) {
-        outputChannel.debug(this.message(...args));
-    }
-    public info(...args: any[]) {
-        outputChannel.info(this.message(...args));
-    }
-    public warn(...args: any[]) {
-        outputChannel.warn(this.message(...args));
-    }
-    public error(...args: any[]) {
-        outputChannel.error(this.message(...args));
-    }
-}
+export default class Io {
+    private static logger: Logger = new Logger('io');
+    private static _compilationMsg = '';
 
-export class Io {
-    private logger: Logger = new Logger('io');
-    private _compilationMsg = '';
-
-    public info(msg: string, ...args: any) {
+    public static info(msg: string, ...args: any) {
         this.logger.info(msg);
         return vscode.window.showInformationMessage(msg, ...args);
     }
-    public warn(msg: string, ...args: any) {
+    public static warn(msg: string, ...args: any) {
         this.logger.warn(msg);
         return vscode.window.showWarningMessage(msg, ...args);
     }
-    public error(msg: string, ...args: any) {
+    public static error(msg: string, ...args: any) {
         this.logger.error(msg);
         return vscode.window.showErrorMessage(msg, ...args);
     }
-    public async confirm(
+    public static async confirm(
         msg: string,
         modal: boolean = false,
     ): Promise<boolean> {
@@ -82,7 +52,7 @@ export class Io {
         );
     }
 
-    set compilationMsg(msg: string) {
+    static set compilationMsg(msg: string) {
         this.logger.info('Setting compilation message', msg);
         compilationChannel.clear();
         compilationChannel.appendLine(msg);
@@ -94,9 +64,7 @@ export class Io {
         this._compilationMsg = msg;
     }
 
-    get compilationMsg(): string {
+    static get compilationMsg(): string {
         return this._compilationMsg;
     }
 }
-
-export const io = new Io();

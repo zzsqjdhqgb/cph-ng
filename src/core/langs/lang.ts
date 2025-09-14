@@ -17,9 +17,9 @@
 
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
+import Logger from '../../helpers/logger';
+import ProcessExecutor from '../../helpers/processExecutor';
 import { exists } from '../../utils/exec';
-import { Logger } from '../../utils/io';
-import { ProcessExecutor } from '../../utils/processExecutor';
 import Result from '../../utils/result';
 import { FileWithHash } from '../../utils/types';
 

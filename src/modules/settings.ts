@@ -17,26 +17,21 @@
 
 import { homedir, tmpdir } from 'os';
 import * as vscode from 'vscode';
-import { Logger } from './io';
-import { renderTemplate } from './strTemplate';
+import Logger from '../helpers/logger';
+import { renderTemplate } from '../utils/strTemplate';
 
 class SettingsSection {
-    private name: string;
     protected logger: Logger = new Logger('settings');
-    constructor(name: string) {
-        this.name = name;
-        this.logger.trace(`Created SettingsSection: ${name}`);
-    }
+    constructor(private name: string) {}
     protected get(key: string): unknown {
-        this.logger.trace(`Getting setting: ${this.name}.${key}`);
         const value = vscode.workspace
             .getConfiguration('cph-ng')
             .get(`${this.name}.${key}`);
-        this.logger.debug(`Setting value for ${this.name}.${key}:`, value);
+        this.logger.trace('Getting setting', `${this.name}.${key}`, value);
         return value;
     }
     protected set(key: string, value: unknown): Thenable<void> {
-        this.logger.trace(`Setting setting: ${this.name}.${key}`, value);
+        this.logger.trace('Setting setting', `${this.name}.${key}`, value);
         return vscode.workspace
             .getConfiguration('cph-ng')
             .update(

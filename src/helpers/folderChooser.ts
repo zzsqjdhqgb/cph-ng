@@ -17,10 +17,11 @@
 
 import { join, relative } from 'path';
 import * as vscode from 'vscode';
-import { io, Logger } from './io';
-import Settings from './settings';
+import Logger from '../helpers/logger';
+import Settings from '../modules/settings';
+import Io from './io';
 
-export class FolderChooser {
+export default class FolderChooser {
     private static logger: Logger = new Logger('folderChooser');
 
     private static async getSubfoldersRecursively(
@@ -63,7 +64,7 @@ export class FolderChooser {
     ): Promise<vscode.Uri | null> {
         this.logger.trace('chooseFolderWithQuickPick', { title });
         if (!vscode.workspace.workspaceFolders) {
-            io.error(vscode.l10n.t('No workspace folder is open.'));
+            Io.error(vscode.l10n.t('No workspace folder is open.'));
             return null;
         }
 
