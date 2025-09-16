@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: check command code when compiling
 - **refactor**: use static class member functions
+- **fix**: data folder is incorrect in file-only mode
 
 ## 0.1.10
 

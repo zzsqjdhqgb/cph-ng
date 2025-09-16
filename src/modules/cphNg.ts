@@ -105,7 +105,7 @@ export default class CphNg {
     public static async getBinByCpp(cppPath: string): Promise<string> {
         const workspaceFolder = vscode.workspace.workspaceFolders
             ? vscode.workspace.workspaceFolders[0].uri.fsPath
-            : '';
+            : dirname(cppPath);
         const dir = renderTemplate(Settings.problem.problemFilePath, [
             ['workspace', workspaceFolder],
             ['dirname', dirname(cppPath)],
