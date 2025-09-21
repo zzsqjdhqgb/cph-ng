@@ -2,6 +2,32 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.2.0
+
+Aggregated from prereleases 0.1.10~0.1.11.
+
+### Added
+
+- Interactive problem support
+- Bulk import from CPH
+- Natural-order sorting for test cases
+- Configuration: max inline data length
+- Short name settings for competitive programming platforms
+
+### Fixed
+
+- Execution time not captured when using exit
+- Compilation: ensure command exit code is checked
+- Incorrect data folder path in file-only mode
+- Redundant warning when checker / interactor already executable
+
+### Refactored
+
+- Related utilities converted to static class member functions
+
+<details>
+<summary>Pre-release history (0.1.10~0.1.11)</summary>
+
 ## 0.1.11
 
 - **fix**: check command code when compiling
@@ -19,6 +45,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: implement bulk import from CPH
 - **feat**: add short name settings for competitive programming platforms
 - **feat**: add natural-orderby for sorting test cases
+
+</details>
 
 ---
 
