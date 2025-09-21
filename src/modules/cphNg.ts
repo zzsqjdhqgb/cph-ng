@@ -176,7 +176,7 @@ export default class CphNg {
                 src: result.data!,
             };
             if (problem.checker) {
-                const checkerLang = Langs.getLang(problem.checker.path);
+                const checkerLang = Langs.getLang(problem.checker.path, true);
                 if (!checkerLang) {
                     data.checker = {
                         outputPath: problem.checker.path,
@@ -196,7 +196,10 @@ export default class CphNg {
                 }
             }
             if (problem.interactor) {
-                const interactorLang = Langs.getLang(problem.interactor.path);
+                const interactorLang = Langs.getLang(
+                    problem.interactor.path,
+                    true,
+                );
                 if (!interactorLang) {
                     data.interactor = {
                         outputPath: problem.interactor.path,
