@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.2.1
+
+- **ci**: build failed in pull requests
+
 ## 0.2.0
 
 Aggregated from prereleases 0.1.10~0.1.11.
