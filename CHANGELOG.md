@@ -2,9 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## 0.2.1
+## [Unreleased]
 
 - **ci**: build failed in pull requests
+- **chore**: improve changelog extraction logic for version releases
 
 ## 0.2.0
 
