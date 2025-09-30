@@ -112,7 +112,7 @@ export default class ExtensionManager {
 
             let lastAlertTime = 0;
             ExtensionManager.compatibleTimer = setInterval(async () => {
-                const currentTime = new Date().getTime();
+                const currentTime = Date.now();
                 if (
                     vscode.extensions.getExtension(
                         'divyanshuagrawal.competitive-programming-helper',
@@ -300,15 +300,18 @@ OS: ${release()}`;
         try {
             const editor = vscode.window.activeTextEditor;
             if (!editor || editor.document.uri.scheme !== 'file') {
+                CphNg.problem = undefined;
+                CphNg.canImport = false;
+                ExtensionManager.updateContext();
                 return;
             }
 
             const filePath = editor.document.fileName;
             if (filePath.startsWith(Settings.cache.directory)) {
-                return;
-            }
-
-            if (
+                ExtensionManager.logger.debug('Cache directory is active', {
+                    filePath,
+                });
+            } else if (
                 CphNg.problem?.tcs
                     .flatMap((tc) =>
                         [

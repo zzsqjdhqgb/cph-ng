@@ -43,21 +43,42 @@ import CphButton from './cphButton';
 
 interface ProblemTitleProps {
     problem: Problem;
+    startTime: number;
 }
 
-const ProblemTitle = ({ problem }: ProblemTitleProps) => {
+const formatDuration = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000);
+    const hh = Math.floor(totalSec / 3600)
+        .toString()
+        .padStart(2, '0');
+    const mm = Math.floor((totalSec % 3600) / 60)
+        .toString()
+        .padStart(2, '0');
+    const ss = (totalSec % 60).toString().padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+};
+
+const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
     const { t } = useTranslation();
     const [isHoveringTitle, setHoveringTitle] = useState(false);
     const [isEditDialogOpen, setEditDialogOpen] = useState(false);
     const [editedTitle, setEditedTitle] = useState('');
     const [editedUrl, setEditedUrl] = useState('');
     const [editedTimeLimit, setEditedTimeLimit] = useState(0);
+    const [timeElapsed, setTimeElapsed] = useState(0);
 
     useEffect(() => {
         setEditedTitle(problem.name);
         setEditedUrl(problem.url || '');
         setEditedTimeLimit(problem.timeLimit);
     }, [problem.name, problem.url, problem.timeLimit]);
+    useEffect(() => {
+        setTimeElapsed(Date.now() - startTime);
+        const interval = setInterval(() => {
+            setTimeElapsed(Date.now() - startTime);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [startTime]);
 
     const handleEditTitle = () => {
         setEditDialogOpen(true);
@@ -150,6 +171,10 @@ const ProblemTitle = ({ problem }: ProblemTitleProps) => {
                         >
                             {basename(problem.src.path)}
                         </CphLink>
+                        &emsp;
+                        <span title={t('problemTitle.timeElapsed')}>
+                            {formatDuration(problem.timeElapsed + timeElapsed)}
+                        </span>
                     </CphText>
                 </CphFlex>
                 {isHoveringTitle && (
