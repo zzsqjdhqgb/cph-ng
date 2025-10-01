@@ -123,7 +123,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                             problem.name
                         )}
                     </CphText>
-                    <CphText fontSize={'0.8rem'}>
+                    <CphText
+                        fontSize={'0.8rem'}
+                        paddingRight={'4px'}
+                    >
                         {t('problemTitle.timeLimit', {
                             time: problem.timeLimit,
                         })}
@@ -172,7 +175,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                             {basename(problem.src.path)}
                         </CphLink>
                         &emsp;
-                        <span title={t('problemTitle.timeElapsed')}>
+                        <span
+                            title={t('problemTitle.timeElapsed')}
+                            className='defaultBlur'
+                        >
                             {formatDuration(problem.timeElapsed + timeElapsed)}
                         </span>
                     </CphText>
