@@ -343,6 +343,11 @@
                         "default": 27121,
                         "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
                     },
+                    "cph-ng.companion.defaultExtension": {
+                        "type": "string",
+                        "default": "cpp",
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.defaultExtension.markdownDescription%"
+                    },
                     "cph-ng.companion.submitLanguage": {
                         "type": "number",
                         "default": -1,

@@ -333,10 +333,10 @@ class Companion {
     }
 
     private static getProblemFileName(name: string, url?: string) {
-        const ext: string = 'cpp'; // TODO: get from user settings
-        Companion.logger.trace('getProblemFileName', { name, url, ext });
+        Companion.logger.trace('getProblemFileName', { name, url });
         const { shortCodeforcesName, shortLuoguName, shortAtCoderName } =
             Settings.companion;
+        const ext = Settings.companion.defaultExtension;
         if (url) {
             try {
                 const u = new URL(url);

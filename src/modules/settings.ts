@@ -126,6 +126,9 @@ class CompanionSection extends SettingsSection {
     get listenPort(): number {
         return this.get('listenPort') as number;
     }
+    get defaultExtension(): string {
+        return this.get('defaultExtension') as string;
+    }
     get submitLanguage(): number {
         return this.get('submitLanguage') as number;
     }
