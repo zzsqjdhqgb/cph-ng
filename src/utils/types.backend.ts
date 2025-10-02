@@ -116,7 +116,7 @@ export const tcIo2Path = async (tcIo: TCIO): Promise<string> => {
         const path = join(
             Settings.cache.directory,
             'io',
-            SHA256(tcIo.data).toString(),
+            SHA256(tcIo.data).toString().substring(0, 8),
         );
         await writeFile(path, tcIo.data);
         return path;

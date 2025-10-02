@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: add default file extension setting for Competitive Companion
+- **fix**: use shorter hash for io cache
 
 ## 0.2.1
 
