@@ -18,6 +18,7 @@
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
+import * as vscode from 'vscode';
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
 import { ProcessResultHandler } from '../helpers/processResultHandler';
@@ -31,6 +32,7 @@ import { Lang } from './langs/lang';
 
 type RunnerResult = Result<undefined> & {
     time: number;
+    memory: number | undefined;
     stdout: string;
     stderr: string;
 };
@@ -86,13 +88,32 @@ export class Runner {
         stdin: TCIO,
         abortController: AbortController,
     ): Promise<RunnerResult> {
+        if (Settings.runner.useRunner && Settings.compilation.useWrapper) {
+            return {
+                verdict: TCVerdicts.RJ,
+                msg: vscode.l10n.t(
+                    'Use Runner option cannot be used with Use Wrapper option.',
+                ),
+                time: 0,
+                memory: undefined,
+                stdout: '',
+                stderr: '',
+            };
+        }
         return ProcessResultHandler.toRunner(
-            await ProcessExecutor.execute({
-                cmd,
-                timeout: timeLimit + Settings.runner.timeAddition,
-                stdin,
-                ac: abortController,
-            }),
+            Settings.runner.useRunner
+                ? await ProcessExecutor.executeWithRunner({
+                      cmd,
+                      timeout: timeLimit + Settings.runner.timeAddition,
+                      stdin,
+                      ac: abortController,
+                  })
+                : await ProcessExecutor.execute({
+                      cmd,
+                      timeout: timeLimit + Settings.runner.timeAddition,
+                      stdin,
+                      ac: abortController,
+                  }),
             abortController,
         );
     }
@@ -142,6 +163,7 @@ export class Runner {
             ...(intProcessResult.verdict !== TCVerdicts.UKE
                 ? intProcessResult
                 : solProcessResult),
+            memory: undefined,
             time: solProcessResult.time,
             stdout: await readFile(outputFile, 'utf-8'),
             stderr: solProcessResult.stderr,
@@ -168,6 +190,7 @@ export class Runner {
                 compileData.interactor?.outputPath,
             );
             result.time = runResult.time;
+            result.memory = runResult.memory;
             result.verdict = TCVerdicts.JGD;
             if (tc.answer.useFile) {
                 result.stdout = {
@@ -204,6 +227,8 @@ export class Runner {
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
                 result.verdict = TCVerdicts.TLE;
+            } else if (result.memory && result.memory > problem.memoryLimit) {
+                result.verdict = TCVerdicts.MLE;
             } else {
                 result.verdict = TCVerdicts.CMP;
                 CphNg.emitProblemChange();

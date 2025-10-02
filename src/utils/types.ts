@@ -47,6 +47,7 @@ export type TCIO =
 
 export interface TCResult {
     verdict: TCVerdict;
+    memory?: number;
     time: number;
     stdout: TCIO;
     stderr: TCIO;
@@ -78,6 +79,7 @@ export interface Problem {
     url?: string;
     tcs: TC[];
     timeLimit: number;
+    memoryLimit: number;
     src: FileWithHash;
     checker?: FileWithHash;
     interactor?: FileWithHash;
@@ -92,6 +94,7 @@ export interface EmbeddedProblem {
         answer: string;
     }[];
     timeLimit: number;
+    memoryLimit: number;
     spjCode?: string;
     interactorCode?: string;
 }

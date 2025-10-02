@@ -39,8 +39,9 @@ const migrateFunctions: Record<string, (oldProblem: any) => any> = {
     '0.1.1': (problem: Problem_0_1_1): Problem_0_2_1 =>
         ({
             ...problem,
-            version: '0.2.1',
+            memoryLimit: 1024,
             timeElapsed: 0,
+            version: '0.2.1',
         }) satisfies Problem_0_2_1,
     '0.1.0': (problem: Problem_0_1_0): Problem_0_1_1 =>
         ({

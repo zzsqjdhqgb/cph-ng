@@ -299,10 +299,13 @@ OS: ${release()}`;
         ExtensionManager.logger.trace('checkActiveFile');
         try {
             const editor = vscode.window.activeTextEditor;
-            if (!editor || editor.document.uri.scheme !== 'file') {
+            if (!editor) {
                 CphNg.problem = undefined;
                 CphNg.canImport = false;
                 ExtensionManager.updateContext();
+                return;
+            }
+            if (editor.document.uri.scheme !== 'file') {
                 return;
             }
 

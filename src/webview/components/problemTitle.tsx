@@ -65,13 +65,15 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
     const [editedTitle, setEditedTitle] = useState('');
     const [editedUrl, setEditedUrl] = useState('');
     const [editedTimeLimit, setEditedTimeLimit] = useState(0);
+    const [editedMemoryLimit, setEditedMemoryLimit] = useState(0);
     const [timeElapsed, setTimeElapsed] = useState(0);
 
     useEffect(() => {
         setEditedTitle(problem.name);
         setEditedUrl(problem.url || '');
         setEditedTimeLimit(problem.timeLimit);
-    }, [problem.name, problem.url, problem.timeLimit]);
+        setEditedMemoryLimit(problem.memoryLimit);
+    }, [problem.name, problem.url, problem.timeLimit, problem.memoryLimit]);
     useEffect(() => {
         setTimeElapsed(Date.now() - startTime);
         const interval = setInterval(() => {
@@ -91,6 +93,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
             title: editedTitle,
             url: editedUrl,
             timeLimit: editedTimeLimit,
+            memoryLimit: editedMemoryLimit,
         } satisfies EditProblemDetailsMsg);
     };
 
@@ -129,6 +132,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                     >
                         {t('problemTitle.timeLimit', {
                             time: problem.timeLimit,
+                        })}
+                        &emsp;
+                        {t('problemTitle.memoryLimit', {
+                            memory: problem.memoryLimit,
                         })}
                         {problem.checker && (
                             <>
@@ -225,6 +232,20 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                             (!e.target.value || parseInt(e.target.value)) &&
                             setEditedTimeLimit(
                                 Math.min(parseInt(e.target.value), 1000 * 60),
+                            )
+                        }
+                        fullWidth
+                        type={'number'}
+                    />
+                    <TextField
+                        variant={'outlined'}
+                        margin={'normal'}
+                        label={t('problemTitle.dialog.field.memory')}
+                        value={editedMemoryLimit}
+                        onChange={(e) =>
+                            (!e.target.value || parseInt(e.target.value)) &&
+                            setEditedMemoryLimit(
+                                Math.min(parseInt(e.target.value), 1024 * 16),
                             )
                         }
                         fullWidth

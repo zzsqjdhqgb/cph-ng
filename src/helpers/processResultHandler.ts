@@ -51,7 +51,12 @@ export class ProcessResultHandler {
         result: ProcessResult,
         abortController?: AbortController,
         ignoreExitCode: boolean = false,
-    ): Result<undefined> & { time: number; stdout: string; stderr: string } {
+    ): Result<undefined> & {
+        time: number;
+        memory: number | undefined;
+        stdout: string;
+        stderr: string;
+    } {
         const { wrapperData, cleanStderr } = this.extractWrapperData(
             result.stderr,
         );
@@ -81,17 +86,21 @@ export class ProcessResultHandler {
             msg = vscode.l10n.t('Process exited with signal: {signal}.', {
                 signal: result.signal,
             });
+        } else if (result.errorMsg) {
+            verdict = TCVerdicts.SE;
+            msg = result.errorMsg;
         } else if (result.exitCode === null) {
             verdict = abortController?.signal.aborted
                 ? TCVerdicts.RJ
                 : TCVerdicts.SE;
-            msg = result.stderr || 'Process failed to start';
+            msg = vscode.l10n.t('Process failed to start');
         }
 
         return {
             verdict,
             msg,
             time,
+            memory: result.memory,
             stdout: result.stdout,
             stderr: cleanStderr,
         };
