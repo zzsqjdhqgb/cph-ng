@@ -21,6 +21,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "action@github.com"
+
       - name: Setup Node
         uses: ./.github/actions/setup-node-pnpm
 
@@ -66,6 +71,7 @@ jobs:
 
       - name: Deploy Dev Docs
         run: |
+          git fetch origin gh-pages --depth=1
           mike deploy --push --update-aliases dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
