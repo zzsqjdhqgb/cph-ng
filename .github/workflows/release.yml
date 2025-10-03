@@ -16,9 +16,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: ./.github/actions/setup-git
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "action@github.com"
 
       - name: Get Version
         id: version

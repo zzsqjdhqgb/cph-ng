@@ -19,7 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: ./.github/actions/setup-git
+        uses: actions/checkout@v4
+
       - name: Setup Node
         uses: ./.github/actions/setup-node-pnpm
 
@@ -53,7 +54,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
-        uses: ./.github/actions/setup-git
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: ./.github/actions/setup-python
