@@ -145,6 +145,17 @@ export default class CphNg {
             );
             if (editor) {
                 await editor.document.save();
+                await new Promise<void>((resolve, _reject) => {
+                    if (!editor.document.isDirty) {
+                        resolve();
+                    }
+                    const intervalId = setInterval(() => {
+                        if (!editor.document.isDirty) {
+                            clearInterval(intervalId);
+                            resolve();
+                        }
+                    }, 50);
+                });
             }
 
             const result = await lang.compile(
