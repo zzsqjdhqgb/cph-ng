@@ -1,0 +1,27 @@
+name: Checkout and Configure Git
+description: Checkout repository and configure Git settings
+inputs:
+  fetch-depth:
+    description:
+      Number of commits to fetch. 0 indicates all history for all branches and
+      tags
+    default: '0'
+    required: false
+  token:
+    description: Personal access token (PAT) used to fetch the repository
+    default: ${{ github.token }}
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        token: ${{ inputs.token }}
+
+    - name: Configure Git
+      shell: bash
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "action@github.com"

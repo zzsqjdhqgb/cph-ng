@@ -3,6 +3,7 @@
         "dbaeumer.vscode-eslint",
         "amodio.tsl-problem-matcher",
         "ms-vscode.extension-test-runner",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "redhat.vscode-yaml"
     ]
 }

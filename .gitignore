@@ -1,4 +1,9 @@
 dist
 node_modules
 *.vsix
-res/runner.a
+venv/
+site/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+*.pyc

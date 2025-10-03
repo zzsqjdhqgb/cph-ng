@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
   pull_request:
@@ -20,17 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-      - name: Setup Node + PNPM
+        uses: ./.github/actions/setup-git
+      - name: Setup Node
         uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: '22'
-          pnpm-version: '10'
 
       - name: Lint
         run: pnpm lint
@@ -38,21 +29,37 @@ jobs:
       - name: Build
         run: pnpm package
 
-      - name: Comment linked issues (on push success)
+      - name: Comment Issues
         if: success() && github.event_name == 'push'
         uses: ./.github/actions/comment-linked-issues
 
-      - name: Upload build artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: extension-${{ github.run_id }}
           path: ./*.vsix
           if-no-files-found: error
 
-      - name: Generate build provenance
+      - name: Generate Provenance
         if:
           github.event_name == 'push' ||
           github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: ./*.vsix
+
+  docs:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: ./.github/actions/setup-git
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python
+
+      - name: Deploy Dev Docs
+        run: |
+          mike deploy --push --update-aliases dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

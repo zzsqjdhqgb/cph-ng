@@ -16,15 +16,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: ./.github/actions/setup-git
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
 
-      - name: Get version and pre-release
+      - name: Get Version
         id: version
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
@@ -47,19 +43,13 @@ jobs:
           echo "pre_release=$PRE_RELEASE" >> $GITHUB_OUTPUT
           echo "Versions match: $VERSION"
 
-      - name: Setup Node + PNPM
+      - name: Setup Node
         uses: ./.github/actions/setup-node-pnpm
-        with:
-          node-version: '22'
-          pnpm-version: '10'
 
-      - name: Create version branch and tag
+      - name: Create Branch and Tag
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           BRANCH_NAME="release/v${VERSION}"
-
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
 
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
@@ -67,10 +57,10 @@ jobs:
           git tag "v${VERSION}"
           git push origin "v${VERSION}"
 
-      - name: Package extension
+      - name: Package
         run: pnpm package
 
-      - name: Extract changelog for version
+      - name: Extract Changelog
         id: changelog
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -86,7 +76,7 @@ jobs:
           echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Publish to VS Code Marketplace
+      - name: Publish to Marketplace
         run: |
           if [ "${{ steps.version.outputs.pre_release }}" = "true" ]; then
             pnpm run publish --pre-release
@@ -96,7 +86,7 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
-      - name: Create GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
@@ -117,19 +107,37 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload build artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: extension-${{ steps.version.outputs.version }}
           path: ./*.vsix
           if-no-files-found: error
-
-      - name: Generate build provenance
+      - name: Generate Provenance
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: ./*.vsix
 
-      - name: Close waiting-for-release issues
+      - name: Setup Python
+        uses: ./.github/actions/setup-python
+      - name: Deploy Docs
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          PRE_RELEASE="${{ steps.version.outputs.pre_release }}"
+
+          MIKE_VERSION=$(echo $VERSION | sed -E 's/^([0-9]+\.[0-9]+)\..*$/\1/')
+
+          if [ "$PRE_RELEASE" = "false" ]; then
+            mike deploy --push --update-aliases "$MIKE_VERSION" "latest"
+            echo "Deployed version $MIKE_VERSION and alias latest"
+          else
+            mike deploy --push "$MIKE_VERSION"
+            echo "Deployed version $MIKE_VERSION only"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Close Issues
         if: success() && steps.version.outputs.pre_release != 'true'
         uses: ./.github/actions/close-waiting-issues
         env:

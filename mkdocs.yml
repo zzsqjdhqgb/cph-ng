@@ -1,0 +1,47 @@
+site_name: CPH NG
+site_url: https://cph-ng.langningchen.com
+theme:
+  name: material
+  palette:
+    - media: '(prefers-color-scheme)'
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  logo: assets/cph-ng.svg
+  features:
+    - content.action.edit
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - toc.integrate
+extra:
+  version:
+    provider: mike
+    alias: true
+repo_url: https://github.com/langningchen/cph-ng
+edit_uri: edit/main/docs/
+plugins:
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 简体中文
+          build: true
