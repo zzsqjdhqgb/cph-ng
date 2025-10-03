@@ -1,5 +1,14 @@
 site_name: CPH NG
 site_url: https://cph-ng.langningchen.com
+site_author: Hughpig
+site_description: A brief introduction for CPH NG, the next generation of CPH
+copyright: ©2025 CPH NG
+nav:
+  - Overview: index.md
+  - Quick Start: quickStart.md
+  - Modules: modules.md
+  - FAQ: faq.md
+  - About: about.md
 theme:
   name: material
   palette:
