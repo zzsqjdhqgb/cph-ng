@@ -56,6 +56,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Git
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "action@github.com"
+
       - name: Setup Python
         uses: ./.github/actions/setup-python
 
