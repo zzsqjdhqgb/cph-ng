@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://cph-ng.langningchen.com/dev/</loc>
+        <lastmod>2025-10-03</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://cph-ng.langningchen.com/dev/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://cph-ng.langningchen.com/devzh/"/>
+    </url>
+    <url>
+        <loc>https://cph-ng.langningchen.com/dev/zh/</loc>
+        <lastmod>2025-10-03</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://cph-ng.langningchen.com/dev/zh/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://cph-ng.langningchen.com/dev"/>
+    </url>
+</urlset>
