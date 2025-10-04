@@ -165,6 +165,12 @@ export class LangCpp extends Lang {
                 .map((result) => result.stderr.trim())
                 .filter((msg) => msg)
                 .join('\n\n');
+            if (results.some((res) => res.killed)) {
+                return {
+                    verdict: TCVerdicts.CE,
+                    msg: vscode.l10n.t('Compilation failed because of timeout'),
+                };
+            }
             if (results.some((res) => !!res.exitCode)) {
                 return { verdict: TCVerdicts.CE, msg: '' };
             }
