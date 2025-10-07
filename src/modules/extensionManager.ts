@@ -367,7 +367,7 @@ OS: ${release()}`;
                         if (!CphNg.problem && Settings.cphCapable.enabled) {
                             try {
                                 await access(
-                                    CphCapable.getProbByCpp(filePath),
+                                    CphCapable.getProbBySrc(filePath),
                                     constants.R_OK,
                                 );
                                 CphNg.canImport = true;

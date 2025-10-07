@@ -41,12 +41,12 @@ export interface CphProblem {
 export default class CphCapable {
     private static logger: Logger = new Logger('cphCapable');
 
-    public static getProbByCpp(cppFile: string): string {
-        this.logger.trace('getProbByCpp', { cppFile });
+    public static getProbBySrc(srcFile: string): string {
+        this.logger.trace('getProbBySrc', { srcFile });
         const probPath = join(
-            dirname(cppFile),
+            dirname(srcFile),
             '.cph',
-            `.${basename(cppFile)}_${MD5(cppFile).toString(enc.Hex)}.prob`,
+            `.${basename(srcFile)}_${MD5(srcFile).toString(enc.Hex)}.prob`,
         );
         this.logger.debug('Generated problem file path', { probPath });
         return probPath;

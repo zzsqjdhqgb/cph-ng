@@ -287,7 +287,7 @@ export default class CphNg {
                 );
                 return;
             }
-            const probFile = CphCapable.getProbByCpp(filePath);
+            const probFile = CphCapable.getProbBySrc(filePath);
             try {
                 await access(probFile, constants.R_OK);
                 const problem = await CphCapable.loadProblem(probFile);
@@ -319,9 +319,9 @@ export default class CphNg {
     public static async getProblem() {
         CphNg.emitProblemChange();
     }
-    public static async loadProblem(cppFile: string): Promise<void> {
-        CphNg.logger.trace('loadProblem', { cppFile });
-        CphNg.problem = await Problems.loadProblem(cppFile);
+    public static async loadProblem(srcFile: string): Promise<void> {
+        CphNg.logger.trace('loadProblem', { srcFile });
+        CphNg.problem = await Problems.loadProblem(srcFile);
     }
     public static async editProblemDetails(
         title: string,
@@ -381,18 +381,18 @@ export default class CphNg {
                     'utf-8',
                 );
             }
-            const cppFile = problem.src.path;
-            let cppData = await readFile(cppFile, 'utf-8');
-            const startIdx = cppData.indexOf(EMBEDDED_HEADER);
-            const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
+            const srcFile = problem.src.path;
+            let srcData = await readFile(srcFile, 'utf-8');
+            const startIdx = srcData.indexOf(EMBEDDED_HEADER);
+            const endIdx = srcData.indexOf(EMBEDDED_FOOTER);
             if (startIdx !== -1 && endIdx !== -1) {
-                cppData =
-                    cppData.substring(0, startIdx) +
-                    cppData.substring(endIdx + EMBEDDED_FOOTER.length);
+                srcData =
+                    srcData.substring(0, startIdx) +
+                    srcData.substring(endIdx + EMBEDDED_FOOTER.length);
             }
-            cppData = cppData.trim();
-            cppData += buildEmbeddedBlock(embeddedProblem);
-            await writeFile(cppFile, cppData);
+            srcData = srcData.trim();
+            srcData += buildEmbeddedBlock(embeddedProblem);
+            await writeFile(srcFile, srcData);
         } catch (e) {
             Io.error(
                 vscode.l10n.t('Failed to export problem: {msg}.', {
@@ -407,7 +407,7 @@ export default class CphNg {
             return;
         }
         const problem = CphNg._problem!;
-        const binPath = await Problems.getBinByCpp(problem.src.path);
+        const binPath = await Problems.getBinBySrc(problem.src.path);
         try {
             await access(binPath, constants.F_OK);
             await unlink(binPath);
@@ -488,20 +488,20 @@ export default class CphNg {
                     );
                     return;
                 }
-                const cppPath = problem.src.path;
+                const srcPath = problem.src.path;
                 const workspaceFolder = vscode.workspace.workspaceFolders
                     ? vscode.workspace.workspaceFolders[0].uri.fsPath
                     : '';
                 folderPath = renderTemplate(Settings.problem.unzipFolder, [
                     ['workspace', workspaceFolder],
-                    ['dirname', dirname(cppPath)],
+                    ['dirname', dirname(srcPath)],
                     [
                         'relativeDirname',
-                        relative(workspaceFolder, dirname(cppPath)),
+                        relative(workspaceFolder, dirname(srcPath)),
                     ],
-                    ['basename', basename(cppPath)],
-                    ['extname', extname(cppPath)],
-                    ['basenameNoExt', basename(cppPath, extname(cppPath))],
+                    ['basename', basename(srcPath)],
+                    ['extname', extname(srcPath)],
+                    ['basenameNoExt', basename(srcPath, extname(srcPath))],
                     ['zipDirname', dirname(zipPath)],
                     ['zipBasename', basename(zipPath)],
                     ['zipBasenameNoExt', basename(zipPath, extname(zipPath))],

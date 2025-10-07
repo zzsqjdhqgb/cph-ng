@@ -6,13 +6,13 @@ export const EMBEDDED_HEADER =
 export const EMBEDDED_FOOTER =
     '/////////////////////// CPH-NG DATA ENDS ///////////////////////';
 
-export function extractEmbedded(cppData: string): EmbeddedProblem | undefined {
-    const startIdx = cppData.indexOf(EMBEDDED_HEADER);
-    const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
+export function extractEmbedded(srcData: string): EmbeddedProblem | undefined {
+    const startIdx = srcData.indexOf(EMBEDDED_HEADER);
+    const endIdx = srcData.indexOf(EMBEDDED_FOOTER);
     if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
         return undefined;
     }
-    const payload = cppData
+    const payload = srcData
         .substring(startIdx + EMBEDDED_HEADER.length, endIdx)
         .replaceAll('\r', '')
         .replaceAll('\n', '')

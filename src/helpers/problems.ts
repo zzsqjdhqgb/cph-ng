@@ -35,17 +35,17 @@ import Logger from './logger';
 export default class Problems {
     private static logger: Logger = new Logger('problems');
 
-    public static async getBinByCpp(cppPath: string): Promise<string> {
+    public static async getBinBySrc(srcPath: string): Promise<string> {
         const workspaceFolder = vscode.workspace.workspaceFolders
             ? vscode.workspace.workspaceFolders[0].uri.fsPath
-            : dirname(cppPath);
+            : dirname(srcPath);
         const dir = renderTemplate(Settings.problem.problemFilePath, [
             ['workspace', workspaceFolder],
-            ['dirname', dirname(cppPath)],
-            ['relativeDirname', relative(workspaceFolder, dirname(cppPath))],
-            ['basename', basename(cppPath)],
-            ['extname', extname(cppPath)],
-            ['basenameNoExt', basename(cppPath, extname(cppPath))],
+            ['dirname', dirname(srcPath)],
+            ['relativeDirname', relative(workspaceFolder, dirname(srcPath))],
+            ['basename', basename(srcPath)],
+            ['extname', extname(srcPath)],
+            ['basenameNoExt', basename(srcPath, extname(srcPath))],
         ]);
         return dir;
     }
@@ -79,18 +79,18 @@ export default class Problems {
         } catch {}
     }
     private static async loadProblemFromEmbedded(
-        cppFile: string,
+        srcFile: string,
     ): Promise<Problem | undefined> {
         try {
-            const cppData = await readFile(cppFile, 'utf-8');
-            const embeddedProblem = extractEmbedded(cppData);
+            const srcData = await readFile(srcFile, 'utf-8');
+            const embeddedProblem = extractEmbedded(srcData);
             if (!embeddedProblem) {
-                const startIdx = cppData.indexOf(EMBEDDED_HEADER);
-                const endIdx = cppData.indexOf(EMBEDDED_FOOTER);
+                const startIdx = srcData.indexOf(EMBEDDED_HEADER);
+                const endIdx = srcData.indexOf(EMBEDDED_FOOTER);
                 if (startIdx !== -1 || endIdx !== -1) {
                     Io.warn(
                         vscode.l10n.t('Invalid embedded data in {file}.', {
-                            file: basename(cppFile),
+                            file: basename(srcFile),
                         }),
                     );
                 }
@@ -101,7 +101,7 @@ export default class Problems {
                     version,
                     name: embeddedProblem.name,
                     url: embeddedProblem.url,
-                    src: { path: cppFile },
+                    src: { path: srcFile },
                     tcs: embeddedProblem.tcs.map((embeddedTc) => ({
                         stdin: { useFile: false, data: embeddedTc.stdin },
                         answer: { useFile: false, data: embeddedTc.answer },
@@ -114,10 +114,10 @@ export default class Problems {
                 if (embeddedProblem.spjCode) {
                     problem.checker = {
                         path: join(
-                            dirname(cppFile),
-                            basename(cppFile, extname(cppFile)) +
+                            dirname(srcFile),
+                            basename(srcFile, extname(srcFile)) +
                                 '.spj' +
-                                extname(cppFile),
+                                extname(srcFile),
                         ),
                     };
                     await writeFile(
@@ -128,10 +128,10 @@ export default class Problems {
                 if (embeddedProblem.interactorCode) {
                     problem.interactor = {
                         path: join(
-                            dirname(cppFile),
-                            basename(cppFile, extname(cppFile)) +
+                            dirname(srcFile),
+                            basename(srcFile, extname(srcFile)) +
                                 '.int' +
-                                extname(cppFile),
+                                extname(srcFile),
                         ),
                     };
                     await writeFile(
@@ -145,7 +145,7 @@ export default class Problems {
                     vscode.l10n.t(
                         'Parse embedded data in file {file} failed: {msg}.',
                         {
-                            file: basename(cppFile),
+                            file: basename(srcFile),
                             msg: (e as Error).message,
                         },
                     ),
@@ -155,20 +155,20 @@ export default class Problems {
     }
 
     public static async loadProblem(
-        cppFile: string,
+        srcFile: string,
     ): Promise<Problem | undefined> {
-        Problems.logger.trace('loadProblem', { cppFile });
+        Problems.logger.trace('loadProblem', { srcFile });
         return (
             (await Problems.loadProblemFromBin(
-                await Problems.getBinByCpp(cppFile),
-            )) || (await Problems.loadProblemFromEmbedded(cppFile))
+                await Problems.getBinBySrc(srcFile),
+            )) || (await Problems.loadProblemFromEmbedded(srcFile))
         );
     }
 
     public static async saveProblem(problem: Problem): Promise<void> {
         Problems.logger.trace('saveProblem', { problem });
         try {
-            const binPath = await Problems.getBinByCpp(problem.src.path);
+            const binPath = await Problems.getBinBySrc(problem.src.path);
             Problems.logger.info('Saving problem', problem, 'to', binPath);
             await mkdir(dirname(binPath), { recursive: true });
             await writeFile(
