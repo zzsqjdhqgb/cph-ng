@@ -60,6 +60,10 @@ export interface RunTcMsg extends BaseMsg {
     idx: number;
     compile: boolean | null;
 }
+export interface ClearTcStatus extends BaseMsg {
+    type: 'clearTcStatus';
+    idx: number;
+}
 export type WebviewTcFileTypes = 'stdin' | 'answer';
 export interface ChooseTcFileMsg extends BaseMsg {
     type: 'chooseTcFile';
@@ -129,6 +133,7 @@ export type WebviewMsg =
     | AddTcMsg
     | LoadTcsMsg
     | RunTcMsg
+    | ClearTcStatus
     | ChooseTcFileMsg
     | UpdateTcMsg
     | CompareTcMsg

@@ -89,6 +89,10 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                     sx={{
                         '& > span': { margin: '0 !important' },
                     }}
+                    onContextMenu={(e) => {
+                        msg({ type: 'clearTcStatus', idx });
+                        e.preventDefault();
+                    }}
                 >
                     <CphFlex smallGap>
                         <CphFlex flex={1}>

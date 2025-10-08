@@ -33,6 +33,7 @@ import {
     AddTcMsg,
     ChooseSrcFileMsg,
     ChooseTcFileMsg,
+    ClearTcStatus,
     CompareTcMsg,
     DelProblemMsg,
     DelTcMsg,
@@ -256,6 +257,15 @@ export default class ProblemsManager {
         );
         tc.isExpand = isExpandVerdict(result.verdict);
         await beforeReturn();
+    }
+    public static async clearTcStatus(msg: ClearTcStatus) {
+        const bgProblem = await this.getBgProblem(msg.activePath);
+        if (!bgProblem) {
+            return;
+        }
+        bgProblem.problem.tcs[msg.idx].result = undefined;
+        await this.dataRefresh();
+        await this.saveIfIdle();
     }
 
     public static async runTcs(msg: RunTcsMsg): Promise<void> {

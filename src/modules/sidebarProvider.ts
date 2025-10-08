@@ -109,6 +109,8 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
                         await ProblemsManager.updateTc(msg);
                     } else if (msg.type === 'runTc') {
                         await ProblemsManager.runTc(msg);
+                    } else if (msg.type === 'clearTcStatus') {
+                        await ProblemsManager.clearTcStatus(msg);
                     } else if (msg.type === 'runTcs') {
                         await ProblemsManager.runTcs(msg);
                     } else if (msg.type === 'stopTcs') {
