@@ -25,13 +25,21 @@ export const setExtensionUri = (uri: vscode.Uri) => {
     extensionPath = uri.fsPath;
 };
 export const sidebarProvider = new SidebarProvider();
-export const getActivePath = () => {
-    const activeUri = vscode.window.activeTextEditor?.document.uri;
-    if (!activeUri || activeUri.scheme !== 'file') {
-        return undefined;
+
+let _activePath: string | undefined;
+export const setActivePath = (textEditor?: vscode.TextEditor) => {
+    if (!textEditor) {
+        _activePath = undefined;
+    } else {
+        const activeUri = textEditor.document.uri;
+        if (activeUri.scheme !== 'file') {
+            return;
+        }
+        _activePath = activeUri.fsPath;
     }
-    return activeUri.fsPath;
 };
+export const getActivePath = () => _activePath;
+
 export const waitUntil = async (check: () => boolean) => {
     return new Promise<void>((resolve, _reject) => {
         if (check()) {

@@ -72,9 +72,7 @@ export default class CphCapable {
         return problem;
     }
 
-    public static async loadProblem(
-        probFile: string,
-    ): Promise<Problem | undefined> {
+    public static async loadProblem(probFile: string): Promise<Problem | null> {
         this.logger.trace('loadProblem', { probFile });
         try {
             const problem = CphCapable.toProblem(
@@ -89,7 +87,7 @@ export default class CphCapable {
             return problem;
         } catch (e) {
             this.logger.error('Failed to load problem', e);
-            return undefined;
+            return null;
         }
     }
 

@@ -32,6 +32,7 @@ import SidebarProvider from '../modules/sidebarProvider';
 import {
     extensionPath,
     getActivePath,
+    setActivePath,
     setExtensionUri,
     sidebarProvider,
 } from '../utils/global';
@@ -117,10 +118,10 @@ export default class ExtensionManager {
             );
             context.subscriptions.push(
                 vscode.window.onDidChangeActiveTextEditor(
-                    debounce((e) => {
-                        console.log(Date.now(), e);
+                    debounce<(editor?: vscode.TextEditor) => void>((editor) => {
+                        setActivePath(editor);
                         sidebarProvider.event.emit('activePath', {
-                            activePath: e?.document.uri.fsPath,
+                            activePath: getActivePath(),
                         });
                         ProblemsManager.dataRefresh();
                         ProblemsManager.saveIfIdle();
@@ -274,6 +275,7 @@ OS: ${release()}`;
                 ),
             );
 
+            setActivePath(vscode.window.activeTextEditor);
             ProblemsManager.dataRefresh();
             ExtensionManager.logger.info(
                 'CPH-NG extension activated successfully',
