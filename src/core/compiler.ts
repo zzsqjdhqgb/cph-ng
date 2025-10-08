@@ -39,10 +39,11 @@ export class Compiler {
     private static async optionalCompile(
         file: FileWithHash,
         ac: AbortController,
+        compile: boolean | null,
     ): Promise<LangCompileResult> {
         const checkerLang = Langs.getLang(file.path, true);
         if (checkerLang) {
-            return await checkerLang.compile(file, ac, true);
+            return await checkerLang.compile(file, ac, compile);
         }
         return {
             verdict: TCVerdicts.UKE,
@@ -75,6 +76,7 @@ export class Compiler {
             const checkerResult = await this.optionalCompile(
                 problem.checker,
                 ac,
+                compile,
             );
             if (checkerResult.verdict !== TCVerdicts.UKE) {
                 return { ...checkerResult, data };
@@ -86,6 +88,7 @@ export class Compiler {
             const interactorResult = await this.optionalCompile(
                 problem.interactor,
                 ac,
+                compile,
             );
             if (interactorResult.verdict !== TCVerdicts.UKE) {
                 return { ...interactorResult, data };
@@ -109,6 +112,7 @@ export class Compiler {
             const generatorResult = await this.optionalCompile(
                 problem.bfCompare.generator,
                 ac,
+                compile,
             );
             if (generatorResult.verdict !== TCVerdicts.UKE) {
                 return { ...generatorResult, data };
@@ -117,6 +121,7 @@ export class Compiler {
             const bruteForceResult = await this.optionalCompile(
                 problem.bfCompare.bruteForce,
                 ac,
+                compile,
             );
             if (bruteForceResult.verdict !== TCVerdicts.UKE) {
                 return { ...bruteForceResult, data };
