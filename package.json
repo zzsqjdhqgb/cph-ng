@@ -3,6 +3,7 @@
     "displayName": "CPH NG",
     "description": "The next generation of CPH.",
     "version": "0.2.2",
+    "type": "module",
     "license": "AGPL-3.0-only",
     "publisher": "langningchen",
     "icon": "res/cph-ng.png",
@@ -31,10 +32,7 @@
         "*"
     ],
     "main": "./dist/extension.js",
-    "exports": {
-        "import": "./dist/extension.js",
-        "require": "./dist/extension.cjs"
-    },
+    "exports": "./dist/extension.js",
     "contributes": {
         "languageModelTools": [
             {

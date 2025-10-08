@@ -51,9 +51,9 @@ const extensionConfig = {
     output: {
         path: resolve(__dirname, 'dist'),
         filename: 'extension.js',
-        libraryTarget: 'commonjs2',
+        libraryTarget: 'module',
     },
-    externals: { vscode: 'commonjs vscode' },
+    externals: 'vscode',
     plugins: [
         {
             apply: (compiler) => {
@@ -76,6 +76,7 @@ const extensionConfig = {
             },
         },
     ],
+    experiments: { outputModule: true },
     ...shared,
 };
 
@@ -88,7 +89,7 @@ const webviewConfig = {
         filename: 'frontend.js',
         libraryTarget: 'window',
     },
-    externals: { vscode: 'vscode' },
+    externals: 'vscode',
     plugins: [
         new CopyPlugin({
             patterns: [{ from: 'src/webview/styles.css', to: 'styles.css' }],
