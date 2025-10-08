@@ -193,7 +193,11 @@ export class Runner {
             result.time = runResult.time;
             result.memory = runResult.memory;
             result.verdict = TCVerdicts.JGD;
-            if (tc.answer.useFile) {
+            if (
+                tc.answer.useFile ||
+                (Settings.runner.stdoutThreshold !== -1 &&
+                    runResult.stdout.length >= Settings.runner.stdoutThreshold)
+            ) {
                 result.stdout = {
                     useFile: true,
                     path: join(

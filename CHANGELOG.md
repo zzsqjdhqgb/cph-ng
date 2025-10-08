@@ -11,6 +11,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: remove embedded data save and load
 - **fix**: no ole when the output and answer are both empty
 - **feat**: add debounce for editor change event
+- **feat**: add stdoutThreshold configuration to control stdout output handling
 
 ## 0.2.2
 
