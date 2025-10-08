@@ -78,7 +78,10 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
         folderPath = renderTemplate(Settings.problem.unzipFolder, [
             ['workspace', workspacePath],
             ['dirname', dirname(srcPath)],
-            ['relativeDirname', relative(workspacePath, dirname(srcPath))],
+            [
+                'relativeDirname',
+                relative(workspacePath, dirname(srcPath)) || '.',
+            ],
             ['basename', basename(srcPath)],
             ['extname', extname(srcPath)],
             ['basenameNoExt', basename(srcPath, extname(srcPath))],

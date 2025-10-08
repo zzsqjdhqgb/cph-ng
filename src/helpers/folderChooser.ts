@@ -82,7 +82,10 @@ export default class FolderChooser {
             subfolders.map((subfolder) => ({
                 label: join(
                     subfolder.folder.name,
-                    relative(subfolder.folder.uri.fsPath, subfolder.uri.fsPath),
+                    relative(
+                        subfolder.folder.uri.fsPath,
+                        subfolder.uri.fsPath,
+                    ) || '.',
                 ),
                 details: subfolder.uri.fsPath,
             })),

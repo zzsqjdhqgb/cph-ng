@@ -40,7 +40,10 @@ export default class Problems {
         const dir = renderTemplate(Settings.problem.problemFilePath, [
             ['workspace', workspacePath],
             ['dirname', dirname(srcPath)],
-            ['relativeDirname', relative(workspacePath, dirname(srcPath))],
+            [
+                'relativeDirname',
+                relative(workspacePath, dirname(srcPath)) || '.',
+            ],
             ['basename', basename(srcPath)],
             ['extname', extname(srcPath)],
             ['basenameNoExt', basename(srcPath, extname(srcPath))],
