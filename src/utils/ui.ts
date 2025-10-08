@@ -23,7 +23,7 @@ import * as vscode from 'vscode';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Settings from '../modules/settings';
-import { WebviewSrcFileTypes } from '../webview/msgs';
+import { WebviewSrcFileTypes, WebviewTcFileTypes } from '../webview/msgs';
 import { exists } from './process';
 import { renderTemplate } from './strTemplate';
 import { TC } from './types';
@@ -184,7 +184,7 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
 };
 
 export const chooseTcFile = async (
-    option: 'stdin' | 'answer',
+    option: WebviewTcFileTypes,
 ): Promise<{ stdin?: string; answer?: string }> => {
     const isInput = option === 'stdin';
     const mainExt = isInput ? ['.in'] : ['.ans', '.out'];

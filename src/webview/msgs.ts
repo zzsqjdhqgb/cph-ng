@@ -60,10 +60,11 @@ export interface RunTcMsg extends BaseMsg {
     idx: number;
     compile: boolean | null;
 }
+export type WebviewTcFileTypes = 'stdin' | 'answer';
 export interface ChooseTcFileMsg extends BaseMsg {
     type: 'chooseTcFile';
     idx: number;
-    label: 'stdin' | 'answer';
+    label: WebviewTcFileTypes;
 }
 export interface UpdateTcMsg extends BaseMsg {
     type: 'updateTc';
@@ -77,7 +78,7 @@ export interface CompareTcMsg extends BaseMsg {
 export interface ToggleTcFileMsg extends BaseMsg {
     type: 'toggleTcFile';
     idx: number;
-    label: 'stdin' | 'answer';
+    label: WebviewTcFileTypes;
 }
 export interface DelTcMsg extends BaseMsg {
     type: 'delTc';
