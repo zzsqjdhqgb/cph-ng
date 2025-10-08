@@ -290,10 +290,10 @@ OS: ${release()}`;
         }
     }
 
-    public static deactivate() {
+    public static async deactivate() {
         ExtensionManager.logger.info('Deactivating CPH-NG extension');
         Companion.stopServer();
-        ProblemsManager.closeAll();
+        await ProblemsManager.closeAll();
         ExtensionManager.logger.info('CPH-NG extension deactivated');
     }
 }
