@@ -7,6 +7,9 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: ensure document is saved before proceeding with compilation
 - **fix**: add message for compilation timeout
 - **style**: rename confusing variable names
+- **refactor**: enable background running
+- **fix**: remove embedded data save and load
+- **fix**: no ole when the output and answer are both empty
 
 ## 0.2.2
 
