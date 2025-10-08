@@ -19,7 +19,7 @@ import EventEmitter from 'events';
 import * as vscode from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
-import { extensionUri } from '../utils/global';
+import { extensionUri, getActivePath, sidebarProvider } from '../utils/global';
 import { Problem } from '../utils/types';
 import * as msgs from '../webview/msgs';
 import CphNg from './cphNg';
@@ -88,91 +88,68 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
             async (msg: msgs.WebviewMsg) => {
                 this.logger.debug('Received message from webview', { msg });
                 try {
-                    switch (msg.type) {
-                        case 'createProblem':
-                            await CphNg.createProblem(msg.activePath);
-                            break;
-                        case 'importProblem':
-                            await CphNg.importProblem(msg.activePath);
-                            break;
-                        case 'getProblem':
-                            ProblemsManager.dataRefresh();
-                            break;
-                        case 'editProblemDetails':
-                            await ProblemsManager.editProblemDetails(msg);
-                            break;
-                        case 'delProblem':
-                            await ProblemsManager.delProblem(msg);
-                            break;
-                        case 'addTc':
-                            await ProblemsManager.addTc(msg);
-                            break;
-                        case 'loadTcs':
-                            await ProblemsManager.loadTcs(msg);
-                            break;
-                        case 'updateTc':
-                            await ProblemsManager.updateTc(msg);
-                            break;
-                        case 'runTc':
-                            await ProblemsManager.runTc(msg);
-                            break;
-                        case 'runTcs':
-                            await ProblemsManager.runTcs(msg);
-                            break;
-                        case 'stopTcs':
-                            await ProblemsManager.stopTcs(msg);
-                            break;
-                        case 'chooseTcFile':
-                            await ProblemsManager.chooseTcFile(msg);
-                            break;
-                        case 'compareTc':
-                            await ProblemsManager.compareTc(msg);
-                            break;
-                        case 'toggleTcFile':
-                            await ProblemsManager.toggleTcFile(msg);
-                            break;
-                        case 'delTc':
-                            await ProblemsManager.delTc(msg);
-                            break;
-                        case 'openFile':
-                            vscode.window.showTextDocument(
-                                await vscode.workspace.openTextDocument(
-                                    msg.path,
-                                ),
-                            );
-                            break;
-                        case 'chooseSrcFile':
-                            await ProblemsManager.chooseSrcFile(msg);
-                            break;
-                        case 'removeSrcFile':
-                            await ProblemsManager.removeSrcFile(msg);
-                            break;
-                        case 'startBfCompare':
-                            await ProblemsManager.startBfCompare(msg);
-                            break;
-                        case 'stopBfCompare':
-                            await ProblemsManager.stopBfCompare(msg);
-                            break;
-                        case 'submitToCodeforces':
-                            await ProblemsManager.submitToCodeforces(msg);
-                            break;
-                        case 'startChat':
-                            await vscode.commands.executeCommand(
-                                'workbench.action.chat.open',
-                                {
-                                    mode: 'agent',
-                                    query: '#cphNgRunTestCases ',
-                                    isPartialQuery: true,
-                                },
-                            );
-                            break;
-                        case 'openSettings':
-                            const openSettingsMsg = msg as msgs.OpenSettingsMsg;
-                            await vscode.commands.executeCommand(
-                                'workbench.action.openSettings',
-                                openSettingsMsg.item,
-                            );
-                            break;
+                    if (msg.type === 'init') {
+                        sidebarProvider.event.emit('activePath', {
+                            activePath: getActivePath(),
+                        });
+                        ProblemsManager.dataRefresh();
+                    } else if (msg.type === 'createProblem') {
+                        await CphNg.createProblem(msg.activePath);
+                    } else if (msg.type === 'importProblem') {
+                        await CphNg.importProblem(msg.activePath);
+                    } else if (msg.type === 'editProblemDetails') {
+                        await ProblemsManager.editProblemDetails(msg);
+                    } else if (msg.type === 'delProblem') {
+                        await ProblemsManager.delProblem(msg);
+                    } else if (msg.type === 'addTc') {
+                        await ProblemsManager.addTc(msg);
+                    } else if (msg.type === 'loadTcs') {
+                        await ProblemsManager.loadTcs(msg);
+                    } else if (msg.type === 'updateTc') {
+                        await ProblemsManager.updateTc(msg);
+                    } else if (msg.type === 'runTc') {
+                        await ProblemsManager.runTc(msg);
+                    } else if (msg.type === 'runTcs') {
+                        await ProblemsManager.runTcs(msg);
+                    } else if (msg.type === 'stopTcs') {
+                        await ProblemsManager.stopTcs(msg);
+                    } else if (msg.type === 'chooseTcFile') {
+                        await ProblemsManager.chooseTcFile(msg);
+                    } else if (msg.type === 'compareTc') {
+                        await ProblemsManager.compareTc(msg);
+                    } else if (msg.type === 'toggleTcFile') {
+                        await ProblemsManager.toggleTcFile(msg);
+                    } else if (msg.type === 'delTc') {
+                        await ProblemsManager.delTc(msg);
+                    } else if (msg.type === 'chooseSrcFile') {
+                        await ProblemsManager.chooseSrcFile(msg);
+                    } else if (msg.type === 'removeSrcFile') {
+                        await ProblemsManager.removeSrcFile(msg);
+                    } else if (msg.type === 'startBfCompare') {
+                        await ProblemsManager.startBfCompare(msg);
+                    } else if (msg.type === 'stopBfCompare') {
+                        await ProblemsManager.stopBfCompare(msg);
+                    } else if (msg.type === 'submitToCodeforces') {
+                        await ProblemsManager.submitToCodeforces(msg);
+                    } else if (msg.type === 'openFile') {
+                        vscode.window.showTextDocument(
+                            await vscode.workspace.openTextDocument(msg.path),
+                        );
+                    } else if (msg.type === 'startChat') {
+                        await vscode.commands.executeCommand(
+                            'workbench.action.chat.open',
+                            {
+                                mode: 'agent',
+                                query: '#cphNgRunTestCases ',
+                                isPartialQuery: true,
+                            },
+                        );
+                    } else if (msg.type === 'openSettings') {
+                        const openSettingsMsg = msg as msgs.OpenSettingsMsg;
+                        await vscode.commands.executeCommand(
+                            'workbench.action.openSettings',
+                            openSettingsMsg.item,
+                        );
                     }
                 } catch (e) {
                     Io.error(
@@ -180,7 +157,7 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
                             'Error occurred when handling message {msgType}: {msg}.',
                             {
                                 msgType: msg.type,
-                                msg: e as Error,
+                                msg: (e as Error).message,
                             },
                         ),
                     );

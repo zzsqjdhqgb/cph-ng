@@ -59,7 +59,7 @@ const App = () => {
                     break;
             }
         };
-        msg({ type: 'getProblem' });
+        msg({ type: 'init' });
     }, []);
 
     const theme = createTheme({

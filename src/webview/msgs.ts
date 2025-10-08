@@ -28,8 +28,8 @@ export interface CreateProblemMsg extends BaseMsg {
 export interface ImportProblemMsg extends BaseMsg {
     type: 'importProblem';
 }
-export interface GetProblemMsg extends BaseMsg {
-    type: 'getProblem';
+export interface InitMsg extends BaseMsg {
+    type: 'init';
 }
 export interface EditProblemDetailsMsg extends BaseMsg {
     type: 'editProblemDetails';
@@ -121,7 +121,7 @@ export interface OpenSettingsMsg extends BaseMsg {
 export type WebviewMsg =
     | CreateProblemMsg
     | ImportProblemMsg
-    | GetProblemMsg
+    | InitMsg
     | EditProblemDetailsMsg
     | DelProblemMsg
     | RunTcsMsg
