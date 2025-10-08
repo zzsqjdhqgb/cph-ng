@@ -5,9 +5,15 @@
  * Ensures all translation files have matching keys with actual usage in code
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
+import {
+    existsSync,
+    readdirSync,
+    readFileSync,
+    statSync,
+    writeFileSync,
+} from 'fs';
+import { extname, join } from 'path';
 
 // Colors for console output
 const colors = {
@@ -79,7 +85,7 @@ function log(message, color = 'reset') {
 
 function loadJsonFile(filePath) {
     try {
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = readFileSync(filePath, 'utf8');
         return JSON.parse(content);
     } catch (error) {
         throw new Error(`Failed to load ${filePath}: ${error.message}`);
@@ -148,7 +154,7 @@ function checkKeysOrder(obj, filePath) {
 
     if (hasChanges) {
         try {
-            fs.writeFileSync(
+            writeFileSync(
                 filePath,
                 JSON.stringify(sortedObj, null, 4) + '\n',
                 'utf8',
@@ -209,11 +215,11 @@ function findFilesRecursively(dir, extensions = []) {
 
     function walkDir(currentDir) {
         try {
-            const items = fs.readdirSync(currentDir);
+            const items = readdirSync(currentDir);
 
             for (const item of items) {
-                const fullPath = path.join(currentDir, item);
-                const stat = fs.statSync(fullPath);
+                const fullPath = join(currentDir, item);
+                const stat = statSync(fullPath);
 
                 if (stat.isDirectory()) {
                     // Skip node_modules and other common directories
@@ -223,7 +229,7 @@ function findFilesRecursively(dir, extensions = []) {
                         walkDir(fullPath);
                     }
                 } else if (stat.isFile()) {
-                    const ext = path.extname(fullPath).slice(1);
+                    const ext = extname(fullPath).slice(1);
                     if (extensions.length === 0 || extensions.includes(ext)) {
                         files.push(fullPath);
                     }
@@ -234,7 +240,7 @@ function findFilesRecursively(dir, extensions = []) {
         }
     }
 
-    if (fs.existsSync(dir)) {
+    if (existsSync(dir)) {
         walkDir(dir);
     }
 
@@ -251,7 +257,7 @@ function extractTranslationCalls(patterns) {
 
             for (const file of files) {
                 try {
-                    const content = fs.readFileSync(file, 'utf8');
+                    const content = readFileSync(file, 'utf8');
 
                     // Extract static keys
                     const matches = content.match(staticRegex);
@@ -308,7 +314,7 @@ function extractVSCodeL10nCalls() {
 function extractWebviewTranslationCalls() {
     return extractTranslationCalls([
         {
-            dir: path.join('src', 'webview'),
+            dir: join('src', 'webview'),
             exts: ['tsx', 'ts'],
             staticRegex: /\bt\s*\(\s*['"](.*?)['"]/g,
             dynamicRegex: /\bt\s*\(\s*(?!['"]).+?\)/g,
@@ -473,7 +479,4 @@ function main() {
     process.exit(0);
 }
 
-// Only run if executed as main script
-if (require.main === module) {
-    main();
-}
+main();

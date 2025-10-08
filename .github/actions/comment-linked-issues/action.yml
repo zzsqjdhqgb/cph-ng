@@ -8,6 +8,6 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
-          const path = require('path');
-          const run = require(path.join(process.env.GITHUB_WORKSPACE, '.github', 'actions', 'comment-linked-issues', 'index.js'));
+          const { join } = await import('path');
+          const { default: run } = await import(join(process.env.GITHUB_WORKSPACE, '.github', 'actions', 'comment-linked-issues', 'index.js'));
           await run({ github, context, core });

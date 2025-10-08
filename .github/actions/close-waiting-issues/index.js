@@ -6,7 +6,7 @@
 /**
  * @param {{ github: GitHubWithGraphQL; context: ActionsContext; core: Core }} deps
  */
-module.exports = async function run({ github, context, core }) {
+export default async function run({ github, context, core }) {
     try {
         const version = process.env.VERSION;
         if (!version) {
@@ -103,4 +103,4 @@ module.exports = async function run({ github, context, core }) {
     } catch (outerErr) {
         core.setFailed(`close-waiting-issues failed: ${outerErr.message}`);
     }
-};
+}

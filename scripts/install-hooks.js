@@ -5,8 +5,8 @@
  * This script installs the pre-commit hook for translation checking
  */
 
-const fs = require('fs');
-const path = require('path');
+import { chmodSync, copyFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 const colors = {
     red: '\x1b[31m',
@@ -28,7 +28,7 @@ function main() {
 
     try {
         // Check if we're in a git repository
-        if (!fs.existsSync('.git')) {
+        if (!existsSync('.git')) {
             log(
                 '❌ Not a git repository. Please run this script in the project root.',
                 'red',
@@ -38,25 +38,25 @@ function main() {
 
         // Ensure hooks directory exists
         const hooksDir = '.git/hooks';
-        if (!fs.existsSync(hooksDir)) {
-            fs.mkdirSync(hooksDir, { recursive: true });
+        if (!existsSync(hooksDir)) {
+            mkdirSync(hooksDir, { recursive: true });
             log(`📁 Created hooks directory: ${hooksDir}`, 'blue');
         }
 
         // Copy pre-commit hook
-        const preCommitSource = path.join('scripts', 'pre-commit');
-        const preCommitTarget = path.join(hooksDir, 'pre-commit');
+        const preCommitSource = join('scripts', 'pre-commit');
+        const preCommitTarget = join(hooksDir, 'pre-commit');
 
-        if (!fs.existsSync(preCommitSource)) {
+        if (!existsSync(preCommitSource)) {
             log(`✌ Source hook not found: ${preCommitSource}`, 'red');
             process.exit(1);
         }
 
-        fs.copyFileSync(preCommitSource, preCommitTarget);
+        copyFileSync(preCommitSource, preCommitTarget);
 
         // Make it executable (works on Unix-like systems)
         try {
-            fs.chmodSync(preCommitTarget, 0o755);
+            chmodSync(preCommitTarget, 0o755);
         } catch (error) {
             log(
                 `⚠️  Could not make hook executable: ${error.message}`,
@@ -72,13 +72,13 @@ function main() {
         log(`📍 Location: ${preCommitTarget}`, 'blue');
 
         // Copy commit-msg hook for commitlint
-        const commitMsgSource = path.join('scripts', 'commit-msg');
-        const commitMsgTarget = path.join(hooksDir, 'commit-msg');
+        const commitMsgSource = join('scripts', 'commit-msg');
+        const commitMsgTarget = join(hooksDir, 'commit-msg');
 
-        if (fs.existsSync(commitMsgSource)) {
-            fs.copyFileSync(commitMsgSource, commitMsgTarget);
+        if (existsSync(commitMsgSource)) {
+            copyFileSync(commitMsgSource, commitMsgTarget);
             try {
-                fs.chmodSync(commitMsgTarget, 0o755);
+                chmodSync(commitMsgTarget, 0o755);
             } catch (error) {
                 log(
                     `⚠️  Could not make commit-msg hook executable: ${error.message}`,
@@ -116,6 +116,4 @@ function main() {
     }
 }
 
-if (require.main === module) {
-    main();
-}
+main();
