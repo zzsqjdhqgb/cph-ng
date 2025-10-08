@@ -36,7 +36,7 @@ import {
 export class LangCpp extends Lang {
     private logger: Logger = new Logger('langCpp');
     public extensions = ['cpp', 'cc', 'cxx', 'c++'];
-    public async compile(
+    protected async _compile(
         src: FileWithHash,
         ac: AbortController,
         forceCompile: boolean | null,

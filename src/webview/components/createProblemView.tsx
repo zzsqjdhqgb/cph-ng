@@ -22,7 +22,7 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CreateProblemMsg, ImportProblemMsg } from '../msgs';
+import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import Tips from './tips';
 
@@ -56,9 +56,7 @@ const CreateProblemView = ({ canImport }: CreateProblemProps) => {
                                 variant={'contained'}
                                 endIcon={<InputIcon />}
                                 onClick={() => {
-                                    vscode.postMessage({
-                                        type: 'importProblem',
-                                    } satisfies ImportProblemMsg);
+                                    msg({ type: 'importProblem' });
                                 }}
                             >
                                 {t('createProblemView.importButton')}
@@ -69,9 +67,7 @@ const CreateProblemView = ({ canImport }: CreateProblemProps) => {
                             variant={canImport ? 'outlined' : 'contained'}
                             endIcon={<SendIcon />}
                             onClick={() => {
-                                vscode.postMessage({
-                                    type: 'createProblem',
-                                } as CreateProblemMsg);
+                                msg({ type: 'createProblem' });
                             }}
                         >
                             {t('createProblemView.createButton')}

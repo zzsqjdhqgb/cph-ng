@@ -20,13 +20,14 @@ import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
+import { ActivePathEvent, ProblemEvent } from '../modules/sidebarProvider';
 import { Problem } from '../utils/types';
 import ErrorBoundary from './components/base/errorBoundary';
 import CreateProblemView from './components/createProblemView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
-import { GetProblemMsg } from './msgs';
+import { msg } from './utils';
 
 i18n.use(initReactI18next).init({
     resources: {
@@ -43,20 +44,22 @@ const App = () => {
     const [startTime, setStartTime] = useState<number | undefined>();
     useEffect(() => {
         i18n.changeLanguage(language);
-        window.onmessage = (e) => {
+        window.onmessage = (
+            e: MessageEvent<ProblemEvent | ActivePathEvent>,
+        ) => {
             const msg = e.data;
             switch (msg.type) {
+                case 'activePath':
+                    window.activePath = msg.activePath;
+                    break;
                 case 'problem':
                     setProblem(msg.problem);
                     setCanImport(msg.canImport);
                     setStartTime(msg.startTime);
                     break;
-                default:
-                    console.error('Unknown message type:', msg.type);
-                    break;
             }
         };
-        vscode.postMessage({ type: 'getProblem' } as GetProblemMsg);
+        msg({ type: 'getProblem' });
     }, []);
 
     const theme = createTheme({

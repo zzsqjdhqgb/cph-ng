@@ -22,12 +22,13 @@ import * as vscode from 'vscode';
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
 import { ProcessResultHandler } from '../helpers/processResultHandler';
-import CphNg, { CompileResult } from '../modules/cphNg';
+import ProblemsManager from '../modules/problemsManager';
 import Settings from '../modules/settings';
 import Result, { assignResult } from '../utils/result';
 import { Problem, TC, TCIO, TCResult } from '../utils/types';
 import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
 import { Checker } from './checker';
+import { CompileResult } from './compiler';
 import { Lang } from './langs/lang';
 
 type RunnerResult = Result<undefined> & {
@@ -180,7 +181,7 @@ export class Runner {
     ) {
         try {
             result.verdict = TCVerdicts.JG;
-            CphNg.emitProblemChange();
+            ProblemsManager.dataRefresh();
 
             const runResult = await this.doRun(
                 await lang.runCommand(compileData.src.outputPath),
@@ -222,7 +223,7 @@ export class Runner {
                 result.stderr.useFile = false;
             }
             result.stderr = await write2TcIo(result.stderr, runResult.stderr);
-            CphNg.emitProblemChange();
+            ProblemsManager.dataRefresh();
 
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
@@ -231,7 +232,7 @@ export class Runner {
                 result.verdict = TCVerdicts.MLE;
             } else {
                 result.verdict = TCVerdicts.CMP;
-                CphNg.emitProblemChange();
+                ProblemsManager.dataRefresh();
                 assignResult(
                     result,
                     compileData.checker
@@ -247,13 +248,13 @@ export class Runner {
                           ),
                 );
             }
-            CphNg.emitProblemChange();
+            ProblemsManager.dataRefresh();
         } catch (e) {
             assignResult(result, {
                 verdict: TCVerdicts.SE,
                 msg: (e as Error).message,
             });
-            CphNg.emitProblemChange();
+            ProblemsManager.dataRefresh();
         }
     }
 }

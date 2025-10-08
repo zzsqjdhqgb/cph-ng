@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import * as vscode from 'vscode';
-import CphNg from '../modules/cphNg';
+import ProblemsManager from '../modules/problemsManager';
+import { getActivePath } from '../utils/global';
 import { TCIO } from '../utils/types';
 
 interface LlmFileReaderParams {
@@ -40,7 +41,9 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
         const { fileType, idx } = options.input;
         const result = new vscode.LanguageModelToolResult([]);
 
-        if (!CphNg.checkProblem()) {
+        const activePath = getActivePath();
+        const bgProblem = await ProblemsManager.getBgProblem(activePath);
+        if (!bgProblem || !bgProblem.problem) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
                     vscode.l10n.t(
@@ -51,11 +54,11 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
             return result;
         }
 
-        const problem = CphNg.problem!;
+        const problem = bgProblem.problem;
         let tcIo: TCIO | undefined;
 
         if (idx) {
-            if (!CphNg.checkIdx(idx - 1)) {
+            if (idx - 1 < 0 || idx - 1 >= problem.tcs.length) {
                 result.content.push(
                     new vscode.LanguageModelTextPart(
                         vscode.l10n.t(

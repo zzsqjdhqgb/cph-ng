@@ -25,8 +25,7 @@ import Problems from '../helpers/problems';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types';
 import CphCapable, { CphProblem } from './cphCapable';
-import CphNg from './cphNg';
-import ExtensionManager from './extensionManager';
+import ProblemsManager from './problemsManager';
 import Settings from './settings';
 
 type OnCreateProblem = (
@@ -102,8 +101,8 @@ class Companion {
         Companion.server.listen(Settings.companion.listenPort);
     }
 
-    public static dispose() {
-        Companion.logger.trace('dispose');
+    public static stopServer() {
+        Companion.logger.trace('stopServer');
         Companion.server.close();
     }
 
@@ -165,13 +164,12 @@ class Companion {
             Companion.logger.info('Opened document', {
                 document: document.fileName,
             });
-            CphNg.problem = problem;
             await Problems.saveProblem(problem);
             await vscode.window.showTextDocument(
                 document,
                 Settings.companion.showPanel,
             );
-            ExtensionManager.updateContext();
+            ProblemsManager.dataRefresh();
         } catch (e) {
             Companion.logger.warn('Parse data from companion failed', e);
             Io.warn(

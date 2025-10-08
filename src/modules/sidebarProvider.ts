@@ -15,35 +15,54 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants } from 'fs/promises';
+import EventEmitter from 'events';
 import * as vscode from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { extensionUri } from '../utils/global';
+import { Problem } from '../utils/types';
 import * as msgs from '../webview/msgs';
-import Companion from './companion';
 import CphNg from './cphNg';
+import ProblemsManager from './problemsManager';
 import Settings from './settings';
+
+export interface ProblemEventData {
+    canImport: boolean;
+    problem?: Problem;
+    startTime?: number;
+}
+export interface ProblemEvent extends ProblemEventData {
+    type: 'problem';
+}
+export interface ActivePathEventData {
+    activePath?: string;
+}
+export interface ActivePathEvent extends ActivePathEventData {
+    type: 'activePath';
+}
 
 export default class SidebarProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'cphNgSidebar';
     private _view?: vscode.WebviewView;
     private logger: Logger = new Logger('sidebar');
+    public event: EventEmitter<{
+        problem: ProblemEventData[];
+        activePath: ActivePathEventData[];
+    }> = new EventEmitter();
 
     constructor() {
         this.logger.trace('constructor');
-        CphNg.addProblemChangeListener((problem, canImport, startTime) => {
-            this.logger.debug('Problem change listener triggered', {
-                problem,
-                canImport,
-                startTime,
-            });
+        this.event.on('problem', (problem) => {
             this._view?.webview.postMessage({
                 type: 'problem',
-                problem,
-                canImport,
-                startTime,
-            });
+                ...problem,
+            } satisfies ProblemEvent);
+        });
+        this.event.on('activePath', (problem) => {
+            this._view?.webview.postMessage({
+                type: 'activePath',
+                ...problem,
+            } satisfies ActivePathEvent);
         });
     }
 
@@ -65,145 +84,113 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(async (msg) => {
-            this.logger.debug('Received message from webview', { msg });
-            try {
-                switch (msg.type) {
-                    case 'createProblem':
-                        await CphNg.createProblem();
-                        break;
-                    case 'importProblem':
-                        await CphNg.importProblem();
-                        break;
-                    case 'getProblem':
-                        await CphNg.getProblem();
-                        break;
-                    case 'editProblemDetails':
-                        const editProblemDetailsMsg =
-                            msg as msgs.EditProblemDetailsMsg;
-                        await CphNg.editProblemDetails(
-                            editProblemDetailsMsg.title,
-                            editProblemDetailsMsg.url,
-                            editProblemDetailsMsg.timeLimit,
-                            editProblemDetailsMsg.memoryLimit,
-                        );
-                        break;
-                    case 'delProblem':
-                        await CphNg.delProblem();
-                        break;
-                    case 'addTc':
-                        await CphNg.addTc();
-                        break;
-                    case 'loadTcs':
-                        await CphNg.loadTcs();
-                        break;
-                    case 'updateTc':
-                        const updateTcMsg = msg as msgs.UpdateTcMsg;
-                        await CphNg.updateTc(updateTcMsg.idx, updateTcMsg.tc);
-                        break;
-                    case 'runTc':
-                        const runTcMsg = msg as msgs.RunTcMsg;
-                        await CphNg.runTc(runTcMsg.idx, runTcMsg.compile);
-                        break;
-                    case 'runTcs':
-                        const runTcsMsg = msg as msgs.RunTcsMsg;
-                        await CphNg.runTcs(runTcsMsg.compile);
-                        break;
-                    case 'stopTcs':
-                        const stopTcsMsg = msg as msgs.StopTcsMsg;
-                        await CphNg.stopTcs(stopTcsMsg.onlyOne);
-                        break;
-                    case 'chooseTcFile':
-                        const chooseTcFileMsg = msg as msgs.ChooseTcFileMsg;
-                        await CphNg.chooseTcFile(
-                            chooseTcFileMsg.idx,
-                            chooseTcFileMsg.label,
-                        );
-                        break;
-                    case 'compareTc':
-                        const compareTcMsg = msg as msgs.CompareTcMsg;
-                        CphNg.compareTc(compareTcMsg.idx);
-                        break;
-                    case 'toggleTcFile':
-                        const toggleTcFileMsg = msg as msgs.ToggleTcFileMsg;
-                        CphNg.toggleTcFile(
-                            toggleTcFileMsg.idx,
-                            toggleTcFileMsg.label,
-                        );
-                        break;
-                    case 'delTc':
-                        const delTcMsg = msg as msgs.DelTcMsg;
-                        await CphNg.delTc(delTcMsg.idx);
-                        break;
-                    case 'openFile':
-                        const openFileMsg = msg as msgs.OpenFileMsg;
-                        try {
-                            await access(openFileMsg.path, constants.R_OK);
+        webviewView.webview.onDidReceiveMessage(
+            async (msg: msgs.WebviewMsg) => {
+                this.logger.debug('Received message from webview', { msg });
+                try {
+                    switch (msg.type) {
+                        case 'createProblem':
+                            await CphNg.createProblem(msg.activePath);
+                            break;
+                        case 'importProblem':
+                            await CphNg.importProblem(msg.activePath);
+                            break;
+                        case 'getProblem':
+                            ProblemsManager.dataRefresh();
+                            break;
+                        case 'editProblemDetails':
+                            await ProblemsManager.editProblemDetails(msg);
+                            break;
+                        case 'delProblem':
+                            await ProblemsManager.delProblem(msg);
+                            break;
+                        case 'addTc':
+                            await ProblemsManager.addTc(msg);
+                            break;
+                        case 'loadTcs':
+                            await ProblemsManager.loadTcs(msg);
+                            break;
+                        case 'updateTc':
+                            await ProblemsManager.updateTc(msg);
+                            break;
+                        case 'runTc':
+                            await ProblemsManager.runTc(msg);
+                            break;
+                        case 'runTcs':
+                            await ProblemsManager.runTcs(msg);
+                            break;
+                        case 'stopTcs':
+                            await ProblemsManager.stopTcs(msg);
+                            break;
+                        case 'chooseTcFile':
+                            await ProblemsManager.chooseTcFile(msg);
+                            break;
+                        case 'compareTc':
+                            await ProblemsManager.compareTc(msg);
+                            break;
+                        case 'toggleTcFile':
+                            await ProblemsManager.toggleTcFile(msg);
+                            break;
+                        case 'delTc':
+                            await ProblemsManager.delTc(msg);
+                            break;
+                        case 'openFile':
                             vscode.window.showTextDocument(
                                 await vscode.workspace.openTextDocument(
-                                    openFileMsg.path,
+                                    msg.path,
                                 ),
                             );
-                        } catch {
-                            vscode.l10n.t('File {file} does not exists.', {
-                                file: openFileMsg.path,
-                            });
-                        }
-                        break;
-                    case 'chooseFile':
-                        const chooseFileMsg = msg as msgs.ChooseFileMsg;
-                        await CphNg.chooseFile(chooseFileMsg.file);
-                        break;
-                    case 'removeFile':
-                        const removeFileMsg = msg as msgs.RemoveFileMsg;
-                        await CphNg.removeFile(removeFileMsg.file);
-                        break;
-                    case 'startBfCompare':
-                        const startBfCompareMsg = msg as msgs.StartBfCompareMsg;
-                        await CphNg.startBfCompare(startBfCompareMsg.compile);
-                        break;
-                    case 'stopBfCompare':
-                        await CphNg.stopBfCompare();
-                        break;
-                    case 'submitToCodeforces':
-                        await Companion.submit(CphNg.problem);
-                        break;
-                    case 'startChat':
-                        await vscode.commands.executeCommand(
-                            'workbench.action.chat.open',
+                            break;
+                        case 'chooseSrcFile':
+                            await ProblemsManager.chooseSrcFile(msg);
+                            break;
+                        case 'removeSrcFile':
+                            await ProblemsManager.removeSrcFile(msg);
+                            break;
+                        case 'startBfCompare':
+                            await ProblemsManager.startBfCompare(msg);
+                            break;
+                        case 'stopBfCompare':
+                            await ProblemsManager.stopBfCompare(msg);
+                            break;
+                        case 'submitToCodeforces':
+                            await ProblemsManager.submitToCodeforces(msg);
+                            break;
+                        case 'startChat':
+                            await vscode.commands.executeCommand(
+                                'workbench.action.chat.open',
+                                {
+                                    mode: 'agent',
+                                    query: '#cphNgRunTestCases ',
+                                    isPartialQuery: true,
+                                },
+                            );
+                            break;
+                        case 'openSettings':
+                            const openSettingsMsg = msg as msgs.OpenSettingsMsg;
+                            await vscode.commands.executeCommand(
+                                'workbench.action.openSettings',
+                                openSettingsMsg.item,
+                            );
+                            break;
+                    }
+                } catch (e) {
+                    Io.error(
+                        vscode.l10n.t(
+                            'Error occurred when handling message {msgType}: {msg}.',
                             {
-                                mode: 'agent',
-                                query: '#cphNgRunTestCases ',
-                                isPartialQuery: true,
+                                msgType: msg.type,
+                                msg: e as Error,
                             },
-                        );
-                        break;
-                    case 'openSettings':
-                        const openSettingsMsg = msg as msgs.OpenSettingsMsg;
-                        await vscode.commands.executeCommand(
-                            'workbench.action.openSettings',
-                            openSettingsMsg.item,
-                        );
-                        break;
-                    default:
-                        this.logger.warn('Unknown message type:', msg.type);
+                        ),
+                    );
+                    this.logger.error('Error handling webview message', {
+                        msgType: msg.type,
+                        msg: e as Error,
+                    });
                 }
-            } catch (e) {
-                Io.error(
-                    vscode.l10n.t(
-                        'Error occurred when handling message {msgType}: {msg}.',
-                        {
-                            msgType: msg.type,
-                            msg: e as Error,
-                        },
-                    ),
-                );
-                this.logger.error('Error handling webview message', {
-                    msgType: msg.type,
-                    msg: e as Error,
-                });
-            }
-        });
+            },
+        );
     }
 
     public refresh() {

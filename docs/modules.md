@@ -79,17 +79,6 @@ A confirmation dialog will appear before the problem is permanently removed.
 
 ![](images/deleteProblem.png)
 
-## Export test data embedded
-
-CPH-NG support embedding the test data within comments.
-
-You can search for the command `CPH-NG: Export to Embedded`. All associated test
-data will be exported in a zipped format and inserted into your active file.
-
-![](images/exportToEmbedded.png)
-
-![](images/exportedToEmbedded.png)
-
 ## Load test data from embedded
 
 Similarly, if your file already contains embedded test data (exported

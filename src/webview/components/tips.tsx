@@ -23,7 +23,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OpenSettingsMsg, StartChatMsg } from '../msgs';
+import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphText from './base/cphText';
 import CphButton from './cphButton';
@@ -41,34 +41,30 @@ const Tips = () => {
         { msg: t('tipMessage3') },
         {
             msg: t('tipMessage4'),
-            action: () =>
-                vscode.postMessage({ type: 'startChat' } as StartChatMsg),
+            action: () => msg({ type: 'startChat' }),
         },
         { msg: t('tipMessage5') },
         {
             msg: t('tipMessage6'),
             action: () =>
-                vscode.postMessage({
-                    type: 'openSettings',
-                    item: 'cph-ng.sidebar.showAcGif',
-                } satisfies OpenSettingsMsg),
+                msg({ type: 'openSettings', item: 'cph-ng.sidebar.showAcGif' }),
         },
         {
             msg: t('tipMessage7'),
             action: () =>
-                vscode.postMessage({
+                msg({
                     type: 'openSettings',
                     item: 'cph-ng.sidebar.hiddenStatuses',
-                } satisfies OpenSettingsMsg),
+                }),
         },
         { msg: t('tipMessage8') },
         {
             msg: t('tipMessage9'),
             action: () =>
-                vscode.postMessage({
+                msg({
                     type: 'openSettings',
                     item: 'cph-ng.compilation.useWrapper',
-                } satisfies OpenSettingsMsg),
+                }),
         },
     ];
     const [idx, setIdx] = useState(

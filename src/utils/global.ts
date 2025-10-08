@@ -16,10 +16,32 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
+import SidebarProvider from '../modules/sidebarProvider';
 
 export let extensionUri: vscode.Uri;
 export let extensionPath: string;
 export const setExtensionUri = (uri: vscode.Uri) => {
     extensionUri = uri;
     extensionPath = uri.fsPath;
+};
+export const sidebarProvider = new SidebarProvider();
+export const getActivePath = () => {
+    const activeUri = vscode.window.activeTextEditor?.document.uri;
+    if (!activeUri || activeUri.scheme !== 'file') {
+        return undefined;
+    }
+    return activeUri.fsPath;
+};
+export const waitUntil = async (check: () => boolean) => {
+    return new Promise<void>((resolve, _reject) => {
+        if (check()) {
+            resolve();
+        }
+        const intervalId = setInterval(() => {
+            if (check()) {
+                clearInterval(intervalId);
+                resolve();
+            }
+        }, 50);
+    });
 };

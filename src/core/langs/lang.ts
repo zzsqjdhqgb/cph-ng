@@ -17,9 +17,11 @@
 
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
+import * as vscode from 'vscode';
 import Logger from '../../helpers/logger';
 import ProcessExecutor from '../../helpers/processExecutor';
-import { exists } from '../../utils/exec';
+import { waitUntil } from '../../utils/global';
+import { exists } from '../../utils/process';
 import Result from '../../utils/result';
 import { FileWithHash } from '../../utils/types';
 
@@ -78,6 +80,21 @@ export class Lang {
     }
     public extensions: string[] = [];
     public async compile(
+        src: FileWithHash,
+        ac: AbortController,
+        forceCompile: boolean | null,
+        additionalData: CompileAdditionalData = DefaultCompileAdditionalData,
+    ): Promise<LangCompileResult> {
+        const editor = vscode.window.visibleTextEditors.find(
+            (editor) => editor.document.fileName === src.path,
+        );
+        if (editor) {
+            await editor.document.save();
+            await waitUntil(() => !editor.document.isDirty);
+        }
+        return this._compile(src, ac, forceCompile, additionalData);
+    }
+    protected async _compile(
         _src: FileWithHash,
         _ac: AbortController,
         _forceCompile: boolean | null,

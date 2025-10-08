@@ -15,32 +15,55 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, mkdir, readFile, rm } from 'fs/promises';
+import { mkdir, readFile, rm } from 'fs/promises';
 import { release } from 'os';
 import { join } from 'path';
+import { EventEmitter } from 'stream';
 import * as vscode from 'vscode';
 import { version } from '../../package.json';
 import LlmFileReader from '../ai/llmFileReader';
 import LlmTcRunner from '../ai/llmTcRunner';
-import Langs from '../core/langs/langs';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Companion from '../modules/companion';
 import CphCapable from '../modules/cphCapable';
 import SidebarProvider from '../modules/sidebarProvider';
-import { extensionPath, setExtensionUri } from '../utils/global';
-import { isRunningVerdict } from '../utils/types';
+import {
+    extensionPath,
+    getActivePath,
+    setExtensionUri,
+    sidebarProvider,
+} from '../utils/global';
 import CphNg from './cphNg';
+import ProblemsManager from './problemsManager';
 import Settings from './settings';
+
+interface ContextEvent {
+    hasProblem: boolean;
+    canImport: boolean;
+    isRunning: boolean;
+}
 
 export default class ExtensionManager {
     private static logger: Logger = new Logger('extension');
-    private static fileTimer: NodeJS.Timeout;
     private static compatibleTimer: NodeJS.Timeout;
+    public static event: EventEmitter<{
+        context: ContextEvent[];
+    }> = new EventEmitter();
 
     public static async activate(context: vscode.ExtensionContext) {
         ExtensionManager.logger.info('Activating CPH-NG extension');
         try {
+            ExtensionManager.event.on('context', (context) => {
+                for (const [key, value] of Object.entries(context)) {
+                    vscode.commands.executeCommand(
+                        'setContext',
+                        `cph-ng.${key}`,
+                        value,
+                    );
+                }
+            });
+
             setExtensionUri(context.extensionUri);
             if (Settings.cache.cleanOnStartup) {
                 ExtensionManager.logger.info('Cleaning cache on startup');
@@ -69,12 +92,7 @@ export default class ExtensionManager {
             );
 
             Companion.init();
-            CphNg.addProblemChangeListener(() => {
-                ExtensionManager.logger.trace('Problem change detected');
-                ExtensionManager.updateContext();
-            });
 
-            const sidebarProvider = new SidebarProvider();
             context.subscriptions.push(
                 vscode.window.registerWebviewViewProvider(
                     SidebarProvider.viewType,
@@ -97,18 +115,14 @@ export default class ExtensionManager {
                 ),
             );
             context.subscriptions.push(
-                vscode.window.onDidChangeActiveTextEditor(() => {
-                    ExtensionManager.checkActiveFile();
+                vscode.window.onDidChangeActiveTextEditor((e) => {
+                    sidebarProvider.event.emit('activePath', {
+                        activePath: e?.document.uri.fsPath,
+                    });
+                    ProblemsManager.dataRefresh();
+                    ProblemsManager.saveIfIdle();
                 }),
             );
-
-            ExtensionManager.fileTimer = setInterval(
-                () => ExtensionManager.checkActiveFile(),
-                1000,
-            );
-            context.subscriptions.push({
-                dispose: () => clearInterval(ExtensionManager.fileTimer),
-            });
 
             let lastAlertTime = 0;
             ExtensionManager.compatibleTimer = setInterval(async () => {
@@ -190,7 +204,11 @@ OS: ${release()}`;
                     'cph-ng.runTestCases',
                     async () => {
                         sidebarProvider.focus();
-                        await CphNg.runTcs(null);
+                        await ProblemsManager.runTcs({
+                            type: 'runTcs',
+                            compile: null,
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
@@ -199,7 +217,11 @@ OS: ${release()}`;
                     'cph-ng.stopTestCases',
                     async () => {
                         sidebarProvider.focus();
-                        await CphNg.stopTcs(false);
+                        await ProblemsManager.stopTcs({
+                            type: 'stopTcs',
+                            onlyOne: false,
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
@@ -207,7 +229,10 @@ OS: ${release()}`;
                 vscode.commands.registerCommand(
                     'cph-ng.addTestCase',
                     async () => {
-                        await CphNg.addTc();
+                        await ProblemsManager.addTc({
+                            type: 'addTc',
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
@@ -215,7 +240,10 @@ OS: ${release()}`;
                 vscode.commands.registerCommand(
                     'cph-ng.loadTestCases',
                     async () => {
-                        await CphNg.loadTcs();
+                        await ProblemsManager.loadTcs({
+                            type: 'loadTcs',
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
@@ -223,7 +251,10 @@ OS: ${release()}`;
                 vscode.commands.registerCommand(
                     'cph-ng.deleteProblem',
                     async () => {
-                        await CphNg.delProblem();
+                        await ProblemsManager.delProblem({
+                            type: 'delProblem',
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
@@ -231,20 +262,15 @@ OS: ${release()}`;
                 vscode.commands.registerCommand(
                     'cph-ng.submitToCodeforces',
                     async () => {
-                        await Companion.submit(CphNg.problem);
-                    },
-                ),
-            );
-            context.subscriptions.push(
-                vscode.commands.registerCommand(
-                    'cph-ng.exportToEmbedded',
-                    async () => {
-                        await CphNg.exportToEmbedded();
+                        await ProblemsManager.submitToCodeforces({
+                            type: 'submitToCodeforces',
+                            activePath: getActivePath(),
+                        });
                     },
                 ),
             );
 
-            ExtensionManager.updateContext();
+            ProblemsManager.dataRefresh();
             ExtensionManager.logger.info(
                 'CPH-NG extension activated successfully',
             );
@@ -260,137 +286,8 @@ OS: ${release()}`;
 
     public static deactivate() {
         ExtensionManager.logger.info('Deactivating CPH-NG extension');
-        Companion.dispose();
+        Companion.stopServer();
+        ProblemsManager.closeAll();
         ExtensionManager.logger.info('CPH-NG extension deactivated');
-    }
-
-    public static updateContext() {
-        ExtensionManager.logger.trace('updateContext');
-        const hasProblem = !!CphNg.problem;
-        const canImport = CphNg.canImport;
-        const isRunning =
-            CphNg.problem?.tcs.some((tc) =>
-                isRunningVerdict(tc.result?.verdict),
-            ) || false;
-
-        ExtensionManager.logger.debug('Context update', {
-            hasProblem,
-            canImport,
-            isRunning,
-        });
-        vscode.commands.executeCommand(
-            'setContext',
-            'cph-ng.hasProblem',
-            hasProblem,
-        );
-        vscode.commands.executeCommand(
-            'setContext',
-            'cph-ng.canImport',
-            canImport,
-        );
-        vscode.commands.executeCommand(
-            'setContext',
-            'cph-ng.isRunning',
-            isRunning,
-        );
-    }
-
-    private static async checkActiveFile() {
-        ExtensionManager.logger.trace('checkActiveFile');
-        try {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                CphNg.problem = undefined;
-                CphNg.canImport = false;
-                ExtensionManager.updateContext();
-                return;
-            }
-            if (editor.document.uri.scheme !== 'file') {
-                return;
-            }
-
-            const filePath = editor.document.fileName;
-            if (filePath.startsWith(Settings.cache.directory)) {
-                ExtensionManager.logger.debug('Cache directory is active', {
-                    filePath,
-                });
-            } else if (
-                CphNg.problem?.tcs
-                    .flatMap((tc) =>
-                        [
-                            tc.stdin.useFile ? [tc.stdin.path] : [],
-                            tc.answer.useFile ? [tc.answer.path] : [],
-                            tc.result?.stdout.useFile
-                                ? [tc.result.stdout.path]
-                                : [],
-                            tc.result?.stderr.useFile
-                                ? [tc.result.stderr.path]
-                                : [],
-                        ].flat(),
-                    )
-                    .includes(filePath)
-            ) {
-                ExtensionManager.logger.debug('Test case file is active', {
-                    filePath,
-                });
-            } else if (CphNg.problem?.checker?.path === filePath) {
-                ExtensionManager.logger.debug('Checker file is active', {
-                    filePath,
-                });
-            } else if (CphNg.problem?.interactor?.path === filePath) {
-                ExtensionManager.logger.debug('Interactor file is active', {
-                    filePath,
-                });
-            } else if (
-                CphNg.problem?.bfCompare?.bruteForce?.path === filePath
-            ) {
-                ExtensionManager.logger.debug('Brute force file is active', {
-                    filePath,
-                });
-            } else if (CphNg.problem?.bfCompare?.generator?.path === filePath) {
-                ExtensionManager.logger.debug('Generator file is active', {
-                    filePath,
-                });
-            } else if (Langs.getLang(filePath, true) !== undefined) {
-                ExtensionManager.logger.debug('Source file is active', {
-                    filePath,
-                });
-                if (CphNg.problem?.src.path !== filePath) {
-                    ExtensionManager.logger.trace(
-                        'Last source file',
-                        CphNg.problem?.src.path,
-                        'is not the current file',
-                        { filePath },
-                    );
-                    await CphNg.loadProblem(filePath);
-                    if (CphNg.problem === undefined) {
-                        if (!CphNg.problem && Settings.cphCapable.enabled) {
-                            try {
-                                await access(
-                                    CphCapable.getProbBySrc(filePath),
-                                    constants.R_OK,
-                                );
-                                CphNg.canImport = true;
-                            } catch {
-                                CphNg.canImport = false;
-                            }
-                        } else {
-                            CphNg.canImport = false;
-                        }
-                        ExtensionManager.updateContext();
-                    }
-                }
-            } else {
-                CphNg.problem = undefined;
-                CphNg.canImport = false;
-                ExtensionManager.updateContext();
-            }
-        } catch (e) {
-            Io.error(
-                vscode.l10n.t('Error in checkActiveFile: {msg}', {
-                    msg: (e as Error).message,
-                }),
-            );
-        }
     }
 }

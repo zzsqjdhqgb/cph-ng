@@ -29,13 +29,7 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
-import {
-    ChooseFileMsg,
-    EditProblemDetailsMsg,
-    OpenFileMsg,
-    RemoveFileMsg,
-} from '../msgs';
-import { basename } from '../utils';
+import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
@@ -88,13 +82,13 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
 
     const handleEditDialogClose = () => {
         setEditDialogOpen(false);
-        vscode.postMessage({
+        msg({
             type: 'editProblemDetails',
             title: editedTitle,
             url: editedUrl,
             timeLimit: editedTimeLimit,
             memoryLimit: editedMemoryLimit,
-        } satisfies EditProblemDetailsMsg);
+        });
     };
 
     return (
@@ -143,10 +137,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphLink
                                     name={problem.checker.path!}
                                     onClick={() => {
-                                        vscode.postMessage({
+                                        msg({
                                             type: 'openFile',
                                             path: problem.checker!.path,
-                                        } satisfies OpenFileMsg);
+                                        });
                                     }}
                                 >
                                     {t('problemTitle.specialJudge')}
@@ -159,10 +153,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphLink
                                     name={problem.interactor.path!}
                                     onClick={() => {
-                                        vscode.postMessage({
+                                        msg({
                                             type: 'openFile',
                                             path: problem.interactor!.path,
-                                        } satisfies OpenFileMsg);
+                                        });
                                     }}
                                 >
                                     {t('problemTitle.interact')}
@@ -173,10 +167,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                         <CphLink
                             name={problem.src.path}
                             onClick={() => {
-                                vscode.postMessage({
+                                msg({
                                     type: 'openFile',
                                     path: problem.src.path,
-                                } satisfies OpenFileMsg);
+                                });
                             }}
                         >
                             {basename(problem.src.path)}
@@ -260,10 +254,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphLink
                                     name={problem.checker.path}
                                     onClick={() => {
-                                        vscode.postMessage({
+                                        msg({
                                             type: 'openFile',
                                             path: problem.checker!.path,
-                                        } satisfies OpenFileMsg);
+                                        });
                                     }}
                                 >
                                     {basename(problem.checker.path)}
@@ -271,10 +265,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphButton
                                     icon={CloseIcon}
                                     onClick={() => {
-                                        vscode.postMessage({
-                                            type: 'removeFile',
-                                            file: 'checker',
-                                        } satisfies RemoveFileMsg);
+                                        msg({
+                                            type: 'removeSrcFile',
+                                            fileType: 'checker',
+                                        });
                                     }}
                                     name={t(
                                         'problemTitle.dialog.button.removeChecker',
@@ -285,10 +279,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                             <CphButton
                                 icon={FileOpenIcon}
                                 onClick={() => {
-                                    vscode.postMessage({
-                                        type: 'chooseFile',
-                                        file: 'checker',
-                                    } satisfies ChooseFileMsg);
+                                    msg({
+                                        type: 'chooseSrcFile',
+                                        fileType: 'checker',
+                                    });
                                 }}
                                 name={t(
                                     'problemTitle.dialog.button.chooseChecker',
@@ -305,10 +299,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphLink
                                     name={problem.interactor.path}
                                     onClick={() => {
-                                        vscode.postMessage({
+                                        msg({
                                             type: 'openFile',
                                             path: problem.interactor!.path,
-                                        } satisfies OpenFileMsg);
+                                        });
                                     }}
                                 >
                                     {basename(problem.interactor.path)}
@@ -316,10 +310,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 <CphButton
                                     icon={CloseIcon}
                                     onClick={() => {
-                                        vscode.postMessage({
-                                            type: 'removeFile',
-                                            file: 'interactor',
-                                        } satisfies RemoveFileMsg);
+                                        msg({
+                                            type: 'removeSrcFile',
+                                            fileType: 'interactor',
+                                        });
                                     }}
                                     name={t(
                                         'problemTitle.dialog.button.removeInteractor',
@@ -330,10 +324,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                             <CphButton
                                 icon={FileOpenIcon}
                                 onClick={() => {
-                                    vscode.postMessage({
-                                        type: 'chooseFile',
-                                        file: 'interactor',
-                                    } satisfies ChooseFileMsg);
+                                    msg({
+                                        type: 'chooseSrcFile',
+                                        fileType: 'interactor',
+                                    });
                                 }}
                                 name={t(
                                     'problemTitle.dialog.button.chooseInteractor',

@@ -37,20 +37,7 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, Problem } from '../../utils/types';
-import {
-    AddTcMsg,
-    ChooseFileMsg,
-    DelProblemMsg,
-    LoadTcsMsg,
-    OpenFileMsg,
-    RemoveFileMsg,
-    RunTcsMsg,
-    StartBfCompareMsg,
-    StopBfCompareMsg,
-    StopTcsMsg,
-    SubmitToCodeforcesMsg,
-} from '../msgs';
-import { basename } from '../utils';
+import { basename, getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphButton from './cphButton';
@@ -91,9 +78,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         name={t('problemActions.addTc')}
                         icon={AddIcon}
                         onClick={() => {
-                            vscode.postMessage({
-                                type: 'addTc',
-                            } satisfies AddTcMsg);
+                            msg({ type: 'addTc' });
                         }}
                     />
                     <CphButton
@@ -101,9 +86,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         name={t('problemActions.loadTcs')}
                         icon={FileCopyIcon}
                         onClick={() => {
-                            vscode.postMessage({
-                                type: 'loadTcs',
-                            } satisfies LoadTcsMsg);
+                            msg({ type: 'loadTcs' });
                         }}
                     />
                     {hasRunning ? (
@@ -113,10 +96,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             icon={PlaylistRemoveIcon}
                             color={'warning'}
                             onClick={(e) => {
-                                vscode.postMessage({
+                                msg({
                                     type: 'stopTcs',
                                     onlyOne: e.ctrlKey,
-                                } satisfies StopTcsMsg);
+                                });
                             }}
                         />
                     ) : (
@@ -126,14 +109,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             icon={PlaylistPlayIcon}
                             color={'success'}
                             onClick={(e) => {
-                                vscode.postMessage({
+                                msg({
                                     type: 'runTcs',
-                                    compile: e.altKey
-                                        ? false
-                                        : e.ctrlKey
-                                          ? true
-                                          : null,
-                                } satisfies RunTcsMsg);
+                                    compile: getCompile(e),
+                                });
                             }}
                         />
                     )}
@@ -177,9 +156,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                         icon={BackupIcon}
                                         color={'success'}
                                         onClick={() => {
-                                            vscode.postMessage({
+                                            msg({
                                                 type: 'submitToCodeforces',
-                                            } satisfies SubmitToCodeforcesMsg);
+                                            });
                                         }}
                                     />
                                 );
@@ -218,9 +197,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                     </Button>
                     <Button
                         onClick={() => {
-                            vscode.postMessage({
+                            msg({
                                 type: 'delProblem',
-                            } as DelProblemMsg);
+                            });
                             setDelDialogOpen(false);
                         }}
                         color={'primary'}
@@ -261,11 +240,11 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                     <CphLink
                                         name={problem.bfCompare.generator.path}
                                         onClick={() => {
-                                            vscode.postMessage({
+                                            msg({
                                                 type: 'openFile',
                                                 path: problem.bfCompare!
                                                     .generator!.path,
-                                            } satisfies OpenFileMsg);
+                                            });
                                         }}
                                     >
                                         {basename(
@@ -275,10 +254,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                     <CphButton
                                         icon={CloseIcon}
                                         onClick={() => {
-                                            vscode.postMessage({
-                                                type: 'removeFile',
-                                                file: 'generator',
-                                            } satisfies RemoveFileMsg);
+                                            msg({
+                                                type: 'removeSrcFile',
+                                                fileType: 'generator',
+                                            });
                                         }}
                                         name={t(
                                             'problemActions.bfCompareDialog.button.removeGenerator',
@@ -289,10 +268,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                 <CphButton
                                     icon={FileOpenIcon}
                                     onClick={() => {
-                                        vscode.postMessage({
-                                            type: 'chooseFile',
-                                            file: 'generator',
-                                        } satisfies ChooseFileMsg);
+                                        msg({
+                                            type: 'chooseSrcFile',
+                                            fileType: 'generator',
+                                        });
                                     }}
                                     name={t(
                                         'problemActions.bfCompareDialog.button.chooseGenerator',
@@ -309,11 +288,11 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                     <CphLink
                                         name={problem.bfCompare.bruteForce.path}
                                         onClick={() => {
-                                            vscode.postMessage({
+                                            msg({
                                                 type: 'openFile',
                                                 path: problem.bfCompare!
                                                     .bruteForce!.path,
-                                            } satisfies OpenFileMsg);
+                                            });
                                         }}
                                     >
                                         {basename(
@@ -323,10 +302,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                     <CphButton
                                         icon={CloseIcon}
                                         onClick={() => {
-                                            vscode.postMessage({
-                                                type: 'removeFile',
-                                                file: 'bruteForce',
-                                            } satisfies RemoveFileMsg);
+                                            msg({
+                                                type: 'removeSrcFile',
+                                                fileType: 'bruteForce',
+                                            });
                                         }}
                                         name={t(
                                             'problemActions.bfCompareDialog.button.removeBruteForce',
@@ -337,10 +316,10 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                                 <CphButton
                                     icon={FileOpenIcon}
                                     onClick={() => {
-                                        vscode.postMessage({
-                                            type: 'chooseFile',
-                                            file: 'bruteForce',
-                                        } satisfies ChooseFileMsg);
+                                        msg({
+                                            type: 'chooseSrcFile',
+                                            fileType: 'bruteForce',
+                                        });
                                     }}
                                     name={t(
                                         'problemActions.bfCompareDialog.button.chooseBruteForce',
@@ -353,9 +332,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             <CphButton
                                 name={t('problemActions.bfCompareDialog.stop')}
                                 onClick={() => {
-                                    vscode.postMessage({
+                                    msg({
                                         type: 'stopBfCompare',
-                                    } as StopBfCompareMsg);
+                                    });
                                 }}
                                 icon={StopCircleIcon}
                                 color={'warning'}
@@ -363,10 +342,11 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                         ) : (
                             <CphButton
                                 name={t('problemActions.bfCompareDialog.run')}
-                                onClick={() => {
-                                    vscode.postMessage({
+                                onClick={(e) => {
+                                    msg({
                                         type: 'startBfCompare',
-                                    } as StartBfCompareMsg);
+                                        compile: getCompile(e),
+                                    });
                                 }}
                                 icon={PlayCircleIcon}
                                 color={'success'}

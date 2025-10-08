@@ -571,10 +571,6 @@
             {
                 "command": "cph-ng.submitToCodeforces",
                 "title": "%cph-ng.commands.submitToCodeforces%"
-            },
-            {
-                "command": "cph-ng.exportToEmbedded",
-                "title": "%cph-ng.commands.exportToEmbedded%"
             }
         ],
         "keybindings": [

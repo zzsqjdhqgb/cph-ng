@@ -28,8 +28,7 @@ import React, { CSSProperties, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
 import { TCIO } from '../../utils/types';
-import { OpenFileMsg } from '../msgs';
-import { basename } from '../utils';
+import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
@@ -159,10 +158,10 @@ const TcDataView = ({
                             <CphLink
                                 name={internalValue.path}
                                 onClick={() => {
-                                    vscode.postMessage({
+                                    msg({
                                         type: 'openFile',
                                         path: internalValue.path,
-                                    } satisfies OpenFileMsg);
+                                    });
                                 }}
                             >
                                 {basename(internalValue.path)}

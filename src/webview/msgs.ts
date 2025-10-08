@@ -17,94 +17,127 @@
 
 import { TC } from '../utils/types';
 
-export interface CreateProblemMsg {
+export interface BaseMsg {
+    type: string;
+    activePath?: string;
+}
+
+export interface CreateProblemMsg extends BaseMsg {
     type: 'createProblem';
 }
-export interface ImportProblemMsg {
+export interface ImportProblemMsg extends BaseMsg {
     type: 'importProblem';
 }
-export interface GetProblemMsg {
+export interface GetProblemMsg extends BaseMsg {
     type: 'getProblem';
 }
-export interface EditProblemDetailsMsg {
+export interface EditProblemDetailsMsg extends BaseMsg {
     type: 'editProblemDetails';
     title: string;
     url: string;
     timeLimit: number;
     memoryLimit: number;
 }
-export interface DelProblemMsg {
+export interface DelProblemMsg extends BaseMsg {
     type: 'delProblem';
 }
-export interface RunTcsMsg {
+export interface RunTcsMsg extends BaseMsg {
     type: 'runTcs';
     compile: boolean | null;
 }
-export interface StopTcsMsg {
+export interface StopTcsMsg extends BaseMsg {
     type: 'stopTcs';
     onlyOne: boolean;
 }
-export interface AddTcMsg {
+export interface AddTcMsg extends BaseMsg {
     type: 'addTc';
 }
-export interface LoadTcsMsg {
+export interface LoadTcsMsg extends BaseMsg {
     type: 'loadTcs';
 }
-export interface RunTcMsg {
+export interface RunTcMsg extends BaseMsg {
     type: 'runTc';
     idx: number;
     compile: boolean | null;
 }
-export interface ChooseTcFileMsg {
+export interface ChooseTcFileMsg extends BaseMsg {
     type: 'chooseTcFile';
     idx: number;
     label: 'stdin' | 'answer';
 }
-export interface UpdateTcMsg {
+export interface UpdateTcMsg extends BaseMsg {
     type: 'updateTc';
     idx: number;
     tc: TC;
 }
-export interface CompareTcMsg {
+export interface CompareTcMsg extends BaseMsg {
     type: 'compareTc';
     idx: number;
 }
-export interface ToggleTcFileMsg {
+export interface ToggleTcFileMsg extends BaseMsg {
     type: 'toggleTcFile';
     idx: number;
-    label: 'stdin' | 'answer' | 'stdout' | 'stderr';
+    label: 'stdin' | 'answer';
 }
-export interface DelTcMsg {
+export interface DelTcMsg extends BaseMsg {
     type: 'delTc';
     idx: number;
 }
-export interface OpenFileMsg {
+export interface OpenFileMsg extends BaseMsg {
     type: 'openFile';
     path: string;
 }
-export type FileTypes = 'checker' | 'interactor' | 'generator' | 'bruteForce';
-export interface ChooseFileMsg {
-    type: 'chooseFile';
-    file: FileTypes;
+export type WebviewSrcFileTypes =
+    | 'checker'
+    | 'interactor'
+    | 'generator'
+    | 'bruteForce';
+export interface ChooseSrcFileMsg extends BaseMsg {
+    type: 'chooseSrcFile';
+    fileType: WebviewSrcFileTypes;
 }
-export interface RemoveFileMsg {
-    type: 'removeFile';
-    file: FileTypes;
+export interface RemoveSrcFileMsg extends BaseMsg {
+    type: 'removeSrcFile';
+    fileType: WebviewSrcFileTypes;
 }
-export interface StartBfCompareMsg {
+export interface StartBfCompareMsg extends BaseMsg {
     type: 'startBfCompare';
     compile: boolean | null;
 }
-export interface StopBfCompareMsg {
+export interface StopBfCompareMsg extends BaseMsg {
     type: 'stopBfCompare';
 }
-export interface SubmitToCodeforcesMsg {
+export interface SubmitToCodeforcesMsg extends BaseMsg {
     type: 'submitToCodeforces';
 }
-export interface StartChatMsg {
+export interface StartChatMsg extends BaseMsg {
     type: 'startChat';
 }
-export interface OpenSettingsMsg {
+export interface OpenSettingsMsg extends BaseMsg {
     type: 'openSettings';
     item: string;
 }
+export type WebviewMsg =
+    | CreateProblemMsg
+    | ImportProblemMsg
+    | GetProblemMsg
+    | EditProblemDetailsMsg
+    | DelProblemMsg
+    | RunTcsMsg
+    | StopTcsMsg
+    | AddTcMsg
+    | LoadTcsMsg
+    | RunTcMsg
+    | ChooseTcFileMsg
+    | UpdateTcMsg
+    | CompareTcMsg
+    | ToggleTcFileMsg
+    | DelTcMsg
+    | OpenFileMsg
+    | ChooseSrcFileMsg
+    | RemoveSrcFileMsg
+    | StartBfCompareMsg
+    | StopBfCompareMsg
+    | SubmitToCodeforcesMsg
+    | StartChatMsg
+    | OpenSettingsMsg;

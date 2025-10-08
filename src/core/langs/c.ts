@@ -35,7 +35,7 @@ import {
 export class LangC extends Lang {
     private logger: Logger = new Logger('langC');
     public extensions = ['c'];
-    public async compile(
+    protected async _compile(
         src: FileWithHash,
         ac: AbortController,
         forceCompile: boolean | null,
