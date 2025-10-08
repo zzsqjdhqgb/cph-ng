@@ -16,6 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { mkdir, readFile, rm } from 'fs/promises';
+import { debounce } from 'lodash';
 import { release } from 'os';
 import { join } from 'path';
 import { EventEmitter } from 'stream';
@@ -115,13 +116,16 @@ export default class ExtensionManager {
                 ),
             );
             context.subscriptions.push(
-                vscode.window.onDidChangeActiveTextEditor((e) => {
-                    sidebarProvider.event.emit('activePath', {
-                        activePath: e?.document.uri.fsPath,
-                    });
-                    ProblemsManager.dataRefresh();
-                    ProblemsManager.saveIfIdle();
-                }),
+                vscode.window.onDidChangeActiveTextEditor(
+                    debounce((e) => {
+                        console.log(Date.now(), e);
+                        sidebarProvider.event.emit('activePath', {
+                            activePath: e?.document.uri.fsPath,
+                        });
+                        ProblemsManager.dataRefresh();
+                        ProblemsManager.saveIfIdle();
+                    }, 50),
+                ),
             );
 
             let lastAlertTime = 0;

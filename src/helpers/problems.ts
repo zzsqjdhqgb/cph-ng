@@ -128,6 +128,7 @@ export default class Problems {
             return false;
         }
         if (
+            path.startsWith(Settings.cache.directory) ||
             problem.src.path === path ||
             problem.checker?.path === path ||
             problem.interactor?.path === path ||

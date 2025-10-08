@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **refactor**: enable background running
 - **fix**: remove embedded data save and load
 - **fix**: no ole when the output and answer are both empty
+- **feat**: add debounce for editor change event
 
 ## 0.2.2
 
