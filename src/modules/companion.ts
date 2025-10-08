@@ -28,11 +28,6 @@ import CphCapable, { CphProblem } from './cphCapable';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
 
-type OnCreateProblem = (
-    problem: Problem,
-    document: vscode.TextDocument,
-) => void;
-
 type CphSubmitEmpty = {
     empty: true;
 };
