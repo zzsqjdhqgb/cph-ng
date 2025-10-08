@@ -177,8 +177,7 @@ export class ProcessResultHandler {
             .join('\n');
         if (
             Settings.comparing.oleSize &&
-            fixedOutput.length >=
-                fixedAnswer.length * Settings.comparing.oleSize
+            fixedOutput.length > fixedAnswer.length * Settings.comparing.oleSize
         ) {
             return { verdict: TCVerdicts.OLE, msg: '' };
         }
