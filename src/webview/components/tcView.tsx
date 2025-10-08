@@ -218,25 +218,11 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                                 msg({ type: 'compareTc', idx });
                                             },
                                         }}
-                                        onToggleFile={() => {
-                                            msg({
-                                                type: 'toggleTcFile',
-                                                idx,
-                                                label: 'stdout',
-                                            });
-                                        }}
                                     />
                                     <TcDataView
                                         label={t('tcView.stderr')}
                                         value={tc.result.stderr}
                                         readOnly={true}
-                                        onToggleFile={() => {
-                                            msg({
-                                                type: 'toggleTcFile',
-                                                idx,
-                                                label: 'stderr',
-                                            });
-                                        }}
                                     />
                                     <TcDataView
                                         label={t('tcView.message')}
