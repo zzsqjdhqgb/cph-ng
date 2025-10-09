@@ -155,6 +155,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                     color={'success'}
                                     loading={running}
                                     onClick={(e) => {
+                                        e.stopPropagation();
                                         msg({
                                             type: 'runTc',
                                             idx,
@@ -167,7 +168,8 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                 name={t('tcView.delete')}
                                 icon={DeleteIcon}
                                 color={'error'}
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     msg({ type: 'delTc', idx });
                                 }}
                             />

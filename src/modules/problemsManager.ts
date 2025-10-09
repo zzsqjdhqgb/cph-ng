@@ -29,33 +29,13 @@ import { exists } from '../utils/process';
 import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
 import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { chooseSrcFile, chooseTcFile, getTcs } from '../utils/ui';
-import {
-    AddTcMsg,
-    ChooseSrcFileMsg,
-    ChooseTcFileMsg,
-    ClearStatus,
-    ClearTcStatus,
-    CompareTcMsg,
-    DelProblemMsg,
-    DelTcMsg,
-    EditProblemDetailsMsg,
-    LoadTcsMsg,
-    RemoveSrcFileMsg,
-    RunTcMsg,
-    RunTcsMsg,
-    StartBfCompareMsg,
-    StopBfCompareMsg,
-    StopTcsMsg,
-    SubmitToCodeforcesMsg,
-    ToggleTcFileMsg,
-    UpdateTcMsg,
-} from '../webview/msgs';
+import * as msgs from '../webview/msgs';
 import Companion from './companion';
 import CphCapable from './cphCapable';
 import ExtensionManager from './extensionManager';
 import Settings from './settings';
 
-interface BgProblem {
+interface FullProblem {
     problem: Problem;
     ac: AbortController | null;
     startTime: number;
@@ -63,86 +43,100 @@ interface BgProblem {
 
 export default class ProblemsManager {
     private static logger: Logger = new Logger('problemsManager');
-    private static bgProblems: BgProblem[] = [];
+    private static fullProblems: FullProblem[] = [];
 
-    public static async getBgProblem(path?: string): Promise<BgProblem | null> {
+    public static async getFullProblem(
+        path?: string,
+    ): Promise<FullProblem | null> {
         if (!path) {
             return null;
         }
-        for (const bgProblem of this.bgProblems) {
-            if (Problems.isRelated(bgProblem.problem, path)) {
-                return bgProblem;
+        for (const fullProblem of this.fullProblems) {
+            if (Problems.isRelated(fullProblem.problem, path)) {
+                return fullProblem;
             }
         }
         const problem = await Problems.loadProblem(path);
         if (!problem) {
             return null;
         }
-        const bgProblem = {
+        const fullProblem = {
             problem,
             ac: null,
             startTime: Date.now(),
-        } satisfies BgProblem;
-        this.bgProblems.push(bgProblem);
-        return bgProblem;
-    }
-    public static async saveIfIdle() {
-        const activePath = getActivePath();
-        const idleProblems: BgProblem[] = this.bgProblems.filter(
-            (bgProblem) =>
-                !bgProblem.ac &&
-                !Problems.isRelated(bgProblem.problem, activePath),
-        );
-        idleProblems.forEach(async (bgProblem) => {
-            bgProblem.problem.timeElapsed += Date.now() - bgProblem.startTime;
-            await Problems.saveProblem(bgProblem.problem);
-            this.bgProblems = this.bgProblems.filter((p) => p !== bgProblem);
-        });
+        } satisfies FullProblem;
+        this.fullProblems.push(fullProblem);
+        return fullProblem;
     }
     public static async dataRefresh() {
-        const filePath = getActivePath();
-        const bgProblem = await this.getBgProblem(filePath);
+        this.logger.info('data refresh');
+        const activePath = getActivePath();
+        const idles: FullProblem[] = this.fullProblems.filter(
+            (fullProblem) =>
+                !fullProblem.ac &&
+                !Problems.isRelated(fullProblem.problem, activePath),
+        );
+        for (const idle of idles) {
+            idle.problem.timeElapsed += Date.now() - idle.startTime;
+            await Problems.saveProblem(idle.problem);
+        }
+        this.fullProblems = this.fullProblems.filter((p) => !idles.includes(p));
+
+        const fullProblem = await this.getFullProblem(activePath);
         const canImport =
-            !!filePath && (await exists(CphCapable.getProbBySrc(filePath)));
+            !!activePath && (await exists(CphCapable.getProbBySrc(activePath)));
         sidebarProvider.event.emit('problem', {
-            problem: bgProblem?.problem,
+            problem: fullProblem && {
+                problem: fullProblem.problem,
+                startTime: fullProblem.startTime,
+            },
+            bgProblems: this.fullProblems
+                .map((bgProblem) => ({
+                    name: bgProblem.problem.name,
+                    srcPath: bgProblem.problem.src.path,
+                }))
+                .filter(
+                    (bgProblem) =>
+                        bgProblem.srcPath !== fullProblem?.problem.src.path,
+                ),
             canImport,
-            startTime: bgProblem?.startTime,
         });
         ExtensionManager.event.emit('context', {
-            hasProblem: !!bgProblem,
+            hasProblem: !!fullProblem,
             canImport,
-            isRunning: !!bgProblem?.ac,
+            isRunning: !!fullProblem?.ac,
         });
     }
     public static async closeAll() {
-        for (const bgProblem of this.bgProblems) {
-            bgProblem.ac?.abort();
-            await waitUntil(() => !bgProblem.ac);
-            bgProblem.problem.timeElapsed += Date.now() - bgProblem.startTime;
-            await Problems.saveProblem(bgProblem.problem);
+        for (const fullProblem of this.fullProblems) {
+            fullProblem.ac?.abort();
+            await waitUntil(() => !fullProblem.ac);
+            fullProblem.problem.timeElapsed +=
+                Date.now() - fullProblem.startTime;
+            await Problems.saveProblem(fullProblem.problem);
         }
-        this.bgProblems = [];
+        this.fullProblems = [];
     }
 
-    public static async editProblemDetails(msg: EditProblemDetailsMsg) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async editProblemDetails(msg: msgs.EditProblemDetailsMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        bgProblem.problem.name = msg.title;
-        bgProblem.problem.url = msg.url;
-        bgProblem.problem.timeLimit = msg.timeLimit;
-        bgProblem.problem.memoryLimit = msg.memoryLimit;
+        fullProblem.problem.name = msg.title;
+        fullProblem.problem.url = msg.url;
+        fullProblem.problem.timeLimit = msg.timeLimit;
+        fullProblem.problem.memoryLimit = msg.memoryLimit;
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async delProblem(msg: DelProblemMsg) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async delProblem(msg: msgs.DelProblemMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const binPath = await Problems.getBinBySrc(bgProblem.problem.src.path);
+        const binPath = await Problems.getBinBySrc(
+            fullProblem.problem.src.path,
+        );
         if (!binPath) {
             return;
         }
@@ -155,67 +149,63 @@ export default class ProblemsManager {
                 }),
             );
         }
-        this.bgProblems = this.bgProblems.filter((p) => p !== bgProblem);
+        this.fullProblems = this.fullProblems.filter((p) => p !== fullProblem);
         await this.dataRefresh();
     }
 
-    public static async addTc(msg: AddTcMsg) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async addTc(msg: msgs.AddTcMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        bgProblem.problem.tcs.push({
+        fullProblem.problem.tcs.push({
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
             isExpand: false,
         });
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async loadTcs(msg: LoadTcsMsg) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async loadTcs(msg: msgs.LoadTcsMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const tcs = await getTcs(bgProblem.problem.src.path);
+        const tcs = await getTcs(fullProblem.problem.src.path);
         if (Settings.problem.clearBeforeLoad) {
-            bgProblem.problem.tcs = tcs;
+            fullProblem.problem.tcs = tcs;
         } else {
             tcs.forEach((tc) => {
-                bgProblem.problem.tcs.push(tc);
+                fullProblem.problem.tcs.push(tc);
             });
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async updateTc(msg: UpdateTcMsg) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async updateTc(msg: msgs.UpdateTcMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        bgProblem.problem.tcs[msg.idx] = msg.tc;
+        fullProblem.problem.tcs[msg.idx] = msg.tc;
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
 
-    public static async runTc(msg: RunTcMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async runTc(msg: msgs.RunTcMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(bgProblem.problem.src.path);
+        const srcLang = Langs.getLang(fullProblem.problem.src.path);
         if (!srcLang) {
             return;
         }
-        bgProblem.ac && bgProblem.ac.abort();
-        bgProblem.ac = new AbortController();
+        fullProblem.ac && fullProblem.ac.abort();
+        fullProblem.ac = new AbortController();
         const beforeReturn = async () => {
-            bgProblem.ac = null;
+            fullProblem.ac = null;
             await this.dataRefresh();
-            await this.saveIfIdle();
         };
 
-        const tc = bgProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.idx];
         tc.result = {
             verdict: TCVerdicts.CP,
             stdout: { useFile: false, data: '' },
@@ -229,10 +219,10 @@ export default class ProblemsManager {
         const result = tc.result;
 
         const compileResult = await Compiler.compileAll(
-            bgProblem.problem,
+            fullProblem.problem,
             srcLang,
             msg.compile,
-            bgProblem.ac,
+            fullProblem.ac,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
             result.verdict = TCVerdicts.CE;
@@ -249,9 +239,9 @@ export default class ProblemsManager {
         }
 
         await Runner.run(
-            bgProblem.problem,
+            fullProblem.problem,
             result,
-            bgProblem.ac,
+            fullProblem.ac,
             srcLang,
             tc,
             compileData,
@@ -259,45 +249,42 @@ export default class ProblemsManager {
         tc.isExpand = isExpandVerdict(result.verdict);
         await beforeReturn();
     }
-    public static async clearTcStatus(msg: ClearTcStatus) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async clearTcStatus(msg: msgs.ClearTcStatusMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        bgProblem.problem.tcs[msg.idx].result = undefined;
+        fullProblem.problem.tcs[msg.idx].result = undefined;
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async clearStatus(msg: ClearStatus) {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async clearStatus(msg: msgs.ClearStatusMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        for (const tc of bgProblem.problem.tcs) {
+        for (const tc of fullProblem.problem.tcs) {
             tc.result = undefined;
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
 
-    public static async runTcs(msg: RunTcsMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async runTcs(msg: msgs.RunTcsMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(bgProblem.problem.src.path);
+        const srcLang = Langs.getLang(fullProblem.problem.src.path);
         if (!srcLang) {
             return;
         }
-        bgProblem.ac && bgProblem.ac.abort();
-        bgProblem.ac = new AbortController();
+        fullProblem.ac && fullProblem.ac.abort();
+        fullProblem.ac = new AbortController();
         const beforeReturn = async () => {
-            bgProblem.ac = null;
+            fullProblem.ac = null;
             await this.dataRefresh();
-            await this.saveIfIdle();
         };
 
-        for (const tc of bgProblem.problem.tcs) {
+        for (const tc of fullProblem.problem.tcs) {
             tc.result = {
                 verdict: TCVerdicts.CP,
                 stdout: { useFile: false, data: '' },
@@ -311,13 +298,13 @@ export default class ProblemsManager {
         await this.dataRefresh();
 
         const compileResult = await Compiler.compileAll(
-            bgProblem.problem,
+            fullProblem.problem,
             srcLang,
             msg.compile,
-            bgProblem.ac,
+            fullProblem.ac,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            for (const tc of bgProblem.problem.tcs) {
+            for (const tc of fullProblem.problem.tcs) {
                 tc.result!.verdict = TCVerdicts.CE;
             }
             await beforeReturn();
@@ -325,32 +312,32 @@ export default class ProblemsManager {
         }
         const compileData = compileResult.data;
         if (!compileData) {
-            for (const tc of bgProblem.problem.tcs) {
+            for (const tc of fullProblem.problem.tcs) {
                 tc.result!.verdict = TCVerdicts.SE;
                 tc.result!.msg = vscode.l10n.t('Compile data is empty.');
             }
             await beforeReturn();
             return;
         }
-        for (const tc of bgProblem.problem.tcs) {
+        for (const tc of fullProblem.problem.tcs) {
             tc.result!.verdict = TCVerdicts.CPD;
         }
         await this.dataRefresh();
 
         let hasExpandStatus = false;
-        for (const tc of bgProblem.problem.tcs) {
-            if (bgProblem.ac.signal.aborted) {
-                if (bgProblem.ac.signal.reason === 'onlyOne') {
-                    bgProblem.ac = new AbortController();
+        for (const tc of fullProblem.problem.tcs) {
+            if (fullProblem.ac.signal.aborted) {
+                if (fullProblem.ac.signal.reason === 'onlyOne') {
+                    fullProblem.ac = new AbortController();
                 } else {
                     tc.result!.verdict = TCVerdicts.SK;
                     continue;
                 }
             }
             await Runner.run(
-                bgProblem.problem,
+                fullProblem.problem,
                 tc.result!,
-                bgProblem.ac,
+                fullProblem.ac,
                 srcLang,
                 tc,
                 compileData,
@@ -364,50 +351,48 @@ export default class ProblemsManager {
         await beforeReturn();
     }
 
-    public static async stopTcs(msg: StopTcsMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async stopTcs(msg: msgs.StopTcsMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        if (bgProblem.ac) {
-            bgProblem.ac.abort(msg.onlyOne ? 'onlyOne' : undefined);
+        if (fullProblem.ac) {
+            fullProblem.ac.abort(msg.onlyOne ? 'onlyOne' : undefined);
         } else {
-            for (const tc of bgProblem.problem.tcs) {
+            for (const tc of fullProblem.problem.tcs) {
                 if (tc.result && isRunningVerdict(tc.result.verdict)) {
                     tc.result.verdict = TCVerdicts.RJ;
                 }
             }
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async chooseTcFile(msg: ChooseTcFileMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async chooseTcFile(msg: msgs.ChooseTcFileMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
         const files = await chooseTcFile(msg.label);
         if (files.stdin) {
-            bgProblem.problem.tcs[msg.idx].stdin = {
+            fullProblem.problem.tcs[msg.idx].stdin = {
                 useFile: true,
                 path: files.stdin,
             };
         }
         if (files.answer) {
-            bgProblem.problem.tcs[msg.idx].answer = {
+            fullProblem.problem.tcs[msg.idx].answer = {
                 useFile: true,
                 path: files.answer,
             };
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async compareTc(msg: CompareTcMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async compareTc(msg: msgs.CompareTcMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const tc = bgProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.idx];
         if (!tc.result) {
             return;
         }
@@ -427,12 +412,12 @@ export default class ProblemsManager {
             );
         }
     }
-    public static async toggleTcFile(msg: ToggleTcFileMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async toggleTcFile(msg: msgs.ToggleTcFileMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const tc = bgProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.idx];
         const fileIo = tc[msg.label];
         if (fileIo.useFile) {
             const data = await tcIo2Str(fileIo);
@@ -454,8 +439,8 @@ export default class ProblemsManager {
                 answer: 'ans',
             }[msg.label];
             let tempFilePath: string | undefined = join(
-                dirname(bgProblem.problem.src.path),
-                `${basename(bgProblem.problem.src.path, extname(bgProblem.problem.src.path))}-${msg.idx + 1}.${ext}`,
+                dirname(fullProblem.problem.src.path),
+                `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.idx + 1}.${ext}`,
             );
             tempFilePath = await vscode.window
                 .showSaveDialog({
@@ -470,21 +455,21 @@ export default class ProblemsManager {
             tc[msg.label] = { useFile: true, path: tempFilePath };
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async delTc(msg: DelTcMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async delTc(msg: msgs.DelTcMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        bgProblem.problem.tcs.splice(msg.idx, 1);
+        fullProblem.problem.tcs.splice(msg.idx, 1);
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
 
-    public static async chooseSrcFile(msg: ChooseSrcFileMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async chooseSrcFile(
+        msg: msgs.ChooseSrcFileMsg,
+    ): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
         const path = await chooseSrcFile(msg.fileType);
@@ -492,56 +477,58 @@ export default class ProblemsManager {
             return;
         }
         if (msg.fileType === 'checker') {
-            bgProblem.problem.checker = { path };
+            fullProblem.problem.checker = { path };
         } else if (msg.fileType === 'interactor') {
-            bgProblem.problem.interactor = { path };
+            fullProblem.problem.interactor = { path };
         } else if (msg.fileType === 'generator') {
-            if (!bgProblem.problem.bfCompare) {
-                bgProblem.problem.bfCompare = { running: false, msg: '' };
+            if (!fullProblem.problem.bfCompare) {
+                fullProblem.problem.bfCompare = { running: false, msg: '' };
             }
-            bgProblem.problem.bfCompare.generator = { path };
+            fullProblem.problem.bfCompare.generator = { path };
         } else {
-            if (!bgProblem.problem.bfCompare) {
-                bgProblem.problem.bfCompare = { running: false, msg: '' };
+            if (!fullProblem.problem.bfCompare) {
+                fullProblem.problem.bfCompare = { running: false, msg: '' };
             }
-            bgProblem.problem.bfCompare.bruteForce = { path };
+            fullProblem.problem.bfCompare.bruteForce = { path };
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async removeSrcFile(msg: RemoveSrcFileMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async removeSrcFile(
+        msg: msgs.RemoveSrcFileMsg,
+    ): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
         if (msg.fileType === 'checker') {
-            bgProblem.problem.checker = undefined;
+            fullProblem.problem.checker = undefined;
         } else if (msg.fileType === 'interactor') {
-            bgProblem.problem.interactor = undefined;
+            fullProblem.problem.interactor = undefined;
         } else if (
             msg.fileType === 'generator' &&
-            bgProblem.problem.bfCompare
+            fullProblem.problem.bfCompare
         ) {
-            bgProblem.problem.bfCompare.generator = undefined;
+            fullProblem.problem.bfCompare.generator = undefined;
         } else if (
             msg.fileType === 'bruteForce' &&
-            bgProblem.problem.bfCompare
+            fullProblem.problem.bfCompare
         ) {
-            bgProblem.problem.bfCompare.bruteForce = undefined;
+            fullProblem.problem.bfCompare.bruteForce = undefined;
         }
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
-    public static async startBfCompare(msg: StartBfCompareMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async startBfCompare(
+        msg: msgs.StartBfCompareMsg,
+    ): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(bgProblem.problem.src.path);
+        const srcLang = Langs.getLang(fullProblem.problem.src.path);
         if (!srcLang) {
             return;
         }
-        const bfCompare = bgProblem.problem.bfCompare;
+        const bfCompare = fullProblem.problem.bfCompare;
         if (!bfCompare || !bfCompare.generator || !bfCompare.bruteForce) {
             Io.warn(
                 vscode.l10n.t(
@@ -556,29 +543,28 @@ export default class ProblemsManager {
             );
             return;
         }
-        bgProblem.ac && bgProblem.ac.abort();
-        bgProblem.ac = new AbortController();
+        fullProblem.ac && fullProblem.ac.abort();
+        fullProblem.ac = new AbortController();
         const beforeReturn = async () => {
             bfCompare.running = false;
-            if (bgProblem.ac?.signal.aborted) {
+            if (fullProblem.ac?.signal.aborted) {
                 bfCompare.msg = vscode.l10n.t(
                     'Brute Force comparison stopped by user, {cnt} runs completed.',
                     { cnt },
                 );
             }
-            bgProblem.ac = null;
+            fullProblem.ac = null;
             await this.dataRefresh();
-            await this.saveIfIdle();
         };
 
         bfCompare.running = true;
         bfCompare.msg = vscode.l10n.t('Compiling...');
         await this.dataRefresh();
         const compileResult = await Compiler.compileAll(
-            bgProblem.problem,
+            fullProblem.problem,
             srcLang,
             msg.compile,
-            bgProblem.ac,
+            fullProblem.ac,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
             bfCompare.msg = vscode.l10n.t('Solution compilation failed.');
@@ -595,7 +581,7 @@ export default class ProblemsManager {
         let cnt = 0;
         while (true) {
             cnt++;
-            if (bgProblem.ac.signal.aborted) {
+            if (fullProblem.ac.signal.aborted) {
                 bfCompare.msg = vscode.l10n.t(
                     'Brute Force comparison stopped by user.',
                 );
@@ -610,7 +596,7 @@ export default class ProblemsManager {
                 [compileData.bfCompare.generator.outputPath],
                 Settings.bfCompare.generatorTimeLimit,
                 { useFile: false, data: '' },
-                bgProblem.ac,
+                fullProblem.ac,
                 undefined,
             );
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
@@ -633,7 +619,7 @@ export default class ProblemsManager {
                 [compileData.bfCompare.bruteForce.outputPath],
                 Settings.bfCompare.bruteForceTimeLimit,
                 { useFile: false, data: generatorRunResult.stdout },
-                bgProblem.ac,
+                fullProblem.ac,
                 undefined,
             );
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
@@ -669,16 +655,16 @@ export default class ProblemsManager {
                 },
             } satisfies TC;
             await Runner.run(
-                bgProblem.problem,
+                fullProblem.problem,
                 tempTc.result!,
-                bgProblem.ac,
+                fullProblem.ac,
                 srcLang,
                 tempTc,
                 compileResult.data!,
             );
             if (tempTc.result?.verdict !== TCVerdicts.AC) {
                 if (tempTc.result?.verdict !== TCVerdicts.RJ) {
-                    bgProblem.problem.tcs.push(tempTc);
+                    fullProblem.problem.tcs.push(tempTc);
                     bfCompare.msg = vscode.l10n.t(
                         'Found a difference in #{cnt} run.',
                         { cnt },
@@ -689,29 +675,30 @@ export default class ProblemsManager {
         }
         await beforeReturn();
     }
-    public static async stopBfCompare(msg: StopBfCompareMsg): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+    public static async stopBfCompare(
+        msg: msgs.StopBfCompareMsg,
+    ): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
         if (
-            !bgProblem.problem.bfCompare ||
-            !bgProblem.problem.bfCompare.running
+            !fullProblem.problem.bfCompare ||
+            !fullProblem.problem.bfCompare.running
         ) {
             Io.warn(vscode.l10n.t('Brute Force comparison is not running.'));
             return;
         }
-        bgProblem.ac && bgProblem.ac.abort();
+        fullProblem.ac && fullProblem.ac.abort();
         await this.dataRefresh();
-        await this.saveIfIdle();
     }
     public static async submitToCodeforces(
-        msg: SubmitToCodeforcesMsg,
+        msg: msgs.SubmitToCodeforcesMsg,
     ): Promise<void> {
-        const bgProblem = await this.getBgProblem(msg.activePath);
-        if (!bgProblem) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
             return;
         }
-        Companion.submit(bgProblem.problem);
+        Companion.submit(fullProblem.problem);
     }
 }

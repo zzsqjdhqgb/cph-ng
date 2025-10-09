@@ -164,7 +164,7 @@ class Companion {
                 document,
                 Settings.companion.showPanel,
             );
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
         } catch (e) {
             Companion.logger.warn('Parse data from companion failed', e);
             Io.warn(

@@ -16,11 +16,10 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import Box from '@mui/material/Box';
-import { t } from 'i18next';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
 import { msg } from '../utils';
-import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
 import ProblemActions from './problemActions';
 import ProblemTitle from './problemTitle';
@@ -32,16 +31,9 @@ interface ProblemViewProps {
 }
 
 const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
+    const { t } = useTranslation();
     return (
-        <CphFlex
-            column
-            smallGap
-            height={'100%'}
-            paddingY={0.5}
-            sx={{
-                boxSizing: 'border-box',
-            }}
-        >
+        <>
             <ProblemTitle
                 problem={problem}
                 startTime={startTime}
@@ -68,7 +60,7 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
                 </CphMenu>
             </Box>
             <ProblemActions problem={problem} />
-        </CphFlex>
+        </>
     );
 };
 

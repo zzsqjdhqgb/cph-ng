@@ -59,7 +59,7 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
         const result = new vscode.LanguageModelToolResult([]);
 
         const activePath = getActivePath();
-        const bgProblem = await ProblemsManager.getBgProblem(activePath);
+        const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(
                 new vscode.LanguageModelTextPart(

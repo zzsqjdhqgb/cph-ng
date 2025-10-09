@@ -40,7 +40,7 @@ export default class CphNg {
         }
         const problem = Problems.createProblem(filePath);
         await Problems.saveProblem(problem);
-        ProblemsManager.dataRefresh();
+        await ProblemsManager.dataRefresh();
     }
     public static async importProblem(filePath?: string): Promise<void> {
         if (!filePath) {
@@ -59,7 +59,7 @@ export default class CphNg {
         const problem = await CphCapable.loadProblem(probFile);
         if (problem) {
             await Problems.saveProblem(problem);
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
         }
     }
 }

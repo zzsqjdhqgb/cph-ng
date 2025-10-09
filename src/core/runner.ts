@@ -181,7 +181,7 @@ export class Runner {
     ) {
         try {
             result.verdict = TCVerdicts.JG;
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
 
             const runResult = await this.doRun(
                 await lang.runCommand(compileData.src.outputPath),
@@ -227,7 +227,7 @@ export class Runner {
                 result.stderr.useFile = false;
             }
             result.stderr = await write2TcIo(result.stderr, runResult.stderr);
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
 
             if (assignResult(result, runResult)) {
             } else if (result.time && result.time > problem.timeLimit) {
@@ -236,7 +236,7 @@ export class Runner {
                 result.verdict = TCVerdicts.MLE;
             } else {
                 result.verdict = TCVerdicts.CMP;
-                ProblemsManager.dataRefresh();
+                await ProblemsManager.dataRefresh();
                 assignResult(
                     result,
                     compileData.checker
@@ -252,13 +252,13 @@ export class Runner {
                           ),
                 );
             }
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
         } catch (e) {
             assignResult(result, {
                 verdict: TCVerdicts.SE,
                 msg: (e as Error).message,
             });
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
         }
     }
 }

@@ -1,6 +1,9 @@
 {
     "acCongrats.firstLine": "恭喜你！",
     "acCongrats.secondLine": "你已通过所有测试用例！",
+    "bgProblemView.empty": "当前还没有后台题目。现在 CPH NG 允许你在后台运行测试样例或者对拍。",
+    "bgProblemView.message": "后台题目数量: {{cnt}}",
+    "bgProblemView.title": "后台题目",
     "createProblemView.createAlert": "此文档没有关联的题目。",
     "createProblemView.createButton": "创建",
     "createProblemView.importAlert": "文档中存在 CPH 题目，但没有 CPH-NG 题目，你可以从中导入。",
@@ -8,6 +11,7 @@
     "errorBoundary.description": "发生了意外错误。我们为此带来的不便表示歉意。您可以尝试重新加载页面或在 GitHub 上报告此问题。",
     "errorBoundary.details": "详细错误信息",
     "errorBoundary.title": "错误",
+    "initView.message": "初始化中",
     "noTcs.firstLine": "当前没有测试用例。",
     "noTcs.secondLine": "点击下方按钮添加一个吧！",
     "problemActions.addTc": "添加测试用例",

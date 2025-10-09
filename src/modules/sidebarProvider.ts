@@ -28,8 +28,14 @@ import Settings from './settings';
 
 export interface ProblemEventData {
     canImport: boolean;
-    problem?: Problem;
-    startTime?: number;
+    problem: {
+        problem: Problem;
+        startTime: number;
+    } | null;
+    bgProblems: {
+        name: string;
+        srcPath: string;
+    }[];
 }
 export interface ProblemEvent extends ProblemEventData {
     type: 'problem';
@@ -92,7 +98,7 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
                         sidebarProvider.event.emit('activePath', {
                             activePath: getActivePath(),
                         });
-                        ProblemsManager.dataRefresh();
+                        await ProblemsManager.dataRefresh();
                     } else if (msg.type === 'createProblem') {
                         await CphNg.createProblem(msg.activePath);
                     } else if (msg.type === 'importProblem') {

@@ -75,7 +75,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                   : vscode.l10n.t('(<empty>)');
 
         const activePath = getActivePath();
-        const bgProblem = await ProblemsManager.getBgProblem(activePath);
+        const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(
                 new vscode.LanguageModelTextPart(
@@ -124,7 +124,8 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                 });
             }
 
-            const refreshedBg = await ProblemsManager.getBgProblem(activePath);
+            const refreshedBg =
+                await ProblemsManager.getFullProblem(activePath);
             const tcs = idx
                 ? [refreshedBg!.problem.tcs[idx - 1]]
                 : refreshedBg!.problem.tcs;

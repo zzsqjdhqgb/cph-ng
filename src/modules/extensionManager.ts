@@ -118,14 +118,16 @@ export default class ExtensionManager {
             );
             context.subscriptions.push(
                 vscode.window.onDidChangeActiveTextEditor(
-                    debounce<(editor?: vscode.TextEditor) => void>((editor) => {
-                        setActivePath(editor);
-                        sidebarProvider.event.emit('activePath', {
-                            activePath: getActivePath(),
-                        });
-                        ProblemsManager.dataRefresh();
-                        ProblemsManager.saveIfIdle();
-                    }, 50),
+                    debounce<(editor?: vscode.TextEditor) => void>(
+                        async (editor) => {
+                            setActivePath(editor);
+                            sidebarProvider.event.emit('activePath', {
+                                activePath: getActivePath(),
+                            });
+                            await ProblemsManager.dataRefresh();
+                        },
+                        50,
+                    ),
                 ),
             );
 
@@ -276,7 +278,7 @@ OS: ${release()}`;
             );
 
             setActivePath(vscode.window.activeTextEditor);
-            ProblemsManager.dataRefresh();
+            await ProblemsManager.dataRefresh();
             ExtensionManager.logger.info(
                 'CPH-NG extension activated successfully',
             );

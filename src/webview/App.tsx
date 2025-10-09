@@ -20,10 +20,16 @@ import i18n from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
-import { ActivePathEvent, ProblemEvent } from '../modules/sidebarProvider';
-import { Problem } from '../utils/types';
+import {
+    ActivePathEvent,
+    ProblemEvent,
+    ProblemEventData,
+} from '../modules/sidebarProvider';
+import CphFlex from './components/base/cphFlex';
 import ErrorBoundary from './components/base/errorBoundary';
+import BgProblemView from './components/bgProblemView';
 import CreateProblemView from './components/createProblemView';
+import InitView from './components/initView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
@@ -39,9 +45,9 @@ i18n.use(initReactI18next).init({
 });
 
 const App = () => {
-    const [problem, setProblem] = useState<Problem | undefined>();
-    const [canImport, setCanImport] = useState<boolean>(false);
-    const [startTime, setStartTime] = useState<number | undefined>();
+    const [problemData, setProblemData] = useState<
+        ProblemEventData | undefined
+    >();
     useEffect(() => {
         i18n.changeLanguage(language);
         window.onmessage = (
@@ -53,9 +59,7 @@ const App = () => {
                     window.activePath = msg.activePath;
                     break;
                 case 'problem':
-                    setProblem(msg.problem);
-                    setCanImport(msg.canImport);
-                    setStartTime(msg.startTime);
+                    setProblemData(msg);
                     break;
             }
         };
@@ -70,14 +74,31 @@ const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <ErrorBoundary>
-                {problem ? (
-                    <ProblemView
-                        problem={problem}
-                        startTime={startTime!}
-                    />
-                ) : (
-                    <CreateProblemView canImport={canImport} />
-                )}
+                <CphFlex
+                    column
+                    smallGap
+                    height={'100%'}
+                    sx={{
+                        boxSizing: 'border-box',
+                    }}
+                >
+                    {problemData ? (
+                        <>
+                            {problemData.problem ? (
+                                <ProblemView {...problemData.problem} />
+                            ) : (
+                                <CreateProblemView
+                                    canImport={problemData.canImport || false}
+                                />
+                            )}
+                            <BgProblemView
+                                bgProblems={problemData.bgProblems || []}
+                            />
+                        </>
+                    ) : (
+                        <InitView />
+                    )}
+                </CphFlex>
             </ErrorBoundary>
         </ThemeProvider>
     );

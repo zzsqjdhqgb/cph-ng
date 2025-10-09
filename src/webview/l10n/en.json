@@ -1,6 +1,9 @@
 {
     "acCongrats.firstLine": "Congratulations!",
     "acCongrats.secondLine": "You have passed all the test cases!",
+    "bgProblemView.empty": "There are currently no background problems now. Now CPH NG allows you to run test cases or a brute force compare in the background.",
+    "bgProblemView.message": "Background problems count: {{cnt}}",
+    "bgProblemView.title": "Background problems",
     "createProblemView.createAlert": "This document does not have a CPH-NG problem associated with it.",
     "createProblemView.createButton": "Create",
     "createProblemView.importAlert": "This document has a CPH problem that you can import from, but no CPH-NG problem.",
@@ -8,6 +11,7 @@
     "errorBoundary.description": "An unexpected error occurred. We apologize for the inconvenience. You can try to reload the page or report this issue on GitHub.",
     "errorBoundary.details": "Detailed error information",
     "errorBoundary.title": "Error",
+    "initView.message": "Initializing",
     "noTcs.firstLine": "There is currently no test cases now.",
     "noTcs.secondLine": "Add one using the button bellow!",
     "problemActions.addTc": "Add Test Case",
