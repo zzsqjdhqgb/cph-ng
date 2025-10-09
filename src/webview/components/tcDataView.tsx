@@ -55,9 +55,9 @@ const ansiToReact = (ansi: string) => {
         <div
             contentEditable
             suppressContentEditableWarning={true}
+            onKeyDown={(e) => e.preventDefault()}
             onCut={(e) => e.preventDefault()}
             onPaste={(e) => e.preventDefault()}
-            onBeforeInput={(e) => e.preventDefault()}
             style={{ cursor: 'text', outline: 'none' }}
         >
             {ansiToJson(ansi).map((entry: AnserJsonEntry, idx: number) => {
