@@ -18,6 +18,7 @@
 import { BoxProps } from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { PopoverPosition } from '@mui/material/Popover';
 import React, { useState } from 'react';
 
 interface CphMenuProps extends BoxProps {
@@ -26,52 +27,25 @@ interface CphMenuProps extends BoxProps {
 }
 
 const CphMenu = ({ children, menu }: CphMenuProps) => {
-    const [contextMenu, setContextMenu] = useState<{
-        mouseX: number;
-        mouseY: number;
-    } | null>(null);
-
-    const handleContextMenu = (event: React.MouseEvent) => {
-        event.preventDefault();
-
-        setContextMenu(
-            contextMenu === null
-                ? {
-                      mouseX: event.clientX + 2,
-                      mouseY: event.clientY - 6,
-                  }
-                : null,
-        );
-
-        const selection = document.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-
-            setTimeout(() => {
-                selection.addRange(range);
-            });
-        }
-    };
-
-    const handleClose = () => {
-        setContextMenu(null);
-    };
-
+    const [contextMenu, setContextMenu] = useState<PopoverPosition>();
     return (
         <div
-            onContextMenu={handleContextMenu}
+            onContextMenu={(e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setContextMenu({
+                    left: e.clientX + 2,
+                    top: e.clientY - 6,
+                });
+            }}
             style={{ cursor: 'context-menu' }}
         >
             {children}
             <Menu
-                open={contextMenu !== null}
-                onClose={handleClose}
+                open={!!contextMenu}
+                onClose={() => setContextMenu(undefined)}
                 anchorReference='anchorPosition'
-                anchorPosition={
-                    contextMenu !== null
-                        ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-                        : undefined
-                }
+                anchorPosition={contextMenu}
             >
                 {Object.entries(menu).map(([key, value]) => (
                     <MenuItem
@@ -79,7 +53,7 @@ const CphMenu = ({ children, menu }: CphMenuProps) => {
                         key={key}
                         onClick={() => {
                             value();
-                            handleClose();
+                            setContextMenu(undefined);
                         }}
                     >
                         {key}

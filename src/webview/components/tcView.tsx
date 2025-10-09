@@ -131,26 +131,43 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                     }}
                                 />
                             )}
-                            <CphButton
-                                name={t('tcView.run')}
-                                icon={PlayArrowIcon}
-                                color={'success'}
-                                loading={running}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    msg({
-                                        type: 'runTc',
-                                        idx,
-                                        compile: getCompile(e),
-                                    });
+                            <CphMenu
+                                menu={{
+                                    [t('tcView.run.menu.forceCompile')]: () => {
+                                        msg({
+                                            type: 'runTc',
+                                            idx,
+                                            compile: true,
+                                        });
+                                    },
+                                    [t('tcView.run.menu.skipCompile')]: () => {
+                                        msg({
+                                            type: 'runTc',
+                                            idx,
+                                            compile: false,
+                                        });
+                                    },
                                 }}
-                            />
+                            >
+                                <CphButton
+                                    name={t('tcView.run')}
+                                    icon={PlayArrowIcon}
+                                    color={'success'}
+                                    loading={running}
+                                    onClick={(e) => {
+                                        msg({
+                                            type: 'runTc',
+                                            idx,
+                                            compile: getCompile(e),
+                                        });
+                                    }}
+                                />
+                            </CphMenu>
                             <CphButton
                                 name={t('tcView.delete')}
                                 icon={DeleteIcon}
                                 color={'error'}
-                                onClick={(e) => {
-                                    e.stopPropagation();
+                                onClick={() => {
                                     msg({ type: 'delTc', idx });
                                 }}
                             />

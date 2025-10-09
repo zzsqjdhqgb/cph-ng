@@ -16,9 +16,12 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import Box from '@mui/material/Box';
+import { t } from 'i18next';
 import React from 'react';
 import { Problem } from '../../utils/types';
+import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
+import CphMenu from './base/cphMenu';
 import ProblemActions from './problemActions';
 import ProblemTitle from './problemTitle';
 import TcsView from './tcsView';
@@ -54,7 +57,15 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
                 bgcolor={'rgba(127, 127, 127, 0.05)'}
                 paddingY={2}
             >
-                <TcsView problem={problem} />
+                <CphMenu
+                    menu={{
+                        [t('problemView.menu.clearStatus')]: () => {
+                            msg({ type: 'clearStatus' });
+                        },
+                    }}
+                >
+                    <TcsView problem={problem} />
+                </CphMenu>
             </Box>
             <ProblemActions problem={problem} />
         </CphFlex>

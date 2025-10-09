@@ -40,6 +40,7 @@ import { isRunningVerdict, Problem } from '../../utils/types';
 import { basename, getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
+import CphMenu from './base/cphMenu';
 import CphButton from './cphButton';
 
 interface ProblemActionsProps {
@@ -103,18 +104,37 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             }}
                         />
                     ) : (
-                        <CphButton
-                            larger={true}
-                            name={t('problemActions.runTcs')}
-                            icon={PlaylistPlayIcon}
-                            color={'success'}
-                            onClick={(e) => {
-                                msg({
-                                    type: 'runTcs',
-                                    compile: getCompile(e),
-                                });
+                        <CphMenu
+                            menu={{
+                                [t('problemActions.runTcs.menu.forceCompile')]:
+                                    () => {
+                                        msg({
+                                            type: 'runTcs',
+                                            compile: true,
+                                        });
+                                    },
+                                [t('problemActions.runTcs.menu.skipCompile')]:
+                                    () => {
+                                        msg({
+                                            type: 'runTcs',
+                                            compile: false,
+                                        });
+                                    },
                             }}
-                        />
+                        >
+                            <CphButton
+                                larger={true}
+                                name={t('problemActions.runTcs')}
+                                icon={PlaylistPlayIcon}
+                                color={'success'}
+                                onClick={(e) => {
+                                    msg({
+                                        type: 'runTcs',
+                                        compile: getCompile(e),
+                                    });
+                                }}
+                            />
+                        </CphMenu>
                     )}
                     <CphButton
                         larger={true}

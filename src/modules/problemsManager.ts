@@ -33,6 +33,7 @@ import {
     AddTcMsg,
     ChooseSrcFileMsg,
     ChooseTcFileMsg,
+    ClearStatus,
     ClearTcStatus,
     CompareTcMsg,
     DelProblemMsg,
@@ -264,6 +265,17 @@ export default class ProblemsManager {
             return;
         }
         bgProblem.problem.tcs[msg.idx].result = undefined;
+        await this.dataRefresh();
+        await this.saveIfIdle();
+    }
+    public static async clearStatus(msg: ClearStatus) {
+        const bgProblem = await this.getBgProblem(msg.activePath);
+        if (!bgProblem) {
+            return;
+        }
+        for (const tc of bgProblem.problem.tcs) {
+            tc.result = undefined;
+        }
         await this.dataRefresh();
         await this.saveIfIdle();
     }
