@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, TC } from '../../utils/types';
 import { getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
+import CphMenu from './base/cphMenu';
 import CphText from './base/cphText';
 import ErrorBoundary from './base/errorBoundary';
 import CphButton from './cphButton';
@@ -47,201 +48,217 @@ const TcView = ({ tc, idx }: TcViewProp) => {
 
     return (
         <ErrorBoundary>
-            <Accordion
-                expanded={tc.isExpand}
-                disableGutters={true}
-                onChange={(_, expanded) => {
-                    tc.isExpand = expanded;
-                    emitUpdate();
-                }}
-                sx={{
-                    borderLeft: `4px solid`,
-                    ...(window.easterEgg
-                        ? (() => {
-                              const hash = MD5(JSON.stringify(tc)).words;
-                              let color = 0;
-                              for (let i = 0; i < hash.length; i++) {
-                                  color = (color << 4) + hash[i];
-                              }
-                              color =
-                                  (((color >> 16) & 0xff) << 16) |
-                                  (((color >> 8) & 0xff) << 8) |
-                                  (color & 0xff);
-                              const colorStr = color
-                                  .toString(16)
-                                  .padStart(6, '0');
-                              return {
-                                  borderLeftColor: `#${colorStr}`,
-                                  backgroundColor: `#${colorStr}20`,
-                              };
-                          })()
-                        : tc.result?.verdict
-                          ? {
-                                borderLeftColor: `rgb(${tc.result.verdict.color})`,
-                                backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
-                            }
-                          : {
-                                borderLeftColor: 'transparent',
-                            }),
+            <CphMenu
+                menu={{
+                    [t('tcView.menu.clearTcStatus')]: () => {
+                        msg({ type: 'clearTcStatus', idx });
+                    },
                 }}
             >
-                <AccordionSummary
-                    sx={{
-                        '& > span': { margin: '0 !important' },
+                <Accordion
+                    expanded={tc.isExpand}
+                    disableGutters={true}
+                    onChange={(_, expanded) => {
+                        tc.isExpand = expanded;
+                        emitUpdate();
                     }}
-                    onContextMenu={(e) => {
-                        msg({ type: 'clearTcStatus', idx });
-                        e.preventDefault();
+                    sx={{
+                        borderLeft: `4px solid`,
+                        ...(window.easterEgg
+                            ? (() => {
+                                  const hash = MD5(JSON.stringify(tc)).words;
+                                  let color = 0;
+                                  for (let i = 0; i < hash.length; i++) {
+                                      color = (color << 4) + hash[i];
+                                  }
+                                  color =
+                                      (((color >> 16) & 0xff) << 16) |
+                                      (((color >> 8) & 0xff) << 8) |
+                                      (color & 0xff);
+                                  const colorStr = color
+                                      .toString(16)
+                                      .padStart(6, '0');
+                                  return {
+                                      borderLeftColor: `#${colorStr}`,
+                                      backgroundColor: `#${colorStr}20`,
+                                  };
+                              })()
+                            : tc.result?.verdict
+                              ? {
+                                    borderLeftColor: `rgb(${tc.result.verdict.color})`,
+                                    backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
+                                }
+                              : {
+                                    borderLeftColor: 'transparent',
+                                }),
                     }}
                 >
-                    <CphFlex smallGap>
-                        <CphFlex flex={1}>
-                            <CphText fontWeight={'bold'}>#{idx + 1}</CphText>
-                            <Tooltip title={tc.result?.verdict.fullName}>
-                                <CphText>{tc.result?.verdict.name}</CphText>
-                            </Tooltip>
-                        </CphFlex>
-                        {!!tc.result?.memory && (
-                            <Chip
-                                label={t('tcView.memory', {
-                                    memory: tc.result.memory.toFixed(1),
-                                })}
-                                size={'small'}
-                                sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
-                            />
-                        )}
-                        {!!tc.result?.time && (
-                            <Chip
-                                label={t('tcView.time', {
-                                    time: tc.result.time.toFixed(1),
-                                })}
-                                size={'small'}
-                                sx={{ marginLeft: 'auto', fontSize: '0.8rem' }}
-                            />
-                        )}
-                        <CphButton
-                            name={t('tcView.run')}
-                            icon={PlayArrowIcon}
-                            color={'success'}
-                            loading={running}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                msg({
-                                    type: 'runTc',
-                                    idx,
-                                    compile: getCompile(e),
-                                });
-                            }}
-                        />
-                        <CphButton
-                            name={t('tcView.delete')}
-                            icon={DeleteIcon}
-                            color={'error'}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                msg({ type: 'delTc', idx });
-                            }}
-                        />
-                    </CphFlex>
-                </AccordionSummary>
-                <AccordionDetails>
-                    <CphFlex column>
-                        <CphFlex
-                            smallGap
-                            column
-                        >
-                            <TcDataView
-                                label={t('tcView.stdin')}
-                                value={tc.stdin}
-                                onBlur={(value) => {
-                                    tc.stdin = {
-                                        useFile: false,
-                                        data: value,
-                                    };
-                                    emitUpdate();
-                                }}
-                                onChooseFile={() =>
+                    <AccordionSummary
+                        sx={{
+                            '& > span': { margin: '0 !important' },
+                        }}
+                    >
+                        <CphFlex smallGap>
+                            <CphFlex flex={1}>
+                                <CphText fontWeight={'bold'}>
+                                    #{idx + 1}
+                                </CphText>
+                                <Tooltip title={tc.result?.verdict.fullName}>
+                                    <CphText>{tc.result?.verdict.name}</CphText>
+                                </Tooltip>
+                            </CphFlex>
+                            {!!tc.result?.memory && (
+                                <Chip
+                                    label={t('tcView.memory', {
+                                        memory: tc.result.memory.toFixed(1),
+                                    })}
+                                    size={'small'}
+                                    sx={{
+                                        marginLeft: 'auto',
+                                        fontSize: '0.8rem',
+                                    }}
+                                />
+                            )}
+                            {!!tc.result?.time && (
+                                <Chip
+                                    label={t('tcView.time', {
+                                        time: tc.result.time.toFixed(1),
+                                    })}
+                                    size={'small'}
+                                    sx={{
+                                        marginLeft: 'auto',
+                                        fontSize: '0.8rem',
+                                    }}
+                                />
+                            )}
+                            <CphButton
+                                name={t('tcView.run')}
+                                icon={PlayArrowIcon}
+                                color={'success'}
+                                loading={running}
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     msg({
-                                        type: 'chooseTcFile',
-                                        label: 'stdin',
+                                        type: 'runTc',
                                         idx,
-                                    })
-                                }
-                                onToggleFile={() => {
-                                    msg({
-                                        type: 'toggleTcFile',
-                                        label: 'stdin',
-                                        idx,
+                                        compile: getCompile(e),
                                     });
                                 }}
                             />
-                            <TcDataView
-                                label={t('tcView.answer')}
-                                value={tc.answer}
-                                onBlur={(value) => {
-                                    tc.answer = {
-                                        useFile: false,
-                                        data: value,
-                                    };
-                                    emitUpdate();
-                                }}
-                                onChooseFile={() => {
-                                    msg({
-                                        type: 'chooseTcFile',
-                                        label: 'answer',
-                                        idx,
-                                    });
-                                }}
-                                onToggleFile={() => {
-                                    msg({
-                                        type: 'toggleTcFile',
-                                        label: 'answer',
-                                        idx,
-                                    });
+                            <CphButton
+                                name={t('tcView.delete')}
+                                icon={DeleteIcon}
+                                color={'error'}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    msg({ type: 'delTc', idx });
                                 }}
                             />
                         </CphFlex>
-                        {tc.result && (
-                            <>
-                                <Divider />
-                                <CphFlex
-                                    smallGap
-                                    column
-                                >
-                                    <TcDataView
-                                        label={t('tcView.stdout')}
-                                        value={tc.result.stdout}
-                                        readOnly={true}
-                                        outputActions={{
-                                            onSetAnswer: () => {
-                                                tc.answer = tc.result!.stdout;
-                                                tc.result = undefined;
-                                                emitUpdate();
-                                            },
-                                            onCompare: () => {
-                                                msg({ type: 'compareTc', idx });
-                                            },
-                                        }}
-                                    />
-                                    <TcDataView
-                                        label={t('tcView.stderr')}
-                                        value={tc.result.stderr}
-                                        readOnly={true}
-                                    />
-                                    <TcDataView
-                                        label={t('tcView.message')}
-                                        value={{
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <CphFlex column>
+                            <CphFlex
+                                smallGap
+                                column
+                            >
+                                <TcDataView
+                                    label={t('tcView.stdin')}
+                                    value={tc.stdin}
+                                    onBlur={(value) => {
+                                        tc.stdin = {
                                             useFile: false,
-                                            data: tc.result.msg,
-                                        }}
-                                        readOnly={true}
-                                    />
-                                </CphFlex>
-                            </>
-                        )}
-                    </CphFlex>
-                </AccordionDetails>
-            </Accordion>
+                                            data: value,
+                                        };
+                                        emitUpdate();
+                                    }}
+                                    onChooseFile={() =>
+                                        msg({
+                                            type: 'chooseTcFile',
+                                            label: 'stdin',
+                                            idx,
+                                        })
+                                    }
+                                    onToggleFile={() => {
+                                        msg({
+                                            type: 'toggleTcFile',
+                                            label: 'stdin',
+                                            idx,
+                                        });
+                                    }}
+                                />
+                                <TcDataView
+                                    label={t('tcView.answer')}
+                                    value={tc.answer}
+                                    onBlur={(value) => {
+                                        tc.answer = {
+                                            useFile: false,
+                                            data: value,
+                                        };
+                                        emitUpdate();
+                                    }}
+                                    onChooseFile={() => {
+                                        msg({
+                                            type: 'chooseTcFile',
+                                            label: 'answer',
+                                            idx,
+                                        });
+                                    }}
+                                    onToggleFile={() => {
+                                        msg({
+                                            type: 'toggleTcFile',
+                                            label: 'answer',
+                                            idx,
+                                        });
+                                    }}
+                                />
+                            </CphFlex>
+                            {tc.result && (
+                                <>
+                                    <Divider />
+                                    <CphFlex
+                                        smallGap
+                                        column
+                                    >
+                                        <TcDataView
+                                            label={t('tcView.stdout')}
+                                            value={tc.result.stdout}
+                                            readOnly={true}
+                                            outputActions={{
+                                                onSetAnswer: () => {
+                                                    tc.answer =
+                                                        tc.result!.stdout;
+                                                    tc.result = undefined;
+                                                    emitUpdate();
+                                                },
+                                                onCompare: () => {
+                                                    msg({
+                                                        type: 'compareTc',
+                                                        idx,
+                                                    });
+                                                },
+                                            }}
+                                        />
+                                        <TcDataView
+                                            label={t('tcView.stderr')}
+                                            value={tc.result.stderr}
+                                            readOnly={true}
+                                        />
+                                        <TcDataView
+                                            label={t('tcView.message')}
+                                            value={{
+                                                useFile: false,
+                                                data: tc.result.msg,
+                                            }}
+                                            readOnly={true}
+                                        />
+                                    </CphFlex>
+                                </>
+                            )}
+                        </CphFlex>
+                    </AccordionDetails>
+                </Accordion>
+            </CphMenu>
         </ErrorBoundary>
     );
 };

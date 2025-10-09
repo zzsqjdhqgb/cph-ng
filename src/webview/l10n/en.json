@@ -61,6 +61,7 @@
     "tcView.answer": "Answer",
     "tcView.delete": "Delete",
     "tcView.memory": "{{memory}} MB",
+    "tcView.menu.clearTcStatus": "Clear Test Case Status",
     "tcView.message": "Message",
     "tcView.run": "Run",
     "tcView.stderr": "Error",
