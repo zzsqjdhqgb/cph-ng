@@ -17,11 +17,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "name",
-                "fullName",
-                "color"
-            ],
+            "required": ["name", "fullName", "color"],
             "additionalProperties": false
         },
         "FileWithHash": {
@@ -37,9 +33,7 @@
                     "maxLength": 64
                 }
             },
-            "required": [
-                "path"
-            ],
+            "required": ["path"],
             "additionalProperties": false
         },
         "TCIO": {
@@ -55,10 +49,7 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "useFile",
-                        "path"
-                    ],
+                    "required": ["useFile", "path"],
                     "additionalProperties": false
                 },
                 {
@@ -71,10 +62,7 @@
                             "type": "string"
                         }
                     },
-                    "required": [
-                        "useFile",
-                        "data"
-                    ],
+                    "required": ["useFile", "data"],
                     "additionalProperties": false
                 }
             ]
@@ -102,13 +90,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "verdict",
-                "time",
-                "stdout",
-                "stderr",
-                "msg"
-            ],
+            "required": ["verdict", "time", "stdout", "stderr", "msg"],
             "additionalProperties": false
         },
         "TC": {
@@ -128,11 +110,7 @@
                     "$ref": "#/definitions/TCResult"
                 }
             },
-            "required": [
-                "stdin",
-                "answer",
-                "isExpand"
-            ],
+            "required": ["stdin", "answer", "isExpand"],
             "additionalProperties": false
         },
         "BFCompare": {
@@ -152,10 +130,7 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "running",
-                "msg"
-            ],
+            "required": ["running", "msg"],
             "additionalProperties": false
         }
     },

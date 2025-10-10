@@ -26,6 +26,7 @@ import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
 import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
 import { exists } from '../utils/process';
+import { assignResult } from '../utils/result';
 import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
 import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { chooseSrcFile, chooseTcFile, getTcs } from '../utils/ui';
@@ -228,8 +229,7 @@ export default class ProblemsManager {
             msg.compile,
             fullProblem.ac,
         );
-        if (compileResult.verdict !== TCVerdicts.UKE) {
-            result.verdict = TCVerdicts.CE;
+        if (assignResult(result, compileResult)) {
             tc.isExpand = true;
             await beforeReturn();
             return;
@@ -308,8 +308,9 @@ export default class ProblemsManager {
             fullProblem.ac,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
+            console.log(compileResult);
             for (const tc of fullProblem.problem.tcs) {
-                tc.result!.verdict = TCVerdicts.CE;
+                assignResult(tc.result!, compileResult);
             }
             await beforeReturn();
             return;

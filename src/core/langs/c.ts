@@ -90,6 +90,13 @@ export class LangC extends Lang {
                 outputPath,
             });
             Io.compilationMsg = result.stderr.trim();
+            if (ac.signal.aborted) {
+                this.logger.warn('Compilation aborted by user');
+                return {
+                    verdict: TCVerdicts.RJ,
+                    msg: vscode.l10n.t('Compilation aborted by user.'),
+                };
+            }
             return {
                 verdict: await access(outputPath, constants.X_OK)
                     .then(() => TCVerdicts.UKE)
@@ -99,13 +106,6 @@ export class LangC extends Lang {
             };
         } catch (e) {
             this.logger.error('Compilation failed', e);
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: vscode.l10n.t('Compilation aborted by user.'),
-                };
-            }
             Io.compilationMsg = (e as Error).message;
             return { verdict: TCVerdicts.CE, msg: '' };
         }

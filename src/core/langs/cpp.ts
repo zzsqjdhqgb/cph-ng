@@ -165,6 +165,13 @@ export class LangCpp extends Lang {
                 .map((result) => result.stderr.trim())
                 .filter((msg) => msg)
                 .join('\n\n');
+            if (ac.signal.aborted) {
+                this.logger.warn('Compilation aborted by user');
+                return {
+                    verdict: TCVerdicts.RJ,
+                    msg: vscode.l10n.t('Compilation aborted by user.'),
+                };
+            }
             if (results.some((res) => res.killed)) {
                 return {
                     verdict: TCVerdicts.CE,
@@ -183,13 +190,6 @@ export class LangCpp extends Lang {
             };
         } catch (e) {
             this.logger.error('Compilation failed', e);
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: vscode.l10n.t('Compilation aborted by user.'),
-                };
-            }
             Io.compilationMsg = (e as Error).message;
             return { verdict: TCVerdicts.CE, msg: '' };
         }
