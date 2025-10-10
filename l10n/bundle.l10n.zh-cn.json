@@ -116,6 +116,7 @@
     "Testlib returned unknown exit code: {code}": "Testlib 返回了未知的退出代码：{code}",
     "Testlib run failed": "Testlib 运行失败",
     "Text files": "文本文件",
+    "The brute force compare found a difference, but the input file is {size} bytes, which may be large. Do you want to save it in file instead?": "对拍找到不同，但是输入文件大小为 {size} 字节，可能较大。你想要把它存在文件里吗？",
     "The file size is {size} bytes, which may be large. Are you sure you want to load it inline?": "文件大小为 {size} 字节，可能较大。你确定要将其内联加载吗？",
     "The {fileType} data for test case {idx} is inline and not stored in a separate file. Content:": "测试用例 {idx} 的 {fileType} 数据是内联的，而不是存储在单独的文件中。内容：",
     "Time Limit Exceeded": "时间超限",

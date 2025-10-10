@@ -568,6 +568,7 @@ export default class ProblemsManager {
             srcLang,
             msg.compile,
             fullProblem.ac,
+            true,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
             bfCompare.msg = vscode.l10n.t('Solution compilation failed.');
@@ -667,6 +668,38 @@ export default class ProblemsManager {
             );
             if (tempTc.result?.verdict !== TCVerdicts.AC) {
                 if (tempTc.result?.verdict !== TCVerdicts.RJ) {
+                    if (
+                        !tempTc.stdin.useFile &&
+                        tempTc.stdin.data.length >
+                            Settings.problem.maxInlineDataLength &&
+                        (await Io.confirm(
+                            vscode.l10n.t(
+                                'The brute force compare found a difference, but the input file is {size} bytes, which may be large. Do you want to save it in file instead?',
+                                { size: tempTc.stdin.data.length },
+                            ),
+                            true,
+                        ))
+                    ) {
+                        let tempFilePath: string | undefined = join(
+                            dirname(fullProblem.problem.src.path),
+                            `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${cnt}.in`,
+                        );
+                        tempFilePath = await vscode.window
+                            .showSaveDialog({
+                                defaultUri: vscode.Uri.file(tempFilePath),
+                                saveLabel: vscode.l10n.t(
+                                    'Select location to save',
+                                ),
+                            })
+                            .then((uri) => (uri ? uri.fsPath : undefined));
+                        if (tempFilePath) {
+                            await writeFile(tempFilePath, tempTc.stdin.data);
+                            tempTc.stdin = {
+                                useFile: true,
+                                path: tempFilePath,
+                            };
+                        }
+                    }
                     fullProblem.problem.tcs.push(tempTc);
                     bfCompare.msg = vscode.l10n.t(
                         'Found a difference in #{cnt} run.',
