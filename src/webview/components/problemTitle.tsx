@@ -32,6 +32,7 @@ import { Problem } from '../../utils/types';
 import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
+import CphMenu from './base/cphMenu';
 import CphText from './base/cphText';
 import CphButton from './cphButton';
 
@@ -185,12 +186,22 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                     </CphText>
                 </CphFlex>
                 {isHoveringTitle && (
-                    <CphButton
-                        name={t('problemTitle.editTitle')}
-                        icon={EditIcon}
-                        color={'secondary'}
-                        onClick={handleEditTitle}
-                    />
+                    <CphMenu
+                        menu={{
+                            [t('problemTitle.menu.editRaw')]: () => {
+                                msg({
+                                    type: 'openRaw',
+                                });
+                            },
+                        }}
+                    >
+                        <CphButton
+                            name={t('problemTitle.editTitle')}
+                            icon={EditIcon}
+                            color={'secondary'}
+                            onClick={handleEditTitle}
+                        />
+                    </CphMenu>
                 )}
             </CphFlex>
             <Dialog

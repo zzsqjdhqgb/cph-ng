@@ -2,6 +2,163 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Problem",
     "type": "object",
+    "definitions": {
+        "TCVerdict": {
+            "title": "TCVerdict",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "fullName",
+                "color"
+            ],
+            "additionalProperties": false
+        },
+        "FileWithHash": {
+            "title": "FileWithHash",
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string",
+                    "minLength": 64,
+                    "maxLength": 64
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "additionalProperties": false
+        },
+        "TCIO": {
+            "title": "TCIO",
+            "oneOf": [
+                {
+                    "properties": {
+                        "useFile": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "path": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "useFile",
+                        "path"
+                    ],
+                    "additionalProperties": false
+                },
+                {
+                    "properties": {
+                        "useFile": {
+                            "type": "boolean",
+                            "const": false
+                        },
+                        "data": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "useFile",
+                        "data"
+                    ],
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "TCResult": {
+            "title": "TCResult",
+            "type": "object",
+            "properties": {
+                "verdict": {
+                    "$ref": "#/definitions/TCVerdict"
+                },
+                "memory": {
+                    "type": "number"
+                },
+                "time": {
+                    "type": "number"
+                },
+                "stdout": {
+                    "$ref": "#/definitions/TCIO"
+                },
+                "stderr": {
+                    "$ref": "#/definitions/TCIO"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "verdict",
+                "time",
+                "stdout",
+                "stderr",
+                "msg"
+            ],
+            "additionalProperties": false
+        },
+        "TC": {
+            "title": "TC",
+            "type": "object",
+            "properties": {
+                "stdin": {
+                    "$ref": "#/definitions/TCIO"
+                },
+                "answer": {
+                    "$ref": "#/definitions/TCIO"
+                },
+                "isExpand": {
+                    "type": "boolean"
+                },
+                "result": {
+                    "$ref": "#/definitions/TCResult"
+                }
+            },
+            "required": [
+                "stdin",
+                "answer",
+                "isExpand"
+            ],
+            "additionalProperties": false
+        },
+        "BFCompare": {
+            "title": "BFCompare",
+            "type": "object",
+            "properties": {
+                "generator": {
+                    "$ref": "#/definitions/FileWithHash"
+                },
+                "bruteForce": {
+                    "$ref": "#/definitions/FileWithHash"
+                },
+                "running": {
+                    "type": "boolean"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "running",
+                "msg"
+            ],
+            "additionalProperties": false
+        }
+    },
     "properties": {
         "version": {
             "type": "string"
@@ -10,114 +167,13 @@
             "type": "string"
         },
         "url": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
         },
         "tcs": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "stdin": {
-                        "type": "object",
-                        "properties": {
-                            "useFile": {
-                                "type": "boolean"
-                            },
-                            "path": {
-                                "type": "string"
-                            },
-                            "data": {
-                                "type": "string"
-                            }
-                        },
-                        "required": ["useFile"]
-                    },
-                    "answer": {
-                        "type": "object",
-                        "properties": {
-                            "useFile": {
-                                "type": "boolean"
-                            },
-                            "path": {
-                                "type": "string"
-                            },
-                            "data": {
-                                "type": "string"
-                            }
-                        },
-                        "required": ["useFile"]
-                    },
-                    "isExpand": {
-                        "type": "boolean"
-                    },
-                    "result": {
-                        "type": "object",
-                        "properties": {
-                            "verdict": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "fullName": {
-                                        "type": "string"
-                                    },
-                                    "color": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["name", "fullName", "color"]
-                            },
-                            "memory": {
-                                "type": "number"
-                            },
-                            "time": {
-                                "type": "number"
-                            },
-                            "stdout": {
-                                "type": "object",
-                                "properties": {
-                                    "useFile": {
-                                        "type": "boolean"
-                                    },
-                                    "path": {
-                                        "type": "string"
-                                    },
-                                    "data": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["useFile"]
-                            },
-                            "stderr": {
-                                "type": "object",
-                                "properties": {
-                                    "useFile": {
-                                        "type": "boolean"
-                                    },
-                                    "path": {
-                                        "type": "string"
-                                    },
-                                    "data": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["useFile"]
-                            },
-                            "msg": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "verdict",
-                            "time",
-                            "stdout",
-                            "stderr",
-                            "msg"
-                        ]
-                    }
-                },
-                "required": ["stdin", "answer", "isExpand"]
+                "$ref": "#/definitions/TC"
             }
         },
         "timeLimit": {
@@ -129,86 +185,16 @@
             "minimum": 1
         },
         "src": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
-                },
-                "hash": {
-                    "type": "string",
-                    "minLength": 64,
-                    "maxLength": 64
-                }
-            },
-            "required": ["path"]
+            "$ref": "#/definitions/FileWithHash"
         },
         "checker": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
-                },
-                "hash": {
-                    "type": "string",
-                    "minLength": 64,
-                    "maxLength": 64
-                }
-            },
-            "required": ["path"]
+            "$ref": "#/definitions/FileWithHash"
         },
         "interactor": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string"
-                },
-                "hash": {
-                    "type": "string",
-                    "minLength": 64,
-                    "maxLength": 64
-                }
-            },
-            "required": ["path"]
+            "$ref": "#/definitions/FileWithHash"
         },
         "bfCompare": {
-            "type": "object",
-            "properties": {
-                "generator": {
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string"
-                        },
-                        "hash": {
-                            "type": "string",
-                            "minLength": 64,
-                            "maxLength": 64
-                        }
-                    },
-                    "required": ["path"]
-                },
-                "bruteForce": {
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string"
-                        },
-                        "hash": {
-                            "type": "string",
-                            "minLength": 64,
-                            "maxLength": 64
-                        }
-                    },
-                    "required": ["path"]
-                },
-                "running": {
-                    "type": "boolean"
-                },
-                "msg": {
-                    "type": "string"
-                }
-            },
-            "required": ["running", "msg"]
+            "$ref": "#/definitions/BFCompare"
         },
         "timeElapsed": {
             "type": "integer",
@@ -223,5 +209,6 @@
         "memoryLimit",
         "src",
         "timeElapsed"
-    ]
+    ],
+    "additionalProperties": false
 }

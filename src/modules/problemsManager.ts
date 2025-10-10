@@ -33,7 +33,7 @@ import * as msgs from '../webview/msgs';
 import Companion from './companion';
 import CphCapable from './cphCapable';
 import ExtensionManager from './extensionManager';
-import { generateTcUri } from './fileSystemProvider';
+import FileSystemProvider, { generateTcUri } from './fileSystemProvider';
 import Settings from './settings';
 
 interface FullProblem {
@@ -702,5 +702,20 @@ export default class ProblemsManager {
             return;
         }
         Companion.submit(fullProblem.problem);
+    }
+    public static async openRaw(msg: msgs.OpenRawMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
+            return;
+        }
+        await vscode.window.showTextDocument(
+            await vscode.workspace.openTextDocument(
+                vscode.Uri.from({
+                    scheme: FileSystemProvider.scheme,
+                    authority: fullProblem.problem.src.path,
+                    path: '/problem.cph-ng.json',
+                }),
+            ),
+        );
     }
 }

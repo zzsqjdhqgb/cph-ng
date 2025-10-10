@@ -54,6 +54,7 @@
     "problemTitle.editTitle": "Edit Problem",
     "problemTitle.interact": "Interact",
     "problemTitle.memoryLimit": "{{memory}} MB",
+    "problemTitle.menu.editRaw": "Edit Raw Data",
     "problemTitle.specialJudge": "SPJ",
     "problemTitle.timeElapsed": "Time Elapsed",
     "problemTitle.timeLimit": "{{time}} ms",

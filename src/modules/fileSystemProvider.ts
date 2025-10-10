@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { join } from 'path';
 import * as vscode from 'vscode';
 import { Problem } from '../utils/types';
 import { write2TcIo } from '../utils/types.backend';
@@ -24,8 +23,8 @@ import ProblemsManager from './problemsManager';
 export type UriTypes = 'stdin' | 'answer' | 'stdout' | 'stderr';
 export const generateTcUri = (problem: Problem, idx: number, type: UriTypes) =>
     vscode.Uri.from({
-        scheme: 'cph-ng',
-        authority: join(problem.src.path),
+        scheme: FileSystemProvider.scheme,
+        authority: problem.src.path,
         path: `/tcs/${idx}/${type}`,
     });
 

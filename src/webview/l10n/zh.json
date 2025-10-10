@@ -54,6 +54,7 @@
     "problemTitle.editTitle": "编辑题目",
     "problemTitle.interact": "交互",
     "problemTitle.memoryLimit": "{{memory}} MB",
+    "problemTitle.menu.editRaw": "编辑原始数据",
     "problemTitle.specialJudge": "SPJ",
     "problemTitle.timeElapsed": "已用时间",
     "problemTitle.timeLimit": "{{time}} 毫秒",

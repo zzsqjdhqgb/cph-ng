@@ -130,18 +130,19 @@ export default class Problems {
         if (!problem || !path) {
             return false;
         }
+        path = path.toLowerCase();
         if (
-            path.startsWith(Settings.cache.directory) ||
-            problem.src.path === path ||
-            problem.checker?.path === path ||
-            problem.interactor?.path === path ||
-            problem.bfCompare?.bruteForce?.path === path ||
-            problem.bfCompare?.generator?.path === path
+            path.startsWith(Settings.cache.directory.toLowerCase()) ||
+            problem.src.path.toLowerCase() === path ||
+            problem.checker?.path.toLowerCase() === path ||
+            problem.interactor?.path.toLowerCase() === path ||
+            problem.bfCompare?.bruteForce?.path.toLowerCase() === path ||
+            problem.bfCompare?.generator?.path.toLowerCase() === path
         ) {
             return true;
         }
         const tcIoRelated = (tcIo?: TCIO) =>
-            tcIo && tcIo.useFile && tcIo.path === path;
+            tcIo && tcIo.useFile && tcIo.path.toLowerCase() === path;
         for (const tc of problem.tcs) {
             if (
                 tcIoRelated(tc.stdin) ||
