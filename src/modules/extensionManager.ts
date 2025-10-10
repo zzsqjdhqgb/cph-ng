@@ -31,12 +31,14 @@ import CphCapable from '../modules/cphCapable';
 import SidebarProvider from '../modules/sidebarProvider';
 import {
     extensionPath,
+    fileSystemProvider,
     getActivePath,
     setActivePath,
     setExtensionUri,
     sidebarProvider,
 } from '../utils/global';
 import CphNg from './cphNg';
+import FileSystemProvider from './fileSystemProvider';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
 
@@ -82,9 +84,6 @@ export default class ExtensionManager {
                 mkdir(join(Settings.cache.directory, 'out'), {
                     recursive: true,
                 }),
-                mkdir(join(Settings.cache.directory, 'diff'), {
-                    recursive: true,
-                }),
                 mkdir(join(Settings.cache.directory, 'io'), {
                     recursive: true,
                 }),
@@ -108,6 +107,13 @@ export default class ExtensionManager {
                 ),
             );
             context.subscriptions.push(
+                vscode.workspace.registerFileSystemProvider(
+                    FileSystemProvider.scheme,
+                    fileSystemProvider,
+                    { isCaseSensitive: true },
+                ),
+            );
+            context.subscriptions.push(
                 vscode.lm.registerTool('run_test_cases', new LlmTcRunner()),
             );
             context.subscriptions.push(
@@ -126,7 +132,7 @@ export default class ExtensionManager {
                             });
                             await ProblemsManager.dataRefresh();
                         },
-                        50,
+                        200,
                     ),
                 ),
             );

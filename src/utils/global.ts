@@ -16,6 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import * as vscode from 'vscode';
+import FileSystemProvider from '../modules/fileSystemProvider';
 import SidebarProvider from '../modules/sidebarProvider';
 
 export let extensionUri: vscode.Uri;
@@ -24,6 +25,7 @@ export const setExtensionUri = (uri: vscode.Uri) => {
     extensionUri = uri;
     extensionPath = uri.fsPath;
 };
+export const fileSystemProvider = new FileSystemProvider();
 export const sidebarProvider = new SidebarProvider();
 
 let _activePath: string | undefined;

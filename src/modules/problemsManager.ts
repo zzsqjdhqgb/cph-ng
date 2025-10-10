@@ -27,12 +27,13 @@ import Problems from '../helpers/problems';
 import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
 import { exists } from '../utils/process';
 import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
-import { tcIo2Path, tcIo2Str, TCVerdicts } from '../utils/types.backend';
+import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { chooseSrcFile, chooseTcFile, getTcs } from '../utils/ui';
 import * as msgs from '../webview/msgs';
 import Companion from './companion';
 import CphCapable from './cphCapable';
 import ExtensionManager from './extensionManager';
+import { generateTcUri } from './fileSystemProvider';
 import Settings from './settings';
 
 interface FullProblem {
@@ -45,6 +46,9 @@ export default class ProblemsManager {
     private static logger: Logger = new Logger('problemsManager');
     private static fullProblems: FullProblem[] = [];
 
+    public static async listFullProblems(): Promise<FullProblem[]> {
+        return this.fullProblems;
+    }
     public static async getFullProblem(
         path?: string,
     ): Promise<FullProblem | null> {
@@ -397,12 +401,10 @@ export default class ProblemsManager {
             return;
         }
         try {
-            const leftFile = await tcIo2Path(tc.answer);
-            const rightFile = await tcIo2Path(tc.result.stdout);
             vscode.commands.executeCommand(
                 'vscode.diff',
-                vscode.Uri.file(leftFile),
-                vscode.Uri.file(rightFile),
+                generateTcUri(fullProblem.problem, msg.idx, 'answer'),
+                generateTcUri(fullProblem.problem, msg.idx, 'stdout'),
             );
         } catch (e) {
             Io.error(
