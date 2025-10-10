@@ -16,6 +16,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: add custom file system
 - **feat**: edit raw problem data
 - **fix**: show reject when cancelling compile
+- **fix**: batch import from cph
 
 ## 0.2.2
 

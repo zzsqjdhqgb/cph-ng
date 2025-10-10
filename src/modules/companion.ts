@@ -17,6 +17,7 @@
 
 import { access, readFile, writeFile } from 'fs/promises';
 import { createServer, Server } from 'http';
+import PQueue from 'p-queue';
 import * as vscode from 'vscode';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
@@ -49,6 +50,7 @@ class Companion {
         { empty: true }
     >;
     private static pendingSubmitResolve?: () => void;
+    private static problemQueue: PQueue = new PQueue({ concurrency: 1 });
 
     public static init() {
         Companion.logger.trace('init');
@@ -62,7 +64,9 @@ class Companion {
             request.on('close', async () => {
                 Companion.logger.debug('Received request', requestData);
                 if (request.url === '/') {
-                    await Companion.processProblem(requestData);
+                    Companion.problemQueue.add(async () => {
+                        await Companion.processProblem(requestData);
+                    });
                     response.statusCode = 200;
                 } else if (request.url === '/getSubmit') {
                     response.statusCode = 200;
