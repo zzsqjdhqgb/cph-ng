@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **feat**: add build type
+- **feat**: double click test case data title to open in editor
 
 ## 0.2.3
 
