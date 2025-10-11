@@ -1,12 +1,12 @@
-# CPH NG
+# CPH-NG
 
-CPH NG (Competitive Programming Helper - Next Generation) is a **Visual Studio
+CPH-NG (Competitive Programming Helper - Next Generation) is a **Visual Studio
 Code (VS Code) extension** specifically developed for competitive programming.
 
-CPH NG empowers users to conveniently and efficiently **compile, run, and
+CPH-NG empowers users to conveniently and efficiently **compile, run, and
 judge** their programs directly within the VS Code environment.
 
-<div class="lfe-marked"><details class="warning"><summary>warning</summary><p>Until now, CPH NG supports C++ and Java only.</p></details></div>
+<div class="lfe-marked"><details class="warning"><summary>warning</summary><p>Until now, CPH-NG supports C++ and Java only.</p></details></div>
 
 ## Features
 
