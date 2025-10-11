@@ -176,6 +176,7 @@ export default class ExtensionManager {
 Commit: ${generated.commitHash}
 Date: ${generated.buildTime}
 Build By: ${generated.buildBy}
+Build Type: ${generated.buildType}
 OS: ${release()}`;
                         const result = (await Io.info(
                             'CPH-NG',

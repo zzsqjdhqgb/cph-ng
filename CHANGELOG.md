@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: add build type
+
 ## 0.2.3
 
 - **fix**: ensure document is saved before proceeding with compilation

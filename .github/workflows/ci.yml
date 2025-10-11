@@ -35,6 +35,8 @@ jobs:
 
       - name: Build
         run: pnpm package
+        env:
+          BUILD_TYPE: 'Auto build'
 
       - name: Comment Issues
         if: success() && github.event_name == 'push'

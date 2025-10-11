@@ -66,6 +66,10 @@ jobs:
 
       - name: Package
         run: pnpm package
+        env:
+          BUILD_TYPE:
+            ${{ steps.version.outputs.pre_release == 'true' && 'Pre-release' ||
+            'Release' }}
 
       - name: Extract Changelog
         id: changelog

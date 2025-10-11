@@ -70,6 +70,7 @@ const extensionConfig = {
                             buildBy: execSync('git config user.name')
                                 .toString()
                                 .trim(),
+                            buildType: process.env.BUILD_TYPE || 'Manual',
                         }),
                     );
                 });
