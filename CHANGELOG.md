@@ -2,6 +2,47 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.3.0
+
+Aggregated from prereleases 0.2.1~0.2.4.
+
+### Added
+
+- Custom file system support
+- Bulk import from CPH
+- Interactive problem support
+- Edit raw problem data
+- Natural-order sorting for test cases
+- Double-click test case data title to open in editor
+- Configuration options: max inline data length, stdoutThreshold, default file
+  extension, memory limit
+- Clear test case result
+- Short name settings for competitive programming platforms
+- Time elapsed statistics
+
+### Fixed
+
+- Ensure document is saved before compilation
+- Compilation timeout message
+- Show reject when cancelling compile
+- Fix OLE when output and answer are both empty
+- Batch import issues
+- Incorrect data folder path in file-only mode
+- Execution time not captured when using exit
+- Compilation command exit code check
+- Redundant warning when checker/interactor already executable
+- Other bug fixes and experience improvements
+
+### Changed
+
+- Refactored utilities to static class members
+- Enable background running
+- Variable name improvements
+- Logic refactoring
+
+<details>
+<summary>Pre-release history (0.2.1~0.2.4)</summary>
+
 ## 0.2.4
 
 - **feat**: add build type
@@ -35,6 +76,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **chore**: improve changelog extraction logic for version releases
 - **fix**: pc status incorrect
 - **feat**: add time elapsed
+
+</details>
 
 ## 0.2.0
 
