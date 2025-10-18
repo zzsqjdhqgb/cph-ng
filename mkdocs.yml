@@ -6,7 +6,45 @@ copyright: ©2025 CPH-NG
 nav:
   - Overview: index.md
   - Quick Start: quickStart.md
-  - Modules: modules.md
+  - Features:
+    - features/index.md
+    - Problem Management:
+      - features/create-problem.md
+      - features/import-problem.md
+      - features/edit-problem.md
+      - features/delete-problem.md
+    - Test Case Management:
+      - features/add-test-case.md
+      - features/load-test-cases.md
+      - features/edit-test-case.md
+      - features/delete-test-case.md
+      - features/toggle-file-inline.md
+      - features/compare-output.md
+    - Running and Testing:
+      - features/run-single-test.md
+      - features/run-all-tests.md
+      - features/stop-execution.md
+      - features/clear-results.md
+    - Advanced Features:
+      - features/brute-force-compare.md
+      - features/special-judge.md
+      - features/interactive-problems.md
+      - features/submit-codeforces.md
+    - Integration:
+      - features/competitive-companion.md
+      - features/cph-import.md
+  - Configuration:
+    - configuration/index.md
+    - configuration/basic.md
+    - configuration/compilation.md
+    - configuration/runner.md
+    - configuration/comparing.md
+    - configuration/brute-force.md
+    - configuration/problem.md
+    - configuration/cache.md
+    - configuration/cph-compat.md
+    - configuration/companion.md
+    - configuration/sidebar.md
   - FAQ: faq.md
   - About: about.md
 theme:
@@ -29,14 +67,18 @@ theme:
   logo: assets/cph-ng.svg
   features:
     - content.action.edit
-    - navigation.instant
-    - navigation.instant.progress
+    - content.code.copy
+    - content.code.annotate
     - navigation.sections
     - navigation.tabs
     - navigation.top
     - navigation.tracking
+    - navigation.indexes
+    - navigation.footer
     - search.suggest
-    - toc.integrate
+    - search.highlight
+    - search.share
+    - toc.follow
 extra:
   version:
     provider: mike
@@ -44,6 +86,7 @@ extra:
 repo_url: https://github.com/langningchen/cph-ng
 edit_uri: edit/main/docs/
 plugins:
+  - search
   - i18n:
       docs_structure: suffix
       languages:
@@ -54,3 +97,22 @@ plugins:
         - locale: zh
           name: 简体中文
           build: true
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+      toc_depth: 3
