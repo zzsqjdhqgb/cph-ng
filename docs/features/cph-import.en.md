@@ -4,13 +4,15 @@ Batch import problems from original CPH extension format.
 
 ## Overview
 
-CPH Import command allows batch importing multiple problems from the original CPH extension. Useful when migrating from CPH to CPH-NG.
+CPH Import command allows batch importing multiple problems from the original
+CPH extension. Useful when migrating from CPH to CPH-NG.
 
 ## UI Interaction
 
 ### Triggering
 
 **Command Palette**:
+
 1. Press Ctrl+Shift+P (Cmd+Shift+P on macOS)
 2. Type: "CPH-NG: Import from CPH"
 3. Select command
@@ -33,6 +35,7 @@ CPH Import command allows batch importing multiple problems from the original CP
 ## Batch Import
 
 Unlike single [Import Problem](import-problem.md), this command:
+
 - Imports multiple problems at once
 - Scans entire workspace
 - Shows selection dialog

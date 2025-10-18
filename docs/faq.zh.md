@@ -4,7 +4,9 @@
 
 ### 什么是 CPH-NG？
 
-CPH-NG（Competitive Programming Helper - Next Generation，竞争性编程助手 - 新一代）是一个用于竞争性编程的 VS Code 扩展。它帮助您在本地编译、运行和评测您的解决方案，测试用例可以从在线评测网站导入或手动创建。
+CPH-NG（Competitive Programming Helper - Next
+Generation，竞争性编程助手 - 新一代）是一个用于竞争性编程的 VS
+Code 扩展。它帮助您在本地编译、运行和评测您的解决方案，测试用例可以从在线评测网站导入或手动创建。
 
 查看[概述](index.md)了解更多信息。
 
@@ -15,11 +17,12 @@ CPH-NG 是一个完全重写的版本，包含许多增强功能：
 - 更多的评测状态（21 种 vs 3 种）
 - 编译缓存以加快测试速度
 - 支持从文件和文件夹加载测试用例
-- 特殊评测（SPJ）和交互式问题支持
+- 特殊评测（SPJ）和交互式题目支持
 - 暴力对拍
 - 更好的内存管理
 
-查看 [README](https://github.com/langningchen/cph-ng#comparison-with-cph) 中的对比表。
+查看 [README](https://github.com/langningchen/cph-ng#comparison-with-cph)
+中的对比表。
 
 ### CPH-NG 支持哪些语言？
 
@@ -58,15 +61,15 @@ CPH-NG 是一个完全重写的版本，包含许多增强功能：
 
 ```json
 {
-  "cph-ng.problem.templateFile": "/path/to/your/template.cpp"
+    "cph-ng.problem.templateFile": "/path/to/your/template.cpp"
 }
 ```
 
-查看[问题设置](configuration.md#问题设置)了解更多选项。
+查看[题目设置](configuration.md#题目设置)了解更多选项。
 
 ## 使用 CPH-NG
 
-### 如何创建新问题？
+### 如何创建新题目？
 
 三种方式：
 
@@ -74,20 +77,21 @@ CPH-NG 是一个完全重写的版本，包含许多增强功能：
 2. 使用命令面板：`CPH-NG: Create Problem`
 3. 使用键盘快捷键：`Ctrl+Alt+B`（macOS 上为 `Cmd+Alt+B`）
 
-查看[快速入门](quickStart.md#创建问题)了解详情。
+查看[快速入门](quickStart.md#创建题目)了解详情。
 
-### 如何从在线评测网站导入问题？
+### 如何从在线评测网站导入题目？
 
-1. 安装 [Competitive Companion](https://github.com/jmerle/competitive-companion) 浏览器扩展
-2. 转到支持的评测网站上的问题（Codeforces、AtCoder 等）
+1. 安装 [Competitive Companion](https://github.com/jmerle/competitive-companion)
+   浏览器扩展
+2. 转到支持的评测网站上的题目（Codeforces、AtCoder 等）
 3. 点击 Competitive Companion 图标
-4. CPH-NG 将自动创建带有测试用例的问题
+4. CPH-NG 将自动创建带有测试用例的题目
 
 查看[功能指南 - Competitive Companion](features.md#从-competitive-companion-导入)了解配置选项。
 
 ### 如何从文件加载测试用例？
 
-1. 点击问题面板中的文件夹图标
+1. 点击题目面板中的文件夹图标
 2. 选择"从 zip 文件加载"或"从文件夹加载"
 3. 选择您的文件/文件夹
 4. 选择要导入的测试用例
@@ -108,15 +112,16 @@ CPH-NG 自动按名称匹配 `.in` 文件与 `.out`/`.ans` 文件。
 
 可能的原因：
 
-1. **机器较慢**：在[运行器设置](configuration.md#运行器设置)中增加 `timeAddition`
+1. **机器较慢**：在[运行器设置](configuration.md#运行器设置)中增加
+   `timeAddition`
 2. **实际的无限循环**：检查您的代码逻辑
-3. **时间限制过于严格**：编辑问题元数据以增加时间限制
+3. **时间限制过于严格**：编辑题目元数据以增加时间限制
 
 ### 如何使用特殊评测？
 
 1. 编写检查器程序（使用 testlib.h 或自定义）
 2. 编译您的检查器
-3. 点击笔形图标编辑问题元数据
+3. 点击笔形图标编辑题目元数据
 4. 点击"Choose Checker"并选择您编译的检查器
 
 查看[功能指南 - 特殊评测](features.md#特殊评测)了解要求和示例。
@@ -140,17 +145,17 @@ CPH-NG 计算源代码和编译器设置的哈希值。如果自上次编译以�
 
 这是自动的，不需要配置。
 
-### 可以自定义存储问题的文件夹吗？
+### 可以自定义存储题目的文件夹吗？
 
 可以！在设置中配置路径模式：
 
 ```json
 {
-  "cph-ng.problem.problemFilePath": "${workspace}/.cph-ng/${basename}.bin"
+    "cph-ng.problem.problemFilePath": "${workspace}/.cph-ng/${basename}.bin"
 }
 ```
 
-查看[问题设置](configuration.md#问题设置)了解可用变量。
+查看[题目设置](configuration.md#题目设置)了解可用变量。
 
 ### 如何隐藏某些评测状态？
 
@@ -158,7 +163,7 @@ CPH-NG 计算源代码和编译器设置的哈希值。如果自上次编译以�
 
 ```json
 {
-  "cph-ng.sidebar.hiddenStatuses": ["WT", "FC", "CP", "CPD"]
+    "cph-ng.sidebar.hiddenStatuses": ["WT", "FC", "CP", "CPD"]
 }
 ```
 
@@ -170,7 +175,8 @@ CPH-NG 计算源代码和编译器设置的哈希值。如果自上次编译以�
 
 1. 检查 CPH-NG 图标是否在活动栏中
 2. 点击图标打开面板
-3. 如果仍未显示，尝试重新加载 VS Code（Ctrl/Cmd+Shift+P → "Developer: Reload Window"）
+3. 如果仍未显示，尝试重新加载 VS Code（Ctrl/Cmd+Shift+P → "Developer: Reload
+   Window"）
 
 ### 测试用例无法运行
 
@@ -185,7 +191,7 @@ CPH-NG 计算源代码和编译器设置的哈希值。如果自上次编译以�
 
 ```json
 {
-  "cph-ng.runner.useRunner": true
+    "cph-ng.runner.useRunner": true
 }
 ```
 
@@ -226,7 +232,8 @@ CPH-NG 计算源代码和编译器设置的哈希值。如果自上次编译以�
 
 ### 在哪里请求功能？
 
-欢迎在 [GitHub Discussions](https://github.com/langningchen/cph-ng/discussions) 上提出功能请求。
+欢迎在 [GitHub Discussions](https://github.com/langningchen/cph-ng/discussions)
+上提出功能请求。
 
 ### 如何贡献？
 

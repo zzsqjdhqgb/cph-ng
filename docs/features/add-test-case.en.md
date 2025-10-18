@@ -4,13 +4,16 @@ Manually add a single test case to the current problem.
 
 ## Overview
 
-The Add Test Case feature creates a new empty test case that can be filled with input data and expected answer. This is useful for creating custom test cases manually.
+The Add Test Case feature creates a new empty test case that can be filled with
+input data and expected answer. This is useful for creating custom test cases
+manually.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method: Sidebar Button**
+
 - Click the plus icon (`+`) button in the problem actions panel
 - Located as the leftmost button below the problem title
 
@@ -22,6 +25,7 @@ The Add Test Case feature creates a new empty test case that can be filled with 
 ### UI Components
 
 Button properties:
+
 - Icon: Plus (+) icon
 - Label: Localized "Add Test Case" text
 - Size: Large button
@@ -41,15 +45,17 @@ The extension performs these steps when adding a test case:
 ### Test Case Structure
 
 New test case is initialized with:
+
 - `stdin.useFile`: `false` (inline data mode)
 - `stdin.data`: `''` (empty string)
-- `answer.useFile`: `false` (inline data mode)  
+- `answer.useFile`: `false` (inline data mode)
 - `answer.data`: `''` (empty string)
 - `isExpand`: `false` (collapsed view)
 
 ### Message Flow
 
 When the add test case button is clicked:
+
 1. The webview sends an `addTc` message to the extension
 2. The extension handler receives the message
 3. The problem manager adds the new test case
@@ -57,7 +63,8 @@ When the add test case button is clicked:
 
 ## Configuration Options
 
-This feature has no specific configuration settings. Test case data is stored according to:
+This feature has no specific configuration settings. Test case data is stored
+according to:
 
 - **Data Storage**: Control file vs inline storage modes  
   → See [Toggle File/Inline](toggle-file-inline.md) feature

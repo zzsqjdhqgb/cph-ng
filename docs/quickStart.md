@@ -1,6 +1,7 @@
 # Quick Start
 
-This guide will help you get started with CPH-NG in minutes. For detailed information about all features, see the [Feature Guide](features.md).
+This guide will help you get started with CPH-NG in minutes. For detailed
+information about all features, see the [Feature Guide](features.md).
 
 ## Installation
 
@@ -12,8 +13,9 @@ the latest version installed.
 After installation, you'll find the extension's sidebar icon on the left side of
 your VS Code window. Feel free to drag it to the right side if you prefer.
 
-!!! tip "First Time Setup"
-    Before creating your first problem, you may want to configure compiler settings in [Configuration](configuration.md#compilation-settings).
+!!! tip "First Time Setup" Before creating your first problem, you may want to
+configure compiler settings in
+[Configuration](configuration.md#compilation-settings).
 
 ## Create a problem
 

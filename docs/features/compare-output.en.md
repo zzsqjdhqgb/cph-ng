@@ -4,13 +4,16 @@ View diff between actual output and expected answer for failed test cases.
 
 ## Overview
 
-The Compare Output feature provides a visual diff viewer when a test case fails with Wrong Answer (WA). It highlights differences between your program's actual output and the expected answer, making it easy to identify discrepancies.
+The Compare Output feature provides a visual diff viewer when a test case fails
+with Wrong Answer (WA). It highlights differences between your program's actual
+output and the expected answer, making it easy to identify discrepancies.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method: Compare Button**
+
 - Run a test case that results in WA (Wrong Answer)
 - A compare/diff icon button appears in the test case output area
 - Click the button to open the comparison view
@@ -24,11 +27,13 @@ The Compare Output feature provides a visual diff viewer when a test case fails 
 ### UI Components
 
 **Compare Button**:
+
 - Icon: Compare arrows or diff icon
 - Position: In test case output area (leftmost button)
 - Only visible for WA verdicts
 
 **Comparison View**:
+
 - Split view showing expected vs actual
 - Differences highlighted in red and green
 - Line-by-line comparison
@@ -48,6 +53,7 @@ The Compare Output feature provides a visual diff viewer when a test case fails 
 ### Comparison Algorithm
 
 The feature performs:
+
 - Line-by-line comparison
 - Whitespace handling based on settings
 - Character-level diff for changed lines
@@ -58,18 +64,22 @@ The feature performs:
 ### Comparison Behavior
 
 #### `cph-ng.comparing.regardPEAsAC`
+
 - **Type**: `boolean`
 - **Default**: `false`
 - **Description**: Treat Presentation Error as Accepted
 - **Effect**: If true, PE cases won't show as WA requiring comparison
 
 #### `cph-ng.comparing.oleSize`
+
 - **Type**: `number`
 - **Default**: `3`
-- **Description**: Maximum output lines difference for OLE (Output Limit Exceeded)
+- **Description**: Maximum output lines difference for OLE (Output Limit
+  Exceeded)
 - **Effect**: Large output differences may show OLE instead of WA
 
 #### `cph-ng.comparing.ignoreError`
+
 - **Type**: `boolean`
 - **Default**: `false`
 - **Description**: Ignore stderr when comparing
@@ -86,6 +96,7 @@ The feature performs:
 ### Set as Answer
 
 If you determine the expected answer was wrong:
+
 - Can click "Set as Answer" button
 - Updates expected answer to match actual output
 - Useful for correcting test case answers
@@ -98,11 +109,11 @@ If you determine the expected answer was wrong:
 2. Result shows "WA"
 3. Click compare button (diff icon)
 4. Comparison view opens showing:
-   ```
-   Expected:  42
-   Actual:    43
-              ^^
-   ```
+    ```
+    Expected:  42
+    Actual:    43
+               ^^
+    ```
 5. Identify the difference
 6. Return to code to fix the issue
 
@@ -118,6 +129,7 @@ If you determine the expected answer was wrong:
 ### Handling PE (Presentation Error)
 
 If `regardPEAsAC` is enabled and only whitespace differs:
+
 1. Test case shows AC instead of WA
 2. No comparison needed
 3. Extra spaces/newlines ignored
@@ -128,4 +140,3 @@ If `regardPEAsAC` is enabled and only whitespace differs:
 - [Run All Tests](run-all-tests.md) - Multiple comparisons
 - [Edit Test Case](edit-test-case.md) - Fix expected answers
 - [Toggle File/Inline](toggle-file-inline.md) - For large outputs
-

@@ -1,16 +1,21 @@
 # Brute Force Compare
 
-Find edge cases automatically using generator, brute force, and optimized solution comparison.
+Find edge cases automatically using generator, brute force, and optimized
+solution comparison.
 
 ## Overview
 
-The Brute Force Compare feature helps discover edge cases and bugs by automatically generating test inputs, running both your optimized solution and a brute force reference solution, and comparing their outputs. When outputs differ, that test case is saved for debugging.
+The Brute Force Compare feature helps discover edge cases and bugs by
+automatically generating test inputs, running both your optimized solution and a
+brute force reference solution, and comparing their outputs. When outputs
+differ, that test case is saved for debugging.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method: Brute Force Button**
+
 - Click the brute force/compare arrows icon in the problem actions panel
 - Dialog opens for configuration
 - Start comparison process
@@ -19,13 +24,14 @@ The Brute Force Compare feature helps discover edge cases and bugs by automatica
 
 - Problem must be loaded
 - Three programs needed:
-  - **Generator**: Creates random test inputs
-  - **Brute Force**: Slow but correct solution
-  - **Your Solution**: Fast solution to validate
+    - **Generator**: Creates random test inputs
+    - **Brute Force**: Slow but correct solution
+    - **Your Solution**: Fast solution to validate
 
 ### UI Components
 
 **Brute Force Dialog**:
+
 - Generator program selection
 - Brute force solution selection
 - Configuration options (iterations, limits)
@@ -38,33 +44,34 @@ The Brute Force Compare feature helps discover edge cases and bugs by automatica
 ### How It Works
 
 1. **Setup**:
-   - User selects generator program
-   - User selects brute force solution
-   - Configures iteration limit
+    - User selects generator program
+    - User selects brute force solution
+    - Configures iteration limit
 
 2. **Comparison Loop**:
-   - Generator creates random input
-   - Both solutions run with same input
-   - Outputs are compared
-   - If different, mismatch found
-   - Loop continues until mismatch or limit reached
+    - Generator creates random input
+    - Both solutions run with same input
+    - Outputs are compared
+    - If different, mismatch found
+    - Loop continues until mismatch or limit reached
 
 3. **Result Handling**:
-   - If mismatch found:
-     - Input saved as new test case
-     - Both outputs saved
-     - User notified
-   - If all match:
-     - "No differences found" message
+    - If mismatch found:
+        - Input saved as new test case
+        - Both outputs saved
+        - User notified
+    - If all match:
+        - "No differences found" message
 
 4. **Test Case Creation**:
-   - Failing input added to test cases
-   - Expected answer from brute force
-   - Can be debugged like normal test
+    - Failing input added to test cases
+    - Expected answer from brute force
+    - Can be debugged like normal test
 
 ### Generator Requirements
 
 Generator program should:
+
 - Output valid test input to stdout
 - Generate random/varied inputs
 - Run quickly (under time limit)
@@ -73,6 +80,7 @@ Generator program should:
 ### Brute Force Requirements
 
 Brute force solution should:
+
 - Read input from stdin
 - Output correct answer to stdout
 - Be verified correct (even if slow)
@@ -144,4 +152,3 @@ print(result)
 - [Run Single Test](run-single-test.md) - Test the found edge case
 - [Add Test Case](add-test-case.md) - Manually add cases if needed
 - [Special Judge](special-judge.md) - Alternative validation method
-

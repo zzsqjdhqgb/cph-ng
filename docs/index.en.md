@@ -6,12 +6,15 @@ Code (VS Code) extension** specifically developed for competitive programming.
 CPH-NG empowers users to conveniently and efficiently **compile, run, and
 judge** their programs directly within the VS Code environment.
 
-!!! warning
-    Until now, CPH NG supports C++ and Java only.
+!!! warning Until now, CPH NG supports C++ and Java only.
 
 ## What is CPH-NG?
 
-CPH-NG is the next generation of the [Competitive Programming Helper](https://github.com/agrawal-d/cph), providing a comprehensive solution for competitive programmers working in VS Code. Whether you're practicing on online judges or working on your own problems, CPH-NG streamlines your workflow from problem creation to submission.
+CPH-NG is the next generation of the
+[Competitive Programming Helper](https://github.com/agrawal-d/cph), providing a
+comprehensive solution for competitive programmers working in VS Code. Whether
+you're practicing on online judges or working on your own problems, CPH-NG
+streamlines your workflow from problem creation to submission.
 
 ## Key Features
 
@@ -21,7 +24,9 @@ CPH-NG is the next generation of the [Competitive Programming Helper](https://gi
 
 Offers **multiple flexible ways** to import test data:
 
-- Import from [Competitive Companion](https://github.com/jmerle/competitive-companion) browser extension
+- Import from
+  [Competitive Companion](https://github.com/jmerle/competitive-companion)
+  browser extension
 - Load from zip files or directories
 - Manually create test cases
 - Import from CPH format
@@ -66,8 +71,10 @@ CPH-NG fully supports:
 
 ### 🔄 Advanced Features
 
-- **Brute Force Comparison**: Test your optimized solution against a brute force reference
-- **File/Inline Toggle**: Switch between inline data and external files for large test cases
+- **Brute Force Comparison**: Test your optimized solution against a brute force
+  reference
+- **File/Inline Toggle**: Switch between inline data and external files for
+  large test cases
 - **Elapsed Time Tracking**: Monitor how long you've been working on a problem
 - **Answer Comparison View**: Visual diff for wrong answers
 - **Result Persistence**: Keep track of your test results across sessions

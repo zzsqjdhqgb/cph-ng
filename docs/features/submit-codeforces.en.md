@@ -4,13 +4,15 @@ Direct submission to Codeforces online judge.
 
 ## Overview
 
-Submit to Codeforces feature allows you to submit your solution directly to Codeforces from within VS Code, without opening a browser.
+Submit to Codeforces feature allows you to submit your solution directly to
+Codeforces from within VS Code, without opening a browser.
 
 ## UI Interaction
 
 ### Triggering
 
 **Submit Button**:
+
 - Only appears when problem URL is from Codeforces
 - Icon: Upload/backup icon
 - Color: Green (success)
@@ -35,10 +37,12 @@ Submit to Codeforces feature allows you to submit your solution directly to Code
 ### Language Selection
 
 #### `cph-ng.companion.submitLanguage`
+
 - Selects C++ compiler version for Codeforces
 - Options: GCC, Clang, MSVC versions
 
 ## Related Features
 
 - [Edit Problem](edit-problem.md) - Set problem URL
-- [Competitive Companion](competitive-companion.md) - Auto-import from Codeforces
+- [Competitive Companion](competitive-companion.md) - Auto-import from
+  Codeforces

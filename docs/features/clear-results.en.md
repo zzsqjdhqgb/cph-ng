@@ -4,18 +4,22 @@ Reset test case execution results.
 
 ## Overview
 
-The Clear Results feature removes execution results from test cases, returning them to an initial state. This is useful for cleaning up the UI or preparing for a fresh test run.
+The Clear Results feature removes execution results from test cases, returning
+them to an initial state. This is useful for cleaning up the UI or preparing for
+a fresh test run.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method 1: Clear All Results**
+
 - Right-click in the problem actions area
 - Select "Clear All Results" or similar option
 - All test case results are cleared
 
 **Method 2: Clear Single Result**
+
 - Right-click on a specific test case
 - Select "Clear Result" or "Clear Status"
 - Only that test case's result is cleared
@@ -28,6 +32,7 @@ The Clear Results feature removes execution results from test cases, returning t
 ### UI Components
 
 **Clear Options**:
+
 - Available via right-click context menus
 - May also be available via menu button
 - Applies to all tests or individual tests
@@ -37,6 +42,7 @@ The Clear Results feature removes execution results from test cases, returning t
 ### How It Works
 
 **Clear All**:
+
 1. User triggers clear all action
 2. Each test case's result data is removed
 3. Verdict reset to empty
@@ -45,6 +51,7 @@ The Clear Results feature removes execution results from test cases, returning t
 6. UI refreshes to show clean state
 
 **Clear Single**:
+
 1. User triggers clear for specific test
 2. Only that test's result data removed
 3. Other tests unaffected
@@ -53,6 +60,7 @@ The Clear Results feature removes execution results from test cases, returning t
 ### What Gets Cleared
 
 **Removed**:
+
 - Verdict (AC, WA, TLE, etc.)
 - Execution time
 - Memory usage
@@ -61,6 +69,7 @@ The Clear Results feature removes execution results from test cases, returning t
 - Comparison data
 
 **Preserved**:
+
 - Test input
 - Expected answer
 - Test case itself
@@ -71,6 +80,7 @@ The Clear Results feature removes execution results from test cases, returning t
 ### Clean Slate
 
 After many test runs, results accumulate:
+
 - Clear all to start fresh
 - Makes UI less cluttered
 - Easier to see new results
@@ -78,6 +88,7 @@ After many test runs, results accumulate:
 ### Before Important Run
 
 Before submission or final validation:
+
 1. Clear all results
 2. Run all tests fresh
 3. Verify clean pass
@@ -85,6 +96,7 @@ Before submission or final validation:
 ### After Code Changes
 
 After significant changes:
+
 - Old results may be confusing
 - Clear them to avoid confusion
 - Run tests with new code
@@ -115,4 +127,3 @@ After significant changes:
 - [Run Single Test](run-single-test.md) - Generate new results
 - [Run All Tests](run-all-tests.md) - Generate results for all
 - [Stop Execution](stop-execution.md) - May leave partial results
-

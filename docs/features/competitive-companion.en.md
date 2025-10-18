@@ -4,7 +4,9 @@ Browser extension integration for automatic problem import from online judges.
 
 ## Overview
 
-Competitive Companion is a browser extension that sends problem data from online judges directly to CPH-NG. Click the extension icon on any problem page to automatically import all test cases and metadata.
+Competitive Companion is a browser extension that sends problem data from online
+judges directly to CPH-NG. Click the extension icon on any problem page to
+automatically import all test cases and metadata.
 
 ## UI Interaction
 
@@ -31,28 +33,34 @@ Competitive Companion is a browser extension that sends problem data from online
 ### Port Setting
 
 #### `cph-ng.companion.listenPort`
+
 - **Default**: `27121`
 - Browser extension sends to this port
 
 ### Naming Conventions
 
 #### `cph-ng.companion.shortCodeforcesName`
+
 - **Default**: `true`
 - Uses short problem names (A, B, C) instead of full titles
 
 #### `cph-ng.companion.shortLuoguName`
+
 - Shortens Luogu problem names
 
 #### `cph-ng.companion.shortAtCoderName`
+
 - Shortens AtCoder problem names
 
 ### File Handling
 
 #### `cph-ng.companion.defaultExtension`
+
 - **Default**: `.cpp`
 - Extension for auto-created files
 
 #### `cph-ng.companion.chooseSaveFolder`
+
 - Whether to prompt for save location
 
 ## How It Works

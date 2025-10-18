@@ -4,17 +4,21 @@ Terminate currently running test cases.
 
 ## Overview
 
-The Stop Execution feature allows you to cancel test cases that are running. This is useful when a test takes too long, is stuck in an infinite loop, or when you realize you need to make changes before the tests finish.
+The Stop Execution feature allows you to cancel test cases that are running.
+This is useful when a test takes too long, is stuck in an infinite loop, or when
+you realize you need to make changes before the tests finish.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method 1: Stop Button**
+
 - While tests are running, the run button changes to a stop button
 - Click to stop execution after current test completes
 
 **Method 2: Stop Only Current (Ctrl+Click)**
+
 - Ctrl+Click (or Cmd+Click on macOS) the stop button
 - Stops the current test immediately
 - Proceeds to next test case
@@ -27,6 +31,7 @@ The Stop Execution feature allows you to cancel test cases that are running. Thi
 ### UI Components
 
 **Stop Button**:
+
 - Icon: Stop/square icon
 - Color: Orange/warning color
 - Replaces run button during execution
@@ -38,6 +43,7 @@ The Stop Execution feature allows you to cancel test cases that are running. Thi
 ### How It Works
 
 **Normal Stop** (Click):
+
 1. User clicks stop button
 2. Current test continues to completion
 3. After current test finishes, remaining tests cancelled
@@ -45,6 +51,7 @@ The Stop Execution feature allows you to cancel test cases that are running. Thi
 5. Incomplete tests show no result
 
 **Skip Current** (Ctrl+Click):
+
 1. User Ctrl+clicks stop button
 2. Current test process is terminated immediately
 3. Next test starts running
@@ -53,6 +60,7 @@ The Stop Execution feature allows you to cancel test cases that are running. Thi
 ### Process Termination
 
 When stopping:
+
 - Running process receives termination signal
 - Process cleanup handled gracefully
 - Temporary files cleaned up
@@ -94,4 +102,3 @@ When stopping:
 - [Run Single Test](run-single-test.md) - Run one test at a time
 - [Run All Tests](run-all-tests.md) - What stop interrupts
 - [Clear Results](clear-results.md) - Clean up after stopping
-

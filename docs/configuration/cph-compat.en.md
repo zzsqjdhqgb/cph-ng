@@ -1,10 +1,12 @@
 # CPH Compatibility Settings
 
-Settings that control integration with the original CPH (Competitive Programming Helper) extension.
+Settings that control integration with the original CPH (Competitive Programming
+Helper) extension.
 
 ## Overview
 
-CPH-NG can import problems created with the original CPH extension, allowing you to migrate existing problems or use both extensions in parallel.
+CPH-NG can import problems created with the original CPH extension, allowing you
+to migrate existing problems or use both extensions in parallel.
 
 ## Compatibility Check
 
@@ -15,17 +17,19 @@ Automatically check for CPH problems when opening files.
 - **Type**: Boolean
 - **Default**: `true`
 - **User Impact**:
-  - `true`: CPH-NG detects when you open a file with existing CPH data and offers to import it
-  - `false`: No automatic detection; manual import only
+    - `true`: CPH-NG detects when you open a file with existing CPH data and
+      offers to import it
+    - `false`: No automatic detection; manual import only
 
 **Example**:
+
 ```json
 {
-  "cph-ng.cphCapable.checkOnStartup": false
+    "cph-ng.cphCapable.checkOnStartup": false
 }
 ```
 
-*Disable automatic CPH problem detection.*
+_Disable automatic CPH problem detection._
 
 ### `cph-ng.cphCapable.checkInterval`
 
@@ -33,16 +37,18 @@ How often to check for CPH problems (in milliseconds).
 
 - **Type**: Number
 - **Default**: `5000` (5 seconds)
-- **User Impact**: Controls the delay between checks when opening files. Lower values mean faster detection but slightly more resource usage.
+- **User Impact**: Controls the delay between checks when opening files. Lower
+  values mean faster detection but slightly more resource usage.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.cphCapable.checkInterval": 10000
+    "cph-ng.cphCapable.checkInterval": 10000
 }
 ```
 
-*Check for CPH problems every 10 seconds.*
+_Check for CPH problems every 10 seconds._
 
 ## How CPH Compatibility Works
 
@@ -50,7 +56,8 @@ How often to check for CPH problems (in milliseconds).
 
 1. **File Open**: When you open a source file (`.cpp`, `.c`, `.java`)
 2. **CPH Check**: CPH-NG looks for `.cph/` folder in the workspace
-3. **Problem Match**: Searches for matching problem file (`.cph/.{filename}.prob`)
+3. **Problem Match**: Searches for matching problem file
+   (`.cph/.{filename}.prob`)
 4. **Import Prompt**: If found and not already imported, shows import button
 
 ### Import Process
@@ -66,6 +73,7 @@ When you click the import button:
 ### File Structure
 
 **Original CPH**:
+
 ```
 workspace/
 ├── problem.cpp
@@ -74,6 +82,7 @@ workspace/
 ```
 
 **After CPH-NG Import**:
+
 ```
 workspace/
 ├── problem.cpp
@@ -98,17 +107,20 @@ CPH-NG imports the following from CPH:
 ## When to Change These Settings
 
 **Disable `checkOnStartup` when**:
+
 - Not using original CPH extension
 - Don't want automatic detection
 - Performance concerns
 - Want to manually control imports
 
 **Increase `checkInterval` when**:
+
 - Experiencing performance issues
 - Don't need immediate detection
 - Working with many files
 
 **Keep Default Settings when**:
+
 - Migrating from CPH to CPH-NG
 - Using both extensions simultaneously
 - Want seamless import experience
@@ -138,23 +150,27 @@ If using both CPH and CPH-NG:
 ### Import Button Not Showing
 
 **Possible causes**:
+
 - `checkOnStartup` is `false` → Enable it
 - No `.cph/` folder in workspace → Verify CPH problems exist
 - Problem already imported → Check `.cph-ng/` folder
 - File not active → Make sure file is open in editor
 
-**Solution**: 
+**Solution**:
+
 - Enable `checkOnStartup`
 - Use "CPH-NG: Import from CPH" command manually
 
 ### Import Fails
 
 **Possible causes**:
+
 - Corrupted `.prob` file
 - Incompatible CPH version
 - File permission issues
 
 **Solution**:
+
 - Check `.prob` file is valid JSON
 - Manually create problem in CPH-NG
 - Check file permissions

@@ -4,13 +4,15 @@
 
 ## 概述
 
-提交到 Codeforces 功能允许您直接从 VS Code 内将解法提交到 Codeforces，无需打开浏览器。
+提交到 Codeforces 功能允许您直接从 VS
+Code 内将解法提交到 Codeforces，无需打开浏览器。
 
 ## 用户交互
 
 ### 触发
 
 **提交按钮**：
+
 - 仅当题目 URL 来自 Codeforces 时出现
 - 图标：上传/备份图标
 - 颜色：绿色（成功）
@@ -35,6 +37,7 @@
 ### 语言选择
 
 #### `cph-ng.companion.submitLanguage`
+
 - 为 Codeforces 选择 C++ 编译器版本
 - 选项：GCC、Clang、MSVC 版本
 

@@ -4,13 +4,15 @@ Remove a specific test case from the problem.
 
 ## Overview
 
-The Delete Test Case feature allows you to remove individual test cases from a problem. This is useful for cleaning up unwanted or redundant test cases.
+The Delete Test Case feature allows you to remove individual test cases from a
+problem. This is useful for cleaning up unwanted or redundant test cases.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method: Delete Icon**
+
 - Locate the test case you want to delete
 - Hover over or click the test case to reveal controls
 - Click the delete/trash icon for that specific test case
@@ -52,7 +54,9 @@ The Delete Test Case feature allows you to remove individual test cases from a p
 
 ## No Confirmation
 
-Unlike problem deletion, test case deletion doesn't show a confirmation dialog. This allows quick cleanup of multiple test cases. Be careful when clicking delete icons.
+Unlike problem deletion, test case deletion doesn't show a confirmation dialog.
+This allows quick cleanup of multiple test cases. Be careful when clicking
+delete icons.
 
 ## Workflow Example
 
@@ -67,6 +71,7 @@ Unlike problem deletion, test case deletion doesn't show a confirmation dialog. 
 ### Cleaning Up After Import
 
 After importing test cases from files:
+
 1. Review all imported cases
 2. Identify unnecessary ones
 3. Delete each unwanted case
@@ -77,4 +82,3 @@ After importing test cases from files:
 - [Add Test Case](add-test-case.md) - Add new test cases
 - [Load Test Cases](load-test-cases.md) - Import multiple cases
 - [Edit Test Case](edit-test-case.md) - Modify instead of deleting
-

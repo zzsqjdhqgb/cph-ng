@@ -11,6 +11,7 @@ CPH 导入命令允许从原始 CPH 扩展批量导入多个题目。在从 CPH 
 ### 触发
 
 **命令面板**：
+
 1. 按 Ctrl+Shift+P（macOS 上为 Cmd+Shift+P）
 2. 输入："CPH-NG: Import from CPH"
 3. 选择命令
@@ -33,6 +34,7 @@ CPH 导入命令允许从原始 CPH 扩展批量导入多个题目。在从 CPH 
 ## 批量导入
 
 与单个[导入题目](import-problem.md)不同，此命令：
+
 - 一次导入多个题目
 - 扫描整个工作区
 - 显示选择对话框

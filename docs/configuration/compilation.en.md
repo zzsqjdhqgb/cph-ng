@@ -10,12 +10,14 @@ Path to the C compiler executable.
 
 - **Type**: String (executable path)
 - **Default**: `"gcc"`
-- **User Impact**: Specifies which C compiler to use. Must be accessible in your system PATH or provide full path.
+- **User Impact**: Specifies which C compiler to use. Must be accessible in your
+  system PATH or provide full path.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.cPath": "/usr/bin/clang"
+    "cph-ng.compilation.cPath": "/usr/bin/clang"
 }
 ```
 
@@ -25,12 +27,14 @@ Path to the C++ compiler executable.
 
 - **Type**: String (executable path)
 - **Default**: `"g++"`
-- **User Impact**: Specifies which C++ compiler to use. Must be accessible in your system PATH or provide full path.
+- **User Impact**: Specifies which C++ compiler to use. Must be accessible in
+  your system PATH or provide full path.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.cppPath": "/usr/bin/clang++"
+    "cph-ng.compilation.cppPath": "/usr/bin/clang++"
 }
 ```
 
@@ -40,12 +44,14 @@ Path to the Java compiler executable.
 
 - **Type**: String (executable path)
 - **Default**: `"javac"`
-- **User Impact**: Specifies which Java compiler to use. Must be accessible in your system PATH or provide full path.
+- **User Impact**: Specifies which Java compiler to use. Must be accessible in
+  your system PATH or provide full path.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.javaPath": "/usr/lib/jvm/java-17/bin/javac"
+    "cph-ng.compilation.javaPath": "/usr/lib/jvm/java-17/bin/javac"
 }
 ```
 
@@ -57,30 +63,31 @@ Additional arguments passed to the C compiler.
 
 - **Type**: String
 - **Default**: `"-O2 -std=gnu11 -Wall"`
-- **User Impact**: Controls optimization level, language standard, and warnings. Common use cases:
-  - Optimization: `-O0` (debug), `-O2` (standard), `-O3` (aggressive)
-  - Standards: `-std=c11`, `-std=c17`, `-std=gnu11`
-  - Warnings: `-Wall`, `-Wextra`, `-Werror`
-  - Debugging: `-g`
-  - Sanitizers: `-fsanitize=address`, `-fsanitize=undefined`
+- **User Impact**: Controls optimization level, language standard, and warnings.
+  Common use cases:
+    - Optimization: `-O0` (debug), `-O2` (standard), `-O3` (aggressive)
+    - Standards: `-std=c11`, `-std=c17`, `-std=gnu11`
+    - Warnings: `-Wall`, `-Wextra`, `-Werror`
+    - Debugging: `-g`
+    - Sanitizers: `-fsanitize=address`, `-fsanitize=undefined`
 
 **Examples**:
 
 ```json
 {
-  "cph-ng.compilation.cArgs": "-O3 -std=c17 -Wall -Wextra"
+    "cph-ng.compilation.cArgs": "-O3 -std=c17 -Wall -Wextra"
 }
 ```
 
-*Use C17 standard with aggressive optimization and extra warnings.*
+_Use C17 standard with aggressive optimization and extra warnings._
 
 ```json
 {
-  "cph-ng.compilation.cArgs": "-g -O0 -std=c11 -Wall -fsanitize=address"
+    "cph-ng.compilation.cArgs": "-g -O0 -std=c11 -Wall -fsanitize=address"
 }
 ```
 
-*Debug configuration with address sanitizer to catch memory errors.*
+_Debug configuration with address sanitizer to catch memory errors._
 
 ### `cph-ng.compilation.cppArgs`
 
@@ -89,28 +96,29 @@ Additional arguments passed to the C++ compiler.
 - **Type**: String
 - **Default**: `"-O2 -std=gnu++17 -Wall"`
 - **User Impact**: Controls C++ compilation. Common use cases:
-  - Standards: `-std=c++11`, `-std=c++14`, `-std=c++17`, `-std=c++20`, `-std=gnu++17`
-  - Optimizations: Same as C
-  - Debugging: `-g`, `-fsanitize=address`, `-fsanitize=undefined`
-  - Platform: `-m32` (32-bit), `-m64` (64-bit)
+    - Standards: `-std=c++11`, `-std=c++14`, `-std=c++17`, `-std=c++20`,
+      `-std=gnu++17`
+    - Optimizations: Same as C
+    - Debugging: `-g`, `-fsanitize=address`, `-fsanitize=undefined`
+    - Platform: `-m32` (32-bit), `-m64` (64-bit)
 
 **Examples**:
 
 ```json
 {
-  "cph-ng.compilation.cppArgs": "-O2 -std=c++20 -Wall"
+    "cph-ng.compilation.cppArgs": "-O2 -std=c++20 -Wall"
 }
 ```
 
-*Use C++20 standard with O2 optimization for competitive programming.*
+_Use C++20 standard with O2 optimization for competitive programming._
 
 ```json
 {
-  "cph-ng.compilation.cppArgs": "-g -O0 -std=c++17 -Wall -fsanitize=address,undefined"
+    "cph-ng.compilation.cppArgs": "-g -O0 -std=c++17 -Wall -fsanitize=address,undefined"
 }
 ```
 
-*Debug with multiple sanitizers to catch memory and undefined behavior errors.*
+_Debug with multiple sanitizers to catch memory and undefined behavior errors._
 
 ### `cph-ng.compilation.javaArgs`
 
@@ -121,13 +129,14 @@ Additional arguments passed to the Java compiler.
 - **User Impact**: Controls Java compilation options.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.javaArgs": "-encoding UTF-8 -Xlint:all"
+    "cph-ng.compilation.javaArgs": "-encoding UTF-8 -Xlint:all"
 }
 ```
 
-*Enable all compiler warnings.*
+_Enable all compiler warnings._
 
 ## Compilation Timeout
 
@@ -137,16 +146,18 @@ Maximum time allowed for compilation (in milliseconds).
 
 - **Type**: Number
 - **Default**: `3000` (3 seconds)
-- **User Impact**: If compilation takes longer than this, it will be terminated. Increase if you have large projects or slower systems.
+- **User Impact**: If compilation takes longer than this, it will be terminated.
+  Increase if you have large projects or slower systems.
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.timeout": 10000
+    "cph-ng.compilation.timeout": 10000
 }
 ```
 
-*Allow up to 10 seconds for compilation.*
+_Allow up to 10 seconds for compilation._
 
 ## Advanced Options
 
@@ -157,18 +168,19 @@ Command wrapper that executes before the compiler.
 - **Type**: String
 - **Default**: `""` (empty)
 - **User Impact**: Runs before compilation. Use cases:
-  - Environment setup
-  - Custom build scripts
-  - Compiler selection based on conditions
+    - Environment setup
+    - Custom build scripts
+    - Compiler selection based on conditions
 
 **Example**:
+
 ```json
 {
-  "cph-ng.compilation.wrapper": "ccache"
+    "cph-ng.compilation.wrapper": "ccache"
 }
 ```
 
-*Use ccache to speed up recompilation.*
+_Use ccache to speed up recompilation._
 
 ### `cph-ng.compilation.beforeCompileHook`
 
@@ -177,9 +189,9 @@ Command executed before compilation starts.
 - **Type**: String
 - **Default**: `""` (empty)
 - **User Impact**: Runs as a separate command before compilation. Use cases:
-  - Pre-processing source files
-  - Generating code
-  - Checking dependencies
+    - Pre-processing source files
+    - Generating code
+    - Checking dependencies
 
 ### `cph-ng.compilation.afterCompileHook`
 
@@ -188,9 +200,9 @@ Command executed after compilation completes.
 - **Type**: String
 - **Default**: `""` (empty)
 - **User Impact**: Runs after successful compilation. Use cases:
-  - Post-processing binaries
-  - Running static analyzers
-  - Copying output files
+    - Post-processing binaries
+    - Running static analyzers
+    - Copying output files
 
 ## Related Features
 

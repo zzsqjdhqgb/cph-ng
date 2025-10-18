@@ -5,6 +5,7 @@
 ## 概述
 
 暴力对拍通过以下方式帮助您查找边界情况：
+
 1. 运行生成器创建随机输入
 2. 在这些输入上运行您的解法
 3. 运行已知正确的暴力解法
@@ -21,13 +22,14 @@
 - **用户影响**：如果生成器生成测试用例所需时间超过此值，它将被终止。如果您的生成器需要更多时间生成复杂的测试用例，请增加此值。
 
 **示例**：
+
 ```json
 {
-  "cph-ng.bfCompare.generatorTimeLimit": 5000
+    "cph-ng.bfCompare.generatorTimeLimit": 5000
 }
 ```
 
-*允许生成器最多 5 秒来创建每个测试用例。*
+_允许生成器最多 5 秒来创建每个测试用例。_
 
 ### `cph-ng.bfCompare.bruteForceTimeLimit`
 
@@ -38,13 +40,14 @@
 - **用户影响**：如果暴力解法运行时间超过此值，它将被终止。暴力解法通常很慢，因此这通常高于正常时间限制。
 
 **示例**：
+
 ```json
 {
-  "cph-ng.bfCompare.bruteForceTimeLimit": 30000
+    "cph-ng.bfCompare.bruteForceTimeLimit": 30000
 }
 ```
 
-*允许暴力解法每个测试用例最多 30 秒。*
+_允许暴力解法每个测试用例最多 30 秒。_
 
 ## 工作原理
 
@@ -53,8 +56,8 @@
 3. **暴力解法**：在相同输入上运行（受 `bruteForceTimeLimit` 限制）
 4. **比较**：比较输出
 5. **结果**：
-   - 如果输出匹配：尝试另一个测试用例
-   - 如果输出不同：**找到失败用例！** 保存以供调试
+    - 如果输出匹配：尝试另一个测试用例
+    - 如果输出不同：**找到失败用例！** 保存以供调试
 
 ## 磁盘操作
 
@@ -69,16 +72,19 @@
 ## 何时调整这些设置
 
 **何时增加 `generatorTimeLimit`**：
+
 - 生成器创建复杂结构（图、树）
 - 生成器验证约束
 - 在生成期间收到超时错误
 
 **何时增加 `bruteForceTimeLimit`**：
+
 - 暴力解法具有高复杂度（O(n³)、O(2ⁿ)）
 - 使用大输入测试
 - 在正确的暴力解法上收到超时
 
 **何时减少超时**：
+
 - 想要更快的迭代（每分钟测试更多用例）
 - 生成器和暴力解法非常快
 - 处理小输入
@@ -86,18 +92,20 @@
 ## 配置示例
 
 ### 简单题目
+
 ```json
 {
-  "cph-ng.bfCompare.generatorTimeLimit": 1000,
-  "cph-ng.bfCompare.bruteForceTimeLimit": 5000
+    "cph-ng.bfCompare.generatorTimeLimit": 1000,
+    "cph-ng.bfCompare.bruteForceTimeLimit": 5000
 }
 ```
 
 ### 复杂题目
+
 ```json
 {
-  "cph-ng.bfCompare.generatorTimeLimit": 10000,
-  "cph-ng.bfCompare.bruteForceTimeLimit": 60000
+    "cph-ng.bfCompare.generatorTimeLimit": 10000,
+    "cph-ng.bfCompare.bruteForceTimeLimit": 60000
 }
 ```
 

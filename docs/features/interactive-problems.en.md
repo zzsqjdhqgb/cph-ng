@@ -4,7 +4,9 @@ Support for interactive problems with custom interactor programs.
 
 ## Overview
 
-Interactive problems require two-way communication between your solution and a judge program. Your solution reads queries, processes them, and writes responses, with the interactor validating the interaction.
+Interactive problems require two-way communication between your solution and a
+judge program. Your solution reads queries, processes them, and writes
+responses, with the interactor validating the interaction.
 
 ## UI Interaction
 
@@ -25,8 +27,9 @@ Interactive problems require two-way communication between your solution and a j
 ## How It Works
 
 With interactor configured:
+
 1. Your solution starts
-2. Interactor starts simultaneously  
+2. Interactor starts simultaneously
 3. Solution writes query → Interactor reads
 4. Interactor writes response → Solution reads
 5. Continues until solution outputs answer or error
@@ -37,6 +40,7 @@ With interactor configured:
 Problem: Guess a number between 1-100
 
 **Your Solution**:
+
 ```cpp
 while(true) {
     cout << guess << endl;

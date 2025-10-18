@@ -4,18 +4,22 @@ Execute one test case and display results.
 
 ## Overview
 
-The Run Single Test Case feature allows you to run your solution against a specific test case. This is useful for debugging individual cases or testing specific scenarios without running all test cases.
+The Run Single Test Case feature allows you to run your solution against a
+specific test case. This is useful for debugging individual cases or testing
+specific scenarios without running all test cases.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method 1: Run Button**
+
 - Expand a test case
 - Click the run/play icon for that specific test case
 - Test executes immediately
 
 **Method 2: Right-click Menu**
+
 - Right-click on a test case
 - Select run option from context menu
 - Choose compilation mode (force compile or skip compile)
@@ -29,11 +33,13 @@ The Run Single Test Case feature allows you to run your solution against a speci
 ### UI Components
 
 **Run Button**:
+
 - Icon: Play/triangle icon
 - Position: Within each test case
 - Click to run that specific case
 
 **Compilation Options** (via menu):
+
 - Force Compile: Always recompile before running
 - Skip Compile: Use cached binary if available
 - Auto (Ctrl+Click): Smart compilation based on changes
@@ -43,29 +49,29 @@ The Run Single Test Case feature allows you to run your solution against a speci
 ### How It Works
 
 1. **Compilation**:
-   - Check if recompilation needed
-   - Compile source if necessary (or forced)
-   - Use cached binary if available and valid
-   - Handle compilation errors
+    - Check if recompilation needed
+    - Compile source if necessary (or forced)
+    - Use cached binary if available and valid
+    - Handle compilation errors
 
 2. **Execution**:
-   - Create temporary input file or pipe
-   - Run compiled program with test input
-   - Capture stdout, stderr
-   - Measure execution time and memory
-   - Apply time and memory limits
-   - Handle timeouts and crashes
+    - Create temporary input file or pipe
+    - Run compiled program with test input
+    - Capture stdout, stderr
+    - Measure execution time and memory
+    - Apply time and memory limits
+    - Handle timeouts and crashes
 
 3. **Comparison**:
-   - Compare actual output with expected answer
-   - Determine verdict (AC, WA, TLE, MLE, RE, etc.)
-   - Calculate differences if WA
+    - Compare actual output with expected answer
+    - Determine verdict (AC, WA, TLE, MLE, RE, etc.)
+    - Calculate differences if WA
 
 4. **Display Results**:
-   - Update test case UI with verdict
-   - Show execution time and memory
-   - Display output or error messages
-   - Enable comparison if WA
+    - Update test case UI with verdict
+    - Show execution time and memory
+    - Display output or error messages
+    - Enable comparison if WA
 
 ### Verdict Types
 
@@ -104,7 +110,7 @@ This feature is affected by multiple configuration settings:
 3. Expand test case #1
 4. Click run button
 5. See results:
-   - ✅ #1 AC (15ms, 3.2MB)
+    - ✅ #1 AC (15ms, 3.2MB)
 6. Output matches expected answer
 
 ### Debugging TLE

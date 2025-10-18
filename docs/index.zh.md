@@ -1,15 +1,18 @@
 # CPH-NG
 
-CPH NG（Competitive Programming Helper - Next Generation，竞争性编程助手 - 新一代）是一个专为竞争性编程开发的 **Visual Studio Code (VS Code) 扩展**。
+CPH NG（Competitive Programming Helper - Next
+Generation，竞争性编程助手 - 新一代）是一个专为竞争性编程开发的 **Visual Studio
+Code (VS Code) 扩展**。
 
 CPH NG 使用户能够在 VS Code 环境中方便高效地**编译、运行和评测**程序。
 
-!!! warning "注意"
-    目前 CPH NG 仅支持 C++ 和 Java。
+!!! warning "注意" 目前 CPH NG 仅支持 C++ 和 Java。
 
 ## 什么是 CPH-NG？
 
-CPH-NG 是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本，为在 VS Code 中工作的竞争性程序员提供全面的解决方案。无论您是在在线评测网站上练习还是处理自己的问题，CPH-NG 都能简化从问题创建到提交的整个工作流程。
+CPH-NG 是 [Competitive Programming Helper](https://github.com/agrawal-d/cph)
+的下一代版本，为在 VS
+Code 中工作的竞争性程序员提供全面的解决方案。无论您是在在线评测网站上练习还是处理自己的题目，CPH-NG 都能简化从题目创建到提交的整个工作流程。
 
 ## 核心功能
 
@@ -19,7 +22,8 @@ CPH-NG 是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) �
 
 提供**多种灵活的方式**导入测试数据：
 
-- 从 [Competitive Companion](https://github.com/jmerle/competitive-companion) 浏览器扩展导入
+- 从 [Competitive Companion](https://github.com/jmerle/competitive-companion)
+  浏览器扩展导入
 - 从 zip 文件或目录加载
 - 手动创建测试用例
 - 从 CPH 格式导入
@@ -59,14 +63,14 @@ CPH-NG 支持 **21 种不同的评测状态**：
 CPH-NG 完全支持：
 
 - 使用 testlib.h 或自定义检查器的**特殊评测（SPJ）**程序
-- 带有自定义交互器的**交互式问题**
-- 针对非标准输出格式的灵活问题验证
+- 带有自定义交互器的**交互式题目**
+- 针对非标准输出格式的灵活题目验证
 
 ### 🔄 高级功能
 
 - **暴力对拍**：使用暴力参考解法测试您的优化解决方案
 - **文件/内联切换**：在内联数据和外部文件之间切换以处理大型测试用例
-- **耗时跟踪**：监控您在问题上工作的时间
+- **耗时跟踪**：监控您在题目上工作的时间
 - **答案比较视图**：错误答案的可视化差异对比
 - **结果持久化**：跨会话保持测试结果的记录
 

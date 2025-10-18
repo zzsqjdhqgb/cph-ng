@@ -4,7 +4,9 @@ Use custom checker programs for non-standard answer validation.
 
 ## Overview
 
-Special Judge (SPJ) allows problems with multiple correct answers or custom validation logic. Instead of exact output matching, your checker program validates whether the output is correct according to problem requirements.
+Special Judge (SPJ) allows problems with multiple correct answers or custom
+validation logic. Instead of exact output matching, your checker program
+validates whether the output is correct according to problem requirements.
 
 ## UI Interaction
 
@@ -25,6 +27,7 @@ Special Judge (SPJ) allows problems with multiple correct answers or custom vali
 ## How It Works
 
 When SPJ is configured:
+
 1. Your solution runs normally
 2. Instead of direct comparison, checker is invoked
 3. Checker receives: input file, output file, answer file
@@ -34,6 +37,7 @@ When SPJ is configured:
 ## Checker Program Structure
 
 Typical checker (C++ with testlib.h):
+
 ```cpp
 #include "testlib.h"
 int main(int argc, char* argv[]) {
@@ -50,5 +54,5 @@ int main(int argc, char* argv[]) {
 ## Related Features
 
 - [Edit Problem](edit-problem.md) - Configure SPJ
-- [Interactive Problems](interactive-problems.md) - Alternative for two-way communication
-
+- [Interactive Problems](interactive-problems.md) - Alternative for two-way
+  communication

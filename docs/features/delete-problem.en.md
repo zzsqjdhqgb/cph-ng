@@ -4,14 +4,18 @@ Remove a problem and its data from the workspace.
 
 ## Overview
 
-The Delete Problem feature permanently removes the problem associated with the current source file. This deletes the problem file containing metadata and test cases, but does not affect your source code file.
+The Delete Problem feature permanently removes the problem associated with the
+current source file. This deletes the problem file containing metadata and test
+cases, but does not affect your source code file.
 
 ## UI Interaction
 
 ### Triggering the Feature
 
 **Method: Delete Button**
-- Click the delete/trash icon button (rightmost button in the problem actions panel)
+
+- Click the delete/trash icon button (rightmost button in the problem actions
+  panel)
 - A confirmation dialog appears before deletion
 
 ### Prerequisites
@@ -22,11 +26,13 @@ The Delete Problem feature permanently removes the problem associated with the c
 ### UI Components
 
 **Delete Button**:
+
 - Icon: Trash/delete icon
 - Color: Red (error color) to indicate destructive action
 - Position: Rightmost button in actions panel
 
 **Confirmation Dialog**:
+
 - Title: Confirms deletion action
 - Content: Warns that action cannot be undone
 - Buttons: Cancel or Confirm
@@ -61,21 +67,25 @@ The Delete Problem feature permanently removes the problem associated with the c
 
 ### Confirmation Required
 
-Deletion requires explicit confirmation to prevent accidental data loss. The confirmation dialog clearly states that the action cannot be undone.
+Deletion requires explicit confirmation to prevent accidental data loss. The
+confirmation dialog clearly states that the action cannot be undone.
 
 ### Source Code Protected
 
-Only the problem metadata file is deleted. Your source code remains safe and unchanged.
+Only the problem metadata file is deleted. Your source code remains safe and
+unchanged.
 
 ## Error Handling
 
 ### Deletion Failure
 
 **File Not Found**:
+
 - Problem file may have been already deleted
 - Warning shown but operation continues
 
 **Permission Error**:
+
 - Insufficient permissions to delete file
 - Error message displayed
 - Problem remains in system
@@ -105,4 +115,3 @@ Only the problem metadata file is deleted. Your source code remains safe and unc
 - [Create Problem](create-problem.md) - Create new problem after deletion
 - [Import Problem](import-problem.md) - Import CPH data if available
 - [Edit Problem](edit-problem.md) - Alternative to deletion for fixing problems
-
