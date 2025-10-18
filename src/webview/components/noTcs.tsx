@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CphFlex from './base/cphFlex';
 import CphText from './base/cphText';

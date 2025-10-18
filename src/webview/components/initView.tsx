@@ -17,7 +17,6 @@
 
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CphFlex from './base/cphFlex';
 import CphText from './base/cphText';

@@ -17,7 +17,6 @@
 
 import Link, { LinkProps } from '@mui/material/Link';
 import Tooltip from '@mui/material/Tooltip';
-import React from 'react';
 import { delProps } from '../../utils';
 
 interface CphLinkProps extends LinkProps {

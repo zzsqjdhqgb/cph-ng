@@ -24,7 +24,6 @@ import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
 import { MD5 } from 'crypto-js';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { isRunningVerdict, TC } from '../../utils/types';
 import { getCompile, msg } from '../utils';

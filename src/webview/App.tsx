@@ -17,7 +17,7 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 import {

@@ -4,9 +4,9 @@ site_author: Hughpig
 site_description: A brief introduction for CPH-NG, the next generation of CPH
 copyright: ©2025 CPH-NG
 nav:
-  - Overview: index.md
-  - Quick Start: quickStart.md
-  - Features:
+  - 简介: index.md
+  - 快速开始: quickStart.md
+  - 功能:
       - features/index.md
       - Problem Management:
           - features/create-problem.md
@@ -33,7 +33,7 @@ nav:
       - Integration:
           - features/competitive-companion.md
           - features/cph-import.md
-  - Configuration:
+  - 配置:
       - configuration/index.md
       - configuration/basic.md
       - configuration/compilation.md
@@ -45,8 +45,18 @@ nav:
       - configuration/cph-compat.md
       - configuration/companion.md
       - configuration/sidebar.md
-  - FAQ: faq.md
-  - About: about.md
+  - 常见问题: faq.md
+  - 贡献:
+      - contributing/index.md
+      - 错误报告: contributing/reporting-a-bug.md
+      - 请求新功能: contributing/feature-request.md
+      - 文档问题: contributing/reporting-a-docs-issue.md
+      - 提交一个拉取请求: contributing/pull-request.md
+      - 询问问题: https://github.com/langningchen/cph-ng/discussions
+      - 帮助:
+          - 创建一个开发环境: contributing/setting-up-dev-env.md
+  - About:
+      - about/about.md
 theme:
   name: material
   palette:
@@ -98,6 +108,10 @@ plugins:
           name: 简体中文
           build: true
 markdown_extensions:
+  - abbr
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -110,9 +124,6 @@ markdown_extensions:
   - tables
   - attr_list
   - md_in_html
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - toc:
       permalink: true
       toc_depth: 3

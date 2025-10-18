@@ -1,21 +1,28 @@
-# About
+---
+hide:
+  - navigation
+  - toc
+---
 
-## About the project
+# 关于
 
-Github Repository: <https://github.com/langningchen/cph-ng>
+## 关于这个项目
 
-## Contributing
+GitHub 仓库：<https://github.com/langningchen/cph-ng>
 
-You can contribute to this extension in many ways:
+## 贡献
 
-- File bug reports by
-  [creating issues](https://github.com/langningchen/cph-ng/issues).
-- Discuss the problems you meet or feelings in
-  [Github Discussions](https://github.com/langningchen/cph-ng/discussions).
-- It's welcomed to [Pull requests](https://github.com/langningchen/cph-ng/pulls)
-  to help develop the extension.
+您可以通过多种方式为此扩展做出贡献：
 
-## License
+- 通过 [创建问题](https://github.com/langningchen/cph-ng/issues)
+  提交错误报告或者改建意见。
+- 在 [GitHub 讨论区](https://github.com/langningchen/cph-ng/discussions)
+  中讨论您遇到的问题或感受。
+- 欢迎 [Pull requests](https://github.com/langningchen/cph-ng/pulls)
+  来帮助开发扩展。
 
-This project is licensed under the terms of the
-[GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE).
+## 许可证
+
+该项目根据
+[GNU Affero General Public License v3.0](https://github.com/langningchen/cph-ng/blob/main/LICENSE)
+的条款进行许可。
