@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.3.1
+
+- **fix**: incorrect file extension
+
 ## 0.3.0
 
 Aggregated from prereleases 0.2.1~0.2.4.
