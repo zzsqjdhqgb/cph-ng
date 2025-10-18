@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.3.2
+
+- **fix**: reading file in windows
+
 ## 0.3.1
 
 - **fix**: incorrect file extension
