@@ -2,7 +2,7 @@
 
 [简体中文](https://github.com/langningchen/cph-ng/blob/main/README.zh-CN.md) | English
 
-> Quickly compile, run and judge competitive programming problems in VS Code.
+> Quickly compile, run and judge competitive programming problems in VSCode.
 > Automatically download testcases, or write & test your own problems.
 
 This is the next generation of the
@@ -76,8 +76,8 @@ This is the next generation of the
     pnpm run watch
     ```
 
-5. **Open in VS Code**
-    - Open the project folder in VS Code
+5. **Open in VSCode**
+    - Open the project folder in VSCode
     - Press `F5` to start debugging
     - A new Extension Development Host window will open with CPH-NG loaded
 
@@ -147,9 +147,9 @@ checking:
 
 ### Debugging
 
-- **Extension Host**: Press `F5` in VS Code to start debugging
+- **Extension Host**: Press `F5` in VSCode to start debugging
 - **Webview**: Open Chrome DevTools in the webview panel
-- **Logs**: Check VS Code Output panel (CPH-NG channels)
+- **Logs**: Check VSCode Output panel (CPH-NG channels)
 - **Compilation**: Check Output panel (CPH-NG Compilation channel)
 
 ## License

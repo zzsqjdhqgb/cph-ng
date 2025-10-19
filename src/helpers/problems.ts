@@ -106,6 +106,7 @@ export default class Problems {
         this.logger.trace('saveProblem', { problem });
         const binPath = await this.getBinBySrc(problem.src.path);
         if (!binPath) {
+            Io.warn(vscode.l10n.t('No workspace folder is open.'));
             return false;
         }
         this.logger.info('Saving problem', { binPath, problem });

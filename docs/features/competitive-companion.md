@@ -13,7 +13,7 @@ Companion 是一个浏览器扩展，可将在线评测的题目数据直接发�
 
 1. 安装 Competitive Companion 浏览器扩展
 2. 在 CPH-NG 设置中配置监听端口（默认：27121）
-3. 在 VS Code 中打开源文件
+3. 在 VSCode 中打开源文件
 4. 导航到在线评测上的题目
 5. 点击 Competitive Companion 图标
 6. 在 CPH-NG 中自动创建题目

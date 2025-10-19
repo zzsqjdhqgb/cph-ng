@@ -128,7 +128,7 @@ jobs:
             ${{ steps.version.outputs.pre_release == 'true' && '⚠️ **This is a pre-release version.**' || '' }}
 
             ## Installation
-            Download the `.vsix` file below and install it manually in VS Code, or install from the marketplace.
+            Download the `.vsix` file below and install it manually in VSCode, or install from the marketplace.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

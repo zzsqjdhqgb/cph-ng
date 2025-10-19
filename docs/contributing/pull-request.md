@@ -13,7 +13,7 @@
 [错误报告]: reporting-a-bug.md
 [文档问题]: reporting-a-docs-issue.md
 [更变请求]: feature-request.md
-[配置]: ../configuration
+[配置]: ../configuration/index.md
 
 ## 了解拉取请求 { #introduction }
 
@@ -84,7 +84,7 @@ sequenceDiagram
    您应该选择一些项目来测试您的更改。您绝对应该确保更改不会破坏 CPH-NG 的文档构建（您可以在 `docs` 文件夹中找到）。
 
 [CPH-NG 仓库]:https://github.com/langnignchen/cph-ng
-[设置一个开发环境]:(setting-up-dev-env.md)
+[设置一个开发环境]:setting-up-dev-env.md
 
 ### 最终确定 { #final-decision }
 

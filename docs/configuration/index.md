@@ -100,72 +100,8 @@ CPH-NG 面板的 UI 自定义。
 | `${basenameNoExt}`   | 不带扩展名的文件名 | `main`                   |
 | `${extname}`         | 文件扩展名         | `.cpp`                   |
 
-### 设置访问
+### 如何修改配置 { #how-to-modify }
 
-**VS Code UI：**
-
-1. 按 `Ctrl+,`（Windows/Linux）或 `Cmd+,`（macOS）
-2. 搜索"cph-ng"
+1. 按 <kbd>Ctrl/Cmd + ,</kbd>
+2. 搜索 `cph-ng`
 3. 浏览和修改设置
-
-**settings.json：**
-
-```json
-{
-    "cph-ng.problem.defaultTimeLimit": 2000,
-    "cph-ng.compilation.cppArgs": "-O2 -std=c++20 -Wall"
-}
-```
-
-## 配置示例
-
-### 竞争性编程设置
-
-```json
-{
-    "cph-ng.problem.defaultTimeLimit": 2000,
-    "cph-ng.problem.defaultMemoryLimit": 256,
-    "cph-ng.compilation.cppArgs": "-O2 -std=c++17 -Wall",
-    "cph-ng.companion.shortCodeforcesName": true,
-    "cph-ng.comparing.regardPEAsAC": false
-}
-```
-
-### 调试配置
-
-```json
-{
-    "cph-ng.compilation.cppArgs": "-g -O0 -std=c++20 -Wall -fsanitize=address",
-    "cph-ng.runner.useRunner": true,
-    "cph-ng.comparing.ignoreError": false
-}
-```
-
-### 性能优化
-
-```json
-{
-    "cph-ng.cache.cleanOnStartup": false,
-    "cph-ng.compilation.timeout": 5000,
-    "cph-ng.runner.timeAddition": 500
-}
-```
-
-## 源代码参考
-
-设置定义在：`src/modules/settings.ts`
-
-每个设置类别都有一个对应的类：
-
-- `BasicSection`（第 45 行）
-- `CompilationSection`（第 54 行）
-- `RunnerSection`（第 158 行）
-- `ComparingSection`（第 176 行）
-- `BFCompareSection`（第 191 行）
-- `ProblemSection`（第 203 行）
-- `CacheSection`（第 96 行）
-- `CphCapableSection`（第 113 行）
-- `CompanionSection`（第 122 行）
-- `SidebarSection`（第 245 行）
-
-Package.json 贡献：`package.json` 第 113-520 行

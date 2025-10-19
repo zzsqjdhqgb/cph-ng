@@ -35,7 +35,7 @@ export default class CphNg {
             return;
         }
         if (await Problems.loadProblem(filePath)) {
-            Io.warn(vscode.l10n.t('Problem already exists for this file'));
+            Io.warn(vscode.l10n.t('Problem already exists for this file.'));
             return;
         }
         const problem = Problems.createProblem(filePath);
@@ -52,7 +52,7 @@ export default class CphNg {
             return;
         }
         if (await Problems.loadProblem(filePath)) {
-            Io.warn(vscode.l10n.t('Problem already exists for this file'));
+            Io.warn(vscode.l10n.t('Problem already exists for this file.'));
             return;
         }
         const probFile = CphCapable.getProbBySrc(filePath);
@@ -60,6 +60,8 @@ export default class CphNg {
         if (problem) {
             await Problems.saveProblem(problem);
             await ProblemsManager.dataRefresh();
+        } else {
+            Io.warn(vscode.l10n.t('Failed to load problem from CPH.'));
         }
     }
 }

@@ -2,7 +2,7 @@
 
 简体中文 | [English](https://github.com/langningchen/cph-ng/blob/main/README.md)
 
-> 在 VS Code 中快速编译、运行和评测编程竞赛题目。可自动下载测试用例，或编写和测试自己的题目。
+> 在 VSCode 中快速编译、运行和评测编程竞赛题目。可自动下载测试用例，或编写和测试自己的题目。
 
 这是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本。
 
@@ -73,8 +73,8 @@
     pnpm run watch
     ```
 
-5.  **在 VS Code 中打开**
-    - 在 VS Code 中打开项目文件夹
+5.  **在 VSCode 中打开**
+    - 在 VSCode 中打开项目文件夹
     - 按 `F5` 开始调试
     - 将会打开一个加载了 CPH-NG 的新扩展开发主机窗口
 
@@ -143,9 +143,9 @@
 
 ### 调试
 
-- **扩展主机**：在 VS Code 中按 `F5` 开始调试
+- **扩展主机**：在 VSCode 中按 `F5` 开始调试
 - **Webview**：在 webview 面板中打开 Chrome DevTools
-- **日志**：查看 VS Code 输出面板 (CPH-NG 通道)
+- **日志**：查看 VSCode 输出面板 (CPH-NG 通道)
 - **编译**：查看输出面板 (CPH-NG 编译通道)
 
 ## 许可证

@@ -1,68 +1,58 @@
-# Quick Start
+---
+hide:
+  - navigation
+---
 
-This guide will help you get started with CPH-NG in minutes. For detailed
-information about all features, see the [Feature Guide](features.md).
+# 快速入门
 
-## Installation
+本指南将帮助您在几分钟内开始使用 CPH-NG。有关所有功能的详细信息，请参阅 [功能指南](features/index.md)。
 
-First, the CPH-NG VS Code extension must be installed in your environment. You
-can install it directly by clicking this link:
-[Install CPH-NG](vscode:extension/langningchen.cph-ng). Please ensure you have
-the latest version installed.
+## 安装 { #installation }
 
-After installation, you'll find the extension's sidebar icon on the left side of
-your VS Code window. Feel free to drag it to the right side if you prefer.
+首先，必须在您的环境中安装 CPH-NG VSCode 扩展。你可以在扩展商店中找到它。请确保您安装了最新版本。有关安装的更详细信息，你可以参考 [简介](./index.md#installation)。
 
-!!! tip "First Time Setup" Before creating your first problem, you may want to
-configure compiler settings in
-[Configuration](configuration.md#compilation-settings).
+安装后，您会在 VSCode 窗口的左侧找到该扩展的侧边栏图标。如果您愿意，可以将其拖到右侧。
 
-## Create a problem
+!!! tip "首次设置"
+    在创建您的第一个题目之前，您可能需要在 [配置](configuration/compilation.md) 中配置编译器设置。
 
-![to create a problem](images/createProblem.png)
+## 创建一个题目
 
-A problem would be created after you click the `CREATE` button. You can do this
-by using the command `CPH-NG: Create Problem` or pressing `Ctrl+Alt+B` as a
-shortcut.
+![](images/createProblem.png)
 
-![a problem is created](images/problemCreated.png)
+单击 `创建` 按钮后，就会创建一个题目。有关创建题目的更详细信息，可以参考 [创建题目](./features/create-problem.md)。
 
-## Add test cases
+![](images/problemCreated.png)
 
-Once the problem is created,the buttons below are able to be used.
+## 添加测试用例
 
-The leftmost button is used to **create a single test case**. You will need to
-manually enter the input data and the expected answer (output).
+题目创建后，就可以使用侧边栏底部的按钮了。
 
-![add a test case](images/addTestCase.png)
+最左边的按钮用于**创建一个单独的测试用例**。您需要手动输入输入数据和预期答案（输出）。
 
-- Tip: CPH-NG also supports **loading test cases from zipped files or specific
-  directories**, which is a great option for managing large datasets.
+![添加一个测试用例](images/addTestCase.png)
 
-## Run test cases
+!!! tip
+    CPH-NG 还支持**从压缩文件或特定目录加载测试用例**，这是管理大型数据集的绝佳选择。
 
-- To run **a single test case**, click the green play button next to that test
-  case.
+## 运行测试用例
 
-- To run **all test cases simultaneously**, click the middle play button in the
-  lower control panel.
+- 要运行**单个测试用例**，请单击该测试用例旁边的绿色播放按钮。
 
-CPH-NG would show you **the first judged test case which isn't accepted**
-automatically.
+- 要**同时运行所有测试用例**，请单击下方控制面板中间的播放按钮。
+
+CPH-NG 会自动向您展开**第一个未通过的已评测测试用例**。
 
 ![](images/testCaseRun.png)
 
-If you load these test cases from files,the output would be also showed as
-files.Drag or click them to show them in detailed.
+如果您从文件加载这些测试用例，输出也将显示为文件。拖动它们可以查看详细信息。
 
 ![](images/fileTestCase.png)
 
-**Now, you have already learned the basic usage of CPH-NG. Enjoy coding with
-CPH-NG!**
+**现在，您已经学会了 CPH-NG 的基本用法。尽情享受使用 CPH-NG 编程的乐趣吧！**
 
-## Next Steps
+## 后续步骤
 
-- Explore all features in the [Feature Guide](features/)
-- Learn about [Configuration Options](configuration/)
-- Check [Modules](modules.md) for additional functionality
-- Visit [FAQ](faq.md) if you have questions
+- 在 [功能指南](features/index.md) 中探索所有功能
+- 了解 [配置选项](configuration/index.md)
+- 如果您有问题，请访问 [常见问题解答](faq.md)

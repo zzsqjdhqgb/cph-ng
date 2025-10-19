@@ -1,36 +1,36 @@
 site_name: CPH-NG
 site_url: https://cph-ng.langningchen.com
-site_author: Hughpig
+site_author: Langning Chen
 site_description: A brief introduction for CPH-NG, the next generation of CPH
 copyright: ©2025 CPH-NG
 nav:
   - 简介: index.md
-  - 快速开始: quickStart.md
+  - 快速入门: quickStart.md
   - 功能:
       - features/index.md
-      - Problem Management:
+      - 题目管理:
           - features/create-problem.md
           - features/import-problem.md
           - features/edit-problem.md
           - features/delete-problem.md
-      - Test Case Management:
+      - 测试用例管理:
           - features/add-test-case.md
           - features/load-test-cases.md
           - features/edit-test-case.md
           - features/delete-test-case.md
           - features/toggle-file-inline.md
           - features/compare-output.md
-      - Running and Testing:
+      - 运行和测试:
           - features/run-single-test.md
           - features/run-all-tests.md
           - features/stop-execution.md
           - features/clear-results.md
-      - Advanced Features:
+      - 高级功能:
           - features/brute-force-compare.md
           - features/special-judge.md
           - features/interactive-problems.md
           - features/submit-codeforces.md
-      - Integration:
+      - 集成:
           - features/competitive-companion.md
           - features/cph-import.md
   - 配置:
@@ -55,8 +55,7 @@ nav:
       - 询问问题: https://github.com/langningchen/cph-ng/discussions
       - 帮助:
           - 创建一个开发环境: contributing/setting-up-dev-env.md
-  - About:
-      - about/about.md
+  - 关于: about.md
 theme:
   name: material
   palette:
@@ -97,16 +96,6 @@ repo_url: https://github.com/langningchen/cph-ng
 edit_uri: edit/main/docs/
 plugins:
   - search
-  - i18n:
-      docs_structure: suffix
-      languages:
-        - locale: en
-          default: true
-          name: English
-          build: true
-        - locale: zh
-          name: 简体中文
-          build: true
 markdown_extensions:
   - abbr
   - pymdownx.emoji:

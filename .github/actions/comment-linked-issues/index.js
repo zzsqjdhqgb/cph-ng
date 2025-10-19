@@ -67,7 +67,7 @@ export default async function run({ github, context, core }) {
                 `${mention} 👋 The CI build has passed.\n\n` +
                 `Related commits:\n${shaLinks}\n\n` +
                 `Workflow run details: ${runUrl}\n\n` +
-                `Please download the \`vsix\` artifact from the workflow run and install it in your VS Code instance to test the changes.\n\n` +
+                `Please download the \`vsix\` artifact from the workflow run and install it in your VSCode instance to test the changes.\n\n` +
                 `If the problem persists, please reply in this issue.`;
 
             const { data: comments } = await github.rest.issues.listComments({

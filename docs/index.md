@@ -1,3 +1,8 @@
+---
+hide:
+  - navigation
+---
+
 # CPH-NG
 
 CPH-NG (1) 是一个专为竞争性编程开发的 **Visual Studio Code 扩展**。
@@ -5,41 +10,33 @@ CPH-NG (1) 是一个专为竞争性编程开发的 **Visual Studio Code 扩展**
 
 1.  CPH-NG 英文全称 `Competitive Programming Helper - Next Generation`，中文全称翻译可以理解为`新一代竞争性编程助手`
 
-CPH-NG 使用户能够在 VS Code 环境中方便高效地**编译、运行和评测**程序。
+CPH-NG 使用户能够在 VSCode 环境中方便高效地**编译、运行和评测**程序。
 
 !!! warning
 
     目前 CPH-NG 仅支持 C++ 和 Java，如果需要支持更多语言，欢迎提出建议。
 
-## 什么是 CPH-NG？
+## 什么是 CPH-NG？ { #introduction }
 
-CPH-NG 是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本，为在 VS Code 中工作的竞争性程序员提供全面的解决方案。无论您是在在线评测网站上练习还是处理自己的题目，CPH-NG 都能简化从题目创建到提交的整个工作流程。
+CPH-NG 是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本，为在 VSCode 中工作的竞争性程序员提供全面的解决方案。无论您是在在线评测网站上练习还是处理自己的题目，CPH-NG 都能简化从题目创建到提交的整个工作流程。
 
-## 安装
+## 安装 { #installation }
 
 - 在 VSCode 扩展面板中搜索 `CPH-NG`
 - 从 Visual Studio Code 市场直接安装 <https://marketplace.visualstudio.com/items?itemName=langningchen.cph-ng>
 
-## 快速链接
+## 核心功能 { #core-features }
 
-- [快速入门指南](quickStart.md) - 几分钟内开始使用
-- [功能指南](features/) - 详细的功能文档
-- [配置参考](configuration.md) - 所有配置选项
-- [常见问题](faq.md) - 常见问题解答
-- [关于](about.md) - 项目信息和贡献指南
-
-## 核心功能
-
-### 智能测试数据管理
+### 智能测试数据管理 { #smart-test-case-management }
 
 提供**多种灵活的方式**导入测试数据：
 
 - 从 [Competitive Companion](https://github.com/jmerle/competitive-companion) 浏览器扩展导入
-- [从 zip 文件或目录加载](features/load-test-cases)
-- [手动创建测试用例](features/add-test-case)
-- [从原始 CPH 格式导入](features/import-problem)
+- [从 zip 文件或目录加载](features/load-test-cases.md)
+- [手动创建测试用例](features/add-test-case.md)
+- [从原始 CPH 格式导入](features/import-problem.md)
 
-### 智能编译系统
+### 智能编译系统 { #smart-compilation }
 
 CPH-NG 具有智能编译系统，能够：
 
@@ -49,7 +46,7 @@ CPH-NG 具有智能编译系统，能够：
 - 提供清晰的编译错误消息
 - 支持编译钩子和包装器
 
-### 全面的评测系统
+### 全面的评测系统 { #full-verdicts }
 
 CPH-NG 支持 **20 种不同的评测状态**：
 
@@ -75,7 +72,7 @@ CPH-NG 支持 **20 种不同的评测状态**：
 | WA   | 答案错误 | 
 | WT   | 等待中 | 
 
-### 🎓 特殊评测支持
+### 🎓 特殊评测支持 { #spj-support }
 
 ![特殊评测](images/specialJudge.png)
 
@@ -85,7 +82,7 @@ CPH-NG 完全支持：
 - 带有自定义交互器的**交互式题目**
 - 针对非标准输出格式的灵活题目验证
 
-### 🔄 高级功能
+### 🔄 高级功能 { #advanced-features }
 
 - **暴力对拍**：使用暴力参考解法测试您的优化解决方案
 - **文件/内联切换**：在内联数据和外部文件之间切换以处理大型测试用例
