@@ -85,7 +85,7 @@ export class LangCpp extends Lang {
 
                 const compilerArgs = args.split(/\s+/).filter(Boolean);
                 compileCommands.push(
-                    [compiler, ...compilerArgs, src.path, '-c', '-o', obj],
+                    [compiler, src.path, ...compilerArgs, '-c', '-o', obj],
                     [
                         compiler,
                         '-fPIC',
@@ -112,8 +112,8 @@ export class LangCpp extends Lang {
                     [objcopy, '--redefine-sym', 'main=original_main', obj],
                     [
                         compiler,
-                        ...compilerArgs,
                         ...linkObjects,
+                        ...compilerArgs,
                         '-o',
                         outputPath,
                         ...(type() === 'Linux' ? ['-ldl'] : []),
@@ -123,8 +123,8 @@ export class LangCpp extends Lang {
                 const compilerArgs = args.split(/\s+/).filter(Boolean);
                 compileCommands.push([
                     compiler,
-                    ...compilerArgs,
                     src.path,
+                    ...compilerArgs,
                     '-o',
                     outputPath,
                 ]);

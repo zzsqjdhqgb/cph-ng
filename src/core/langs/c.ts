@@ -80,7 +80,7 @@ export class LangC extends Lang {
             const compilerArgs = args.split(/\s+/).filter(Boolean);
 
             const result = await ProcessExecutor.execute({
-                cmd: [compiler, ...compilerArgs, src.path, '-o', outputPath],
+                cmd: [compiler, src.path, ...compilerArgs, '-o', outputPath],
                 ac,
                 timeout,
             });

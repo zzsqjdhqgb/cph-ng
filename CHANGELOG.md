@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: c/c++ compile options order
+
 ## 0.3.2
 
 - **fix**: reading file in windows
