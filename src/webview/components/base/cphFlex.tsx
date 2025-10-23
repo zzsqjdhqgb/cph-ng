@@ -17,6 +17,7 @@
 
 import { BoxProps } from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import React from 'react';
 import { delProps } from '../../utils';
 
 interface CphFlexProps extends BoxProps {

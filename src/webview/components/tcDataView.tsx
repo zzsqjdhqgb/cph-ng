@@ -24,7 +24,7 @@ import FileOpenIcon from '@mui/icons-material/FileOpen';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import { AnserJsonEntry, ansiToJson } from 'anser';
-import { CSSProperties, useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
 import { TCIO } from '../../utils/types';

@@ -17,6 +17,7 @@
 
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import React from 'react';
 import { Problem } from '../../utils/types';
 import AcCongrats from './acCongrats';
 import CphFlex from './base/cphFlex';

@@ -20,6 +20,7 @@ import SendIcon from '@mui/icons-material/Send';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';

@@ -21,7 +21,7 @@ import ShuffleIcon from '@mui/icons-material/Shuffle';
 import TryIcon from '@mui/icons-material/Try';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
