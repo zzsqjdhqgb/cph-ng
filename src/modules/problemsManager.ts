@@ -176,12 +176,14 @@ export default class ProblemsManager {
             return;
         }
         const tcs = await getTcs(fullProblem.problem.src.path);
-        if (Settings.problem.clearBeforeLoad) {
-            fullProblem.problem.tcs = tcs;
-        } else {
-            tcs.forEach((tc) => {
-                fullProblem.problem.tcs.push(tc);
-            });
+        if (tcs.length > 0) {
+            if (Settings.problem.clearBeforeLoad) {
+                fullProblem.problem.tcs = tcs;
+            } else {
+                tcs.forEach((tc) => {
+                    fullProblem.problem.tcs.push(tc);
+                });
+            }
         }
         await this.dataRefresh();
     }
