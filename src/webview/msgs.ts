@@ -37,6 +37,12 @@ export interface EditProblemDetailsMsg extends BaseMsg {
     url: string;
     timeLimit: number;
     memoryLimit: number;
+    compilationSettings?: {
+        compiler?: string;
+        compilerArgs?: string;
+        runner?: string;
+        runnerArgs?: string;
+    };
 }
 export interface DelProblemMsg extends BaseMsg {
     type: 'delProblem';

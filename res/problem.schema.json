@@ -132,6 +132,25 @@
             },
             "required": ["running", "msg"],
             "additionalProperties": false
+        },
+        "CompilationSettings": {
+            "title": "CompilationSettings",
+            "type": "object",
+            "properties": {
+                "compiler": {
+                    "type": "string"
+                },
+                "compilerArgs": {
+                    "type": "string"
+                },
+                "runner": {
+                    "type": "string"
+                },
+                "runnerArgs": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         }
     },
     "properties": {
@@ -174,6 +193,9 @@
         "timeElapsed": {
             "type": "integer",
             "minimum": 0
+        },
+        "compilationSettings": {
+            "$ref": "#/definitions/CompilationSettings"
         }
     },
     "required": [

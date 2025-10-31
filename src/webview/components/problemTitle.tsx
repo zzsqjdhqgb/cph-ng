@@ -61,6 +61,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
     const [editedUrl, setEditedUrl] = useState('');
     const [editedTimeLimit, setEditedTimeLimit] = useState(0);
     const [editedMemoryLimit, setEditedMemoryLimit] = useState(0);
+    const [editedCompiler, setEditedCompiler] = useState('');
+    const [editedCompilerArgs, setEditedCompilerArgs] = useState('');
+    const [editedRunner, setEditedRunner] = useState('');
+    const [editedRunnerArgs, setEditedRunnerArgs] = useState('');
     const [timeElapsed, setTimeElapsed] = useState(0);
 
     useEffect(() => {
@@ -68,7 +72,17 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
         setEditedUrl(problem.url || '');
         setEditedTimeLimit(problem.timeLimit);
         setEditedMemoryLimit(problem.memoryLimit);
-    }, [problem.name, problem.url, problem.timeLimit, problem.memoryLimit]);
+        setEditedCompiler(problem.compilationSettings?.compiler || '');
+        setEditedCompilerArgs(problem.compilationSettings?.compilerArgs || '');
+        setEditedRunner(problem.compilationSettings?.runner || '');
+        setEditedRunnerArgs(problem.compilationSettings?.runnerArgs || '');
+    }, [
+        problem.name,
+        problem.url,
+        problem.timeLimit,
+        problem.memoryLimit,
+        problem.compilationSettings,
+    ]);
     useEffect(() => {
         setTimeElapsed(Date.now() - startTime);
         const interval = setInterval(() => {
@@ -83,12 +97,25 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
 
     const handleEditDialogClose = () => {
         setEditDialogOpen(false);
+        const compilationSettings =
+            editedCompiler ||
+            editedCompilerArgs ||
+            editedRunner ||
+            editedRunnerArgs
+                ? {
+                      compiler: editedCompiler || undefined,
+                      compilerArgs: editedCompilerArgs || undefined,
+                      runner: editedRunner || undefined,
+                      runnerArgs: editedRunnerArgs || undefined,
+                  }
+                : undefined;
         msg({
             type: 'editProblemDetails',
             title: editedTitle,
             url: editedUrl,
             timeLimit: editedTimeLimit,
             memoryLimit: editedMemoryLimit,
+            compilationSettings,
         });
     };
 
@@ -257,6 +284,44 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                         }
                         fullWidth
                         type={'number'}
+                    />
+                    <Typography
+                        variant={'subtitle1'}
+                        marginTop={2}
+                    >
+                        {t('problemTitle.dialog.field.compilationSettings')}
+                    </Typography>
+                    <TextField
+                        variant={'outlined'}
+                        margin={'normal'}
+                        label={t('problemTitle.dialog.field.compiler')}
+                        value={editedCompiler}
+                        onChange={(e) => setEditedCompiler(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        variant={'outlined'}
+                        margin={'normal'}
+                        label={t('problemTitle.dialog.field.compilerArgs')}
+                        value={editedCompilerArgs}
+                        onChange={(e) => setEditedCompilerArgs(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        variant={'outlined'}
+                        margin={'normal'}
+                        label={t('problemTitle.dialog.field.runner')}
+                        value={editedRunner}
+                        onChange={(e) => setEditedRunner(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        variant={'outlined'}
+                        margin={'normal'}
+                        label={t('problemTitle.dialog.field.runnerArgs')}
+                        value={editedRunnerArgs}
+                        onChange={(e) => setEditedRunnerArgs(e.target.value)}
+                        fullWidth
                     />
                     <CphFlex>
                         <Typography>

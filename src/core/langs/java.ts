@@ -38,7 +38,9 @@ export class LangJava extends Lang {
         src: FileWithHash,
         ac: AbortController,
         forceCompile: boolean | null,
-        _: CompileAdditionalData = DefaultCompileAdditionalData,
+        {
+            compilationSettings,
+        }: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
 
@@ -47,10 +49,16 @@ export class LangJava extends Lang {
             classDir,
             basename(src.path, extname(src.path)) + '.class',
         );
+
+        const compiler =
+            compilationSettings?.compiler ?? Settings.compilation.javaCompiler;
+        const args =
+            compilationSettings?.compilerArgs ?? Settings.compilation.javaArgs;
+
         const { skip, hash } = await Lang.checkHash(
             src,
             outputPath,
-            Settings.compilation.javaCompiler + Settings.compilation.javaArgs,
+            compiler + args,
             forceCompile,
         );
         if (skip) {
@@ -61,11 +69,7 @@ export class LangJava extends Lang {
             };
         }
 
-        const {
-            javaCompiler: compiler,
-            javaArgs: args,
-            timeout,
-        } = Settings.compilation;
+        const { timeout } = Settings.compilation;
 
         try {
             this.logger.info('Starting compilation', {
@@ -109,10 +113,15 @@ export class LangJava extends Lang {
         }
     }
 
-    public async runCommand(target: string): Promise<string[]> {
+    public async runCommand(
+        target: string,
+        compilationSettings?: CompileAdditionalData['compilationSettings'],
+    ): Promise<string[]> {
         this.logger.trace('runCommand', { target });
-        const { javaRunner: runner, javaRunArgs: runArgs } =
-            Settings.compilation;
+        const runner =
+            compilationSettings?.runner ?? Settings.compilation.javaRunner;
+        const runArgs =
+            compilationSettings?.runnerArgs ?? Settings.compilation.javaRunArgs;
         const runArgsArray = runArgs.split(/\s+/).filter(Boolean);
         return [
             runner,

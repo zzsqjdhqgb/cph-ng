@@ -30,6 +30,12 @@ const logger = new Logger('lang');
 
 export interface CompileAdditionalData {
     canUseWrapper: boolean;
+    compilationSettings?: {
+        compiler?: string;
+        compilerArgs?: string;
+        runner?: string;
+        runnerArgs?: string;
+    };
 }
 export const DefaultCompileAdditionalData: CompileAdditionalData = {
     canUseWrapper: false,
@@ -102,7 +108,10 @@ export class Lang {
     ): Promise<LangCompileResult> {
         throw new Error('Compile method not implemented.');
     }
-    public async runCommand(_target: string): Promise<string[]> {
+    public async runCommand(
+        _target: string,
+        _compilationSettings?: CompileAdditionalData['compilationSettings'],
+    ): Promise<string[]> {
         throw new Error('Run method not implemented.');
     }
 }
