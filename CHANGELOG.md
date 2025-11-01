@@ -2,9 +2,15 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.3.3
 
 - **fix**: c/c++ compile options order
+- **fix**: test cases are not cleared after loading empty test cases
+- **fix**: Windows file comparison by using Uri.file() for filesystem paths
+- **feat**: add automatic unlimited stack configuration for deep recursion
+- **feat**: add debugger with testcase input feature
+- **feat**: add drag-and-drop reordering with real-time preview and improve
+  input focus workflow
 
 ## 0.3.2
 
