@@ -182,7 +182,7 @@ jobs:
                 continue
               fi
               echo "Moving card $card_id -> column $2"
-              gh api -method PATCH $PROJECT/items/"$card_id" -H "Accept: $ACCEPT_HEADER" --input - <<< '{
+              gh api -X PATCH $PROJECT/items/"$card_id" -H "Accept: $ACCEPT_HEADER" --input - <<< '{
                 "fields": [
                   {
                     "id": 234281529,
