@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.3.5
+
+Nothing changed, just dump version to publish a new version.
+
 ## 0.3.4
 
 Nothing changed, just dump version to publish a new version.

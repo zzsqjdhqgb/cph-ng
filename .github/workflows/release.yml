@@ -16,7 +16,6 @@ permissions:
   attestations: write
   issues: write
   pages: write
-  repository-projects: write
 
 jobs:
   release:
@@ -168,7 +167,7 @@ jobs:
       - name: Move cards in project
         if: success()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_GITHUB_TOKEN }}
           PRE_RELEASE: ${{ steps.version.outputs.pre_release }}
         run: |
           set -eux
