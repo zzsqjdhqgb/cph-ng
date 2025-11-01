@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { SHA256 } from 'crypto-js';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import * as vscode from 'vscode';
@@ -757,5 +758,157 @@ export default class ProblemsManager {
             );
         }
         await vscode.window.showTextDocument(document);
+    }
+    public static async debugTc(msg: msgs.DebugTcMsg): Promise<void> {
+        try {
+            const fullProblem = await this.getFullProblem(msg.activePath);
+            if (!fullProblem) {
+                return;
+            }
+            const srcLang = Langs.getLang(fullProblem.problem.src.path);
+            if (!srcLang) {
+                return;
+            }
+
+            const tc = fullProblem.problem.tcs[msg.idx];
+            if (!tc) {
+                Io.error(vscode.l10n.t('Test case not found.'));
+                return;
+            }
+
+            const stdinData = await tcIo2Str(tc.stdin);
+
+            const hash = SHA256(
+                `${fullProblem.problem.src.path}-tc${msg.idx}-${stdinData}`,
+            )
+                .toString()
+                .substring(0, 8);
+            const srcExt = extname(fullProblem.problem.src.path);
+            const inputFilePath = join(
+                Settings.cache.directory,
+                'io',
+                `${hash}.in${srcExt}`,
+            );
+
+            try {
+                await writeFile(inputFilePath, stdinData);
+            } catch (err) {
+                Io.error(
+                    vscode.l10n.t('Failed to write input file: {msg}', {
+                        msg: (err as Error).message,
+                    }),
+                );
+                return;
+            }
+
+            const compileResult = await Compiler.compileAll(
+                fullProblem.problem,
+                srcLang,
+                null,
+                new AbortController(),
+            );
+            if (compileResult.verdict !== TCVerdicts.UKE) {
+                Io.error(
+                    vscode.l10n.t('Failed to compile the program: {msg}', {
+                        msg: compileResult.msg,
+                    }),
+                );
+                return;
+            }
+
+            const compileData = compileResult.data;
+            if (!compileData) {
+                Io.error(vscode.l10n.t('Compile data is empty.'));
+                return;
+            }
+
+            // Get the executable path
+            const executablePath = compileData.outputPath;
+
+            // Determine debug configuration based on language
+            const ext = extname(fullProblem.problem.src.path)
+                .toLowerCase()
+                .slice(1);
+            let debugConfig: vscode.DebugConfiguration;
+
+            if (['cpp', 'cc', 'cxx', 'c++', 'c'].includes(ext)) {
+                debugConfig = {
+                    name: `CPH-NG Debug TC#${msg.idx + 1}`,
+                    type: 'cppdbg',
+                    request: 'launch',
+                    program: executablePath,
+                    args: [],
+                    stopAtEntry: false,
+                    cwd: dirname(fullProblem.problem.src.path),
+                    environment: [],
+                    externalConsole: false,
+                    MIMode: 'gdb',
+                    setupCommands: [
+                        {
+                            description: 'Enable pretty-printing for gdb',
+                            text: '-enable-pretty-printing',
+                            ignoreFailures: true,
+                        },
+                    ],
+                    stdin: inputFilePath,
+                };
+            } else if (ext === 'java') {
+                const className = basename(
+                    fullProblem.problem.src.path,
+                    extname(fullProblem.problem.src.path),
+                );
+                try {
+                    const doc =
+                        await vscode.workspace.openTextDocument(inputFilePath);
+                    await vscode.window.showTextDocument(doc, {
+                        viewColumn: vscode.ViewColumn.Beside,
+                        preview: false,
+                    });
+                    Io.info(
+                        vscode.l10n.t(
+                            'Java debugging does not support automatic stdin redirection. The input file has been opened. Please copy the input manually.',
+                        ),
+                    );
+                } catch (err) {
+                    Io.error(
+                        vscode.l10n.t('Failed to open input file: {msg}', {
+                            msg: (err as Error).message,
+                        }),
+                    );
+                    return;
+                }
+                debugConfig = {
+                    name: `CPH-NG Debug TC#${msg.idx + 1}`,
+                    type: 'java',
+                    request: 'launch',
+                    mainClass: className,
+                    console: 'integratedTerminal',
+                    args: [],
+                };
+            } else {
+                Io.error(
+                    vscode.l10n.t(
+                        'Debugging is not supported for this language yet.',
+                    ),
+                );
+                return;
+            }
+
+            try {
+                await vscode.debug.startDebugging(undefined, debugConfig);
+            } catch (err) {
+                Io.error(
+                    vscode.l10n.t('Failed to start debugger: {msg}', {
+                        msg: (err as Error).message,
+                    }),
+                );
+            }
+        } catch (err) {
+            Io.error(
+                vscode.l10n.t('Failed to debug test case: {msg}', {
+                    msg: (err as Error).message,
+                }),
+            );
+        }
     }
 }

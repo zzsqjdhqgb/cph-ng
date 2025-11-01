@@ -53,6 +53,9 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                     [t('tcView.menu.clearTcStatus')]: () => {
                         msg({ type: 'clearTcStatus', idx });
                     },
+                    [t('tcView.menu.debug')]: () => {
+                        msg({ type: 'debugTc', idx });
+                    },
                 }}
             >
                 <Accordion
