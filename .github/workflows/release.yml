@@ -165,7 +165,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Move cards in project CPH-NG (Done / Pre-release -> Released)
+      - name: Move cards in project
         if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
