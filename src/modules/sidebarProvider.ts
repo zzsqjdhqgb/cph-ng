@@ -131,6 +131,8 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
                         await ProblemsManager.toggleTcFile(msg);
                     } else if (msg.type === 'delTc') {
                         await ProblemsManager.delTc(msg);
+                    } else if (msg.type === 'reorderTc') {
+                        await ProblemsManager.reorderTc(msg);
                     } else if (msg.type === 'chooseSrcFile') {
                         await ProblemsManager.chooseSrcFile(msg);
                     } else if (msg.type === 'removeSrcFile') {

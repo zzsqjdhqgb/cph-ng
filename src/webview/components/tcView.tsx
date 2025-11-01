@@ -38,9 +38,18 @@ import TcDataView from './tcDataView';
 interface TcViewProp {
     tc: TC;
     idx: number;
+    onDragStart?: (e: React.DragEvent) => void;
+    onDragEnd?: () => void;
+    isDragging?: boolean;
 }
 
-const TcView = ({ tc, idx }: TcViewProp) => {
+const TcView = ({
+    tc,
+    idx,
+    onDragStart,
+    onDragEnd,
+    isDragging = false,
+}: TcViewProp) => {
     const { t } = useTranslation();
     const running = isRunningVerdict(tc.result?.verdict);
 
@@ -67,6 +76,8 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                     }}
                     sx={{
                         borderLeft: `4px solid`,
+                        transition: 'all 0.2s',
+                        opacity: isDragging ? 0.5 : 1,
                         ...(window.easterEgg
                             ? (() => {
                                   const hash = MD5(JSON.stringify(tc)).words;
@@ -97,8 +108,18 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                     }}
                 >
                     <AccordionSummary
+                        draggable
+                        onDragStart={(e) => {
+                            e.stopPropagation();
+                            if (onDragStart) onDragStart(e);
+                        }}
+                        onDragEnd={(e) => {
+                            e.stopPropagation();
+                            if (onDragEnd) onDragEnd();
+                        }}
                         sx={{
                             '& > span': { margin: '0 !important' },
+                            'cursor': isDragging ? 'grabbing' : 'grab',
                         }}
                     >
                         <CphFlex smallGap>
@@ -178,7 +199,11 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                             />
                         </CphFlex>
                     </AccordionSummary>
-                    <AccordionDetails>
+                    <AccordionDetails
+                        sx={{
+                            padding: '8px 16px',
+                        }}
+                    >
                         <CphFlex column>
                             <CphFlex
                                 smallGap
@@ -215,6 +240,12 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             isVirtual: true,
                                         });
                                     }}
+                                    autoFocus={
+                                        tc.isExpand &&
+                                        !tc.stdin.data &&
+                                        !tc.answer.data
+                                    }
+                                    tabIndex={idx * 2 + 1}
                                 />
                                 <TcDataView
                                     label={t('tcView.answer')}
@@ -247,6 +278,7 @@ const TcView = ({ tc, idx }: TcViewProp) => {
                                             isVirtual: true,
                                         });
                                     }}
+                                    tabIndex={idx * 2 + 2}
                                 />
                             </CphFlex>
                             {tc.result && (

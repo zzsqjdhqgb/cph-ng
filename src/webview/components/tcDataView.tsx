@@ -24,7 +24,7 @@ import FileOpenIcon from '@mui/icons-material/FileOpen';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import { AnserJsonEntry, ansiToJson } from 'anser';
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
 import { TCIO } from '../../utils/types';
@@ -49,6 +49,8 @@ interface CodeMirrorSectionProps {
     onDbClick?: () => void;
     outputActions?: OutputActions;
     readOnly?: boolean;
+    autoFocus?: boolean;
+    tabIndex?: number;
 }
 
 const ansiToReact = (ansi: string) => {
@@ -112,14 +114,23 @@ const TcDataView = ({
     onDbClick,
     outputActions,
     readOnly,
+    autoFocus,
+    tabIndex,
 }: CodeMirrorSectionProps) => {
     const { t } = useTranslation();
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         setInternalValue(value);
     }, [value]);
+
+    useEffect(() => {
+        if (autoFocus && textareaRef.current) {
+            textareaRef.current.focus();
+        }
+    }, [autoFocus]);
 
     const handleCloseSnackbar = () => {
         setSnackbarOpen(false);
@@ -240,6 +251,7 @@ const TcDataView = ({
                         </div>
                     ) : (
                         <TextareaAutosize
+                            ref={textareaRef}
                             value={internalValue.data}
                             onChange={(e) =>
                                 setInternalValue({
@@ -248,6 +260,7 @@ const TcDataView = ({
                                 })
                             }
                             onBlur={(e) => onBlur && onBlur(e.target.value)}
+                            tabIndex={tabIndex}
                             maxRows={10}
                             style={
                                 {

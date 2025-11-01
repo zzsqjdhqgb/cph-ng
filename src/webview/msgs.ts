@@ -97,6 +97,11 @@ export interface DelTcMsg extends BaseMsg {
     type: 'delTc';
     idx: number;
 }
+export interface ReorderTcMsg extends BaseMsg {
+    type: 'reorderTc';
+    fromIdx: number;
+    toIdx: number;
+}
 export interface OpenFileMsg extends BaseMsg {
     type: 'openFile';
     path: string;
@@ -154,6 +159,7 @@ export type WebviewMsg =
     | CompareTcMsg
     | ToggleTcFileMsg
     | DelTcMsg
+    | ReorderTcMsg
     | OpenFileMsg
     | ChooseSrcFileMsg
     | RemoveSrcFileMsg

@@ -25,6 +25,7 @@ import FileOpenIcon from '@mui/icons-material/FileOpen';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
+
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
@@ -91,6 +92,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                             msg({ type: 'loadTcs' });
                         }}
                     />
+
                     {hasRunning ? (
                         <CphButton
                             larger={true}

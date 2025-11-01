@@ -168,7 +168,7 @@ export default class ProblemsManager {
         fullProblem.problem.tcs.push({
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
-            isExpand: false,
+            isExpand: true,
         });
         await this.dataRefresh();
     }
@@ -469,6 +469,29 @@ export default class ProblemsManager {
             return;
         }
         fullProblem.problem.tcs.splice(msg.idx, 1);
+        await this.dataRefresh();
+    }
+    public static async reorderTc(msg: msgs.ReorderTcMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
+            return;
+        }
+        const tcs = fullProblem.problem.tcs;
+
+        if (
+            msg.fromIdx < 0 ||
+            msg.fromIdx >= tcs.length ||
+            msg.toIdx < 0 ||
+            msg.toIdx >= tcs.length
+        ) {
+            return;
+        }
+
+        // Remove the test case from the original position
+        const [movedTc] = tcs.splice(msg.fromIdx, 1);
+        // Insert it at the new position
+        tcs.splice(msg.toIdx, 0, movedTc);
+
         await this.dataRefresh();
     }
 
