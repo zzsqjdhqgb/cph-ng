@@ -36,6 +36,7 @@ export interface CompileAdditionalData {
         runner?: string;
         runnerArgs?: string;
     };
+    debug?: boolean;
 }
 export const DefaultCompileAdditionalData: CompileAdditionalData = {
     canUseWrapper: false,
@@ -84,7 +85,8 @@ export class Lang {
         });
         return { skip: false, hash };
     }
-    public extensions: string[] = [];
+    public readonly name: string = 'generic';
+    public readonly extensions: string[] = [];
     public async compile(
         src: FileWithHash,
         ac: AbortController,

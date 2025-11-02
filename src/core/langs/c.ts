@@ -34,13 +34,15 @@ import {
 
 export class LangC extends Lang {
     private logger: Logger = new Logger('langC');
-    public extensions = ['c'];
+    public readonly name = 'C';
+    public readonly extensions = ['c'];
     protected async _compile(
         src: FileWithHash,
         ac: AbortController,
         forceCompile: boolean | null,
         {
             compilationSettings,
+            debug,
         }: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
@@ -92,6 +94,10 @@ export class LangC extends Lang {
             ];
             if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
                 cmdArgs.push('-Wl,--stack,268435456');
+            }
+            if (debug) {
+                cmdArgs.push('-g');
+                cmdArgs.push('-O0');
             }
 
             const result = await ProcessExecutor.execute({

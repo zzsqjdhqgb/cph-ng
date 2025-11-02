@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { SHA256 } from 'crypto-js';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import * as vscode from 'vscode';
@@ -25,6 +24,7 @@ import { Runner } from '../core/runner';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
+import ProcessExecutor from '../helpers/processExecutor';
 import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
 import { exists } from '../utils/process';
 import { assignResult } from '../utils/result';
@@ -793,132 +793,64 @@ export default class ProblemsManager {
                 return;
             }
 
-            const tc = fullProblem.problem.tcs[msg.idx];
-            if (!tc) {
-                Io.error(vscode.l10n.t('Test case not found.'));
-                return;
-            }
-
-            const stdinData = await tcIo2Str(tc.stdin);
-
-            const hash = SHA256(
-                `${fullProblem.problem.src.path}-tc${msg.idx}-${stdinData}`,
-            )
-                .toString()
-                .substring(0, 8);
-            const srcExt = extname(fullProblem.problem.src.path);
-            const inputFilePath = join(
-                Settings.cache.directory,
-                'io',
-                `${hash}.in${srcExt}`,
-            );
-
-            try {
-                await writeFile(inputFilePath, stdinData);
-            } catch (err) {
-                Io.error(
-                    vscode.l10n.t('Failed to write input file: {msg}', {
-                        msg: (err as Error).message,
-                    }),
-                );
-                return;
-            }
-
-            const compileResult = await Compiler.compileAll(
-                fullProblem.problem,
-                srcLang,
-                null,
+            const result = await srcLang.compile(
+                fullProblem.problem.src,
                 new AbortController(),
+                null,
+                {
+                    canUseWrapper: false,
+                    compilationSettings:
+                        fullProblem.problem.compilationSettings,
+                    debug: true,
+                },
             );
-            if (compileResult.verdict !== TCVerdicts.UKE) {
+            if (result.verdict !== TCVerdicts.UKE) {
                 Io.error(
                     vscode.l10n.t('Failed to compile the program: {msg}', {
-                        msg: compileResult.msg,
+                        msg: result.msg,
                     }),
                 );
                 return;
             }
+            fullProblem.problem.src.hash = result.data!.hash;
 
-            const compileData = compileResult.data;
-            if (!compileData) {
+            const outputPath = result.data?.outputPath;
+            if (!outputPath) {
                 Io.error(vscode.l10n.t('Compile data is empty.'));
                 return;
             }
 
-            // Get the executable path
-            const executablePath = compileData.outputPath;
+            const process = await ProcessExecutor.launch({
+                cmd: [outputPath],
+                stdin: fullProblem.problem.tcs[msg.idx].stdin,
+                debug: true,
+            });
 
-            // Determine debug configuration based on language
-            const ext = extname(fullProblem.problem.src.path)
-                .toLowerCase()
-                .slice(1);
-            let debugConfig: vscode.DebugConfiguration;
-
-            if (['cpp', 'cc', 'cxx', 'c++', 'c'].includes(ext)) {
-                debugConfig = {
-                    name: `CPH-NG Debug TC#${msg.idx + 1}`,
-                    type: 'cppdbg',
-                    request: 'launch',
-                    program: executablePath,
-                    args: [],
-                    stopAtEntry: false,
-                    cwd: dirname(fullProblem.problem.src.path),
-                    environment: [],
-                    externalConsole: false,
-                    MIMode: 'gdb',
-                    setupCommands: [
-                        {
-                            description: 'Enable pretty-printing for gdb',
-                            text: '-enable-pretty-printing',
-                            ignoreFailures: true,
-                        },
-                    ],
-                    stdin: inputFilePath,
-                };
-            } else if (ext === 'java') {
-                const className = basename(
-                    fullProblem.problem.src.path,
-                    extname(fullProblem.problem.src.path),
-                );
-                try {
-                    const doc =
-                        await vscode.workspace.openTextDocument(inputFilePath);
-                    await vscode.window.showTextDocument(doc, {
-                        viewColumn: vscode.ViewColumn.Beside,
-                        preview: false,
+            try {
+                if (srcLang.name === 'C' || srcLang.name === 'C++') {
+                    await vscode.debug.startDebugging(undefined, {
+                        type: 'cppdbg',
+                        name: `CPH-NG Debug TC#${msg.idx + 1}`,
+                        request: 'attach',
+                        processId: process.child.pid,
+                        program: outputPath,
+                        cwd: dirname(fullProblem.problem.src.path),
+                        setupCommands: [
+                            {
+                                description: 'Set breakpoint at main',
+                                text: '-break-insert -f main',
+                                ignoreFailures: false,
+                            },
+                        ],
                     });
-                    Io.info(
-                        vscode.l10n.t(
-                            'Java debugging does not support automatic stdin redirection. The input file has been opened. Please copy the input manually.',
-                        ),
-                    );
-                } catch (err) {
+                } else {
                     Io.error(
-                        vscode.l10n.t('Failed to open input file: {msg}', {
-                            msg: (err as Error).message,
-                        }),
+                        vscode.l10n.t(
+                            'Debugging is not supported for this language yet.',
+                        ),
                     );
                     return;
                 }
-                debugConfig = {
-                    name: `CPH-NG Debug TC#${msg.idx + 1}`,
-                    type: 'java',
-                    request: 'launch',
-                    mainClass: className,
-                    console: 'integratedTerminal',
-                    args: [],
-                };
-            } else {
-                Io.error(
-                    vscode.l10n.t(
-                        'Debugging is not supported for this language yet.',
-                    ),
-                );
-                return;
-            }
-
-            try {
-                await vscode.debug.startDebugging(undefined, debugConfig);
             } catch (err) {
                 Io.error(
                     vscode.l10n.t('Failed to start debugger: {msg}', {

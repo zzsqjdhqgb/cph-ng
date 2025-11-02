@@ -35,7 +35,8 @@ import {
 
 export class LangCpp extends Lang {
     private logger: Logger = new Logger('langCpp');
-    public extensions = ['cpp', 'cc', 'cxx', 'c++'];
+    public readonly name = 'C++';
+    public readonly extensions = ['cpp', 'cc', 'cxx', 'c++'];
     protected async _compile(
         src: FileWithHash,
         ac: AbortController,
@@ -43,6 +44,7 @@ export class LangCpp extends Lang {
         {
             canUseWrapper,
             compilationSettings,
+            debug,
         }: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
@@ -132,6 +134,10 @@ export class LangCpp extends Lang {
                 ];
                 if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
                     cmdArgs.push('-Wl,--stack,268435456');
+                }
+                if (debug) {
+                    cmdArgs.push('-g');
+                    cmdArgs.push('-O0');
                 }
                 compileCommands.push(cmdArgs);
             }

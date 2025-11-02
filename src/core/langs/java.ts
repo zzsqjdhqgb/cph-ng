@@ -33,7 +33,8 @@ import {
 
 export class LangJava extends Lang {
     private logger: Logger = new Logger('langJava');
-    public extensions = ['java'];
+    public readonly name = 'Java';
+    public readonly extensions = ['java'];
     protected async _compile(
         src: FileWithHash,
         ac: AbortController,
