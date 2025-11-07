@@ -243,6 +243,9 @@ class ProblemSection extends SettingsSection {
     get maxInlineDataLength(): number {
         return this.get('maxInlineDataLength') as number;
     }
+    get testCaseExtensionList(): string[] {
+        return this.get('testCaseExtensionList') as string[];
+    }
 }
 
 class SidebarSection extends SettingsSection {

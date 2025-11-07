@@ -133,6 +133,9 @@ export default class Problems {
             return false;
         }
         path = path.toLowerCase();
+        if (extname(path) in Settings.problem.testCaseExtensionList) {
+            return true;
+        }
         if (
             path.startsWith(Settings.cache.directory.toLowerCase()) ||
             problem.src.path.toLowerCase() === path ||

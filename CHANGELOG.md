@@ -6,6 +6,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 - **fix**: debug not working
 - **feat**: store test cases as UUID-keyed map and add tcOrder #98
+- **feat**: support configurable test-case extensions and detect related files
 
 ## 0.3.6
 

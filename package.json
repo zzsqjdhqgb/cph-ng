@@ -316,6 +316,17 @@
                         "type": "number",
                         "default": 65536,
                         "markdownDescription": "%cph-ng.configuration.problem.properties.maxInlineDataLength.markdownDescription%"
+                    },
+                    "cph-ng.problem.testCaseExtensionList": {
+                        "type": "array",
+                        "default": [
+                            ".in",
+                            ".out",
+                            ".ans",
+                            ".txt",
+                            ".csv"
+                        ],
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.testCaseExtensionList.markdownDescription%"
                     }
                 }
             },

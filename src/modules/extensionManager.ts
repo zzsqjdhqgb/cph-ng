@@ -132,7 +132,7 @@ export default class ExtensionManager {
                             });
                             await ProblemsManager.dataRefresh();
                         },
-                        200,
+                        1000,
                     ),
                 ),
             );
