@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { randomUUID, UUID } from 'crypto';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import * as vscode from 'vscode';
@@ -84,6 +85,11 @@ export default class ProblemsManager {
         );
         for (const idle of idles) {
             idle.problem.timeElapsed += Date.now() - idle.startTime;
+            idle.problem.tcs = Object.fromEntries(
+                Object.entries(idle.problem.tcs).filter(([key]) =>
+                    idle.problem.tcOrder.includes(key as UUID),
+                ),
+            );
             await Problems.saveProblem(idle.problem);
         }
         this.fullProblems = this.fullProblems.filter((p) => !idles.includes(p));
@@ -165,11 +171,13 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        fullProblem.problem.tcs.push({
+        const uuid = randomUUID();
+        fullProblem.problem.tcs[uuid] = {
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
             isExpand: true,
-        });
+        };
+        fullProblem.problem.tcOrder.push(uuid);
         await this.dataRefresh();
     }
     public static async loadTcs(msg: msgs.LoadTcsMsg) {
@@ -180,11 +188,12 @@ export default class ProblemsManager {
         const tcs = await getTcs(fullProblem.problem.src.path);
         if (tcs.length > 0) {
             if (Settings.problem.clearBeforeLoad) {
-                fullProblem.problem.tcs = tcs;
-            } else {
-                tcs.forEach((tc) => {
-                    fullProblem.problem.tcs.push(tc);
-                });
+                fullProblem.problem.tcOrder = [];
+            }
+            for (const tc of tcs) {
+                const uuid = randomUUID();
+                fullProblem.problem.tcs[uuid] = tc;
+                fullProblem.problem.tcOrder.push(uuid);
             }
         }
         await this.dataRefresh();
@@ -194,7 +203,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        fullProblem.problem.tcs[msg.idx] = msg.tc;
+        fullProblem.problem.tcs[msg.id] = msg.tc;
         await this.dataRefresh();
     }
 
@@ -214,7 +223,7 @@ export default class ProblemsManager {
             await this.dataRefresh();
         };
 
-        const tc = fullProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.id];
         tc.result = {
             verdict: TCVerdicts.CP,
             stdout: { useFile: false, data: '' },
@@ -262,7 +271,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        fullProblem.problem.tcs[msg.idx].result = undefined;
+        fullProblem.problem.tcs[msg.id].result = undefined;
         await this.dataRefresh();
     }
     public static async clearStatus(msg: msgs.ClearStatusMsg) {
@@ -270,7 +279,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        for (const tc of fullProblem.problem.tcs) {
+        for (const tc of Object.values(fullProblem.problem.tcs)) {
             tc.result = undefined;
         }
         await this.dataRefresh();
@@ -292,8 +301,10 @@ export default class ProblemsManager {
             await this.dataRefresh();
         };
 
-        for (const tc of fullProblem.problem.tcs) {
-            tc.result = {
+        const tcs = fullProblem.problem.tcs;
+        const tcOrder = [...fullProblem.problem.tcOrder];
+        for (const tcId of tcOrder) {
+            tcs[tcId].result = {
                 verdict: TCVerdicts.CP,
                 stdout: { useFile: false, data: '' },
                 stderr: { useFile: false, data: '' },
@@ -301,7 +312,7 @@ export default class ProblemsManager {
                 time: 0,
                 msg: '',
             };
-            tc.isExpand = false;
+            tcs[tcId].isExpand = false;
         }
         await this.dataRefresh();
 
@@ -312,47 +323,60 @@ export default class ProblemsManager {
             fullProblem.ac,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            console.log(compileResult);
-            for (const tc of fullProblem.problem.tcs) {
-                assignResult(tc.result!, compileResult);
+            for (const tcId of tcOrder) {
+                const result = tcs[tcId].result;
+                if (result) {
+                    assignResult(result, compileResult);
+                }
             }
             await beforeReturn();
             return;
         }
         const compileData = compileResult.data;
         if (!compileData) {
-            for (const tc of fullProblem.problem.tcs) {
-                tc.result!.verdict = TCVerdicts.SE;
-                tc.result!.msg = vscode.l10n.t('Compile data is empty.');
+            for (const tcId of tcOrder) {
+                const result = tcs[tcId].result;
+                if (result) {
+                    result.verdict = TCVerdicts.SE;
+                    result.msg = vscode.l10n.t('Compile data is empty.');
+                }
             }
             await beforeReturn();
             return;
         }
-        for (const tc of fullProblem.problem.tcs) {
-            tc.result!.verdict = TCVerdicts.CPD;
+        for (const tcId of tcOrder) {
+            const result = tcs[tcId].result;
+            if (result) {
+                result.verdict = TCVerdicts.CPD;
+            }
         }
         await this.dataRefresh();
 
         let hasExpandStatus = false;
-        for (const tc of fullProblem.problem.tcs) {
+        for (const tcId of tcOrder) {
+            const tc = tcs[tcId];
+            const result = tc.result;
+            if (!result) {
+                continue;
+            }
             if (fullProblem.ac.signal.aborted) {
                 if (fullProblem.ac.signal.reason === 'onlyOne') {
                     fullProblem.ac = new AbortController();
                 } else {
-                    tc.result!.verdict = TCVerdicts.SK;
+                    result.verdict = TCVerdicts.SK;
                     continue;
                 }
             }
             await Runner.run(
                 fullProblem.problem,
-                tc.result!,
+                result,
                 fullProblem.ac,
                 srcLang,
                 tc,
                 compileData,
             );
             if (!hasExpandStatus) {
-                tc.isExpand = isExpandVerdict(tc.result!.verdict);
+                tc.isExpand = isExpandVerdict(result.verdict);
                 await this.dataRefresh();
                 hasExpandStatus = tc.isExpand;
             }
@@ -368,7 +392,7 @@ export default class ProblemsManager {
         if (fullProblem.ac) {
             fullProblem.ac.abort(msg.onlyOne ? 'onlyOne' : undefined);
         } else {
-            for (const tc of fullProblem.problem.tcs) {
+            for (const tc of Object.values(fullProblem.problem.tcs)) {
                 if (tc.result && isRunningVerdict(tc.result.verdict)) {
                     tc.result.verdict = TCVerdicts.RJ;
                 }
@@ -383,13 +407,13 @@ export default class ProblemsManager {
         }
         const files = await chooseTcFile(msg.label);
         if (files.stdin) {
-            fullProblem.problem.tcs[msg.idx].stdin = {
+            fullProblem.problem.tcs[msg.id].stdin = {
                 useFile: true,
                 path: files.stdin,
             };
         }
         if (files.answer) {
-            fullProblem.problem.tcs[msg.idx].answer = {
+            fullProblem.problem.tcs[msg.id].answer = {
                 useFile: true,
                 path: files.answer,
             };
@@ -401,15 +425,15 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const tc = fullProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.id];
         if (!tc.result) {
             return;
         }
         try {
             vscode.commands.executeCommand(
                 'vscode.diff',
-                generateTcUri(fullProblem.problem, msg.idx, 'answer'),
-                generateTcUri(fullProblem.problem, msg.idx, 'stdout'),
+                generateTcUri(fullProblem.problem, msg.id, 'answer'),
+                generateTcUri(fullProblem.problem, msg.id, 'stdout'),
             );
         } catch (e) {
             Io.error(
@@ -424,7 +448,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const tc = fullProblem.problem.tcs[msg.idx];
+        const tc = fullProblem.problem.tcs[msg.id];
         const fileIo = tc[msg.label];
         if (fileIo.useFile) {
             const data = await tcIo2Str(fileIo);
@@ -447,7 +471,7 @@ export default class ProblemsManager {
             }[msg.label];
             let tempFilePath: string | undefined = join(
                 dirname(fullProblem.problem.src.path),
-                `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.idx + 1}.${ext}`,
+                `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.id + 1}.${ext}`,
             );
             tempFilePath = await vscode.window
                 .showSaveDialog({
@@ -468,7 +492,9 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        fullProblem.problem.tcs.splice(msg.idx, 1);
+        fullProblem.problem.tcOrder = fullProblem.problem.tcOrder.filter(
+            (id) => id !== msg.id,
+        );
         await this.dataRefresh();
     }
     public static async reorderTc(msg: msgs.ReorderTcMsg): Promise<void> {
@@ -476,22 +502,9 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const tcs = fullProblem.problem.tcs;
-
-        if (
-            msg.fromIdx < 0 ||
-            msg.fromIdx >= tcs.length ||
-            msg.toIdx < 0 ||
-            msg.toIdx >= tcs.length
-        ) {
-            return;
-        }
-
-        // Remove the test case from the original position
-        const [movedTc] = tcs.splice(msg.fromIdx, 1);
-        // Insert it at the new position
-        tcs.splice(msg.toIdx, 0, movedTc);
-
+        const tcOrder = fullProblem.problem.tcOrder;
+        const [movedTc] = tcOrder.splice(msg.fromIdx, 1);
+        tcOrder.splice(msg.toIdx, 0, movedTc);
         await this.dataRefresh();
     }
 
@@ -727,7 +740,9 @@ export default class ProblemsManager {
                             };
                         }
                     }
-                    fullProblem.problem.tcs.push(tempTc);
+                    const id = randomUUID();
+                    fullProblem.problem.tcs[id] = tempTc;
+                    fullProblem.problem.tcOrder.push(id);
                     bfCompare.msg = vscode.l10n.t(
                         'Found a difference in #{cnt} run.',
                         { cnt },
@@ -822,7 +837,7 @@ export default class ProblemsManager {
 
             const process = await ProcessExecutor.launch({
                 cmd: [outputPath],
-                stdin: fullProblem.problem.tcs[msg.idx].stdin,
+                stdin: fullProblem.problem.tcs[msg.id].stdin,
                 debug: true,
             });
 
@@ -830,7 +845,7 @@ export default class ProblemsManager {
                 if (srcLang.name === 'C' || srcLang.name === 'C++') {
                     await vscode.debug.startDebugging(undefined, {
                         type: 'cppdbg',
-                        name: `CPH-NG Debug TC#${msg.idx + 1}`,
+                        name: `CPH-NG Debug TC#${msg.id + 1}`,
                         request: 'attach',
                         processId: process.child.pid,
                         program: outputPath,

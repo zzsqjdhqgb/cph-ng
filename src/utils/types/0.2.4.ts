@@ -15,32 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { UUID } from 'crypto';
-
-export const isRunningVerdict = (verdict?: TCVerdict): boolean => {
-    return (
-        verdict !== undefined &&
-        ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
-    );
-};
-
-export const isExpandVerdict = (verdict?: TCVerdict): boolean => {
-    return !(
-        (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
-        isRunningVerdict(verdict)
-    );
-};
-
-export class TCVerdict {
+export interface TCVerdict {
     name: string;
     fullName: string;
     color: string;
-
-    constructor(name: string, fullName: string, color: string) {
-        this.name = name;
-        this.fullName = fullName;
-        this.color = color;
-    }
 }
 
 export type TCIO =
@@ -86,8 +64,7 @@ export interface Problem {
     version: string;
     name: string;
     url?: string;
-    tcs: Record<UUID, TC>;
-    tcOrder: UUID[];
+    tcs: TC[];
     timeLimit: number;
     memoryLimit: number;
     src: FileWithHash;

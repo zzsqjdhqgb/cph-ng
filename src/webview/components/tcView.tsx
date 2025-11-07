@@ -23,6 +23,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Tooltip from '@mui/material/Tooltip';
+import { UUID } from 'crypto';
 import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +39,7 @@ import TcDataView from './tcDataView';
 interface TcViewProp {
     tc: TC;
     idx: number;
+    id: UUID;
     onDragStart?: (e: React.DragEvent) => void;
     onDragEnd?: () => void;
     isDragging?: boolean;
@@ -46,6 +48,7 @@ interface TcViewProp {
 const TcView = ({
     tc,
     idx,
+    id,
     onDragStart,
     onDragEnd,
     isDragging = false,
@@ -53,17 +56,17 @@ const TcView = ({
     const { t } = useTranslation();
     const running = isRunningVerdict(tc.result?.verdict);
 
-    const emitUpdate = () => msg({ type: 'updateTc', idx, tc });
+    const emitUpdate = () => msg({ type: 'updateTc', id, tc });
 
     return (
         <ErrorBoundary>
             <CphMenu
                 menu={{
                     [t('tcView.menu.clearTcStatus')]: () => {
-                        msg({ type: 'clearTcStatus', idx });
+                        msg({ type: 'clearTcStatus', id });
                     },
                     [t('tcView.menu.debug')]: () => {
-                        msg({ type: 'debugTc', idx });
+                        msg({ type: 'debugTc', id });
                     },
                 }}
             >
@@ -160,14 +163,14 @@ const TcView = ({
                                     [t('tcView.run.menu.forceCompile')]: () => {
                                         msg({
                                             type: 'runTc',
-                                            idx,
+                                            id,
                                             compile: true,
                                         });
                                     },
                                     [t('tcView.run.menu.skipCompile')]: () => {
                                         msg({
                                             type: 'runTc',
-                                            idx,
+                                            id,
                                             compile: false,
                                         });
                                     },
@@ -182,7 +185,7 @@ const TcView = ({
                                         e.stopPropagation();
                                         msg({
                                             type: 'runTc',
-                                            idx,
+                                            id,
                                             compile: getCompile(e),
                                         });
                                     }}
@@ -194,7 +197,7 @@ const TcView = ({
                                 color={'error'}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    msg({ type: 'delTc', idx });
+                                    msg({ type: 'delTc', id });
                                 }}
                             />
                         </CphFlex>
@@ -212,7 +215,7 @@ const TcView = ({
                                 <TcDataView
                                     label={t('tcView.stdin')}
                                     value={tc.stdin}
-                                    onBlur={(value) => {
+                                    onChange={(value) => {
                                         tc.stdin = {
                                             useFile: false,
                                             data: value,
@@ -223,34 +226,30 @@ const TcView = ({
                                         msg({
                                             type: 'chooseTcFile',
                                             label: 'stdin',
-                                            idx,
+                                            id,
                                         })
                                     }
                                     onToggleFile={() => {
                                         msg({
                                             type: 'toggleTcFile',
                                             label: 'stdin',
-                                            idx,
+                                            id,
                                         });
                                     }}
                                     onDbClick={() => {
                                         msg({
                                             type: 'openFile',
-                                            path: `/tcs/${idx}/stdin`,
+                                            path: `/tcs/${id}/stdin`,
                                             isVirtual: true,
                                         });
                                     }}
-                                    autoFocus={
-                                        tc.isExpand &&
-                                        !tc.stdin.data &&
-                                        !tc.answer.data
-                                    }
+                                    autoFocus={tc.isExpand}
                                     tabIndex={idx * 2 + 1}
                                 />
                                 <TcDataView
                                     label={t('tcView.answer')}
                                     value={tc.answer}
-                                    onBlur={(value) => {
+                                    onChange={(value) => {
                                         tc.answer = {
                                             useFile: false,
                                             data: value,
@@ -261,20 +260,20 @@ const TcView = ({
                                         msg({
                                             type: 'chooseTcFile',
                                             label: 'answer',
-                                            idx,
+                                            id,
                                         });
                                     }}
                                     onToggleFile={() => {
                                         msg({
                                             type: 'toggleTcFile',
                                             label: 'answer',
-                                            idx,
+                                            id,
                                         });
                                     }}
                                     onDbClick={() => {
                                         msg({
                                             type: 'openFile',
-                                            path: `/tcs/${idx}/answer`,
+                                            path: `/tcs/${id}/answer`,
                                             isVirtual: true,
                                         });
                                     }}
@@ -302,14 +301,14 @@ const TcView = ({
                                                 onCompare: () => {
                                                     msg({
                                                         type: 'compareTc',
-                                                        idx,
+                                                        id,
                                                     });
                                                 },
                                             }}
                                             onDbClick={() => {
                                                 msg({
                                                     type: 'openFile',
-                                                    path: `/tcs/${idx}/stdout`,
+                                                    path: `/tcs/${id}/stdout`,
                                                     isVirtual: true,
                                                 });
                                             }}
@@ -321,7 +320,7 @@ const TcView = ({
                                             onDbClick={() => {
                                                 msg({
                                                     type: 'openFile',
-                                                    path: `/tcs/${idx}/stderr`,
+                                                    path: `/tcs/${id}/stderr`,
                                                     isVirtual: true,
                                                 });
                                             }}

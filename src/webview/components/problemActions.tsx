@@ -53,7 +53,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
     const [clickTime, setClickTime] = useState<number[]>([]);
     const [isDelDialogOpen, setDelDialogOpen] = useState(false);
     const [isBfCompareDialogOpen, setBfCompareDialogOpen] = useState(false);
-    const hasRunning = problem.tcs.some((tc) =>
+    const hasRunning = Object.values(problem.tcs).some((tc) =>
         isRunningVerdict(tc.result?.verdict),
     );
     useEffect(() => {

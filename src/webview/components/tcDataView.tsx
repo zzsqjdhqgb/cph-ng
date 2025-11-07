@@ -43,7 +43,7 @@ interface OutputActions {
 interface CodeMirrorSectionProps {
     label: string;
     value: TCIO;
-    onBlur?: (value: string) => void;
+    onChange?: (value: string) => void;
     onChooseFile?: () => void;
     onToggleFile?: () => void;
     onDbClick?: () => void;
@@ -108,7 +108,7 @@ const ansiToReact = (ansi: string) => {
 const TcDataView = ({
     label,
     value,
-    onBlur,
+    onChange,
     onChooseFile,
     onToggleFile,
     onDbClick,
@@ -200,7 +200,7 @@ const TcDataView = ({
                             <CphButton
                                 name={t('tcDataView.clearFile')}
                                 icon={ClearIcon}
-                                onClick={() => onBlur && onBlur('')}
+                                onClick={() => onChange && onChange('')}
                             />
                         )
                     ) : (
@@ -253,13 +253,13 @@ const TcDataView = ({
                         <TextareaAutosize
                             ref={textareaRef}
                             value={internalValue.data}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                                onChange && onChange(e.target.value);
                                 setInternalValue({
                                     useFile: false,
                                     data: e.target.value,
-                                })
-                            }
-                            onBlur={(e) => onBlur && onBlur(e.target.value)}
+                                });
+                            }}
                             tabIndex={tabIndex}
                             maxRows={10}
                             style={

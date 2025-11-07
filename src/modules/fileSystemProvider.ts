@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { UUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import * as vscode from 'vscode';
 import { Problem } from '../utils/types';
@@ -22,11 +23,11 @@ import { write2TcIo } from '../utils/types.backend';
 import ProblemsManager from './problemsManager';
 
 export type UriTypes = 'stdin' | 'answer' | 'stdout' | 'stderr';
-export const generateTcUri = (problem: Problem, idx: number, type: UriTypes) =>
+export const generateTcUri = (problem: Problem, id: UUID, type: UriTypes) =>
     vscode.Uri.from({
         scheme: FileSystemProvider.scheme,
         authority: problem.src.path,
-        path: `/tcs/${idx}/${type}`,
+        path: `/tcs/${id}/${type}`,
     });
 
 type CphFsFile = {
@@ -73,72 +74,77 @@ export class FileSystemProvider implements vscode.FileSystemProvider {
             ],
             [
                 'tcs',
-                problem.tcs.map((tc, idx): [string, CphFsItem] => {
-                    const items: CphFsDir = [
-                        [
-                            'stdin',
-                            {
-                                data: tc.stdin.useFile
-                                    ? vscode.Uri.file(tc.stdin.path)
-                                    : tc.stdin.data,
-                                set: async (data: string) => {
-                                    tc.stdin = await write2TcIo(tc.stdin, data);
+                Object.entries(problem.tcs).map(
+                    ([id, tc]): [string, CphFsItem] => {
+                        const items: CphFsDir = [
+                            [
+                                'stdin',
+                                {
+                                    data: tc.stdin.useFile
+                                        ? vscode.Uri.file(tc.stdin.path)
+                                        : tc.stdin.data,
+                                    set: async (data: string) => {
+                                        tc.stdin = await write2TcIo(
+                                            tc.stdin,
+                                            data,
+                                        );
+                                    },
                                 },
-                            },
-                        ],
-                        [
-                            'answer',
-                            {
-                                data: tc.answer.useFile
-                                    ? vscode.Uri.file(tc.answer.path)
-                                    : tc.answer.data,
-                                set: async (data: string) => {
-                                    tc.answer = await write2TcIo(
-                                        tc.answer,
-                                        data,
-                                    );
+                            ],
+                            [
+                                'answer',
+                                {
+                                    data: tc.answer.useFile
+                                        ? vscode.Uri.file(tc.answer.path)
+                                        : tc.answer.data,
+                                    set: async (data: string) => {
+                                        tc.answer = await write2TcIo(
+                                            tc.answer,
+                                            data,
+                                        );
+                                    },
                                 },
-                            },
-                        ],
-                    ];
-                    if (tc.result) {
-                        items.push([
-                            'stdout',
-                            {
-                                data: tc.result.stdout.useFile
-                                    ? vscode.Uri.file(tc.result.stdout.path)
-                                    : tc.result.stdout.data,
-                                set: async (data: string) => {
-                                    if (!tc.result) {
-                                        throw this.notFound;
-                                    }
-                                    tc.result.stdout = await write2TcIo(
-                                        tc.result!.stdout,
-                                        data,
-                                    );
+                            ],
+                        ];
+                        if (tc.result) {
+                            items.push([
+                                'stdout',
+                                {
+                                    data: tc.result.stdout.useFile
+                                        ? vscode.Uri.file(tc.result.stdout.path)
+                                        : tc.result.stdout.data,
+                                    set: async (data: string) => {
+                                        if (!tc.result) {
+                                            throw this.notFound;
+                                        }
+                                        tc.result.stdout = await write2TcIo(
+                                            tc.result!.stdout,
+                                            data,
+                                        );
+                                    },
                                 },
-                            },
-                        ]);
-                        items.push([
-                            'stderr',
-                            {
-                                data: tc.result.stderr.useFile
-                                    ? vscode.Uri.file(tc.result.stderr.path)
-                                    : tc.result.stderr.data,
-                                set: async (data: string) => {
-                                    if (!tc.result) {
-                                        throw this.notFound;
-                                    }
-                                    tc.result.stderr = await write2TcIo(
-                                        tc.result!.stderr,
-                                        data,
-                                    );
+                            ]);
+                            items.push([
+                                'stderr',
+                                {
+                                    data: tc.result.stderr.useFile
+                                        ? vscode.Uri.file(tc.result.stderr.path)
+                                        : tc.result.stderr.data,
+                                    set: async (data: string) => {
+                                        if (!tc.result) {
+                                            throw this.notFound;
+                                        }
+                                        tc.result.stderr = await write2TcIo(
+                                            tc.result!.stderr,
+                                            data,
+                                        );
+                                    },
                                 },
-                            },
-                        ]);
-                    }
-                    return [idx.toString(), items];
-                }),
+                            ]);
+                        }
+                        return [id, items];
+                    },
+                ),
             ],
         ];
         for (const part of path) {

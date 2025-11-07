@@ -165,9 +165,19 @@
             "format": "uri"
         },
         "tcs": {
+            "type": "object",
+            "propertyNames": {
+                "format": "uuid"
+            },
+            "additionalProperties": {
+                "$ref": "#/definitions/TC"
+            }
+        },
+        "tcOrder": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/TC"
+                "type": "string",
+                "format": "uuid"
             }
         },
         "timeLimit": {

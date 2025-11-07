@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { randomUUID } from 'crypto';
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
@@ -54,20 +55,26 @@ export default class CphCapable {
 
     public static toProblem(cphProblem: CphProblem): Problem {
         this.logger.trace('toProblem', { cphProblem });
-        const problem = {
+        const problem: Problem = {
             version,
             name: cphProblem.name,
             url: cphProblem.url,
-            tcs: cphProblem.tests.map((test) => ({
-                stdin: { useFile: false, data: test.input },
-                answer: { useFile: false, data: test.output },
-                isExpand: false,
-            })),
+            tcs: {},
+            tcOrder: [],
             timeLimit: cphProblem.timeLimit,
             memoryLimit: cphProblem.memoryLimit,
             src: { path: cphProblem.srcPath },
             timeElapsed: 0,
         } satisfies Problem;
+        for (const test of cphProblem.tests) {
+            const id = randomUUID();
+            problem.tcs[id] = {
+                stdin: { useFile: false, data: test.input },
+                answer: { useFile: false, data: test.output },
+                isExpand: false,
+            };
+            problem.tcOrder.push(id);
+        }
         this.logger.info('Converted CphProblem to Problem', { problem });
         return problem;
     }
@@ -131,7 +138,7 @@ export default class CphCapable {
                 label: p.name,
                 description: [
                     vscode.l10n.t('Number of test cases: {cnt}', {
-                        cnt: p.tcs.length,
+                        cnt: p.tcOrder.length,
                     }),
                     p.checker ? vscode.l10n.t('Special Judge') : '',
                     p.interactor ? vscode.l10n.t('Interactive') : '',

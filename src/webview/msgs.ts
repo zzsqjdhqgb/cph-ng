@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { UUID } from 'crypto';
 import { TC } from '../utils/types';
 
 export interface BaseMsg {
@@ -63,12 +64,12 @@ export interface LoadTcsMsg extends BaseMsg {
 }
 export interface RunTcMsg extends BaseMsg {
     type: 'runTc';
-    idx: number;
+    id: UUID;
     compile: boolean | null;
 }
 export interface ClearTcStatusMsg extends BaseMsg {
     type: 'clearTcStatus';
-    idx: number;
+    id: UUID;
 }
 export interface ClearStatusMsg extends BaseMsg {
     type: 'clearStatus';
@@ -76,26 +77,26 @@ export interface ClearStatusMsg extends BaseMsg {
 export type WebviewTcFileTypes = 'stdin' | 'answer';
 export interface ChooseTcFileMsg extends BaseMsg {
     type: 'chooseTcFile';
-    idx: number;
+    id: UUID;
     label: WebviewTcFileTypes;
 }
 export interface UpdateTcMsg extends BaseMsg {
     type: 'updateTc';
-    idx: number;
+    id: UUID;
     tc: TC;
 }
 export interface CompareTcMsg extends BaseMsg {
     type: 'compareTc';
-    idx: number;
+    id: UUID;
 }
 export interface ToggleTcFileMsg extends BaseMsg {
     type: 'toggleTcFile';
-    idx: number;
+    id: UUID;
     label: WebviewTcFileTypes;
 }
 export interface DelTcMsg extends BaseMsg {
     type: 'delTc';
-    idx: number;
+    id: UUID;
 }
 export interface ReorderTcMsg extends BaseMsg {
     type: 'reorderTc';
@@ -139,7 +140,7 @@ export interface OpenSettingsMsg extends BaseMsg {
 }
 export interface DebugTcMsg extends BaseMsg {
     type: 'debugTc';
-    idx: number;
+    id: UUID;
 }
 export type WebviewMsg =
     | CreateProblemMsg

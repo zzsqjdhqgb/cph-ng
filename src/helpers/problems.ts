@@ -56,7 +56,8 @@ export default class Problems {
             version,
             name: basename(srcFile, extname(srcFile)),
             src: { path: srcFile },
-            tcs: [],
+            tcs: {},
+            tcOrder: [],
             timeLimit: Settings.problem.defaultTimeLimit,
             memoryLimit: Settings.problem.defaultMemoryLimit,
             timeElapsed: 0,
@@ -144,7 +145,7 @@ export default class Problems {
         }
         const tcIoRelated = (tcIo?: TCIO) =>
             tcIo && tcIo.useFile && tcIo.path.toLowerCase() === path;
-        for (const tc of problem.tcs) {
+        for (const tc of Object.values(problem.tcs)) {
             if (
                 tcIoRelated(tc.stdin) ||
                 tcIoRelated(tc.answer) ||
