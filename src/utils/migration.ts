@@ -16,6 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { randomUUID } from 'crypto';
+import { compare, lte } from 'semver';
 import Logger from '../helpers/logger';
 import { Problem, Problem as Problem_0_2_5 } from './types';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
@@ -31,6 +32,7 @@ import { Problem as Problem_0_2_4 } from './types/0.2.4';
 const logger = new Logger('migration');
 
 export type OldProblem =
+    | Problem_0_2_4
     | Problem_0_2_3
     | Problem_0_2_1
     | Problem_0_1_1
@@ -44,7 +46,7 @@ const migrateFunctions: Record<string, (oldProblem: any) => any> = {
     '0.2.4': (problem: Problem_0_2_4): Problem_0_2_5 => {
         const newProblem: Problem_0_2_5 = {
             ...problem,
-            version: '0.2.4',
+            version: '0.2.5',
             tcs: {},
             tcOrder: [],
         };
@@ -143,6 +145,14 @@ export const migration = (problem: OldProblem): Problem => {
         const version: string = (() => {
             const problemAny = problem as any;
             if ('version' in problemAny) {
+                const versions = Object.keys(migrateFunctions).sort((a, b) =>
+                    compare(b, a),
+                );
+                for (const version of versions) {
+                    if (lte(version, problemAny.version)) {
+                        return version;
+                    }
+                }
                 return problemAny.version;
             }
             if ('src' in problemAny) {
