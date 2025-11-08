@@ -19,7 +19,7 @@ import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
 import { version } from '../../package.json';
 import Logger from '../helpers/logger';
-import { Problem, Problem as Problem_0_3_6 } from './types';
+import { Problem, Problem as Problem_0_3_7 } from './types';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
 import { Problem as Problem_0_0_3 } from './types/0.0.3';
 import { Problem as Problem_0_0_4 } from './types/0.0.4';
@@ -44,10 +44,10 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
-    '0.2.4': (problem: Problem_0_2_4): Problem_0_3_6 => {
-        const newProblem: Problem_0_3_6 = {
+    '0.2.4': (problem: Problem_0_2_4): Problem_0_3_7 => {
+        const newProblem: Problem_0_3_7 = {
             ...problem,
-            version: '0.3.6',
+            version: '0.3.7',
             tcs: {},
             tcOrder: [],
         };
