@@ -17,8 +17,9 @@
 
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
+import { version } from '../../package.json';
 import Logger from '../helpers/logger';
-import { Problem, Problem as Problem_0_2_5 } from './types';
+import { Problem, Problem as Problem_0_3_6 } from './types';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
 import { Problem as Problem_0_0_3 } from './types/0.0.3';
 import { Problem as Problem_0_0_4 } from './types/0.0.4';
@@ -43,10 +44,10 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
-    '0.2.4': (problem: Problem_0_2_4): Problem_0_2_5 => {
-        const newProblem: Problem_0_2_5 = {
+    '0.2.4': (problem: Problem_0_2_4): Problem_0_3_6 => {
+        const newProblem: Problem_0_3_6 = {
             ...problem,
-            version: '0.2.5',
+            version: '0.3.6',
             tcs: {},
             tcOrder: [],
         };
@@ -142,12 +143,13 @@ const migrateFunctions: Record<string, (oldProblem: any) => any> = {
 export const migration = (problem: OldProblem): Problem => {
     logger.trace('Starting migration', { problem });
     while (true) {
-        const version: string = (() => {
+        const detectedVer: string = (() => {
             const problemAny = problem as any;
             if ('version' in problemAny) {
-                const versions = Object.keys(migrateFunctions).sort((a, b) =>
-                    compare(b, a),
-                );
+                const versions = [
+                    ...Object.keys(migrateFunctions),
+                    version,
+                ].sort((a, b) => compare(b, a));
                 for (const version of versions) {
                     if (lte(version, problemAny.version)) {
                         return version;
@@ -176,13 +178,16 @@ export const migration = (problem: OldProblem): Problem => {
             }
             return '0.0.1';
         })();
-        logger.debug('Detected version', { version });
-        if (migrateFunctions[version] === undefined) {
+        logger.debug('Detected version', { detectedVer });
+        if (migrateFunctions[detectedVer] === undefined) {
             logger.debug('No migration function found, stopping migration');
             break;
         }
-        problem = migrateFunctions[version](problem);
-        logger.debug('Migrated to version', { version, problem });
+        problem = migrateFunctions[detectedVer](problem);
+        logger.debug('Migrated to version', {
+            version: detectedVer,
+            problem,
+        });
     }
     return problem as unknown as Problem;
 };
