@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: update URL host checks to use endsWith for better accuracy
+
 ## 0.3.7
 
 - **fix**: debug not working

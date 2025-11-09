@@ -338,7 +338,9 @@ class Companion {
         if (url) {
             try {
                 const u = new URL(url);
-                if (u.host.includes('codeforces.com') && shortCodeforcesName) {
+                const isHost = (host: string) =>
+                    u.hostname === host || u.hostname.endsWith(`.${host}`);
+                if (isHost('codeforces.com') && shortCodeforcesName) {
                     const regexPatterns = [
                         /\/contest\/(\d+)\/problem\/(\w+)/,
                         /\/problemset\/problem\/(\d+)\/(\w+)/,
@@ -351,13 +353,13 @@ class Companion {
                         }
                     }
                 }
-                if (u.host.includes('luogu.com.cn') && shortLuoguName) {
+                if (isHost('luogu.com.cn') && shortLuoguName) {
                     const match = url.match(/problem\/(\w+)/);
                     if (match) {
                         return `${match[1]}.${ext}`;
                     }
                 }
-                if (u.host.includes('atcoder.jp') && shortAtCoderName) {
+                if (isHost('atcoder.jp') && shortAtCoderName) {
                     const match = url.match(/tasks\/(\w+)_(\w+)/);
                     if (match) {
                         return `${match[1]}${match[2]}.${ext}`;
