@@ -19,7 +19,7 @@ import AdmZip from 'adm-zip';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join, relative } from 'path';
-import * as vscode from 'vscode';
+import { l10n, Uri, window, workspace } from 'vscode';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Settings from '../modules/settings';
@@ -40,14 +40,14 @@ async function getAllFiles(dirPath: string): Promise<string[]> {
 }
 export const getTcs = async (srcPath: string): Promise<TC[]> => {
     const option = (
-        await vscode.window.showQuickPick(
+        await window.showQuickPick(
             [
                 {
-                    label: vscode.l10n.t('Load from a zip file'),
+                    label: l10n.t('Load from a zip file'),
                     value: 'zip',
                 },
                 {
-                    label: vscode.l10n.t('Load from a folder'),
+                    label: l10n.t('Load from a folder'),
                     value: 'folder',
                 },
             ],
@@ -60,8 +60,8 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
 
     let folderPath = '';
     if (option === 'zip') {
-        const zipFile = await vscode.window.showOpenDialog({
-            title: vscode.l10n.t('Choose a zip file containing test cases'),
+        const zipFile = await window.showOpenDialog({
+            title: l10n.t('Choose a zip file containing test cases'),
             filters: { 'Zip files': ['zip'], 'All files': ['*'] },
         });
         if (!zipFile) {
@@ -69,8 +69,8 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
         }
         const zipPath = zipFile[0].fsPath;
         const zipData = new AdmZip(zipPath);
-        const srcUri = vscode.Uri.file(srcPath);
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(srcUri);
+        const srcUri = Uri.file(srcPath);
+        const workspaceFolder = workspace.getWorkspaceFolder(srcUri);
         if (!workspaceFolder) {
             return [];
         }
@@ -96,7 +96,7 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
         }
     } else if (option === 'folder') {
         const folderUri = await FolderChooser.chooseFolder(
-            vscode.l10n.t('Choose a folder containing test cases'),
+            l10n.t('Choose a folder containing test cases'),
         );
         if (!folderUri) {
             return [];
@@ -143,7 +143,7 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
         }
     }
     if (!tcs.length) {
-        Io.warn(vscode.l10n.t('No test cases found in the zip file.'));
+        Io.warn(l10n.t('No test cases found in the zip file.'));
         return [];
     }
     const orderedTcs = orderBy(tcs, [
@@ -155,7 +155,7 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
                   ? basename(it.answer.path)
                   : '',
     ]);
-    const chosenIdx = await vscode.window.showQuickPick(
+    const chosenIdx = await window.showQuickPick(
         orderedTcs.map((tc, idx) => ({
             label: `${basename(
                 tc.stdin.useFile
@@ -164,20 +164,20 @@ export const getTcs = async (srcPath: string): Promise<TC[]> => {
                       ? tc.answer.path
                       : 'unknown',
             )}`,
-            description: vscode.l10n.t('Input {input}, Answer {answer}', {
+            description: l10n.t('Input {input}, Answer {answer}', {
                 input: tc.stdin.useFile
                     ? tc.stdin.path.replace(folderPath + '/', '')
-                    : vscode.l10n.t('not found'),
+                    : l10n.t('not found'),
                 answer: tc.answer.useFile
                     ? tc.answer.path.replace(folderPath + '/', '')
-                    : vscode.l10n.t('not found'),
+                    : l10n.t('not found'),
             }),
             value: idx,
             picked: true,
         })),
         {
             canPickMany: true,
-            title: vscode.l10n.t('Select test cases to add'),
+            title: l10n.t('Select test cases to add'),
         },
     );
     if (!chosenIdx) {
@@ -192,16 +192,16 @@ export const chooseTcFile = async (
     const isInput = option === 'stdin';
     const mainExt = isInput ? ['in'] : ['ans', 'out'];
     const pairExt = isInput ? ['ans', 'out'] : ['in'];
-    const fileUri = await vscode.window.showOpenDialog({
+    const fileUri = await window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: false,
-        title: vscode.l10n.t('Choose {type} file', {
-            type: isInput ? vscode.l10n.t('stdin') : vscode.l10n.t('answer'),
+        title: l10n.t('Choose {type} file', {
+            type: isInput ? l10n.t('stdin') : l10n.t('answer'),
         }),
         filters: {
-            [vscode.l10n.t('Text files')]: mainExt,
-            [vscode.l10n.t('All files')]: ['*'],
+            [l10n.t('Text files')]: mainExt,
+            [l10n.t('All files')]: ['*'],
         },
     });
     if (!fileUri || !fileUri.length) {
@@ -224,12 +224,10 @@ export const chooseTcFile = async (
         if (
             behavior === 'ask' &&
             !(await Io.confirm(
-                vscode.l10n.t(
+                l10n.t(
                     'Found matching {found} file: {file}. Do you want to use it?',
                     {
-                        found: isInput
-                            ? vscode.l10n.t('answer')
-                            : vscode.l10n.t('stdin'),
+                        found: isInput ? l10n.t('answer') : l10n.t('stdin'),
                         file: basename(pairPath),
                     },
                 ),
@@ -247,16 +245,16 @@ export const chooseTcFile = async (
 export const chooseSrcFile = async (
     fileType: WebviewSrcFileTypes,
 ): Promise<string | null> => {
-    const checkerFileUri = await vscode.window.showOpenDialog({
+    const checkerFileUri = await window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: false,
-        title: vscode.l10n.t('Select {fileType} File', {
+        title: l10n.t('Select {fileType} File', {
             fileType: {
-                checker: vscode.l10n.t('Checker'),
-                interactor: vscode.l10n.t('Interactor'),
-                generator: vscode.l10n.t('Generator'),
-                bruteForce: vscode.l10n.t('Brute Force'),
+                checker: l10n.t('Checker'),
+                interactor: l10n.t('Interactor'),
+                generator: l10n.t('Generator'),
+                bruteForce: l10n.t('Brute Force'),
             }[fileType],
         }),
     });

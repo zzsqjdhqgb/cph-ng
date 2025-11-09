@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { l10n, window } from 'vscode';
 import Logger from '../helpers/logger';
 
-const compilationChannel = vscode.window.createOutputChannel(
-    vscode.l10n.t('CPH-NG Compilation'),
+const compilationChannel = window.createOutputChannel(
+    l10n.t('CPH-NG Compilation'),
 );
 
 export default class Io {
@@ -28,15 +28,15 @@ export default class Io {
 
     public static info(msg: string, ...args: any) {
         this.logger.info(msg);
-        return vscode.window.showInformationMessage(msg, ...args);
+        return window.showInformationMessage(msg, ...args);
     }
     public static warn(msg: string, ...args: any) {
         this.logger.warn(msg);
-        return vscode.window.showWarningMessage(msg, ...args);
+        return window.showWarningMessage(msg, ...args);
     }
     public static error(msg: string, ...args: any) {
         this.logger.error(msg);
-        return vscode.window.showErrorMessage(msg, ...args);
+        return window.showErrorMessage(msg, ...args);
     }
     public static async confirm(
         msg: string,
@@ -44,11 +44,8 @@ export default class Io {
     ): Promise<boolean> {
         this.logger.info(msg);
         return (
-            (await vscode.window.showInformationMessage(
-                msg,
-                { modal },
-                'Yes',
-            )) === 'Yes'
+            (await window.showInformationMessage(msg, { modal }, 'Yes')) ===
+            'Yes'
         );
     }
 

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
@@ -28,14 +28,14 @@ export default class CphNg {
     public static async createProblem(filePath?: string): Promise<void> {
         if (!filePath) {
             Io.warn(
-                vscode.l10n.t(
+                l10n.t(
                     'No active editor found. Please open a file to create a problem.',
                 ),
             );
             return;
         }
         if (await Problems.loadProblem(filePath)) {
-            Io.warn(vscode.l10n.t('Problem already exists for this file.'));
+            Io.warn(l10n.t('Problem already exists for this file.'));
             return;
         }
         const problem = Problems.createProblem(filePath);
@@ -45,14 +45,14 @@ export default class CphNg {
     public static async importProblem(filePath?: string): Promise<void> {
         if (!filePath) {
             Io.warn(
-                vscode.l10n.t(
+                l10n.t(
                     'No active editor found. Please open a file to create a problem.',
                 ),
             );
             return;
         }
         if (await Problems.loadProblem(filePath)) {
-            Io.warn(vscode.l10n.t('Problem already exists for this file.'));
+            Io.warn(l10n.t('Problem already exists for this file.'));
             return;
         }
         const probFile = CphCapable.getProbBySrc(filePath);
@@ -61,7 +61,7 @@ export default class CphNg {
             await Problems.saveProblem(problem);
             await ProblemsManager.dataRefresh();
         } else {
-            Io.warn(vscode.l10n.t('Failed to load problem from CPH.'));
+            Io.warn(l10n.t('Failed to load problem from CPH.'));
         }
     }
 }

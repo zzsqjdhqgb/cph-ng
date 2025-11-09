@@ -17,7 +17,7 @@
 
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 import Logger from '../../helpers/logger';
 import ProcessExecutor from '../../helpers/processExecutor';
 import { waitUntil } from '../../utils/global';
@@ -93,7 +93,7 @@ export class Lang {
         forceCompile: boolean | null,
         additionalData: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
-        const editor = vscode.window.visibleTextEditors.find(
+        const editor = window.visibleTextEditors.find(
             (editor) => editor.document.fileName === src.path,
         );
         if (editor) {

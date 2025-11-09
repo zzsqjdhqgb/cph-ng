@@ -18,80 +18,32 @@
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Settings from '../modules/settings';
 import { TCIO, TCVerdict } from './types';
 
 export class TCVerdicts {
-    static UKE = new TCVerdict(
-        'UKE',
-        vscode.l10n.t('Unknown Error'),
-        '0, 0, 255',
-    );
-    static AC = new TCVerdict('AC', vscode.l10n.t('Accepted'), '73, 205, 50');
-    static PC = new TCVerdict(
-        'PC',
-        vscode.l10n.t('Partially Correct'),
-        '237, 152, 19',
-    );
-    static PE = new TCVerdict(
-        'PE',
-        vscode.l10n.t('Presentation Error'),
-        '255, 119, 142',
-    );
-    static WA = new TCVerdict(
-        'WA',
-        vscode.l10n.t('Wrong Answer'),
-        '211, 20, 13',
-    );
-    static TLE = new TCVerdict(
-        'TLE',
-        vscode.l10n.t('Time Limit Exceeded'),
-        '12, 0, 102',
-    );
-    static MLE = new TCVerdict(
-        'MLE',
-        vscode.l10n.t('Memory Limit Exceeded'),
-        '83, 0, 167',
-    );
-    static OLE = new TCVerdict(
-        'OLE',
-        vscode.l10n.t('Output Limit Exceeded'),
-        '131, 0, 167',
-    );
-    static RE = new TCVerdict(
-        'RE',
-        vscode.l10n.t('Runtime Error'),
-        '26, 38, 200',
-    );
-    static RF = new TCVerdict(
-        'RF',
-        vscode.l10n.t('Restricted Function'),
-        '0, 145, 130',
-    );
-    static CE = new TCVerdict(
-        'CE',
-        vscode.l10n.t('Compilation Error'),
-        '139, 116, 0',
-    );
-    static SE = new TCVerdict('SE', vscode.l10n.t('System Error'), '0, 0, 0');
-    static WT = new TCVerdict('WT', vscode.l10n.t('Waiting'), '65, 0, 217');
-    static FC = new TCVerdict('FC', vscode.l10n.t('Fetched'), '76, 0, 255');
-    static CP = new TCVerdict('CP', vscode.l10n.t('Compiling'), '94, 25, 255');
-    static CPD = new TCVerdict(
-        'CPD',
-        vscode.l10n.t('Compiled'),
-        '115, 64, 255',
-    );
-    static JG = new TCVerdict('JG', vscode.l10n.t('Judging'), '132, 79, 255');
-    static JGD = new TCVerdict('JGD', vscode.l10n.t('Judged'), '150, 127, 255');
-    static CMP = new TCVerdict(
-        'CMP',
-        vscode.l10n.t('Comparing'),
-        '168, 125, 255',
-    );
-    static SK = new TCVerdict('SK', vscode.l10n.t('Skipped'), '75, 75, 75');
-    static RJ = new TCVerdict('RJ', vscode.l10n.t('Rejected'), '78, 0, 0');
+    static UKE = new TCVerdict('UKE', l10n.t('Unknown Error'), '#0000ff');
+    static AC = new TCVerdict('AC', l10n.t('Accepted'), '#49cd32');
+    static PC = new TCVerdict('PC', l10n.t('Partially Correct'), '#ed9813');
+    static PE = new TCVerdict('PE', l10n.t('Presentation Error'), '#ff778e');
+    static WA = new TCVerdict('WA', l10n.t('Wrong Answer'), '#d3140d');
+    static TLE = new TCVerdict('TLE', l10n.t('Time Limit Exceed'), '#0c0066');
+    static MLE = new TCVerdict('MLE', l10n.t('Memory Limit Exceed'), '#5300a7');
+    static OLE = new TCVerdict('OLE', l10n.t('Output Limit Exceed'), '#8300a7');
+    static RE = new TCVerdict('RE', l10n.t('Runtime Error'), '#1a26c8');
+    static RF = new TCVerdict('RF', l10n.t('Restricted Function'), '#008f81');
+    static CE = new TCVerdict('CE', l10n.t('Compilation Error'), '#8b7400');
+    static SE = new TCVerdict('SE', l10n.t('System Error'), '#000000');
+    static WT = new TCVerdict('WT', l10n.t('Waiting'), '#4100d9');
+    static FC = new TCVerdict('FC', l10n.t('Fetched'), '#4c00ff');
+    static CP = new TCVerdict('CP', l10n.t('Compiling'), '#5e19ff');
+    static CPD = new TCVerdict('CPD', l10n.t('Compiled'), '#7340ff');
+    static JG = new TCVerdict('JG', l10n.t('Judging'), '#844fff');
+    static JGD = new TCVerdict('JGD', l10n.t('Judged'), '#967fff');
+    static CMP = new TCVerdict('CMP', l10n.t('Comparing'), '#a87dff');
+    static SK = new TCVerdict('SK', l10n.t('Skipped'), '#4b4b4b');
+    static RJ = new TCVerdict('RJ', l10n.t('Rejected'), '#4e0000');
 }
 
 export const write2TcIo = async (tcIo: TCIO, data: string) => {

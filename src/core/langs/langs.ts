@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { basename, extname } from 'path';
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
 import { LangC } from './c';
@@ -37,7 +37,7 @@ export default class Langs {
         if (!lang) {
             ignoreError ||
                 Io.error(
-                    vscode.l10n.t(
+                    l10n.t(
                         'Cannot determine the programming language of the source file: {file}.',
                         { file: basename(filePath) },
                     ),

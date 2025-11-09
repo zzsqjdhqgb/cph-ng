@@ -18,7 +18,7 @@
 import { randomUUID, UUID } from 'crypto';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
-import * as vscode from 'vscode';
+import { commands, debug, l10n, Uri, window, workspace } from 'vscode';
 import { Compiler } from '../core/compiler';
 import Langs from '../core/langs/langs';
 import { Runner } from '../core/runner';
@@ -157,7 +157,7 @@ export default class ProblemsManager {
             await unlink(binPath);
         } catch {
             Io.warn(
-                vscode.l10n.t('Failed to delete problem file {file}.', {
+                l10n.t('Failed to delete problem file {file}.', {
                     file: basename(binPath),
                 }),
             );
@@ -250,7 +250,7 @@ export default class ProblemsManager {
         const compileData = compileResult.data;
         if (!compileData) {
             result.verdict = TCVerdicts.SE;
-            result.msg = vscode.l10n.t('Compile data is empty.');
+            result.msg = l10n.t('Compile data is empty.');
             await beforeReturn();
             return;
         }
@@ -338,7 +338,7 @@ export default class ProblemsManager {
                 const result = tcs[tcId].result;
                 if (result) {
                     result.verdict = TCVerdicts.SE;
-                    result.msg = vscode.l10n.t('Compile data is empty.');
+                    result.msg = l10n.t('Compile data is empty.');
                 }
             }
             await beforeReturn();
@@ -430,14 +430,14 @@ export default class ProblemsManager {
             return;
         }
         try {
-            vscode.commands.executeCommand(
-                'vscode.diff',
+            commands.executeCommand(
+                'diff',
                 generateTcUri(fullProblem.problem, msg.id, 'answer'),
                 generateTcUri(fullProblem.problem, msg.id, 'stdout'),
             );
         } catch (e) {
             Io.error(
-                vscode.l10n.t('Failed to compare test case: {msg}', {
+                l10n.t('Failed to compare test case: {msg}', {
                     msg: (e as Error).message,
                 }),
             );
@@ -455,7 +455,7 @@ export default class ProblemsManager {
             if (
                 data.length <= Settings.problem.maxInlineDataLength ||
                 (await Io.confirm(
-                    vscode.l10n.t(
+                    l10n.t(
                         'The file size is {size} bytes, which may be large. Are you sure you want to load it inline?',
                         { size: data.length },
                     ),
@@ -473,10 +473,10 @@ export default class ProblemsManager {
                 dirname(fullProblem.problem.src.path),
                 `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.id + 1}.${ext}`,
             );
-            tempFilePath = await vscode.window
+            tempFilePath = await window
                 .showSaveDialog({
-                    defaultUri: vscode.Uri.file(tempFilePath),
-                    saveLabel: vscode.l10n.t('Select location to save'),
+                    defaultUri: Uri.file(tempFilePath),
+                    saveLabel: l10n.t('Select location to save'),
                 })
                 .then((uri) => (uri ? uri.fsPath : undefined));
             if (!tempFilePath) {
@@ -574,16 +574,14 @@ export default class ProblemsManager {
         const bfCompare = fullProblem.problem.bfCompare;
         if (!bfCompare || !bfCompare.generator || !bfCompare.bruteForce) {
             Io.warn(
-                vscode.l10n.t(
+                l10n.t(
                     'Please choose both generator and brute force files first.',
                 ),
             );
             return;
         }
         if (bfCompare.running) {
-            Io.warn(
-                vscode.l10n.t('Brute Force comparison is already running.'),
-            );
+            Io.warn(l10n.t('Brute Force comparison is already running.'));
             return;
         }
         fullProblem.ac && fullProblem.ac.abort();
@@ -591,7 +589,7 @@ export default class ProblemsManager {
         const beforeReturn = async () => {
             bfCompare.running = false;
             if (fullProblem.ac?.signal.aborted) {
-                bfCompare.msg = vscode.l10n.t(
+                bfCompare.msg = l10n.t(
                     'Brute Force comparison stopped by user, {cnt} runs completed.',
                     { cnt },
                 );
@@ -601,7 +599,7 @@ export default class ProblemsManager {
         };
 
         bfCompare.running = true;
-        bfCompare.msg = vscode.l10n.t('Compiling...');
+        bfCompare.msg = l10n.t('Compiling...');
         await this.dataRefresh();
         const compileResult = await Compiler.compileAll(
             fullProblem.problem,
@@ -611,13 +609,13 @@ export default class ProblemsManager {
             true,
         );
         if (compileResult.verdict !== TCVerdicts.UKE) {
-            bfCompare.msg = vscode.l10n.t('Solution compilation failed.');
+            bfCompare.msg = l10n.t('Solution compilation failed.');
             await beforeReturn();
             return;
         }
         const compileData = compileResult.data;
         if (!compileData || !compileData.bfCompare) {
-            bfCompare.msg = vscode.l10n.t('Compile data is empty.');
+            bfCompare.msg = l10n.t('Compile data is empty.');
             await beforeReturn();
             return;
         }
@@ -626,13 +624,13 @@ export default class ProblemsManager {
         while (true) {
             cnt++;
             if (fullProblem.ac.signal.aborted) {
-                bfCompare.msg = vscode.l10n.t(
+                bfCompare.msg = l10n.t(
                     'Brute Force comparison stopped by user.',
                 );
                 break;
             }
 
-            bfCompare.msg = vscode.l10n.t('#{cnt} Running generator...', {
+            bfCompare.msg = l10n.t('#{cnt} Running generator...', {
                 cnt,
             });
             await this.dataRefresh();
@@ -645,17 +643,14 @@ export default class ProblemsManager {
             );
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                    bfCompare.msg = vscode.l10n.t(
-                        'Generator run failed: {msg}',
-                        {
-                            msg: generatorRunResult.msg,
-                        },
-                    );
+                    bfCompare.msg = l10n.t('Generator run failed: {msg}', {
+                        msg: generatorRunResult.msg,
+                    });
                 }
                 break;
             }
 
-            bfCompare.msg = vscode.l10n.t('#{cnt} Running brute force...', {
+            bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
                 cnt,
             });
             await this.dataRefresh();
@@ -668,17 +663,14 @@ export default class ProblemsManager {
             );
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                    bfCompare.msg = vscode.l10n.t(
-                        'Brute force run failed: {msg}',
-                        {
-                            msg: bruteForceRunResult.msg,
-                        },
-                    );
+                    bfCompare.msg = l10n.t('Brute force run failed: {msg}', {
+                        msg: bruteForceRunResult.msg,
+                    });
                 }
                 break;
             }
 
-            bfCompare.msg = vscode.l10n.t('#{cnt} Running solution...', {
+            bfCompare.msg = l10n.t('#{cnt} Running solution...', {
                 cnt,
             });
             await this.dataRefresh();
@@ -713,7 +705,7 @@ export default class ProblemsManager {
                         tempTc.stdin.data.length >
                             Settings.problem.maxInlineDataLength &&
                         (await Io.confirm(
-                            vscode.l10n.t(
+                            l10n.t(
                                 'The brute force compare found a difference, but the input file is {size} bytes, which may be large. Do you want to save it in file instead?',
                                 { size: tempTc.stdin.data.length },
                             ),
@@ -724,12 +716,10 @@ export default class ProblemsManager {
                             dirname(fullProblem.problem.src.path),
                             `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${cnt}.in`,
                         );
-                        tempFilePath = await vscode.window
+                        tempFilePath = await window
                             .showSaveDialog({
-                                defaultUri: vscode.Uri.file(tempFilePath),
-                                saveLabel: vscode.l10n.t(
-                                    'Select location to save',
-                                ),
+                                defaultUri: Uri.file(tempFilePath),
+                                saveLabel: l10n.t('Select location to save'),
                             })
                             .then((uri) => (uri ? uri.fsPath : undefined));
                         if (tempFilePath) {
@@ -743,7 +733,7 @@ export default class ProblemsManager {
                     const id = randomUUID();
                     fullProblem.problem.tcs[id] = tempTc;
                     fullProblem.problem.tcOrder.push(id);
-                    bfCompare.msg = vscode.l10n.t(
+                    bfCompare.msg = l10n.t(
                         'Found a difference in #{cnt} run.',
                         { cnt },
                     );
@@ -764,7 +754,7 @@ export default class ProblemsManager {
             !fullProblem.problem.bfCompare ||
             !fullProblem.problem.bfCompare.running
         ) {
-            Io.warn(vscode.l10n.t('Brute Force comparison is not running.'));
+            Io.warn(l10n.t('Brute Force comparison is not running.'));
             return;
         }
         fullProblem.ac && fullProblem.ac.abort();
@@ -781,21 +771,21 @@ export default class ProblemsManager {
     }
     public static async openFile(msg: msgs.OpenFileMsg): Promise<void> {
         if (!msg.isVirtual) {
-            var document = await vscode.workspace.openTextDocument(msg.path);
+            var document = await workspace.openTextDocument(msg.path);
         } else {
             const fullProblem = await this.getFullProblem(msg.activePath);
             if (!fullProblem) {
                 return;
             }
-            var document = await vscode.workspace.openTextDocument(
-                vscode.Uri.from({
+            var document = await workspace.openTextDocument(
+                Uri.from({
                     scheme: FileSystemProvider.scheme,
                     authority: fullProblem.problem.src.path,
                     path: msg.path,
                 }),
             );
         }
-        await vscode.window.showTextDocument(document);
+        await window.showTextDocument(document);
     }
     public static async debugTc(msg: msgs.DebugTcMsg): Promise<void> {
         try {
@@ -821,7 +811,7 @@ export default class ProblemsManager {
             );
             if (result.verdict !== TCVerdicts.UKE) {
                 Io.error(
-                    vscode.l10n.t('Failed to compile the program: {msg}', {
+                    l10n.t('Failed to compile the program: {msg}', {
                         msg: result.msg,
                     }),
                 );
@@ -831,7 +821,7 @@ export default class ProblemsManager {
 
             const outputPath = result.data?.outputPath;
             if (!outputPath) {
-                Io.error(vscode.l10n.t('Compile data is empty.'));
+                Io.error(l10n.t('Compile data is empty.'));
                 return;
             }
 
@@ -843,9 +833,9 @@ export default class ProblemsManager {
 
             try {
                 if (srcLang.name === 'C' || srcLang.name === 'C++') {
-                    await vscode.debug.startDebugging(undefined, {
+                    await debug.startDebugging(undefined, {
                         type: 'cppdbg',
-                        name: `CPH-NG Debug TC#${msg.id + 1}`,
+                        name: `CPH-NG Debug`,
                         request: 'attach',
                         processId: process.child.pid,
                         program: outputPath,
@@ -860,7 +850,7 @@ export default class ProblemsManager {
                     });
                 } else {
                     Io.error(
-                        vscode.l10n.t(
+                        l10n.t(
                             'Debugging is not supported for this language yet.',
                         ),
                     );
@@ -868,14 +858,14 @@ export default class ProblemsManager {
                 }
             } catch (err) {
                 Io.error(
-                    vscode.l10n.t('Failed to start debugger: {msg}', {
+                    l10n.t('Failed to start debugger: {msg}', {
                         msg: (err as Error).message,
                     }),
                 );
             }
         } catch (err) {
             Io.error(
-                vscode.l10n.t('Failed to debug test case: {msg}', {
+                l10n.t('Failed to debug test case: {msg}', {
                     msg: (err as Error).message,
                 }),
             );

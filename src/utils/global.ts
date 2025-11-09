@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { TextEditor, Uri } from 'vscode';
 import FileSystemProvider from '../modules/fileSystemProvider';
 import SidebarProvider from '../modules/sidebarProvider';
 
-export let extensionUri: vscode.Uri;
+export let extensionUri: Uri;
 export let extensionPath: string;
-export const setExtensionUri = (uri: vscode.Uri) => {
+export const setExtensionUri = (uri: Uri) => {
     extensionUri = uri;
     extensionPath = uri.fsPath;
 };
@@ -29,7 +29,7 @@ export const fileSystemProvider = new FileSystemProvider();
 export const sidebarProvider = new SidebarProvider();
 
 let _activePath: string | undefined;
-export const setActivePath = (textEditor?: vscode.TextEditor) => {
+export const setActivePath = (textEditor?: TextEditor) => {
     if (!textEditor) {
         _activePath = undefined;
     } else {

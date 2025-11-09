@@ -16,12 +16,22 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { EventEmitter } from 'events';
-import * as vscode from 'vscode';
+import {
+    ColorThemeKind,
+    commands,
+    env,
+    l10n,
+    Uri,
+    Webview,
+    WebviewView,
+    WebviewViewProvider,
+    window,
+} from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { extensionUri, getActivePath, sidebarProvider } from '../utils/global';
 import { Problem } from '../utils/types';
-import * as msgs from '../webview/msgs';
+import { WebviewMsg } from '../webview/msgs';
 import CphNg from './cphNg';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
@@ -47,9 +57,9 @@ export interface ActivePathEvent extends ActivePathEventData {
     type: 'activePath';
 }
 
-export default class SidebarProvider implements vscode.WebviewViewProvider {
+export default class SidebarProvider implements WebviewViewProvider {
     public static readonly viewType = 'cphNgSidebar';
-    private _view?: vscode.WebviewView;
+    private _view?: WebviewView;
     private logger: Logger = new Logger('sidebar');
     public event: EventEmitter<{
         problem: ProblemEventData[];
@@ -74,12 +84,10 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
 
     public focus() {
         this.logger.trace('focus');
-        vscode.commands.executeCommand(
-            'workbench.view.extension.cphNgContainer',
-        );
+        commands.executeCommand('workbench.view.extension.cphNgContainer');
     }
 
-    public resolveWebviewView(webviewView: vscode.WebviewView) {
+    public resolveWebviewView(webviewView: WebviewView) {
         this.logger.trace('resolveWebviewView', { webviewView });
         this._view = webviewView;
 
@@ -90,96 +98,93 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage(
-            async (msg: msgs.WebviewMsg) => {
-                this.logger.debug('Received message from webview', { msg });
-                try {
-                    if (msg.type === 'init') {
-                        sidebarProvider.event.emit('activePath', {
-                            activePath: getActivePath(),
-                        });
-                        await ProblemsManager.dataRefresh();
-                    } else if (msg.type === 'createProblem') {
-                        await CphNg.createProblem(msg.activePath);
-                    } else if (msg.type === 'importProblem') {
-                        await CphNg.importProblem(msg.activePath);
-                    } else if (msg.type === 'editProblemDetails') {
-                        await ProblemsManager.editProblemDetails(msg);
-                    } else if (msg.type === 'delProblem') {
-                        await ProblemsManager.delProblem(msg);
-                    } else if (msg.type === 'addTc') {
-                        await ProblemsManager.addTc(msg);
-                    } else if (msg.type === 'loadTcs') {
-                        await ProblemsManager.loadTcs(msg);
-                    } else if (msg.type === 'updateTc') {
-                        await ProblemsManager.updateTc(msg);
-                    } else if (msg.type === 'runTc') {
-                        await ProblemsManager.runTc(msg);
-                    } else if (msg.type === 'clearTcStatus') {
-                        await ProblemsManager.clearTcStatus(msg);
-                    } else if (msg.type === 'clearStatus') {
-                        await ProblemsManager.clearStatus(msg);
-                    } else if (msg.type === 'runTcs') {
-                        await ProblemsManager.runTcs(msg);
-                    } else if (msg.type === 'stopTcs') {
-                        await ProblemsManager.stopTcs(msg);
-                    } else if (msg.type === 'chooseTcFile') {
-                        await ProblemsManager.chooseTcFile(msg);
-                    } else if (msg.type === 'compareTc') {
-                        await ProblemsManager.compareTc(msg);
-                    } else if (msg.type === 'toggleTcFile') {
-                        await ProblemsManager.toggleTcFile(msg);
-                    } else if (msg.type === 'delTc') {
-                        await ProblemsManager.delTc(msg);
-                    } else if (msg.type === 'reorderTc') {
-                        await ProblemsManager.reorderTc(msg);
-                    } else if (msg.type === 'chooseSrcFile') {
-                        await ProblemsManager.chooseSrcFile(msg);
-                    } else if (msg.type === 'removeSrcFile') {
-                        await ProblemsManager.removeSrcFile(msg);
-                    } else if (msg.type === 'startBfCompare') {
-                        await ProblemsManager.startBfCompare(msg);
-                    } else if (msg.type === 'stopBfCompare') {
-                        await ProblemsManager.stopBfCompare(msg);
-                    } else if (msg.type === 'submitToCodeforces') {
-                        await ProblemsManager.submitToCodeforces(msg);
-                    } else if (msg.type === 'openFile') {
-                        await ProblemsManager.openFile(msg);
-                    } else if (msg.type === 'startChat') {
-                        await vscode.commands.executeCommand(
-                            'workbench.action.chat.open',
-                            {
-                                mode: 'agent',
-                                query: '#cphNgRunTestCases ',
-                                isPartialQuery: true,
-                            },
-                        );
-                    } else if (msg.type === 'openSettings') {
-                        const openSettingsMsg = msg as msgs.OpenSettingsMsg;
-                        await vscode.commands.executeCommand(
-                            'workbench.action.openSettings',
-                            openSettingsMsg.item,
-                        );
-                    } else if (msg.type === 'debugTc') {
-                        await ProblemsManager.debugTc(msg);
-                    }
-                } catch (e) {
-                    Io.error(
-                        vscode.l10n.t(
-                            'Error occurred when handling message {msgType}: {msg}.',
-                            {
-                                msgType: msg.type,
-                                msg: (e as Error).message,
-                            },
-                        ),
-                    );
-                    this.logger.error('Error handling webview message', {
-                        msgType: msg.type,
-                        msg: e as Error,
+        webviewView.webview.onDidReceiveMessage(async (msg: WebviewMsg) => {
+            this.logger.debug('Received message from webview', { msg });
+            try {
+                if (msg.type === 'init') {
+                    sidebarProvider.event.emit('activePath', {
+                        activePath: getActivePath(),
                     });
+                    await ProblemsManager.dataRefresh();
+                } else if (msg.type === 'createProblem') {
+                    await CphNg.createProblem(msg.activePath);
+                } else if (msg.type === 'importProblem') {
+                    await CphNg.importProblem(msg.activePath);
+                } else if (msg.type === 'editProblemDetails') {
+                    await ProblemsManager.editProblemDetails(msg);
+                } else if (msg.type === 'delProblem') {
+                    await ProblemsManager.delProblem(msg);
+                } else if (msg.type === 'addTc') {
+                    await ProblemsManager.addTc(msg);
+                } else if (msg.type === 'loadTcs') {
+                    await ProblemsManager.loadTcs(msg);
+                } else if (msg.type === 'updateTc') {
+                    await ProblemsManager.updateTc(msg);
+                } else if (msg.type === 'runTc') {
+                    await ProblemsManager.runTc(msg);
+                } else if (msg.type === 'clearTcStatus') {
+                    await ProblemsManager.clearTcStatus(msg);
+                } else if (msg.type === 'clearStatus') {
+                    await ProblemsManager.clearStatus(msg);
+                } else if (msg.type === 'runTcs') {
+                    await ProblemsManager.runTcs(msg);
+                } else if (msg.type === 'stopTcs') {
+                    await ProblemsManager.stopTcs(msg);
+                } else if (msg.type === 'chooseTcFile') {
+                    await ProblemsManager.chooseTcFile(msg);
+                } else if (msg.type === 'compareTc') {
+                    await ProblemsManager.compareTc(msg);
+                } else if (msg.type === 'toggleTcFile') {
+                    await ProblemsManager.toggleTcFile(msg);
+                } else if (msg.type === 'delTc') {
+                    await ProblemsManager.delTc(msg);
+                } else if (msg.type === 'reorderTc') {
+                    await ProblemsManager.reorderTc(msg);
+                } else if (msg.type === 'chooseSrcFile') {
+                    await ProblemsManager.chooseSrcFile(msg);
+                } else if (msg.type === 'removeSrcFile') {
+                    await ProblemsManager.removeSrcFile(msg);
+                } else if (msg.type === 'startBfCompare') {
+                    await ProblemsManager.startBfCompare(msg);
+                } else if (msg.type === 'stopBfCompare') {
+                    await ProblemsManager.stopBfCompare(msg);
+                } else if (msg.type === 'submitToCodeforces') {
+                    await ProblemsManager.submitToCodeforces(msg);
+                } else if (msg.type === 'openFile') {
+                    await ProblemsManager.openFile(msg);
+                } else if (msg.type === 'startChat') {
+                    await commands.executeCommand(
+                        'workbench.action.chat.open',
+                        {
+                            mode: 'agent',
+                            query: '#cphNgRunTestCases ',
+                            isPartialQuery: true,
+                        },
+                    );
+                } else if (msg.type === 'openSettings') {
+                    await commands.executeCommand(
+                        'workbench.action.openSettings',
+                        msg.item,
+                    );
+                } else if (msg.type === 'debugTc') {
+                    await ProblemsManager.debugTc(msg);
                 }
-            },
-        );
+            } catch (e) {
+                Io.error(
+                    l10n.t(
+                        'Error occurred when handling message {msgType}: {msg}.',
+                        {
+                            msgType: msg.type,
+                            msg: (e as Error).message,
+                        },
+                    ),
+                );
+                this.logger.error('Error handling webview message', {
+                    msgType: msg.type,
+                    msg: e as Error,
+                });
+            }
+        });
     }
 
     public refresh() {
@@ -191,14 +196,12 @@ export default class SidebarProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private _getHtmlForWebview(webview: vscode.Webview): string {
+    private _getHtmlForWebview(webview: Webview): string {
         this.logger.trace('_getHtmlForWebview', { webview });
         const getUri = (filename: string) =>
-            webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, filename));
+            webview.asWebviewUri(Uri.joinPath(extensionUri, filename));
         let isDarkMode =
-            vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark
-                ? true
-                : false;
+            window.activeColorTheme.kind === ColorThemeKind.Dark ? true : false;
         if (Settings.sidebar.colorTheme === 'light') {
             isDarkMode = false;
         }
@@ -218,7 +221,7 @@ window.vscode = acquireVsCodeApi();
 window.isDarkMode = ${isDarkMode};
 window.hiddenStatuses = ${JSON.stringify(Settings.sidebar.hiddenStatuses)};
 window.partyUri = '${Settings.sidebar.showAcGif ? getUri('res/party.gif') : ''}';
-window.language = '${vscode.env.language}';
+window.language = '${env.language}';
 window.showTips = '${Settings.sidebar.showTips}';
 window.fontFamily = \`${Settings.sidebar.fontFamily}\`;
 </script>

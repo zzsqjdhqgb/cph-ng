@@ -19,7 +19,7 @@ import { randomUUID } from 'crypto';
 import { enc, MD5 } from 'crypto-js';
 import { readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
-import * as vscode from 'vscode';
+import { FileType, l10n, window, workspace } from 'vscode';
 import { version } from '../../package.json';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
@@ -101,20 +101,18 @@ export default class CphCapable {
     public static async importFromCph(): Promise<void> {
         this.logger.trace('importFromCph');
         const uri = await FolderChooser.chooseFolder(
-            vscode.l10n.t(
-                'Please select the .cph folder contains the problem files',
-            ),
+            l10n.t('Please select the .cph folder contains the problem files'),
         );
         if (!uri) {
             this.logger.info('No folder selected, aborting import');
             return;
         }
         this.logger.info('Selected folder for import', { uri });
-        const probFiles = await vscode.workspace.fs.readDirectory(uri);
+        const probFiles = await workspace.fs.readDirectory(uri);
         this.logger.debug('Read directory contents', { probFiles });
         const problems: Problem[] = [];
         for (const [name, type] of probFiles) {
-            if (type === vscode.FileType.File && name.endsWith('.prob')) {
+            if (type === FileType.File && name.endsWith('.prob')) {
                 const probFilePath = join(uri.fsPath, name);
                 const problem = await this.loadProblem(probFilePath);
                 if (problem) {
@@ -128,21 +126,19 @@ export default class CphCapable {
             }
         }
         if (problems.length === 0) {
-            Io.info(
-                vscode.l10n.t('No problem files found in the selected folder.'),
-            );
+            Io.info(l10n.t('No problem files found in the selected folder.'));
             return;
         }
-        const chosenIdx = await vscode.window.showQuickPick(
+        const chosenIdx = await window.showQuickPick(
             problems.map((p, idx) => ({
                 label: p.name,
                 description: [
-                    vscode.l10n.t('Number of test cases: {cnt}', {
+                    l10n.t('Number of test cases: {cnt}', {
                         cnt: p.tcOrder.length,
                     }),
-                    p.checker ? vscode.l10n.t('Special Judge') : '',
-                    p.interactor ? vscode.l10n.t('Interactive') : '',
-                    p.bfCompare ? vscode.l10n.t('Brute Force Comparison') : '',
+                    p.checker ? l10n.t('Special Judge') : '',
+                    p.interactor ? l10n.t('Interactive') : '',
+                    p.bfCompare ? l10n.t('Brute Force Comparison') : '',
                 ]
                     .join(' ')
                     .trim(),
@@ -152,7 +148,7 @@ export default class CphCapable {
             })),
             {
                 canPickMany: true,
-                title: vscode.l10n.t('Select problems to import'),
+                title: l10n.t('Select problems to import'),
             },
         );
         if (!chosenIdx || chosenIdx.length === 0) {

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Result from '../utils/result';
 import { FileWithHash, Problem } from '../utils/types';
@@ -105,9 +105,7 @@ export class Compiler {
             ) {
                 return {
                     verdict: TCVerdicts.SE,
-                    msg: vscode.l10n.t(
-                        'Brute Force comparison data not found.',
-                    ),
+                    msg: l10n.t('Brute Force comparison data not found.'),
                 };
             }
             const generatorResult = await this.optionalCompile(

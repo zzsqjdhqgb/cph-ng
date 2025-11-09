@@ -103,7 +103,7 @@ checking:
     - Add translations in `package.nls.zh.json` (Chinese)
 
 2. **Runtime Messages** (Extension code)
-    - Use `vscode.l10n.t('key')` in TypeScript code
+    - Use `l10n.t('key')` in TypeScript code
     - Add translations in `l10n/bundle.l10n.zh-cn.json`
 
 3. **Webview UI** (React components)

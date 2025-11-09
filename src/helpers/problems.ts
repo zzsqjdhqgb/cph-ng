@@ -17,7 +17,7 @@
 
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { basename, dirname, extname, relative } from 'path';
-import * as vscode from 'vscode';
+import { l10n, Uri, workspace } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { version } from '../../package.json';
 import Settings from '../modules/settings';
@@ -31,8 +31,8 @@ export default class Problems {
     private static logger: Logger = new Logger('problems');
 
     public static async getBinBySrc(srcPath: string): Promise<string | null> {
-        const srcUri = vscode.Uri.file(srcPath);
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(srcUri);
+        const srcUri = Uri.file(srcPath);
+        const workspaceFolder = workspace.getWorkspaceFolder(srcUri);
         if (!workspaceFolder) {
             return null;
         }
@@ -81,7 +81,7 @@ export default class Problems {
             ) satisfies OldProblem;
         } catch (e) {
             Io.warn(
-                vscode.l10n.t('Parse problem {file} failed: {msg}.', {
+                l10n.t('Parse problem {file} failed: {msg}.', {
                     file: basename(binPath),
                     msg: (e as Error).message,
                 }),
@@ -92,7 +92,7 @@ export default class Problems {
             var problem = migration(oldProblem);
         } catch (e) {
             Io.warn(
-                vscode.l10n.t('Migrate problem {file} failed: {msg}.', {
+                l10n.t('Migrate problem {file} failed: {msg}.', {
                     file: basename(binPath),
                     msg: (e as Error).message,
                 }),
@@ -107,7 +107,7 @@ export default class Problems {
         this.logger.trace('saveProblem', { problem });
         const binPath = await this.getBinBySrc(problem.src.path);
         if (!binPath) {
-            Io.warn(vscode.l10n.t('No workspace folder is open.'));
+            Io.warn(l10n.t('No workspace folder is open.'));
             return false;
         }
         this.logger.info('Saving problem', { binPath, problem });
@@ -120,7 +120,7 @@ export default class Problems {
             return true;
         } catch (e) {
             Io.error(
-                vscode.l10n.t('Failed to save problem: {msg}', {
+                l10n.t('Failed to save problem: {msg}', {
                     msg: (e as Error).message,
                 }),
             );

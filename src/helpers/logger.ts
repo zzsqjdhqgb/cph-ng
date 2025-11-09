@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 
-const outputChannel = vscode.window.createOutputChannel('CPH-NG', {
+const outputChannel = window.createOutputChannel('CPH-NG', {
     log: true,
 });
 
