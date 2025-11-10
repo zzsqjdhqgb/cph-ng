@@ -1,3 +1,5 @@
+**此页面由 AI 生成且未经人工审核，可能包含错误。因人工过于繁忙，暂时无法进行校对。**
+
 # Companion 设置
 
 Competitive Companion 浏览器扩展集成的设置。
