@@ -102,8 +102,8 @@ const TcView = ({
                               })()
                             : tc.result?.verdict
                               ? {
-                                    borderLeftColor: `rgb(${tc.result.verdict.color})`,
-                                    backgroundColor: `rgba(${tc.result.verdict.color}, 0.1)`,
+                                    borderLeftColor: tc.result.verdict.color,
+                                    backgroundColor: `${tc.result.verdict.color}20`,
                                 }
                               : {
                                     borderLeftColor: 'transparent',
