@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { join, relative } from 'path';
-import * as vscode from 'vscode';
+import { FileType, l10n, Uri, window, workspace } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
 import Io from './io';
@@ -25,14 +25,14 @@ export default class FolderChooser {
     private static logger: Logger = new Logger('folderChooser');
 
     private static async getSubfoldersRecursively(
-        folderUri: vscode.Uri,
-    ): Promise<vscode.Uri[]> {
+        folderUri: Uri,
+    ): Promise<Uri[]> {
         this.logger.trace('getSubfoldersRecursively', { folderUri });
-        const subfolders: vscode.Uri[] = [];
-        const entries = await vscode.workspace.fs.readDirectory(folderUri);
+        const subfolders: Uri[] = [];
+        const entries = await workspace.fs.readDirectory(folderUri);
         for (const [name, type] of entries) {
-            if (type === vscode.FileType.Directory && name[0] !== '.') {
-                const subfolderUri = vscode.Uri.joinPath(folderUri, name);
+            if (type === FileType.Directory && name[0] !== '.') {
+                const subfolderUri = Uri.joinPath(folderUri, name);
                 subfolders.push(subfolderUri);
                 const nestedSubfolders =
                     await this.getSubfoldersRecursively(subfolderUri);
@@ -44,9 +44,9 @@ export default class FolderChooser {
 
     private static async chooseFolderWithDialog(
         title: string,
-    ): Promise<vscode.Uri | null> {
+    ): Promise<Uri | null> {
         this.logger.trace('chooseFolderWithDialog', { title });
-        const folderUri = await vscode.window.showOpenDialog({
+        const folderUri = await window.showOpenDialog({
             canSelectMany: false,
             title,
             canSelectFolders: true,
@@ -61,15 +61,15 @@ export default class FolderChooser {
 
     private static async chooseFolderWithQuickPick(
         title: string,
-    ): Promise<vscode.Uri | null> {
+    ): Promise<Uri | null> {
         this.logger.trace('chooseFolderWithQuickPick', { title });
-        if (!vscode.workspace.workspaceFolders) {
-            Io.error(vscode.l10n.t('No workspace folder is open.'));
+        if (!workspace.workspaceFolders) {
+            Io.error(l10n.t('No workspace folder is open.'));
             return null;
         }
 
         const subfolders = await Promise.all(
-            vscode.workspace.workspaceFolders.map(async (folder) => [
+            workspace.workspaceFolders.map(async (folder) => [
                 ...(await this.getSubfoldersRecursively(folder.uri)).map(
                     (uri) => ({ folder, uri }),
                 ),
@@ -78,7 +78,7 @@ export default class FolderChooser {
         ).then((results) => results.flat());
         this.logger.debug('Got subfolders', { subfolders });
 
-        const selected = await vscode.window.showQuickPick(
+        const selected = await window.showQuickPick(
             subfolders.map((subfolder) => ({
                 label: join(
                     subfolder.folder.name,
@@ -97,10 +97,10 @@ export default class FolderChooser {
         if (!selected) {
             return null;
         }
-        return vscode.Uri.file(selected.details);
+        return Uri.file(selected.details);
     }
 
-    static async chooseFolder(title: string): Promise<vscode.Uri | null> {
+    static async chooseFolder(title: string): Promise<Uri | null> {
         this.logger.trace('chooseFolder', { title });
         if (Settings.basic.folderOpener === 'tree') {
             return await this.chooseFolderWithDialog(title);

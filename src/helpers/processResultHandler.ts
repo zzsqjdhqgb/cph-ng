@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
 import Result from '../utils/result';
@@ -71,19 +71,19 @@ export class ProcessResultHandler {
 
         if (result.killed) {
             verdict = TCVerdicts.TLE;
-            msg = vscode.l10n.t('Killed due to timeout');
+            msg = l10n.t('Killed due to timeout');
         } else if (
             !ignoreExitCode &&
             result.exitCode !== null &&
             result.exitCode !== 0
         ) {
             verdict = TCVerdicts.RE;
-            msg = vscode.l10n.t('Process exited with code: {code}.', {
+            msg = l10n.t('Process exited with code: {code}.', {
                 code: result.exitCode,
             });
         } else if (result.signal) {
             verdict = TCVerdicts.RE;
-            msg = vscode.l10n.t('Process exited with signal: {signal}.', {
+            msg = l10n.t('Process exited with signal: {signal}.', {
                 signal: result.signal,
             });
         } else if (result.errorMsg) {
@@ -93,7 +93,7 @@ export class ProcessResultHandler {
             verdict = abortController?.signal.aborted
                 ? TCVerdicts.RJ
                 : TCVerdicts.SE;
-            msg = vscode.l10n.t('Process failed to start');
+            msg = l10n.t('Process failed to start');
         }
 
         return {
@@ -135,12 +135,12 @@ export class ProcessResultHandler {
             case 3:
                 return {
                     verdict: TCVerdicts.SE,
-                    msg: vscode.l10n.t('Testlib run failed'),
+                    msg: l10n.t('Testlib run failed'),
                 };
             case 4:
                 return {
                     verdict: TCVerdicts.WA,
-                    msg: vscode.l10n.t('Unexpected EOF'),
+                    msg: l10n.t('Unexpected EOF'),
                 };
             case 7:
                 return { verdict: TCVerdicts.PC };
@@ -148,10 +148,9 @@ export class ProcessResultHandler {
                 this.logger.warn('Testlib returned unknown exit code', code);
                 return {
                     verdict: TCVerdicts.SE,
-                    msg: vscode.l10n.t(
-                        'Testlib returned unknown exit code: {code}',
-                        { code },
-                    ),
+                    msg: l10n.t('Testlib returned unknown exit code: {code}', {
+                        code,
+                    }),
                 };
         }
     }

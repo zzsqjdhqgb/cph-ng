@@ -15,7 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import {
+    CancellationToken,
+    l10n,
+    LanguageModelTextPart,
+    LanguageModelTool,
+    LanguageModelToolInvocationOptions,
+    LanguageModelToolInvocationPrepareOptions,
+    LanguageModelToolResult,
+    PreparedToolInvocation,
+} from 'vscode';
 import Io from '../helpers/io';
 import ProblemsManager from '../modules/problemsManager';
 import { getActivePath } from '../utils/global';
@@ -25,26 +34,26 @@ interface CphTestRunnerParams {
     idx?: number;
 }
 
-class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
+class LlmTcRunner implements LanguageModelTool<CphTestRunnerParams> {
     async prepareInvocation(
-        options: vscode.LanguageModelToolInvocationPrepareOptions<CphTestRunnerParams>,
-        _token: vscode.CancellationToken,
-    ): Promise<vscode.PreparedToolInvocation> {
+        options: LanguageModelToolInvocationPrepareOptions<CphTestRunnerParams>,
+        _token: CancellationToken,
+    ): Promise<PreparedToolInvocation> {
         const { idx } = options.input;
         return {
             invocationMessage: idx
-                ? vscode.l10n.t('Running test case {idx} using CPH-NG...', {
+                ? l10n.t('Running test case {idx} using CPH-NG...', {
                       idx,
                   })
-                : vscode.l10n.t('Running all test cases using CPH-NG...'),
+                : l10n.t('Running all test cases using CPH-NG...'),
             confirmationMessages: {
-                title: vscode.l10n.t('Run Test Cases'),
+                title: l10n.t('Run Test Cases'),
                 message: idx
-                    ? vscode.l10n.t(
+                    ? l10n.t(
                           'Do you want to run test case {idx} for the current problem?',
                           { idx },
                       )
-                    : vscode.l10n.t(
+                    : l10n.t(
                           'Do you want to run all test cases for the current problem?',
                       ),
             },
@@ -52,15 +61,15 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
     }
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<CphTestRunnerParams>,
-        token: vscode.CancellationToken,
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: LanguageModelToolInvocationOptions<CphTestRunnerParams>,
+        token: CancellationToken,
+    ): Promise<LanguageModelToolResult> {
         const { idx } = options.input;
-        const result = new vscode.LanguageModelToolResult([]);
+        const result = new LanguageModelToolResult([]);
 
         const tcIo2String = (tcIo: TCIO) =>
             tcIo.useFile
-                ? vscode.l10n.t(
+                ? l10n.t(
                       'Data stored in file {path}, you can call `read_problem_file` to access it.',
                       { path: tcIo.path },
                   )
@@ -69,17 +78,17 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                     (tcIo.data.length > 1000
                         ? tcIo.data.substring(0, 1000) +
                           '... ' +
-                          vscode.l10n.t('(truncated)')
+                          l10n.t('(truncated)')
                         : tcIo.data) +
                     '\n```'
-                  : vscode.l10n.t('(<empty>)');
+                  : l10n.t('(<empty>)');
 
         const activePath = getActivePath();
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         'Error: No competitive programming problem found. Please open or create a problem first.',
                     ),
                 ),
@@ -88,12 +97,12 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
         }
 
         const problem = bgProblem.problem;
-        if (idx && (idx - 1 < 0 || idx - 1 >= problem.tcs.length)) {
+        if (idx && (idx - 1 < 0 || idx - 1 >= problem.tcOrder.length)) {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         'Error: Test case {idx} not found. Valid test cases range from 1 to {max}.',
-                        { idx, max: problem.tcs.length },
+                        { idx, max: problem.tcOrder.length },
                     ),
                 ),
             );
@@ -113,7 +122,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                 await ProblemsManager.runTc({
                     type: 'runTc',
                     activePath,
-                    idx: idx - 1,
+                    id: problem.tcOrder[idx - 1],
                     compile: null,
                 });
             } else {
@@ -126,60 +135,61 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
 
             const refreshedBg =
                 await ProblemsManager.getFullProblem(activePath);
-            const tcs = idx
-                ? [refreshedBg!.problem.tcs[idx - 1]]
-                : refreshedBg!.problem.tcs;
+            const tcIds = idx
+                ? [refreshedBg!.problem.tcOrder[idx - 1]]
+                : refreshedBg!.problem.tcOrder;
+            const tcs = tcIds.map((tcId) => problem.tcs[tcId]);
             const outputParts: string[] = [];
             if (tcs[0].result!.verdict.name === 'CE') {
-                outputParts.push(vscode.l10n.t('Compilation Error'));
+                outputParts.push(l10n.t('Compilation Error'));
                 outputParts.push('');
                 outputParts.push(Io.compilationMsg);
             } else {
-                outputParts.push(vscode.l10n.t('Test cases run successfully.'));
+                outputParts.push(l10n.t('Test cases run successfully.'));
                 outputParts.push('');
 
                 tcs.forEach((tc, testCaseIndex) => {
                     const testResult = tc.result!;
                     outputParts.push(
-                        vscode.l10n.t('--- Test Case {index} ---', {
+                        l10n.t('--- Test Case {index} ---', {
                             index: idx || testCaseIndex + 1,
                         }),
                     );
                     outputParts.push(
-                        vscode.l10n.t('Verdict: {name} ({fullName})', {
+                        l10n.t('Verdict: {name} ({fullName})', {
                             name: testResult.verdict.name,
                             fullName: testResult.verdict.fullName,
                         }),
                     );
                     outputParts.push(
-                        vscode.l10n.t('Time: {time}ms', {
+                        l10n.t('Time: {time}ms', {
                             time: testResult.time,
                         }),
                     );
                     if (testResult.msg) {
                         outputParts.push(
-                            vscode.l10n.t('Message: {msg}', {
+                            l10n.t('Message: {msg}', {
                                 msg: testResult.msg,
                             }),
                         );
                     }
                     outputParts.push(
-                        vscode.l10n.t('Input: {input}', {
+                        l10n.t('Input: {input}', {
                             input: tcIo2String(tc.stdin),
                         }),
                     );
                     outputParts.push(
-                        vscode.l10n.t('Expected Output (Answer): {output}', {
+                        l10n.t('Expected Output (Answer): {output}', {
                             output: tcIo2String(tc.answer),
                         }),
                     );
                     outputParts.push(
-                        vscode.l10n.t('Actual Output: {output}', {
+                        l10n.t('Actual Output: {output}', {
                             output: tcIo2String(testResult.stdout),
                         }),
                     );
                     outputParts.push(
-                        vscode.l10n.t('Error Output: {output}', {
+                        l10n.t('Error Output: {output}', {
                             output: tcIo2String(testResult.stderr),
                         }),
                     );
@@ -187,7 +197,7 @@ class LlmTcRunner implements vscode.LanguageModelTool<CphTestRunnerParams> {
                 });
             }
             result.content.push(
-                new vscode.LanguageModelTextPart(outputParts.join('\n')),
+                new LanguageModelTextPart(outputParts.join('\n')),
             );
         }
         return result;

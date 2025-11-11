@@ -23,7 +23,7 @@ import { constants } from 'os';
 import { dirname, join } from 'path';
 import { cwd, platform } from 'process';
 import { pipeline } from 'stream/promises';
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
 import { extensionPath } from '../utils/global';
@@ -97,7 +97,7 @@ export default class ProcessExecutor {
             if (!['win32', 'linux'].includes(platform)) {
                 return ProcessExecutor.createErrorResult(
                     null,
-                    vscode.l10n.t(`Runner is unsupported for {platform}`, {
+                    l10n.t(`Runner is unsupported for {platform}`, {
                         platform,
                     }),
                 );
@@ -124,7 +124,7 @@ export default class ProcessExecutor {
                 Io.compilationMsg = result.stderr;
                 return ProcessExecutor.createErrorResult(
                     null,
-                    vscode.l10n.t('Failed to compile runner program'),
+                    l10n.t('Failed to compile runner program'),
                 );
             }
         }
@@ -178,7 +178,7 @@ export default class ProcessExecutor {
                     resolve(
                         this.createErrorResult(
                             process,
-                            vscode.l10n.t('Runner exited with code {code}', {
+                            l10n.t('Runner exited with code {code}', {
                                 code,
                             }),
                         ),
@@ -192,7 +192,7 @@ export default class ProcessExecutor {
                         resolve(
                             this.createErrorResult(
                                 process,
-                                vscode.l10n.t(
+                                l10n.t(
                                     'Runner error {type} with code {code}.',
                                     {
                                         type: runInfo.error_type,

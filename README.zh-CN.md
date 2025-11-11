@@ -99,7 +99,7 @@
     - 在 `package.nls.zh.json` 中添加翻译 (中文)
 
 2.  **运行时消息** (扩展代码)
-    - 在 TypeScript 代码中使用 `vscode.l10n.t('key')`
+    - 在 TypeScript 代码中使用 `l10n.t('key')`
     - 在 `l10n/bundle.l10n.zh-cn.json` 中添加翻译
 
 3.  **Webview UI** (React 组件)

@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { homedir, tmpdir } from 'os';
-import * as vscode from 'vscode';
+import { ConfigurationTarget, workspace } from 'vscode';
 import Logger from '../helpers/logger';
 import { renderTemplate } from '../utils/strTemplate';
 
@@ -24,7 +24,7 @@ class SettingsSection {
     protected logger: Logger = new Logger('settings');
     constructor(private name: string) {}
     protected get(key: string): unknown {
-        const value = vscode.workspace
+        const value = workspace
             .getConfiguration('cph-ng')
             .get(`${this.name}.${key}`);
         this.logger.trace('Getting setting', `${this.name}.${key}`, value);
@@ -32,13 +32,9 @@ class SettingsSection {
     }
     protected set(key: string, value: unknown): Thenable<void> {
         this.logger.trace('Setting setting', `${this.name}.${key}`, value);
-        return vscode.workspace
+        return workspace
             .getConfiguration('cph-ng')
-            .update(
-                `${this.name}.${key}`,
-                value,
-                vscode.ConfigurationTarget.Global,
-            );
+            .update(`${this.name}.${key}`, value, ConfigurationTarget.Global);
     }
 }
 

@@ -4,9 +4,15 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 
 ## [Unreleased]
 
+- **fix**: update URL host checks to use endsWith for better accuracy
+
+## 0.3.7
+
 - **fix**: debug not working
-- **feat**: store test cases as UUID-keyed map and add tcOrder #98
+- **feat**: store test cases as UUID-keyed map and add tcOrder
 - **feat**: support configurable test-case extensions and detect related files
+- **chore**: upgrade packages
+- **fix**: problem version migration
 
 ## 0.3.6
 

@@ -16,7 +16,16 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { readFile } from 'fs/promises';
-import * as vscode from 'vscode';
+import {
+    CancellationToken,
+    l10n,
+    LanguageModelTextPart,
+    LanguageModelTool,
+    LanguageModelToolInvocationOptions,
+    LanguageModelToolInvocationPrepareOptions,
+    LanguageModelToolResult,
+    PreparedToolInvocation,
+} from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
 import { getActivePath } from '../utils/global';
 import { TCIO } from '../utils/types';
@@ -26,24 +35,23 @@ interface LlmFileReaderParams {
     idx?: number;
 }
 
-class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
+class LlmFileReader implements LanguageModelTool<LlmFileReaderParams> {
     async prepareInvocation(
-        options: vscode.LanguageModelToolInvocationPrepareOptions<LlmFileReaderParams>,
-        _token: vscode.CancellationToken,
-    ): Promise<vscode.PreparedToolInvocation> {
+        options: LanguageModelToolInvocationPrepareOptions<LlmFileReaderParams>,
+        _token: CancellationToken,
+    ): Promise<PreparedToolInvocation> {
         const { fileType, idx } = options.input;
         const fileDescription = idx
-            ? vscode.l10n.t("test case {idx}'s {fileType}", { idx, fileType })
-            : vscode.l10n.t("the problem's {fileType}", { fileType });
+            ? l10n.t("test case {idx}'s {fileType}", { idx, fileType })
+            : l10n.t("the problem's {fileType}", { fileType });
 
         return {
-            invocationMessage: vscode.l10n.t(
-                'Reading {fileDescription} file...',
-                { fileDescription },
-            ),
+            invocationMessage: l10n.t('Reading {fileDescription} file...', {
+                fileDescription,
+            }),
             confirmationMessages: {
-                title: vscode.l10n.t('Read Problem File'),
-                message: vscode.l10n.t(
+                title: l10n.t('Read Problem File'),
+                message: l10n.t(
                     'Do you want to read the content of {fileDescription} file?',
                     { fileDescription },
                 ),
@@ -52,18 +60,18 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
     }
 
     async invoke(
-        options: vscode.LanguageModelToolInvocationOptions<LlmFileReaderParams>,
-        _token: vscode.CancellationToken,
-    ): Promise<vscode.LanguageModelToolResult> {
+        options: LanguageModelToolInvocationOptions<LlmFileReaderParams>,
+        _token: CancellationToken,
+    ): Promise<LanguageModelToolResult> {
         const { fileType, idx } = options.input;
-        const result = new vscode.LanguageModelToolResult([]);
+        const result = new LanguageModelToolResult([]);
 
         const activePath = getActivePath();
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         'Error: No competitive programming problem found. Please open or create a problem first.',
                     ),
                 ),
@@ -75,18 +83,18 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
         let tcIo: TCIO | undefined;
 
         if (idx) {
-            if (idx - 1 < 0 || idx - 1 >= problem.tcs.length) {
+            if (idx - 1 < 0 || idx - 1 >= problem.tcOrder.length) {
                 result.content.push(
-                    new vscode.LanguageModelTextPart(
-                        vscode.l10n.t(
+                    new LanguageModelTextPart(
+                        l10n.t(
                             'Error: Test case {idx} not found. Valid test cases range from 1 to {max}.',
-                            { idx, max: problem.tcs.length },
+                            { idx, max: problem.tcOrder.length },
                         ),
                     ),
                 );
                 return result;
             }
-            const testCase = problem.tcs[idx - 1];
+            const testCase = problem.tcs[problem.tcOrder[idx - 1]];
             switch (fileType) {
                 case 'input':
                     tcIo = testCase.stdin;
@@ -102,8 +110,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
                     break;
                 default:
                     result.content.push(
-                        new vscode.LanguageModelTextPart(
-                            vscode.l10n.t(
+                        new LanguageModelTextPart(
+                            l10n.t(
                                 "Error: Invalid file type '{fileType}'. Must be 'input', 'output', 'answer', or 'error'.",
                                 { fileType },
                             ),
@@ -113,8 +121,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
             }
         } else {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         'Error: Please specify a test case index `idx` to read {fileType} data, as it is typically tied to a specific test case.',
                         { fileType },
                     ),
@@ -125,8 +133,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
 
         if (!tcIo) {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         "Error: Could not retrieve data for {fileType} of test case {idx}. It might not exist or tests haven't been run yet.",
                         { fileType, idx },
                     ),
@@ -140,8 +148,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
                 const fileContent = (await readFile(tcIo.path, 'utf-8')).trim();
                 if (fileContent) {
                     result.content.push(
-                        new vscode.LanguageModelTextPart(
-                            vscode.l10n.t(
+                        new LanguageModelTextPart(
+                            l10n.t(
                                 'Content of {fileType} for test case {idx}:',
                                 { fileType, idx },
                             ) +
@@ -152,8 +160,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
                     );
                 } else {
                     result.content.push(
-                        new vscode.LanguageModelTextPart(
-                            vscode.l10n.t(
+                        new LanguageModelTextPart(
+                            l10n.t(
                                 `Content of {fileType} for test case {idx} is empty.`,
                                 { fileType, idx },
                             ),
@@ -162,8 +170,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
                 }
             } catch (e: any) {
                 result.content.push(
-                    new vscode.LanguageModelTextPart(
-                        vscode.l10n.t(`Error reading file {path}: {error}.`, {
+                    new LanguageModelTextPart(
+                        l10n.t(`Error reading file {path}: {error}.`, {
                             path: tcIo.path,
                             error: e.message || 'Unknown error',
                         }),
@@ -172,8 +180,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
             }
         } else if (!tcIo.useFile) {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         'The {fileType} data for test case {idx} is inline and not stored in a separate file. Content:',
                         { fileType, idx },
                     ) +
@@ -184,8 +192,8 @@ class LlmFileReader implements vscode.LanguageModelTool<LlmFileReaderParams> {
             );
         } else {
             result.content.push(
-                new vscode.LanguageModelTextPart(
-                    vscode.l10n.t(
+                new LanguageModelTextPart(
+                    l10n.t(
                         `Error: The path for {fileType} of test case {idx} is not available.`,
                         { fileType, idx },
                     ),

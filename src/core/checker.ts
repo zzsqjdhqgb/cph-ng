@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
 import { ProcessResultHandler } from '../helpers/processResultHandler';
@@ -65,7 +65,7 @@ export class Checker {
             this.logger.warn('Checker setup failed', e);
             return {
                 verdict: TCVerdicts.SE,
-                msg: vscode.l10n.t('Checker setup failed: {msg}', {
+                msg: l10n.t('Checker setup failed: {msg}', {
                     msg: (e as Error).message,
                 }),
             };

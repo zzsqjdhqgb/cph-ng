@@ -17,7 +17,7 @@
 
 import { access, constants } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
-import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
 import ProcessExecutor from '../../helpers/processExecutor';
@@ -97,7 +97,7 @@ export class LangJava extends Lang {
                 this.logger.warn('Compilation aborted by user');
                 return {
                     verdict: TCVerdicts.RJ,
-                    msg: vscode.l10n.t('Compilation aborted by user.'),
+                    msg: l10n.t('Compilation aborted by user.'),
                 };
             }
             return {

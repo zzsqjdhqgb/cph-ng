@@ -18,7 +18,7 @@
 import { access, readFile, writeFile } from 'fs/promises';
 import { createServer, Server } from 'http';
 import PQueue from 'p-queue';
-import * as vscode from 'vscode';
+import { l10n, ProgressLocation, Uri, window, workspace } from 'vscode';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
@@ -87,7 +87,7 @@ class Companion {
         Companion.server.on('error', (e) => {
             Companion.logger.error('Server error occurred', e);
             Io.error(
-                vscode.l10n.t('Failed to start companion server: {msg}.', {
+                l10n.t('Failed to start companion server: {msg}.', {
                     msg: e.message,
                 }),
             );
@@ -117,25 +117,21 @@ class Companion {
             );
             const folder = Settings.companion.chooseSaveFolder
                 ? await FolderChooser.chooseFolder(
-                      vscode.l10n.t(
-                          'Select a folder to save the problem source file',
-                      ),
+                      l10n.t('Select a folder to save the problem source file'),
                   )
-                : vscode.workspace.workspaceFolders?.[0].uri;
+                : workspace.workspaceFolders?.[0].uri;
 
             if (!folder) {
                 Companion.logger.warn('No folder selected');
                 Io.info(
-                    vscode.l10n.t(
-                        'No folder selected, problem creation cancelled.',
-                    ),
+                    l10n.t('No folder selected, problem creation cancelled.'),
                 );
                 return;
             }
 
             Companion.logger.trace('Using folder', { folder });
             problem.src = {
-                path: vscode.Uri.joinPath(
+                path: Uri.joinPath(
                     folder,
                     Companion.getProblemFileName(problem.name, problem.url),
                 ).fsPath,
@@ -157,14 +153,12 @@ class Companion {
                 await Companion.createSourceFile(problem);
             }
 
-            const document = await vscode.workspace.openTextDocument(
-                problem.src.path,
-            );
+            const document = await workspace.openTextDocument(problem.src.path);
             Companion.logger.info('Opened document', {
                 document: document.fileName,
             });
             await Problems.saveProblem(problem);
-            await vscode.window.showTextDocument(
+            await window.showTextDocument(
                 document,
                 Settings.companion.showPanel,
             );
@@ -172,7 +166,7 @@ class Companion {
         } catch (e) {
             Companion.logger.warn('Parse data from companion failed', e);
             Io.warn(
-                vscode.l10n.t('Parse data from companion failed: {msg}.', {
+                l10n.t('Parse data from companion failed: {msg}.', {
                     msg: (e as Error).message,
                 }),
             );
@@ -190,18 +184,18 @@ class Companion {
             'GNU G++23 14.2 (64 bit, msys2)': 91,
         };
         if (Companion.isSubmitting) {
-            Io.warn(vscode.l10n.t('A submission is already in progress.'));
+            Io.warn(l10n.t('A submission is already in progress.'));
             return Promise.reject(new Error('Submission already in progress'));
         }
 
         let submitLanguageId = Settings.companion.submitLanguage;
         if (!Object.values(languageList).includes(submitLanguageId)) {
-            const choice = await vscode.window.showQuickPick(
+            const choice = await window.showQuickPick(
                 Object.keys(languageList),
-                { placeHolder: vscode.l10n.t('Choose submission language') },
+                { placeHolder: l10n.t('Choose submission language') },
             );
             if (!choice) {
-                Io.info(vscode.l10n.t('Submission cancelled.'));
+                Io.info(l10n.t('Submission cancelled.'));
                 return;
             }
             submitLanguageId =
@@ -215,9 +209,7 @@ class Companion {
             sourceCode,
         });
         if (sourceCode.trim() === '') {
-            Io.warn(
-                vscode.l10n.t('Source code is empty. Submission cancelled.'),
-            );
+            Io.warn(l10n.t('Source code is empty. Submission cancelled.'));
             return;
         }
         const requestData: Exclude<CphSubmitResponse, { empty: true }> = {
@@ -234,10 +226,10 @@ class Companion {
         Companion.logger.debug('Submission data', requestData);
 
         Companion.isSubmitting = true;
-        return await vscode.window.withProgress(
+        return await window.withProgress(
             {
-                location: vscode.ProgressLocation.Notification,
-                title: vscode.l10n.t('Waiting response from cph-submit...'),
+                location: ProgressLocation.Notification,
+                title: l10n.t('Waiting response from cph-submit...'),
                 cancellable: true,
             },
             async (_, token) =>
@@ -258,7 +250,7 @@ class Companion {
                     };
 
                     token.onCancellationRequested(() => {
-                        Io.warn(vscode.l10n.t('Submission cancelled.'));
+                        Io.warn(l10n.t('Submission cancelled.'));
                         cleanup();
                         resolve();
                     });
@@ -306,7 +298,7 @@ class Companion {
                 } catch (e) {
                     Companion.logger.warn('Template file error', e);
                     Io.warn(
-                        vscode.l10n.t(
+                        l10n.t(
                             'Failed to use template file: {msg}, creating empty file instead',
                             { msg: (e as Error).message },
                         ),
@@ -338,7 +330,9 @@ class Companion {
         if (url) {
             try {
                 const u = new URL(url);
-                if (u.host.includes('codeforces.com') && shortCodeforcesName) {
+                const isHost = (host: string) =>
+                    u.hostname === host || u.hostname.endsWith(`.${host}`);
+                if (isHost('codeforces.com') && shortCodeforcesName) {
                     const regexPatterns = [
                         /\/contest\/(\d+)\/problem\/(\w+)/,
                         /\/problemset\/problem\/(\d+)\/(\w+)/,
@@ -351,13 +345,13 @@ class Companion {
                         }
                     }
                 }
-                if (u.host.includes('luogu.com.cn') && shortLuoguName) {
+                if (isHost('luogu.com.cn') && shortLuoguName) {
                     const match = url.match(/problem\/(\w+)/);
                     if (match) {
                         return `${match[1]}.${ext}`;
                     }
                 }
-                if (u.host.includes('atcoder.jp') && shortAtCoderName) {
+                if (isHost('atcoder.jp') && shortAtCoderName) {
                     const match = url.match(/tasks\/(\w+)_(\w+)/);
                     if (match) {
                         return `${match[1]}${match[2]}.${ext}`;
