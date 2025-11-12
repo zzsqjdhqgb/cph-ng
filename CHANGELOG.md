@@ -2,6 +2,37 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.4.0
+
+Aggregated from prereleases 0.3.1~0.3.8.
+
+### Added
+
+- Python support with PyPy
+- Debugger with testcase input feature
+- Automatic unlimited stack configuration for deep recursion
+- Drag-and-drop reordering with real-time preview
+- Support configurable test-case extensions and detect related files
+
+### Fixed
+
+- Update URL host checks to use endsWith for better accuracy
+- Debug not working
+- C/C++ compile options order
+- Test cases are not cleared after loading empty test cases
+- Windows file comparison by using Uri.file() for filesystem paths
+- Reading file in windows
+- Incorrect file extension
+
+### Changed
+
+- Store test cases as UUID-keyed map and add tcOrder
+- Upgrade packages
+- Problem version migration
+
+<details>
+<summary>Pre-release history (0.3.1~0.3.8)</summary>
+
 ## 0.3.8
 
 - **fix**: update URL host checks to use endsWith for better accuracy
@@ -45,6 +76,8 @@ Nothing changed, just dump version to publish a new version.
 ## 0.3.1
 
 - **fix**: incorrect file extension
+
+</details>
 
 ## 0.3.0
 
