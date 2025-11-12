@@ -16,7 +16,6 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { access, constants } from 'fs/promises';
-import { type } from 'os';
 import { basename, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
@@ -32,33 +31,32 @@ import {
     LangCompileResult,
 } from './lang';
 
-export class LangC extends Lang {
-    private logger: Logger = new Logger('langC');
-    public readonly name = 'C';
-    public readonly extensions = ['c'];
-    public readonly enableRunner = true;
+export class LangPython extends Lang {
+    private logger: Logger = new Logger('langPython');
+    public readonly name = 'Python';
+    public readonly extensions = ['py'];
     protected async _compile(
         src: FileWithHash,
         ac: AbortController,
         forceCompile: boolean | null,
         {
             compilationSettings,
-            debug,
         }: CompileAdditionalData = DefaultCompileAdditionalData,
     ): Promise<LangCompileResult> {
         this.logger.trace('compile', { src, forceCompile });
 
+        const cacheDir = join(Settings.cache.directory, 'bin');
         const outputPath = join(
-            Settings.cache.directory,
-            'bin',
-            basename(src.path, extname(src.path)) +
-                (type() === 'Windows_NT' ? '.exe' : ''),
+            cacheDir,
+            basename(src.path, extname(src.path)) + '.pyc',
         );
 
         const compiler =
-            compilationSettings?.compiler ?? Settings.compilation.cCompiler;
+            compilationSettings?.compiler ??
+            Settings.compilation.pythonCompiler;
         const args =
-            compilationSettings?.compilerArgs ?? Settings.compilation.cArgs;
+            compilationSettings?.compilerArgs ??
+            Settings.compilation.pythonArgs;
 
         const { skip, hash } = await Lang.checkHash(
             src,
@@ -81,28 +79,19 @@ export class LangC extends Lang {
                 compiler,
                 args,
                 src: src.path,
-                outputPath,
+                cacheDir,
             });
 
             const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-            const cmdArgs = [
-                compiler,
-                src.path,
-                ...compilerArgs,
-                '-o',
-                outputPath,
-            ];
-            if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
-                cmdArgs.push('-Wl,--stack,268435456');
-            }
-            if (debug) {
-                cmdArgs.push('-g');
-                cmdArgs.push('-O0');
-            }
-
+            // Compile Python to bytecode using py_compile to the cache directory
             const result = await ProcessExecutor.execute({
-                cmd: cmdArgs,
+                cmd: [
+                    compiler,
+                    '-c',
+                    `import py_compile; py_compile.compile('${src.path}', cfile='${outputPath}', doraise=True)`,
+                    ...compilerArgs,
+                ],
                 ac,
                 timeout,
             });
@@ -119,8 +108,19 @@ export class LangC extends Lang {
                     msg: l10n.t('Compilation aborted by user.'),
                 };
             }
+            if (result.killed) {
+                return {
+                    verdict: TCVerdicts.CE,
+                    msg: l10n.t('Compilation failed because of timeout'),
+                };
+            }
+            if (result.exitCode) {
+                return { verdict: TCVerdicts.CE, msg: '' };
+            }
+
+            // Check if the compiled .pyc file exists
             return {
-                verdict: await access(outputPath, constants.X_OK)
+                verdict: await access(outputPath, constants.R_OK)
                     .then(() => TCVerdicts.UKE)
                     .catch(() => TCVerdicts.CE),
                 msg: '',
@@ -132,8 +132,18 @@ export class LangC extends Lang {
             return { verdict: TCVerdicts.CE, msg: '' };
         }
     }
-    public async runCommand(target: string): Promise<string[]> {
+
+    public async runCommand(
+        target: string,
+        compilationSettings?: CompileAdditionalData['compilationSettings'],
+    ): Promise<string[]> {
         this.logger.trace('runCommand', { target });
-        return [target];
+        const runner =
+            compilationSettings?.runner ?? Settings.compilation.pythonRunner;
+        const runArgs =
+            compilationSettings?.runnerArgs ??
+            Settings.compilation.pythonRunArgs;
+        const runArgsArray = runArgs.split(/\s+/).filter(Boolean);
+        return [runner, ...runArgsArray, target];
     }
 }
