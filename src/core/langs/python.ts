@@ -89,7 +89,7 @@ export class LangPython extends Lang {
                 cmd: [
                     compiler,
                     '-c',
-                    `import py_compile; py_compile.compile('${src.path}', cfile='${outputPath}', doraise=True)`,
+                    `import py_compile; py_compile.compile(r'${src.path}', cfile=r'${outputPath}', doraise=True)`,
                     ...compilerArgs,
                 ],
                 ac,

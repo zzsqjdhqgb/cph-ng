@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: use raw string for outputPath in Python compilation command
+
 ## 0.4.1
 
 - **fix**: compare test case
