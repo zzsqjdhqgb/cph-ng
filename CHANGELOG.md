@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.4.1
+
+- **fix**: compare test case
+
 ## 0.4.0
 
 Aggregated from prereleases 0.3.1~0.3.8.

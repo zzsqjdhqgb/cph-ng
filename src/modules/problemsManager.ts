@@ -431,7 +431,7 @@ export default class ProblemsManager {
         }
         try {
             commands.executeCommand(
-                'diff',
+                'vscode.diff',
                 generateTcUri(fullProblem.problem, msg.id, 'answer'),
                 generateTcUri(fullProblem.problem, msg.id, 'stdout'),
             );
