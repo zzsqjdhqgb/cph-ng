@@ -2,8 +2,9 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.2
 
+- **fix**: replace dynamic version with static version in migration logic
 - **fix**: use raw string for outputPath in Python compilation command
 
 ## 0.4.1

@@ -17,7 +17,6 @@
 
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
-import { version } from '../../package.json';
 import Logger from '../helpers/logger';
 import { Problem, Problem as Problem_0_3_7 } from './types';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
@@ -148,7 +147,7 @@ export const migration = (problem: OldProblem): Problem => {
             if ('version' in problemAny) {
                 const versions = [
                     ...Object.keys(migrateFunctions),
-                    version,
+                    '0.3.7',
                 ].sort((a, b) => compare(b, a));
                 for (const version of versions) {
                     if (lte(version, problemAny.version)) {
