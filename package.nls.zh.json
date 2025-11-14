@@ -73,7 +73,7 @@
     "cph-ng.configuration.compilation.properties.pythonRunner.markdownDescription": "指定用于执行 Python 程序的 **Python 解释器**（例如 `pypy3`、`python3`）。此设置决定了用于运行 Python 代码的可执行文件。建议使用 PyPy 以在竞赛编程中获得更好的性能。",
     "cph-ng.configuration.compilation.properties.timeout.markdownDescription": "设置编译过程的最大允许时间（单位为**毫秒**），超时后将终止。设置为 `0` 可禁用超时，允许编译无限期运行。这可以防止进程挂起。",
     "cph-ng.configuration.compilation.properties.useHook.markdownDescription": "**仅在启用 `#cph-ng.compilation.useWrapper#` 时可用。** 启用后，将编译并链接一个钩子与程序，以防止文件 IO。",
-    "cph-ng.configuration.compilation.properties.useWrapper.markdownDescription": "**此选项仅适用于 C++ 程序。** 启用后，程序将在一个包装脚本中执行，以提供更准确的时间测量。",
+    "cph-ng.configuration.compilation.properties.useWrapper.markdownDescription": "**不要与 `#cph-ng.runner.useRunner#` 选项同时使用。此选项仅适用于 Windows 或 Linux 系统与 C++ 程序。** 启用后，程序将在一个包装脚本中执行，以提供更准确的时间测量。",
     "cph-ng.configuration.compilation.title": "编译",
     "cph-ng.configuration.cphCapable.properties.enabled.markdownDescription": "启用从 Competitive Programming Helper (CPH) 到 CPH-NG 的**题目数据导入**。这简化了将题目定义和测试用例导入扩展的过程，减少了手动设置。",
     "cph-ng.configuration.cphCapable.title": "CPH 兼容",
