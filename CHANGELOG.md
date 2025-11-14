@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: disable show tips
+
 ## 0.4.2
 
 - **fix**: replace dynamic version with static version in migration logic
