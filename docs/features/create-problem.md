@@ -15,8 +15,8 @@
 该功能可以通过多种方式触发：
 
 - 打开一个没有题目的源文件并点击 CPH-NG 侧边栏面板中的 `创建` 按钮。
-- 按 <kbd>F1</kbd> 或者 <kbd>Ctrl/Cmd+Shift+P</kbd> 打开命令面板，并输入并选择：`CPH-NG: 创建题目`
-- 打开一个没有题目的源文件并按 <kbd>Ctrl/Cmd+Alt+B</kbd> 快捷键
+- 按 ++f1++ 或者 ++ctrl+shift+p++ 打开命令面板，并输入并选择：`CPH-NG: 创建题目`
+- 打开一个没有题目的源文件并按 ++ctrl+alt+b++ 快捷键
 - 打开一个没有题目的源文件中点击右上角的火箭图标
 
 ![](../images/createProblem.png)

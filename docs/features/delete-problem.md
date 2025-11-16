@@ -16,7 +16,7 @@
 该功能可以通过多种方式触发：
 
 - 点击题目操作面板底部控制栏中的删除按钮
-- 按 <kbd>F1</kbd> 或者 <kbd>Ctrl/Cmd+Shift+P</kbd> 打开命令面板，并输入并选择：`CPH-NG: 删除题目`
+- 按 ++f1++ 或者 ++ctrl+shift+p++ 打开命令面板，并输入并选择：`CPH-NG: 删除题目`
 
 ![](../images/deleteProblem.png)
 

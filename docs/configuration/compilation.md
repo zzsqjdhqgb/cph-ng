@@ -61,7 +61,7 @@
 ## 高级编译部分 { #advanced }
 
 !!! warning
-    此栏的配置选项在 MacOS 无法执行，并且在 Windows/Linux 上的稳定性有待测试，故默认关闭。
+    此栏的配置选项在 MacOS 无法执行，并且在 Windows/Linux 上的稳定性有待测试，故默认关闭。详情请参考 [包装脚本 / 运行器](../features/wrapper-runner.md)。
 
 ### `objcopy` <small>字符串</small> { #objcopy }
 
@@ -79,7 +79,7 @@
 |:-:|
 |`false`|
 
-### `useHook` <small>布尔值</small> { #useWrapper }
+### `useHook` <small>布尔值</small> { #useHook }
 
 **仅在启用 [`useWrapper`](#useWrapper) 时可用。** 启用后，将编译并链接一个钩子与程序，以防止文件 IO。
 
@@ -89,4 +89,4 @@
 
 ### 相关功能 { #advanced_relatives }
 
-- [包装脚本](../features/use-wrapper.md)
+- [包装脚本 / 运行器](../features/wrapper-runner.md)

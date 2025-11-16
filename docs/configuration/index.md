@@ -104,6 +104,6 @@ CPH-NG 面板的 UI 自定义。
 
 ### 如何修改配置 { #how-to-modify }
 
-1. 按 <kbd>Ctrl/Cmd + ,</kbd>
+1. 按 ++ctrl+comma++
 2. 搜索 `cph-ng`
 3. 浏览和修改设置

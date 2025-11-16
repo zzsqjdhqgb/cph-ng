@@ -18,11 +18,12 @@ hide:
 
 ## 创建一个题目
 
-![](images/createProblem.png)
+![创建一个新题目](images/createProblem.png){ width=800 loading=lazy }
+/// caption
+创建一个新题目
+///
 
 单击 `创建` 按钮后，就会创建一个题目。有关创建题目的更详细信息，可以参考 [创建题目](./features/create-problem.md)。
-
-![](images/problemCreated.png)
 
 ## 添加测试用例
 
@@ -30,10 +31,13 @@ hide:
 
 最左边的按钮用于**创建一个单独的测试用例**。您需要手动输入输入数据和预期答案（输出）。
 
-![添加一个测试用例](images/addTestCase.png)
+![添加一个测试用例](images/addTestCase.png){ width=800 loading=lazy }
+/// caption
+添加一个测试用例
+///
 
-!!! tip
-    CPH-NG 还支持**从压缩文件或特定目录加载测试用例**，这是管理大型数据集的绝佳选择。
+!!! tip "批量导入测试用例"
+    CPH-NG 还支持**从压缩文件或特定目录加载测试用例**，这是管理大型数据集的绝佳选择。详细信息可以参考 [加载测试用例](./features/load-test-cases.md)。
 
 ## 运行测试用例
 
@@ -43,11 +47,10 @@ hide:
 
 CPH-NG 会自动向您展开**第一个未通过的已评测测试用例**。
 
-![](images/testCaseRun.png)
-
-如果您从文件加载这些测试用例，输出也将显示为文件。拖动它们可以查看详细信息。
-
-![](images/fileTestCase.png)
+![运行测试用例](images/testCaseRun.png){ width=800 loading=lazy }
+/// caption
+运行测试用例
+///
 
 **现在，您已经学会了 CPH-NG 的基本用法。尽情享受使用 CPH-NG 编程的乐趣吧！**
 

@@ -7,10 +7,7 @@
 
 ## 描述 { #description }
 
-导入题目功能允许您将题目从原始 CPH (1) 扩展迁移到 CPH-NG。它读取与源代码关联的 CPH 题目文件，并将其转换为 CPH-NG 格式，包括所有测试用例和元数据。
-{ .annotate }
-
-1.  Competitive Programming Helper
+导入题目功能允许您将题目从原始 CPH 扩展迁移到 CPH-NG。它读取与源代码关联的 CPH 题目文件，并将其转换为 CPH-NG 格式，包括所有测试用例和元数据。
 
 ## 交互 { #interaction }
 
@@ -19,15 +16,15 @@
 该功能可以通过多种方式触发：
 
 - 打开一个没有题目的源文件并点击 CPH-NG 侧边栏面板中的 `导入` 按钮。
-- 按 <kbd>F1</kbd> 或者 <kbd>Ctrl/Cmd+Shift+P</kbd> 打开命令面板，并输入并选择：`CPH-NG: 导入题目`
-- 打开一个没有题目的源文件并按 <kbd>Ctrl/Cmd+Alt+B</kbd> 快捷键
+- 按 ++f1++ 或者 ++ctrl+shift+p++ 打开命令面板，并输入并选择：`CPH-NG: 导入题目`
+- 打开一个没有题目的源文件并按 ++ctrl+alt+b++ 快捷键
 - 打开一个没有题目的源文件中点击右上角的火箭图标
 
 ![](../images/importFromCph.png)
 
 ![](../images/importedFromCph.png)
 
-### 前置条件
+### 前置条件 { #preconditions }
 
 - 必须有一个打开源文件的编辑器处于活动状态
 - 此文件不应已存在题目
