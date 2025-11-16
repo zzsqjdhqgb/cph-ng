@@ -241,7 +241,6 @@ const TcView = ({
                                             isVirtual: true,
                                         });
                                     }}
-                                    autoFocus={tc.isExpand}
                                     tabIndex={idx * 2 + 1}
                                 />
                             </ErrorBoundary>
