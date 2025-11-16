@@ -5,6 +5,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: disable show tips
+- **fix**: disable auto focus
+- **feat**: add disable/enable test case feature
 
 ## 0.4.2
 

@@ -122,6 +122,8 @@ export default class SidebarProvider implements WebviewViewProvider {
                     await ProblemsManager.updateTc(msg);
                 } else if (msg.type === 'runTc') {
                     await ProblemsManager.runTc(msg);
+                } else if (msg.type === 'toggleDisable') {
+                    await ProblemsManager.toggleDisable(msg);
                 } else if (msg.type === 'clearTcStatus') {
                     await ProblemsManager.clearTcStatus(msg);
                 } else if (msg.type === 'clearStatus') {

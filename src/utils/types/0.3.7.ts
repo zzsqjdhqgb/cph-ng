@@ -60,7 +60,6 @@ export interface TC {
     stdin: TCIO;
     answer: TCIO;
     isExpand: boolean;
-    isDisabled: boolean;
     result?: TCResult;
 }
 

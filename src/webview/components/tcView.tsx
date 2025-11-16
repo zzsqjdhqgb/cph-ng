@@ -60,26 +60,39 @@ const TcView = ({
 
     return (
         <CphMenu
-            menu={{
-                [t('tcView.menu.clearTcStatus')]: () => {
-                    msg({ type: 'clearTcStatus', id });
-                },
-                [t('tcView.menu.debug')]: () => {
-                    msg({ type: 'debugTc', id });
-                },
-            }}
+            menu={
+                tc.isDisabled
+                    ? {
+                          [t('tcView.menu.enableTc')]: () => {
+                              msg({ type: 'toggleDisable', id });
+                          },
+                      }
+                    : {
+                          [t('tcView.menu.disableTc')]: () => {
+                              msg({ type: 'toggleDisable', id });
+                          },
+                          [t('tcView.menu.clearTcStatus')]: () => {
+                              msg({ type: 'clearTcStatus', id });
+                          },
+                          [t('tcView.menu.debug')]: () => {
+                              msg({ type: 'debugTc', id });
+                          },
+                      }
+            }
         >
             <Accordion
-                expanded={tc.isExpand}
+                expanded={tc.isDisabled ? false : tc.isExpand}
                 disableGutters={true}
                 onChange={(_, expanded) => {
+                    if (tc.isDisabled) return;
                     tc.isExpand = expanded;
                     emitUpdate();
                 }}
                 sx={{
                     borderLeft: `4px solid`,
                     transition: 'all 0.2s',
-                    opacity: isDragging ? 0.5 : 1,
+                    opacity: isDragging || tc.isDisabled ? 0.5 : 1,
+                    filter: tc.isDisabled ? 'grayscale(100%)' : 'none',
                     ...(window.easterEgg
                         ? (() => {
                               const hash = MD5(JSON.stringify(tc)).words;
@@ -110,6 +123,7 @@ const TcView = ({
                 }}
             >
                 <AccordionSummary
+                    disabled={tc.isDisabled}
                     draggable
                     onDragStart={(e) => {
                         e.stopPropagation();
@@ -119,9 +133,29 @@ const TcView = ({
                         e.stopPropagation();
                         if (onDragEnd) onDragEnd();
                     }}
+                    onClick={(e) => {
+                        if (tc.isDisabled) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                    }}
                     sx={{
                         '& > span': { margin: '0 !important' },
-                        'cursor': isDragging ? 'grabbing' : 'grab',
+                        'cursor': isDragging
+                            ? 'grabbing'
+                            : tc.isDisabled
+                              ? 'not-allowed'
+                              : 'grab',
+                        'pointerEvents': tc.isDisabled ? 'none' : 'auto',
+                        '&[draggable="true"]': {
+                            pointerEvents: 'auto',
+                        },
+                        '& *': tc.isDisabled
+                            ? {
+                                  cursor: 'not-allowed !important',
+                                  pointerEvents: 'none !important',
+                              }
+                            : {},
                     }}
                 >
                     <CphFlex smallGap>

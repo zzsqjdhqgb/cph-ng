@@ -18,7 +18,7 @@
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
 import Logger from '../helpers/logger';
-import { Problem, Problem as Problem_0_3_7 } from './types';
+import { Problem, Problem as Problem_0_4_3 } from './types';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
 import { Problem as Problem_0_0_3 } from './types/0.0.3';
 import { Problem as Problem_0_0_4 } from './types/0.0.4';
@@ -28,10 +28,13 @@ import { Problem as Problem_0_1_1 } from './types/0.1.1';
 import { Problem as Problem_0_2_1 } from './types/0.2.1';
 import { Problem as Problem_0_2_3 } from './types/0.2.3';
 import { Problem as Problem_0_2_4 } from './types/0.2.4';
+import { Problem as Problem_0_3_7 } from './types/0.3.7';
 
 const logger = new Logger('migration');
 
 export type OldProblem =
+    | Problem_0_4_3
+    | Problem_0_3_7
     | Problem_0_2_4
     | Problem_0_2_3
     | Problem_0_2_1
@@ -43,6 +46,17 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
+    '0.3.7': (problem: Problem_0_3_7): Problem_0_4_3 =>
+        ({
+            ...problem,
+            version: '0.4.3',
+            tcs: Object.fromEntries(
+                Object.entries(problem.tcs).map(([id, tc]) => [
+                    id,
+                    { ...tc, isDisabled: false },
+                ]),
+            ),
+        }) satisfies Problem_0_4_3,
     '0.2.4': (problem: Problem_0_2_4): Problem_0_3_7 => {
         const newProblem: Problem_0_3_7 = {
             ...problem,
@@ -147,7 +161,7 @@ export const migration = (problem: OldProblem): Problem => {
             if ('version' in problemAny) {
                 const versions = [
                     ...Object.keys(migrateFunctions),
-                    '0.3.7',
+                    '0.4.3',
                 ].sort((a, b) => compare(b, a));
                 for (const version of versions) {
                     if (lte(version, problemAny.version)) {

@@ -76,6 +76,8 @@
     "tcView.memory": "{{memory}} MB",
     "tcView.menu.clearTcStatus": "清除此测试用例状态",
     "tcView.menu.debug": "使用此测试用例调试",
+    "tcView.menu.disableTc": "禁用测试用例",
+    "tcView.menu.enableTc": "启用测试用例",
     "tcView.message": "消息",
     "tcView.run": "运行",
     "tcView.run.menu.forceCompile": "运行 (强制编译)",

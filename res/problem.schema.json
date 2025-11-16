@@ -106,11 +106,14 @@
                 "isExpand": {
                     "type": "boolean"
                 },
+                "isDisabled": {
+                    "type": "boolean"
+                },
                 "result": {
                     "$ref": "#/definitions/TCResult"
                 }
             },
-            "required": ["stdin", "answer", "isExpand"],
+            "required": ["stdin", "answer", "isExpand", "isDisabled"],
             "additionalProperties": false
         },
         "BFCompare": {

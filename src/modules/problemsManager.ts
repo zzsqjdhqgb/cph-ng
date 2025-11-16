@@ -176,6 +176,7 @@ export default class ProblemsManager {
             stdin: { useFile: false, data: '' },
             answer: { useFile: false, data: '' },
             isExpand: true,
+            isDisabled: false,
         };
         fullProblem.problem.tcOrder.push(uuid);
         await this.dataRefresh();
@@ -266,6 +267,15 @@ export default class ProblemsManager {
         tc.isExpand = isExpandVerdict(result.verdict);
         await beforeReturn();
     }
+    public static async toggleDisable(msg: msgs.ToggleDisableMsg) {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
+            return;
+        }
+        fullProblem.problem.tcs[msg.id].isDisabled =
+            !fullProblem.problem.tcs[msg.id].isDisabled;
+        await this.dataRefresh();
+    }
     public static async clearTcStatus(msg: msgs.ClearTcStatusMsg) {
         const fullProblem = await this.getFullProblem(msg.activePath);
         if (!fullProblem) {
@@ -302,7 +312,9 @@ export default class ProblemsManager {
         };
 
         const tcs = fullProblem.problem.tcs;
-        const tcOrder = [...fullProblem.problem.tcOrder];
+        const tcOrder = [...fullProblem.problem.tcOrder].filter(
+            (id) => !tcs[id].isDisabled,
+        );
         for (const tcId of tcOrder) {
             tcs[tcId].result = {
                 verdict: TCVerdicts.CP,
@@ -683,6 +695,7 @@ export default class ProblemsManager {
                     data: bruteForceRunResult.stdout,
                 },
                 isExpand: true,
+                isDisabled: false,
                 result: {
                     verdict: TCVerdicts.CP,
                     stdout: { useFile: false, data: '' },

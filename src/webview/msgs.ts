@@ -67,6 +67,10 @@ export interface RunTcMsg extends BaseMsg {
     id: UUID;
     compile: boolean | null;
 }
+export interface ToggleDisableMsg extends BaseMsg {
+    type: 'toggleDisable';
+    id: UUID;
+}
 export interface ClearTcStatusMsg extends BaseMsg {
     type: 'clearTcStatus';
     id: UUID;
@@ -153,6 +157,7 @@ export type WebviewMsg =
     | AddTcMsg
     | LoadTcsMsg
     | RunTcMsg
+    | ToggleDisableMsg
     | ClearTcStatusMsg
     | ClearStatusMsg
     | ChooseTcFileMsg
