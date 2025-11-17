@@ -99,6 +99,7 @@ export default class Problems {
             );
             return null;
         }
+        problem.src.path = srcFile;
         this.logger.info('Problem loaded', { binPath, problem });
         return problem;
     }

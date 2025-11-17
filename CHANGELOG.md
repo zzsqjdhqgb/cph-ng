@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: set problem source path when loading a problem
+
 ## 0.4.6
 
 - **fix**: use better migration logic
