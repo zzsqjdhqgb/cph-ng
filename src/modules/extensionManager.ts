@@ -16,7 +16,6 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { mkdir, readFile, rm } from 'fs/promises';
-import { debounce } from 'lodash';
 import { release } from 'os';
 import { join } from 'path';
 import { EventEmitter } from 'stream';
@@ -42,6 +41,7 @@ import Logger from '../helpers/logger';
 import Companion from '../modules/companion';
 import CphCapable from '../modules/cphCapable';
 import SidebarProvider from '../modules/sidebarProvider';
+import { debounce } from '../utils/debounce';
 import {
     extensionPath,
     fileSystemProvider,
