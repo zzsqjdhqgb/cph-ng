@@ -161,7 +161,7 @@ export const migration = (problem: OldProblem): Problem => {
             if ('version' in problemAny) {
                 const versions = [
                     ...Object.keys(migrateFunctions),
-                    '0.4.3',
+                    '0.4.5',
                 ].sort((a, b) => compare(b, a));
                 for (const version of versions) {
                     if (lte(version, problemAny.version)) {
