@@ -46,6 +46,7 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
+    '0.4.3': (_: Problem_0_4_3): null => null,
     '0.3.7': (problem: Problem_0_3_7): Problem_0_4_3 =>
         ({
             ...problem,
@@ -159,10 +160,9 @@ export const migration = (problem: OldProblem): Problem => {
         const detectedVer: string = (() => {
             const problemAny = problem as any;
             if ('version' in problemAny) {
-                const versions = [
-                    ...Object.keys(migrateFunctions),
-                    '0.4.5',
-                ].sort((a, b) => compare(b, a));
+                const versions = Object.keys(migrateFunctions).sort((a, b) =>
+                    compare(b, a),
+                );
                 for (const version of versions) {
                     if (lte(version, problemAny.version)) {
                         return version;
@@ -192,11 +192,14 @@ export const migration = (problem: OldProblem): Problem => {
             return '0.0.1';
         })();
         logger.debug('Detected version', { detectedVer });
-        if (migrateFunctions[detectedVer] === undefined) {
-            logger.debug('No migration function found, stopping migration');
+        let newProblem = migrateFunctions[detectedVer](problem);
+        if (newProblem === null) {
+            logger.debug(
+                'Migration function returned null, stopping migration',
+            );
             break;
         }
-        problem = migrateFunctions[detectedVer](problem);
+        problem = newProblem;
         logger.debug('Migrated to version', {
             version: detectedVer,
             problem,

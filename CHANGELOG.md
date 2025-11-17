@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.4.6
+
+- **fix**: use better migration logic
+
 ## 0.4.5
 
 - **fix**: migrate issues
