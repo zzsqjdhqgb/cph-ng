@@ -2,7 +2,7 @@
     "name": "cph-ng",
     "displayName": "CPH-NG",
     "description": "The next generation of CPH.",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "type": "module",
     "license": "AGPL-3.0-only",
     "publisher": "langningchen",
@@ -182,6 +182,8 @@
         },
         "configuration": [
             {
+                "id": "basic",
+                "order": 0,
                 "title": "%cph-ng.configuration.basic.title%",
                 "properties": {
                     "cph-ng.basic.folderOpener": {
@@ -200,6 +202,8 @@
                 }
             },
             {
+                "id": "compilation",
+                "order": 1,
                 "title": "%cph-ng.configuration.compilation.title%",
                 "properties": {
                     "cph-ng.compilation.cCompiler": {
@@ -285,6 +289,8 @@
                 }
             },
             {
+                "id": "runner",
+                "order": 2,
                 "title": "%cph-ng.configuration.runner.title%",
                 "properties": {
                     "cph-ng.runner.timeAddition": {
@@ -315,6 +321,8 @@
                 }
             },
             {
+                "id": "comparing",
+                "order": 3,
                 "title": "%cph-ng.configuration.comparing.title%",
                 "properties": {
                     "cph-ng.comparing.oleSize": {
@@ -335,6 +343,8 @@
                 }
             },
             {
+                "id": "bfCompare",
+                "order": 4,
                 "title": "%cph-ng.configuration.bfCompare.title%",
                 "properties": {
                     "cph-ng.bfCompare.generatorTimeLimit": {
@@ -350,6 +360,8 @@
                 }
             },
             {
+                "id": "problem",
+                "order": 5,
                 "title": "%cph-ng.configuration.problem.title%",
                 "properties": {
                     "cph-ng.problem.defaultTimeLimit": {
@@ -421,6 +433,8 @@
                 }
             },
             {
+                "id": "cache",
+                "order": 6,
                 "title": "%cph-ng.configuration.cache.title%",
                 "properties": {
                     "cph-ng.cache.directory": {
@@ -436,6 +450,8 @@
                 }
             },
             {
+                "id": "cphCapable",
+                "order": 7,
                 "title": "%cph-ng.configuration.cphCapable.title%",
                 "properties": {
                     "cph-ng.cphCapable.enabled": {
@@ -446,6 +462,8 @@
                 }
             },
             {
+                "id": "companion",
+                "order": 8,
                 "title": "%cph-ng.configuration.companion.title%",
                 "properties": {
                     "cph-ng.companion.shortCodeforcesName": {
@@ -547,6 +565,8 @@
                 }
             },
             {
+                "id": "sidebar",
+                "order": 9,
                 "title": "%cph-ng.configuration.sidebar.title%",
                 "properties": {
                     "cph-ng.sidebar.retainWhenHidden": {
