@@ -56,11 +56,11 @@ class LlmTestCaseLister implements LanguageModelTool<LlmTestCaseListerParams> {
         const result = new LanguageModelToolResult([]);
         const activePath = options.input.activePath;
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
-        if (!bgProblem || !bgProblem.problem) {
+        if (!bgProblem) {
             result.content.push(
                 new LanguageModelTextPart(
                     l10n.t(
-                        'Error: No competitive programming problem found. Please open or create a problem first.',
+                        'Error: No competitive programming problem found. Please ask the user to open or create a problem first.',
                     ),
                 ),
             );

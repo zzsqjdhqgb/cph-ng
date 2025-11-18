@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: changed default value of cph-ng.comparing.oleSize to 8
 - **feat**: let llm decide active file path
 - **fix**: add tcOrder to required properties in problem schema
+- **fix**: update error message to prompt user
 
 ## 0.4.6
 

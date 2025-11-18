@@ -52,7 +52,7 @@
     "Error output for test case {id}:{content}": "测试用例 {id} 的错误输出：{content}",
     "Error while reading data: {msg}": "读取数据时出错：{msg}",
     "Error: At least one of stdin or answer must be provided.": "错误：必须提供 stdin 或 answer 中的至少一项。",
-    "Error: No competitive programming problem found. Please open or create a problem first.": "错误：未找到竞争性编程题目。请先打开或创建一个题目。",
+    "Error: No competitive programming problem found. Please ask the user to open or create a problem first.": "错误：未找到竞争性编程题目。请先要求用户打开或创建一个题目。",
     "Error: Result data for test case {id} is not available yet. Please run the test case first.": "错误：测试用例 {id} 的结果数据尚不可用。请先运行该测试用例。",
     "Error: Test case identifier must be a non-empty string.": "错误：测试用例标识符必须是非空字符串。",
     "Error: Test case {id} not found in the current problem.": "错误：在当前题目中未找到测试用例 {id}。",
