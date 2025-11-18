@@ -7,6 +7,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: set problem source path when loading a problem
 - **fix**: create and import problem using keyboard shortcut
 - **feat**: focus back on editor after keyboard shortcut
+- **feat**: changed default value of cph-ng.comparing.oleSize to 8
 
 ## 0.4.6
 

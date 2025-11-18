@@ -327,7 +327,7 @@
                 "properties": {
                     "cph-ng.comparing.oleSize": {
                         "type": "number",
-                        "default": 3,
+                        "default": 8,
                         "markdownDescription": "%cph-ng.configuration.comparing.properties.oleSize.markdownDescription%"
                     },
                     "cph-ng.comparing.regardPEAsAC": {
