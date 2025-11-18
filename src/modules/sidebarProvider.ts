@@ -84,7 +84,9 @@ export default class SidebarProvider implements WebviewViewProvider {
 
     public focus() {
         this.logger.trace('focus');
+        const editor = window.activeTextEditor;
         commands.executeCommand('workbench.view.extension.cphNgContainer');
+        editor && window.showTextDocument(editor.document);
     }
 
     public resolveWebviewView(webviewView: WebviewView) {
