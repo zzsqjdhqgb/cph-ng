@@ -207,13 +207,13 @@ OS: ${release()}`;
             context.subscriptions.push(
                 commands.registerCommand('cph-ng.createProblem', async () => {
                     sidebarProvider.focus();
-                    await CphNg.createProblem();
+                    await CphNg.createProblem(getActivePath());
                 }),
             );
             context.subscriptions.push(
                 commands.registerCommand('cph-ng.importProblem', async () => {
                     sidebarProvider.focus();
-                    await CphNg.importProblem();
+                    await CphNg.importProblem(getActivePath());
                 }),
             );
             context.subscriptions.push(
