@@ -26,9 +26,10 @@ import {
     PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
-import { getActivePath } from '../utils/global';
 
-interface LlmTestCaseListerParams {}
+interface LlmTestCaseListerParams {
+    activePath: string;
+}
 
 class LlmTestCaseLister implements LanguageModelTool<LlmTestCaseListerParams> {
     async prepareInvocation(
@@ -49,11 +50,11 @@ class LlmTestCaseLister implements LanguageModelTool<LlmTestCaseListerParams> {
     }
 
     async invoke(
-        _options: LanguageModelToolInvocationOptions<LlmTestCaseListerParams>,
+        options: LanguageModelToolInvocationOptions<LlmTestCaseListerParams>,
         _token: CancellationToken,
     ): Promise<LanguageModelToolResult> {
         const result = new LanguageModelToolResult([]);
-        const activePath = getActivePath();
+        const activePath = options.input.activePath;
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(

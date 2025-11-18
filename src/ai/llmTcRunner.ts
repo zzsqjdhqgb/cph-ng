@@ -28,9 +28,9 @@ import {
 } from 'vscode';
 import Io from '../helpers/io';
 import ProblemsManager from '../modules/problemsManager';
-import { getActivePath } from '../utils/global';
 
 interface CphTestRunnerParams {
+    activePath: string;
     id?: UUID;
 }
 
@@ -67,7 +67,7 @@ class LlmTcRunner implements LanguageModelTool<CphTestRunnerParams> {
         const { id } = options.input;
         const result = new LanguageModelToolResult([]);
 
-        const activePath = getActivePath();
+        const activePath = options.input.activePath;
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(

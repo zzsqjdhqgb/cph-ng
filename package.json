@@ -51,10 +51,17 @@
                 "icon": "$(play)",
                 "inputSchema": {
                     "type": "object",
+                    "required": [
+                        "activePath"
+                    ],
                     "properties": {
                         "id": {
                             "type": "string",
                             "description": "Optional test case ID (UUID) to run. Omit to execute the full test suite."
+                        },
+                        "activePath": {
+                            "type": "string",
+                            "description": "File path for the target problem source code. Must be provided by LLM invocations."
                         }
                     }
                 }
@@ -71,7 +78,8 @@
                     "type": "object",
                     "required": [
                         "dataType",
-                        "id"
+                        "id",
+                        "activePath"
                     ],
                     "properties": {
                         "dataType": {
@@ -91,6 +99,10 @@
                         "id": {
                             "type": "string",
                             "description": "The test case ID (UUID) whose data should be fetched."
+                        },
+                        "activePath": {
+                            "type": "string",
+                            "description": "File path for the target problem source code. Must be provided by LLM invocations."
                         }
                     }
                 }
@@ -105,7 +117,15 @@
                 "icon": "$(list-unordered)",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {}
+                    "required": [
+                        "activePath"
+                    ],
+                    "properties": {
+                        "activePath": {
+                            "type": "string",
+                            "description": "File path for the target problem source code. Must be provided by LLM invocations."
+                        }
+                    }
                 }
             },
             {
@@ -118,6 +138,9 @@
                 "icon": "$(edit)",
                 "inputSchema": {
                     "type": "object",
+                    "required": [
+                        "activePath"
+                    ],
                     "properties": {
                         "id": {
                             "type": "string",
@@ -130,6 +153,10 @@
                         "answer": {
                             "type": "string",
                             "description": "Expected output content to store inline for the test case."
+                        },
+                        "activePath": {
+                            "type": "string",
+                            "description": "File path for the target problem source code. Must be provided by LLM invocations."
                         }
                     },
                     "anyOf": [
@@ -327,7 +354,7 @@
                 "properties": {
                     "cph-ng.comparing.oleSize": {
                         "type": "number",
-                        "default": 8,
+                        "default": 1,
                         "markdownDescription": "%cph-ng.configuration.comparing.properties.oleSize.markdownDescription%"
                     },
                     "cph-ng.comparing.regardPEAsAC": {

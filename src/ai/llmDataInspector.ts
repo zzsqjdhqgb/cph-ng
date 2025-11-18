@@ -28,7 +28,6 @@ import {
     PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
-import { getActivePath } from '../utils/global';
 import { TCIO } from '../utils/types';
 
 const MAX_PREVIEW_LENGTH = 1000;
@@ -75,6 +74,7 @@ type DataType =
     | 'memory';
 
 interface LlmDataInspectorParams {
+    activePath: string;
     dataType: DataType;
     id: UUID;
 }
@@ -121,7 +121,7 @@ class LlmDataInspector implements LanguageModelTool<LlmDataInspectorParams> {
             return result;
         }
 
-        const activePath = getActivePath();
+        const activePath = options.input.activePath;
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(

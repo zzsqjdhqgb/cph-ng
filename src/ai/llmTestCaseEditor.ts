@@ -27,10 +27,10 @@ import {
     PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
-import { getActivePath } from '../utils/global';
 import { TC } from '../utils/types';
 
 interface LlmTestCaseEditorParams {
+    activePath: string;
     id?: UUID;
     stdin?: string;
     answer?: string;
@@ -85,7 +85,7 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
             return result;
         }
 
-        const activePath = getActivePath();
+        const activePath = options.input.activePath;
         const bgProblem = await ProblemsManager.getFullProblem(activePath);
         if (!bgProblem || !bgProblem.problem) {
             result.content.push(
@@ -150,6 +150,7 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
                 stdin: { useFile: false, data: stdin ?? '' },
                 answer: { useFile: false, data: answer ?? '' },
                 isExpand: true,
+                isDisabled: false,
             } satisfies TC;
 
             problem.tcs[newId] = tc;
