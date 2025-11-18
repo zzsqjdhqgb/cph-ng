@@ -11,6 +11,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: let llm decide active file path
 - **fix**: add tcOrder to required properties in problem schema
 - **fix**: update error message to prompt user
+- **feat**: use inline copy message
 
 ## 0.4.6
 

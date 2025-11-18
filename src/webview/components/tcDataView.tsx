@@ -20,9 +20,8 @@ import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import ClearIcon from '@mui/icons-material/Clear';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DifferenceIcon from '@mui/icons-material/Difference';
+import DoneIcon from '@mui/icons-material/Done';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
 import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -117,7 +116,7 @@ const TcDataView = ({
     tabIndex,
 }: CodeMirrorSectionProps) => {
     const { t } = useTranslation();
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -130,10 +129,6 @@ const TcDataView = ({
             textareaRef.current.focus();
         }
     }, [autoFocus]);
-
-    const handleCloseSnackbar = () => {
-        setSnackbarOpen(false);
-    };
 
     const commonStyle: CSSProperties = {
         fontFamily,
@@ -218,13 +213,20 @@ const TcDataView = ({
                             />
                         )}
                         <CphButton
-                            name={t('tcDataView.copy')}
-                            icon={ContentCopyIcon}
+                            name={
+                                copied
+                                    ? t('tcDataView.copied')
+                                    : t('tcDataView.copy')
+                            }
+                            icon={copied ? DoneIcon : ContentCopyIcon}
                             onClick={() => {
                                 navigator.clipboard
                                     .writeText(internalValue.data)
                                     .then(() => {
-                                        setSnackbarOpen(true);
+                                        setCopied(true);
+                                        setTimeout(() => {
+                                            setCopied(false);
+                                        }, 2000);
                                     })
                                     .catch((e) => {
                                         console.error(
@@ -268,21 +270,6 @@ const TcDataView = ({
                         }
                     />
                 ))}
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={'success'}
-                    variant={'filled'}
-                    sx={{ width: '100%' }}
-                >
-                    {t('tcDataView.snackbar.message')}
-                </Alert>
-            </Snackbar>
         </CphFlex>
     );
 };
