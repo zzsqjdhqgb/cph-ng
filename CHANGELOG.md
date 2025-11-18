@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.7
 
 - **fix**: set problem source path when loading a problem
 - **fix**: create and import problem using keyboard shortcut
