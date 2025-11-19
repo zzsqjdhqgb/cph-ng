@@ -59,6 +59,8 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
                 />
             </CphFlex>
             <Dialog
+                fullWidth
+                maxWidth={false}
                 open={open}
                 onClose={() => {
                     setOpen(false);

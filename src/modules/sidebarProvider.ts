@@ -172,6 +172,8 @@ export default class SidebarProvider implements WebviewViewProvider {
                     );
                 } else if (msg.type === 'debugTc') {
                     await ProblemsManager.debugTc(msg);
+                } else if (msg.type === 'dragDrop') {
+                    await ProblemsManager.dragDrop(msg);
                 }
             } catch (e) {
                 Io.error(

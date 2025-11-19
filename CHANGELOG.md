@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: drag and drop to webview
+
 ## 0.4.7
 
 - **fix**: set problem source path when loading a problem

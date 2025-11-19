@@ -15,18 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
-import FileOpenIcon from '@mui/icons-material/FileOpen';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
+import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import InputAdornment from '@mui/material/InputAdornment';
+import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import React, { useEffect, useState } from 'react';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
 import { basename, msg } from '../utils';
@@ -57,10 +60,11 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
     const { t } = useTranslation();
     const [isHoveringTitle, setHoveringTitle] = useState(false);
     const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+    const [tabValue, setTabValue] = useState('basic');
     const [editedTitle, setEditedTitle] = useState('');
     const [editedUrl, setEditedUrl] = useState('');
-    const [editedTimeLimit, setEditedTimeLimit] = useState(0);
-    const [editedMemoryLimit, setEditedMemoryLimit] = useState(0);
+    const [editedTimeLimit, setEditedTimeLimit] = useState('');
+    const [editedMemoryLimit, setEditedMemoryLimit] = useState('');
     const [editedCompiler, setEditedCompiler] = useState('');
     const [editedCompilerArgs, setEditedCompilerArgs] = useState('');
     const [editedRunner, setEditedRunner] = useState('');
@@ -70,8 +74,8 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
     useEffect(() => {
         setEditedTitle(problem.name);
         setEditedUrl(problem.url || '');
-        setEditedTimeLimit(problem.timeLimit);
-        setEditedMemoryLimit(problem.memoryLimit);
+        setEditedTimeLimit(problem.timeLimit.toString());
+        setEditedMemoryLimit(problem.memoryLimit.toString());
         setEditedCompiler(problem.compilationSettings?.compiler || '');
         setEditedCompilerArgs(problem.compilationSettings?.compilerArgs || '');
         setEditedRunner(problem.compilationSettings?.runner || '');
@@ -113,14 +117,14 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
             type: 'editProblemDetails',
             title: editedTitle,
             url: editedUrl,
-            timeLimit: editedTimeLimit,
-            memoryLimit: editedMemoryLimit,
+            timeLimit: parseInt(editedTimeLimit),
+            memoryLimit: parseInt(editedMemoryLimit),
             compilationSettings,
         });
     };
 
     return (
-        <Container>
+        <>
             <CphFlex
                 onMouseEnter={() => setHoveringTitle(true)}
                 onMouseLeave={() => setHoveringTitle(false)}
@@ -234,185 +238,224 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 )}
             </CphFlex>
             <Dialog
+                fullScreen
                 open={isEditDialogOpen}
                 onClose={handleEditDialogClose}
             >
                 <DialogTitle>{t('problemTitle.dialog.title')}</DialogTitle>
                 <DialogContent>
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.title')}
-                        value={editedTitle}
-                        onChange={(e) => setEditedTitle(e.target.value)}
-                        fullWidth
-                        autoFocus
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.url')}
-                        value={editedUrl}
-                        onChange={(e) => setEditedUrl(e.target.value)}
-                        fullWidth
-                        type={'url'}
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.time')}
-                        value={editedTimeLimit}
-                        onChange={(e) =>
-                            (!e.target.value || parseInt(e.target.value)) &&
-                            setEditedTimeLimit(
-                                Math.min(parseInt(e.target.value), 1000 * 60),
-                            )
-                        }
-                        fullWidth
-                        type={'number'}
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.memory')}
-                        value={editedMemoryLimit}
-                        onChange={(e) =>
-                            (!e.target.value || parseInt(e.target.value)) &&
-                            setEditedMemoryLimit(
-                                Math.min(parseInt(e.target.value), 1024 * 16),
-                            )
-                        }
-                        fullWidth
-                        type={'number'}
-                    />
-                    <Typography
-                        variant={'subtitle1'}
-                        marginTop={2}
-                    >
-                        {t('problemTitle.dialog.field.compilationSettings')}
-                    </Typography>
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.compiler')}
-                        value={editedCompiler}
-                        onChange={(e) => setEditedCompiler(e.target.value)}
-                        fullWidth
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.compilerArgs')}
-                        value={editedCompilerArgs}
-                        onChange={(e) => setEditedCompilerArgs(e.target.value)}
-                        fullWidth
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.runner')}
-                        value={editedRunner}
-                        onChange={(e) => setEditedRunner(e.target.value)}
-                        fullWidth
-                    />
-                    <TextField
-                        variant={'outlined'}
-                        margin={'normal'}
-                        label={t('problemTitle.dialog.field.runnerArgs')}
-                        value={editedRunnerArgs}
-                        onChange={(e) => setEditedRunnerArgs(e.target.value)}
-                        fullWidth
-                    />
-                    <CphFlex>
-                        <Typography>
-                            {t('problemTitle.dialog.field.specialJudge')}
-                        </Typography>
-                        {problem.checker ? (
-                            <>
-                                <CphLink
-                                    name={problem.checker.path}
-                                    onClick={() => {
-                                        msg({
-                                            type: 'openFile',
-                                            path: problem.checker!.path,
-                                        });
-                                    }}
-                                >
-                                    {basename(problem.checker.path)}
-                                </CphLink>
-                                <CphButton
-                                    icon={CloseIcon}
-                                    onClick={() => {
-                                        msg({
-                                            type: 'removeSrcFile',
-                                            fileType: 'checker',
-                                        });
-                                    }}
-                                    name={t(
-                                        'problemTitle.dialog.button.removeChecker',
-                                    )}
+                    <TabContext value={tabValue}>
+                        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <TabList
+                                variant='scrollable'
+                                scrollButtons='auto'
+                                onChange={(
+                                    _event: SyntheticEvent,
+                                    value: string,
+                                ) => setTabValue(value)}
+                            >
+                                <Tab
+                                    label={t('problemTitle.dialog.tab.basic')}
+                                    value='basic'
                                 />
-                            </>
-                        ) : (
-                            <CphButton
-                                icon={FileOpenIcon}
-                                onClick={() => {
-                                    msg({
-                                        type: 'chooseSrcFile',
-                                        fileType: 'checker',
-                                    });
-                                }}
-                                name={t(
-                                    'problemTitle.dialog.button.chooseChecker',
-                                )}
-                            />
-                        )}
-                    </CphFlex>
-                    <CphFlex>
-                        <Typography>
-                            {t('problemTitle.dialog.field.interact')}
-                        </Typography>
-                        {problem.interactor ? (
-                            <>
-                                <CphLink
-                                    name={problem.interactor.path}
-                                    onClick={() => {
-                                        msg({
-                                            type: 'openFile',
-                                            path: problem.interactor!.path,
-                                        });
-                                    }}
-                                >
-                                    {basename(problem.interactor.path)}
-                                </CphLink>
-                                <CphButton
-                                    icon={CloseIcon}
-                                    onClick={() => {
-                                        msg({
-                                            type: 'removeSrcFile',
-                                            fileType: 'interactor',
-                                        });
-                                    }}
-                                    name={t(
-                                        'problemTitle.dialog.button.removeInteractor',
+                                <Tab
+                                    label={t(
+                                        'problemTitle.dialog.tab.environment',
                                     )}
+                                    value='environment'
                                 />
-                            </>
-                        ) : (
-                            <CphButton
-                                icon={FileOpenIcon}
-                                onClick={() => {
-                                    msg({
-                                        type: 'chooseSrcFile',
-                                        fileType: 'interactor',
-                                    });
-                                }}
-                                name={t(
-                                    'problemTitle.dialog.button.chooseInteractor',
-                                )}
+                                <Tab
+                                    label={t(
+                                        'problemTitle.dialog.tab.advanced',
+                                    )}
+                                    value='advanced'
+                                />
+                            </TabList>
+                        </Box>
+                        <TabPanel
+                            value='basic'
+                            sx={{ padding: '0' }}
+                        >
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.title')}
+                                value={editedTitle}
+                                onChange={(e) => setEditedTitle(e.target.value)}
+                                fullWidth
+                                autoFocus
                             />
-                        )}
-                    </CphFlex>
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.url')}
+                                value={editedUrl}
+                                onChange={(e) => setEditedUrl(e.target.value)}
+                                fullWidth
+                            />
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.time')}
+                                value={editedTimeLimit}
+                                onChange={(e) =>
+                                    setEditedTimeLimit(e.target.value)
+                                }
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                ms
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
+                            />
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.memory')}
+                                value={editedMemoryLimit}
+                                onChange={(e) =>
+                                    setEditedMemoryLimit(e.target.value)
+                                }
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                MB
+                                            </InputAdornment>
+                                        ),
+                                    },
+                                }}
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            value='environment'
+                            sx={{ padding: '0' }}
+                        >
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.compiler')}
+                                value={editedCompiler}
+                                onChange={(e) =>
+                                    setEditedCompiler(e.target.value)
+                                }
+                                fullWidth
+                            />
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t(
+                                    'problemTitle.dialog.field.compilerArgs',
+                                )}
+                                value={editedCompilerArgs}
+                                onChange={(e) =>
+                                    setEditedCompilerArgs(e.target.value)
+                                }
+                                fullWidth
+                            />
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t('problemTitle.dialog.field.runner')}
+                                value={editedRunner}
+                                onChange={(e) =>
+                                    setEditedRunner(e.target.value)
+                                }
+                                fullWidth
+                            />
+                            <TextField
+                                variant={'outlined'}
+                                margin={'normal'}
+                                label={t(
+                                    'problemTitle.dialog.field.runnerArgs',
+                                )}
+                                value={editedRunnerArgs}
+                                onChange={(e) =>
+                                    setEditedRunnerArgs(e.target.value)
+                                }
+                                fullWidth
+                            />
+                        </TabPanel>
+                        <TabPanel
+                            value='advanced'
+                            sx={{ padding: '0' }}
+                        >
+                            <CphFlex
+                                flexWrap={'wrap'}
+                                py={2}
+                            >
+                                {problem.checker ? (
+                                    <Chip
+                                        label={t(
+                                            'problemTitle.dialog.field.specialJudge',
+                                        )}
+                                        variant='outlined'
+                                        onClick={() => {
+                                            msg({
+                                                type: 'openFile',
+                                                path: problem.checker!.path,
+                                            });
+                                        }}
+                                        onDelete={() => {
+                                            msg({
+                                                type: 'removeSrcFile',
+                                                fileType: 'checker',
+                                            });
+                                        }}
+                                    />
+                                ) : (
+                                    <Chip
+                                        label={t(
+                                            'problemTitle.dialog.field.specialJudge',
+                                        )}
+                                        onClick={() => {
+                                            msg({
+                                                type: 'chooseSrcFile',
+                                                fileType: 'checker',
+                                            });
+                                        }}
+                                    />
+                                )}
+                                {problem.interactor ? (
+                                    <Chip
+                                        label={t(
+                                            'problemTitle.dialog.field.interact',
+                                        )}
+                                        variant='outlined'
+                                        onClick={() => {
+                                            msg({
+                                                type: 'openFile',
+                                                path: problem.interactor!.path,
+                                            });
+                                        }}
+                                        onDelete={() => {
+                                            msg({
+                                                type: 'removeSrcFile',
+                                                fileType: 'interactor',
+                                            });
+                                        }}
+                                    />
+                                ) : (
+                                    <Chip
+                                        label={t(
+                                            'problemTitle.dialog.field.interact',
+                                        )}
+                                        onClick={() => {
+                                            msg({
+                                                type: 'chooseSrcFile',
+                                                fileType: 'interactor',
+                                            });
+                                        }}
+                                    />
+                                )}
+                            </CphFlex>
+                        </TabPanel>
+                    </TabContext>
                 </DialogContent>
                 <DialogActions>
                     <Button
@@ -430,7 +473,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Container>
+        </>
     );
 };
 

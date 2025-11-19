@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -39,24 +38,20 @@ const BgProblemView = ({ bgProblems }: BgProblemViewProps) => {
 
     return (
         <>
-            <Container
+            <CphText
                 sx={{ cursor: 'pointer' }}
+                fontSize={'smaller'}
                 onClick={() => {
                     setOpen(true);
                 }}
             >
-                <CphText
-                    sx={{ cursor: 'pointer' }}
-                    fontSize={'smaller'}
-                >
-                    {t('bgProblemView.message', {
-                        cnt: bgProblems.length,
-                    })}
-                </CphText>
-            </Container>
+                {t('bgProblemView.message', {
+                    cnt: bgProblems.length,
+                })}
+            </CphText>
             <Dialog
                 fullWidth
-                maxWidth='lg'
+                maxWidth={false}
                 open={open}
                 onClose={() => {
                     setOpen(false);

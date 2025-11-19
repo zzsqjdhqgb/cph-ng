@@ -28,7 +28,6 @@ import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
 
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -64,144 +63,143 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
     }, [clickTime]);
     return (
         <>
-            <Container>
-                <CphFlex
-                    smallGap
+            <CphFlex
+                smallGap
+                onClick={() => {
+                    setClickTime((times) => {
+                        const now = Date.now();
+                        const newTimes = [...times, now];
+                        if (newTimes.length > 10) newTimes.shift();
+                        return newTimes;
+                    });
+                }}
+            >
+                <CphButton
+                    larger={true}
+                    name={t('problemActions.addTc')}
+                    icon={AddIcon}
                     onClick={() => {
-                        setClickTime((times) => {
-                            const now = Date.now();
-                            const newTimes = [...times, now];
-                            if (newTimes.length > 10) newTimes.shift();
-                            return newTimes;
-                        });
+                        msg({ type: 'addTc' });
                     }}
-                >
-                    <CphButton
-                        larger={true}
-                        name={t('problemActions.addTc')}
-                        icon={AddIcon}
-                        onClick={() => {
-                            msg({ type: 'addTc' });
-                        }}
-                    />
-                    <CphButton
-                        larger={true}
-                        name={t('problemActions.loadTcs')}
-                        icon={FileCopyIcon}
-                        onClick={() => {
-                            msg({ type: 'loadTcs' });
-                        }}
-                    />
+                />
+                <CphButton
+                    larger={true}
+                    name={t('problemActions.loadTcs')}
+                    icon={FileCopyIcon}
+                    onClick={() => {
+                        msg({ type: 'loadTcs' });
+                    }}
+                />
 
-                    {hasRunning ? (
+                {hasRunning ? (
+                    <CphButton
+                        larger={true}
+                        name={t('problemActions.stopTcs')}
+                        icon={PlaylistRemoveIcon}
+                        color={'warning'}
+                        onClick={(e) => {
+                            msg({
+                                type: 'stopTcs',
+                                onlyOne: e.ctrlKey,
+                            });
+                        }}
+                    />
+                ) : (
+                    <CphMenu
+                        menu={{
+                            [t('problemActions.runTcs.menu.forceCompile')]:
+                                () => {
+                                    msg({
+                                        type: 'runTcs',
+                                        compile: true,
+                                    });
+                                },
+                            [t('problemActions.runTcs.menu.skipCompile')]:
+                                () => {
+                                    msg({
+                                        type: 'runTcs',
+                                        compile: false,
+                                    });
+                                },
+                        }}
+                    >
                         <CphButton
                             larger={true}
-                            name={t('problemActions.stopTcs')}
-                            icon={PlaylistRemoveIcon}
-                            color={'warning'}
+                            name={t('problemActions.runTcs')}
+                            icon={PlaylistPlayIcon}
+                            color={'success'}
                             onClick={(e) => {
                                 msg({
-                                    type: 'stopTcs',
-                                    onlyOne: e.ctrlKey,
+                                    type: 'runTcs',
+                                    compile: getCompile(e),
                                 });
                             }}
                         />
-                    ) : (
-                        <CphMenu
-                            menu={{
-                                [t('problemActions.runTcs.menu.forceCompile')]:
-                                    () => {
-                                        msg({
-                                            type: 'runTcs',
-                                            compile: true,
-                                        });
-                                    },
-                                [t('problemActions.runTcs.menu.skipCompile')]:
-                                    () => {
-                                        msg({
-                                            type: 'runTcs',
-                                            compile: false,
-                                        });
-                                    },
-                            }}
-                        >
-                            <CphButton
-                                larger={true}
-                                name={t('problemActions.runTcs')}
-                                icon={PlaylistPlayIcon}
-                                color={'success'}
-                                onClick={(e) => {
-                                    msg({
-                                        type: 'runTcs',
-                                        compile: getCompile(e),
-                                    });
-                                }}
-                            />
-                        </CphMenu>
-                    )}
-                    <CphButton
-                        larger={true}
-                        name={t('problemActions.bfCompare')}
-                        icon={CompareArrowsIcon}
-                        onClick={() => setBfCompareDialogOpen(true)}
-                        sx={
-                            problem.bfCompare?.running
-                                ? {
-                                      'animation': 'pulse 1s infinite',
-                                      '@keyframes pulse': {
-                                          '0%': {
-                                              opacity: 1,
-                                          },
-                                          '50%': {
-                                              opacity: 0.2,
-                                          },
-                                          '100%': {
-                                              opacity: 1,
-                                          },
+                    </CphMenu>
+                )}
+                <CphButton
+                    larger={true}
+                    name={t('problemActions.bfCompare')}
+                    icon={CompareArrowsIcon}
+                    onClick={() => setBfCompareDialogOpen(true)}
+                    sx={
+                        problem.bfCompare?.running
+                            ? {
+                                  'animation': 'pulse 1s infinite',
+                                  '@keyframes pulse': {
+                                      '0%': {
+                                          opacity: 1,
                                       },
-                                  }
-                                : undefined
+                                      '50%': {
+                                          opacity: 0.2,
+                                      },
+                                      '100%': {
+                                          opacity: 1,
+                                      },
+                                  },
+                              }
+                            : undefined
+                    }
+                />
+                {(() => {
+                    if (!problem.url) return null;
+                    try {
+                        if (
+                            new URL(problem.url).hostname === 'codeforces.com'
+                        ) {
+                            return (
+                                <CphButton
+                                    larger={true}
+                                    name={t(
+                                        'problemActions.submitToCodeforces',
+                                    )}
+                                    icon={BackupIcon}
+                                    color={'success'}
+                                    onClick={() => {
+                                        msg({
+                                            type: 'submitToCodeforces',
+                                        });
+                                    }}
+                                />
+                            );
                         }
-                    />
-                    {(() => {
-                        if (!problem.url) return null;
-                        try {
-                            if (
-                                new URL(problem.url).hostname ===
-                                'codeforces.com'
-                            ) {
-                                return (
-                                    <CphButton
-                                        larger={true}
-                                        name={t(
-                                            'problemActions.submitToCodeforces',
-                                        )}
-                                        icon={BackupIcon}
-                                        color={'success'}
-                                        onClick={() => {
-                                            msg({
-                                                type: 'submitToCodeforces',
-                                            });
-                                        }}
-                                    />
-                                );
-                            }
-                        } catch {}
-                        return null;
-                    })()}
-                    <CphButton
-                        larger={true}
-                        name={t('problemActions.deleteProblem')}
-                        icon={DeleteForeverIcon}
-                        color={'error'}
-                        onClick={() => setDelDialogOpen(true)}
-                    />
-                    {window.easterEgg && (
-                        <div title={t('problemActions.easterEgg')}>🐰</div>
-                    )}
-                </CphFlex>
-            </Container>
+                    } catch {}
+                    return null;
+                })()}
+                <CphButton
+                    larger={true}
+                    name={t('problemActions.deleteProblem')}
+                    icon={DeleteForeverIcon}
+                    color={'error'}
+                    onClick={() => setDelDialogOpen(true)}
+                />
+                {window.easterEgg && (
+                    <div title={t('problemActions.easterEgg')}>🐰</div>
+                )}
+            </CphFlex>
             <Dialog
+                fullWidth
+                maxWidth={false}
                 open={isDelDialogOpen}
                 onClose={() => setDelDialogOpen(false)}
             >
@@ -234,7 +232,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
             </Dialog>
             <Dialog
                 fullWidth
-                maxWidth='lg'
+                maxWidth={false}
                 open={isBfCompareDialogOpen}
                 onClose={() => setBfCompareDialogOpen(false)}
             >

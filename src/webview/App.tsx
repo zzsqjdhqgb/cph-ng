@@ -29,6 +29,7 @@ import CphFlex from './components/base/cphFlex';
 import ErrorBoundary from './components/base/errorBoundary';
 import BgProblemView from './components/bgProblemView';
 import CreateProblemView from './components/createProblemView';
+import DragOverlay from './components/dragOverlay';
 import InitView from './components/initView';
 import ProblemView from './components/problemView';
 import langEn from './l10n/en.json';
@@ -70,9 +71,21 @@ const App = () => {
         palette: {
             mode: isDarkMode ? 'dark' : 'light',
         },
+        breakpoints: {
+            values: {
+                xs: 0,
+                sm: 170,
+                md: 260,
+                lg: 360,
+                xl: 480,
+            },
+        },
     });
     return (
         <ThemeProvider theme={theme}>
+            <ErrorBoundary>
+                <DragOverlay />
+            </ErrorBoundary>
             <ErrorBoundary>
                 <CphFlex
                     column
@@ -81,6 +94,7 @@ const App = () => {
                     sx={{
                         boxSizing: 'border-box',
                     }}
+                    padding={1}
                 >
                     {problemData ? (
                         <>

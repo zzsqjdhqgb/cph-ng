@@ -72,6 +72,7 @@ export default class CphCapable {
                 stdin: { useFile: false, data: test.input },
                 answer: { useFile: false, data: test.output },
                 isExpand: false,
+                isDisabled: false,
             };
             problem.tcOrder.push(id);
         }

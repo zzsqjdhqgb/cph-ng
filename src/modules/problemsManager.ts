@@ -22,6 +22,7 @@ import { commands, debug, l10n, Uri, window, workspace } from 'vscode';
 import { Compiler } from '../core/compiler';
 import Langs from '../core/langs/langs';
 import { Runner } from '../core/runner';
+import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
@@ -31,13 +32,13 @@ import { exists } from '../utils/process';
 import { assignResult } from '../utils/result';
 import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
 import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
-import { chooseSrcFile, chooseTcFile, getTcs } from '../utils/ui';
 import * as msgs from '../webview/msgs';
 import Companion from './companion';
 import CphCapable from './cphCapable';
 import ExtensionManager from './extensionManager';
 import FileSystemProvider, { generateTcUri } from './fileSystemProvider';
 import Settings from './settings';
+import TcFactory from './tcFactory';
 
 interface FullProblem {
     problem: Problem;
@@ -186,16 +187,43 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const tcs = await getTcs(fullProblem.problem.src.path);
-        if (tcs.length > 0) {
-            if (Settings.problem.clearBeforeLoad) {
-                fullProblem.problem.tcOrder = [];
+
+        const option = (
+            await window.showQuickPick(
+                [
+                    {
+                        label: l10n.t('Load from a zip file'),
+                        value: 'zip',
+                    },
+                    {
+                        label: l10n.t('Load from a folder'),
+                        value: 'folder',
+                    },
+                ],
+                { canPickMany: false },
+            )
+        )?.value;
+        if (!option) {
+            return undefined;
+        }
+
+        if (option === 'zip') {
+            const zipFile = await window.showOpenDialog({
+                title: l10n.t('Choose a zip file containing test cases'),
+                filters: { 'Zip files': ['zip'], 'All files': ['*'] },
+            });
+            if (!zipFile) {
+                return undefined;
             }
-            for (const tc of tcs) {
-                const uuid = randomUUID();
-                fullProblem.problem.tcs[uuid] = tc;
-                fullProblem.problem.tcOrder.push(uuid);
+            await TcFactory.fromZip(fullProblem.problem, zipFile[0].fsPath);
+        } else if (option === 'folder') {
+            const folderUri = await FolderChooser.chooseFolder(
+                l10n.t('Choose a folder containing test cases'),
+            );
+            if (!folderUri) {
+                return undefined;
             }
+            await TcFactory.fromFolder(fullProblem.problem, folderUri.fsPath);
         }
         await this.dataRefresh();
     }
@@ -417,19 +445,27 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const files = await chooseTcFile(msg.label);
-        if (files.stdin) {
-            fullProblem.problem.tcs[msg.id].stdin = {
-                useFile: true,
-                path: files.stdin,
-            };
+        const isInput = msg.label === 'stdin';
+        const mainExt = isInput ? ['in'] : ['ans', 'out'];
+        const fileUri = await window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            title: l10n.t('Choose {type} file', {
+                type: isInput ? l10n.t('stdin') : l10n.t('answer'),
+            }),
+            filters: {
+                [l10n.t('Text files')]: mainExt,
+                [l10n.t('All files')]: ['*'],
+            },
+        });
+        if (!fileUri || !fileUri.length) {
+            return;
         }
-        if (files.answer) {
-            fullProblem.problem.tcs[msg.id].answer = {
-                useFile: true,
-                path: files.answer,
-            };
-        }
+        fullProblem.problem.tcs[msg.id] = {
+            ...fullProblem.problem.tcs[msg.id],
+            ...(await TcFactory.fromFile(fileUri[0].fsPath, isInput)),
+        };
         await this.dataRefresh();
     }
     public static async compareTc(msg: msgs.CompareTcMsg): Promise<void> {
@@ -527,10 +563,24 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const path = await chooseSrcFile(msg.fileType);
-        if (!path) {
+
+        const checkerFileUri = await window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            title: l10n.t('Select {fileType} File', {
+                fileType: {
+                    checker: l10n.t('Checker'),
+                    interactor: l10n.t('Interactor'),
+                    generator: l10n.t('Generator'),
+                    bruteForce: l10n.t('Brute Force'),
+                }[msg.fileType],
+            }),
+        });
+        if (!checkerFileUri) {
             return;
         }
+        const path = checkerFileUri[0].fsPath;
         if (msg.fileType === 'checker') {
             fullProblem.problem.checker = { path };
         } else if (msg.fileType === 'interactor') {
@@ -745,9 +795,9 @@ export default class ProblemsManager {
                             };
                         }
                     }
-                    const id = randomUUID();
-                    fullProblem.problem.tcs[id] = tempTc;
-                    fullProblem.problem.tcOrder.push(id);
+                    const uuid = randomUUID();
+                    fullProblem.problem.tcs[uuid] = tempTc;
+                    fullProblem.problem.tcOrder.push(uuid);
                     bfCompare.msg = l10n.t(
                         'Found a difference in #{cnt} run.',
                         { cnt },
@@ -885,5 +935,33 @@ export default class ProblemsManager {
                 }),
             );
         }
+    }
+    public static async dragDrop(msg: msgs.DragDropMsg): Promise<void> {
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
+            return;
+        }
+        for (const item in msg.items) {
+            if (msg.items[item] === 'folder') {
+                await TcFactory.applyTcs(
+                    fullProblem.problem,
+                    await TcFactory.fromFolder(fullProblem.problem, item),
+                );
+                break;
+            }
+            if (extname(item) === '.zip') {
+                await TcFactory.applyTcs(
+                    fullProblem.problem,
+                    await TcFactory.fromZip(fullProblem.problem, item),
+                );
+                break;
+            }
+            if (extname(item) === '.in') {
+                const uuid = randomUUID();
+                fullProblem.problem.tcs[uuid] = await TcFactory.fromFile(item);
+                fullProblem.problem.tcOrder.push(uuid);
+            }
+        }
+        await this.dataRefresh();
     }
 }

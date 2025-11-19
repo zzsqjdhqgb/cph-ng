@@ -16,7 +16,6 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
@@ -111,83 +110,74 @@ const TcsView = ({ problem }: TcsViewProps) => {
     const displayOrder = getDisplayOrder();
 
     return (
-        <Container>
-            <CphFlex column>
-                {problem.tcOrder.length ? (
-                    <>
-                        {partyUri &&
-                        problem.tcOrder.every(
-                            (id) =>
-                                problem.tcs[id]?.result?.verdict.name === 'AC',
-                        ) ? (
-                            <AcCongrats />
-                        ) : null}
-                        <Box width={'100%'}>
-                            {displayOrder.map((originalIdx, displayIdx) => {
-                                const id = problem.tcOrder[originalIdx];
-                                const tc = problem.tcs[id];
-                                if (
-                                    tc.result?.verdict &&
-                                    hiddenStatuses.includes(
-                                        tc.result?.verdict.name,
-                                    )
-                                ) {
-                                    return null;
-                                }
+        <CphFlex column>
+            {problem.tcOrder.length ? (
+                <>
+                    {partyUri &&
+                    problem.tcOrder.every(
+                        (id) => problem.tcs[id]?.result?.verdict.name === 'AC',
+                    ) ? (
+                        <AcCongrats />
+                    ) : null}
+                    <Box width={'100%'}>
+                        {displayOrder.map((originalIdx, displayIdx) => {
+                            const id = problem.tcOrder[originalIdx];
+                            const tc = problem.tcs[id];
+                            if (
+                                tc.result?.verdict &&
+                                hiddenStatuses.includes(tc.result?.verdict.name)
+                            ) {
+                                return null;
+                            }
 
-                                return (
-                                    <Box
-                                        key={id}
-                                        onDragOver={(e) =>
-                                            handleDragOver(e, displayIdx)
-                                        }
-                                    >
-                                        <ErrorBoundary>
-                                            <TcView
-                                                tc={tc}
-                                                idx={originalIdx}
-                                                id={id}
-                                                onDragStart={(e) =>
-                                                    handleDragStart(
-                                                        originalIdx,
-                                                        e,
-                                                    )
-                                                }
-                                                onDragEnd={handleDragEnd}
-                                                isDragging={
-                                                    draggedIdx === originalIdx
-                                                }
-                                            />
-                                        </ErrorBoundary>
-                                    </Box>
-                                );
-                            })}
-                            <Box
-                                onClick={() => msg({ type: 'addTc' })}
-                                sx={{
-                                    'minHeight': '40px',
-                                    'cursor': 'pointer',
-                                    'display': 'flex',
-                                    'alignItems': 'center',
-                                    'justifyContent': 'center',
-                                    'opacity': 0.5,
-                                    '&:hover': {
-                                        opacity: 1,
-                                        backgroundColor:
-                                            'rgba(127, 127, 127, 0.1)',
-                                    },
-                                    'transition': 'all 0.2s',
-                                }}
-                            >
-                                {t('tcsView.addTcHint')}
-                            </Box>
+                            return (
+                                <Box
+                                    key={id}
+                                    onDragOver={(e) =>
+                                        handleDragOver(e, displayIdx)
+                                    }
+                                >
+                                    <ErrorBoundary>
+                                        <TcView
+                                            tc={tc}
+                                            idx={originalIdx}
+                                            id={id}
+                                            onDragStart={(e) =>
+                                                handleDragStart(originalIdx, e)
+                                            }
+                                            onDragEnd={handleDragEnd}
+                                            isDragging={
+                                                draggedIdx === originalIdx
+                                            }
+                                        />
+                                    </ErrorBoundary>
+                                </Box>
+                            );
+                        })}
+                        <Box
+                            onClick={() => msg({ type: 'addTc' })}
+                            sx={{
+                                'minHeight': '40px',
+                                'cursor': 'pointer',
+                                'display': 'flex',
+                                'alignItems': 'center',
+                                'justifyContent': 'center',
+                                'opacity': 0.5,
+                                '&:hover': {
+                                    opacity: 1,
+                                    backgroundColor: 'rgba(127, 127, 127, 0.1)',
+                                },
+                                'transition': 'all 0.2s',
+                            }}
+                        >
+                            {t('tcsView.addTcHint')}
                         </Box>
-                    </>
-                ) : (
-                    <NoTcs />
-                )}
-            </CphFlex>
-        </Container>
+                    </Box>
+                </>
+            ) : (
+                <NoTcs />
+            )}
+        </CphFlex>
     );
 };
 

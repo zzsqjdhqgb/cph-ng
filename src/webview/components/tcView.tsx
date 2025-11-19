@@ -161,11 +161,14 @@ const TcView = ({
                     <CphFlex smallGap>
                         <CphFlex flex={1}>
                             <CphText fontWeight={'bold'}>#{idx + 1}</CphText>
-                            <Tooltip title={tc.result?.verdict.fullName}>
+                            <Tooltip
+                                disableInteractive
+                                title={tc.result?.verdict.fullName}
+                            >
                                 <CphText>{tc.result?.verdict.name}</CphText>
                             </Tooltip>
                         </CphFlex>
-                        {!!tc.result?.memory && (
+                        {tc.result?.memory !== undefined && (
                             <Chip
                                 label={t('tcView.memory', {
                                     memory: tc.result.memory.toFixed(1),
@@ -177,7 +180,7 @@ const TcView = ({
                                 }}
                             />
                         )}
-                        {!!tc.result?.time && (
+                        {tc.result?.time !== undefined && (
                             <Chip
                                 label={t('tcView.time', {
                                     time: tc.result.time.toFixed(1),

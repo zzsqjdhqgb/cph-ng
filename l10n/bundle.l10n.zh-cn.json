@@ -106,7 +106,7 @@
     "No problem files found in the selected folder.": "在所选文件夹中未找到题目文件。",
     "No test cases are available to display.": "没有可显示的测试用例。",
     "No test cases are currently defined for this problem.": "当前题目尚未定义测试用例。",
-    "No test cases found in the zip file.": "在 ZIP 压缩文件中未找到测试用例。",
+    "No test cases found.": "未找到测试用例。",
     "No workspace folder is open.": "未打开任何工作区文件夹。",
     "Not run yet": "尚未运行",
     "Number of test cases: {cnt}": "测试用例数量：{cnt}",

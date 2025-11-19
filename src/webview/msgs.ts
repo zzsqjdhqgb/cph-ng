@@ -146,6 +146,10 @@ export interface DebugTcMsg extends BaseMsg {
     type: 'debugTc';
     id: UUID;
 }
+export interface DragDropMsg extends BaseMsg {
+    type: 'dragDrop';
+    items: Record<string, 'folder' | 'file'>;
+}
 export type WebviewMsg =
     | CreateProblemMsg
     | ImportProblemMsg
@@ -174,4 +178,5 @@ export type WebviewMsg =
     | SubmitToCodeforcesMsg
     | StartChatMsg
     | OpenSettingsMsg
-    | DebugTcMsg;
+    | DebugTcMsg
+    | DragDropMsg;
