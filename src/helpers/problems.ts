@@ -16,13 +16,13 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { mkdir, readFile, writeFile } from 'fs/promises';
-import { basename, dirname, extname, relative } from 'path';
-import { l10n, Uri, workspace } from 'vscode';
+import { basename, dirname, extname } from 'path';
+import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { version } from '../../package.json';
 import Settings from '../modules/settings';
 import { migration, OldProblem } from '../utils/migration';
-import { renderTemplate } from '../utils/strTemplate';
+import { renderPathWithFile } from '../utils/strTemplate';
 import { Problem, TCIO } from '../utils/types';
 import Io from './io';
 import Logger from './logger';
@@ -31,24 +31,11 @@ export default class Problems {
     private static logger: Logger = new Logger('problems');
 
     public static async getBinBySrc(srcPath: string): Promise<string | null> {
-        const srcUri = Uri.file(srcPath);
-        const workspaceFolder = workspace.getWorkspaceFolder(srcUri);
-        if (!workspaceFolder) {
-            return null;
-        }
-        const workspacePath = workspaceFolder.uri.fsPath;
-        const dir = renderTemplate(Settings.problem.problemFilePath, [
-            ['workspace', workspacePath],
-            ['dirname', dirname(srcPath)],
-            [
-                'relativeDirname',
-                relative(workspacePath, dirname(srcPath)) || '.',
-            ],
-            ['basename', basename(srcPath)],
-            ['extname', extname(srcPath)],
-            ['basenameNoExt', basename(srcPath, extname(srcPath))],
-        ]);
-        return dir;
+        return renderPathWithFile(
+            Settings.problem.problemFilePath,
+            srcPath,
+            true,
+        );
     }
 
     public static createProblem(srcFile: string): Problem {

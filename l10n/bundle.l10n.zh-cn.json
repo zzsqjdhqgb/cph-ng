@@ -119,6 +119,7 @@
     "Parse data from companion failed: {msg}.": "从伴侣解析数据失败：{msg}。",
     "Parse problem {file} failed: {msg}.": "解析题目 {file} 失败：{msg}。",
     "Partially Correct": "部分正确",
+    "Path uses ${workspace} or ${relativeDirname}, but file is not in a workspace folder.": "路径使用了 ${workspace} 或 ${relativeDirname}，但文件不在工作区文件夹中。",
     "Please choose both generator and brute force files first.": "请先选择生成器和暴力解法文件。",
     "Please select the .cph folder contains the problem files": "请选择包含题目文件的 .cph 文件夹",
     "Presentation Error": "格式错误",

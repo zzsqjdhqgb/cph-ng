@@ -15,19 +15,86 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '../helpers/logger';
+import { readFile } from 'fs/promises';
+import { homedir, tmpdir } from 'os';
+import { basename, dirname, extname, normalize, relative } from 'path';
+import { l10n, Uri, workspace } from 'vscode';
+import Io from '../helpers/io';
+import Settings from '../modules/settings';
+import { Problem } from './types';
 
-const logger = new Logger('strTemplate');
-
-export const renderTemplate = (
-    original: string,
-    replacements: [string, string][],
-) => {
-    logger.trace('renderTemplate', { original, replacements });
+const renderString = (original: string, replacements: [string, string][]) => {
     for (const replacement of replacements) {
         original = original.replaceAll(`\${${replacement[0]}}`, replacement[1]);
-        logger.trace('Applied replacement', { replacement, result: original });
     }
-    logger.trace('Template rendering completed', { result: original });
     return original;
+};
+
+export const renderTemplate = async (problem: Problem) => {
+    const template = await readFile(Settings.problem.templateFile, 'utf-8');
+    return renderString(template, [
+        ['title', problem.name],
+        ['timeLimit', problem.timeLimit.toString()],
+        ['memoryLimit', problem.memoryLimit.toString()],
+        ['url', problem.url || ''],
+    ]);
+};
+export const renderPath = (original: string) => {
+    return normalize(
+        renderString(original, [
+            ['tmp', tmpdir()],
+            ['home', homedir()],
+        ]),
+    );
+};
+export const renderPathWithFile = (
+    original: string,
+    path: string,
+    ignoreError: boolean = false,
+) => {
+    const workspaceFolder = workspace.getWorkspaceFolder(Uri.file(path));
+    const dirnameV = dirname(path);
+    const extnameV = extname(path);
+    const basenameV = basename(path);
+    const basenameNoExt = basename(path, extnameV);
+    if (
+        original.includes('${workspace}') ||
+        original.includes('${relativeDirname}')
+    ) {
+        if (!workspaceFolder) {
+            ignoreError ||
+                Io.error(
+                    l10n.t(
+                        'Path uses ${workspace} or ${relativeDirname}, but file is not in a workspace folder.',
+                    ),
+                );
+            return null;
+        }
+        const workspace = workspaceFolder.uri.fsPath;
+        original = renderString(original, [
+            ['workspace', workspace],
+            ['relativeDirname', relative(workspace, dirnameV) || '.'],
+        ]);
+    }
+    return normalize(
+        renderString(renderPath(original), [
+            ['dirname', dirnameV],
+            ['extname', extnameV],
+            ['basename', basenameV],
+            ['basenameNoExt', basenameNoExt],
+        ]),
+    );
+};
+export const renderUnzipFolder = (srcPath: string, zipPath: string) => {
+    const original = renderPathWithFile(Settings.problem.unzipFolder, srcPath);
+    return (
+        original &&
+        normalize(
+            renderString(original, [
+                ['zipDirname', dirname(zipPath)],
+                ['zipBasename', basename(zipPath)],
+                ['zipBasenameNoExt', basename(zipPath, extname(zipPath))],
+            ]),
+        )
+    );
 };

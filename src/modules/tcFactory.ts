@@ -19,11 +19,11 @@ import AdmZip from 'adm-zip';
 import { randomUUID } from 'crypto';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
-import { basename, dirname, extname, join, relative } from 'path';
-import { l10n, Uri, window, workspace } from 'vscode';
+import { basename, dirname, extname, join } from 'path';
+import { l10n, window } from 'vscode';
 import Io from '../helpers/io';
 import { exists } from '../utils/process';
-import { renderTemplate } from '../utils/strTemplate';
+import { renderUnzipFolder } from '../utils/strTemplate';
 import { Problem, TC, TCIO } from '../utils/types';
 import Settings from './settings';
 
@@ -98,23 +98,10 @@ export default class TcFactory {
     ): Promise<TC[]> {
         const srcPath = problem.src.path;
         const zipData = new AdmZip(zipPath);
-        const srcUri = Uri.file(srcPath);
-        const workspaceFolder = workspace.getWorkspaceFolder(srcUri)!;
-        const workspacePath = workspaceFolder.uri.fsPath;
-        const folderPath = renderTemplate(Settings.problem.unzipFolder, [
-            ['workspace', workspacePath],
-            ['dirname', dirname(srcPath)],
-            [
-                'relativeDirname',
-                relative(workspacePath, dirname(srcPath)) || '.',
-            ],
-            ['basename', basename(srcPath)],
-            ['extname', extname(srcPath)],
-            ['basenameNoExt', basename(srcPath, extname(srcPath))],
-            ['zipDirname', dirname(zipPath)],
-            ['zipBasename', basename(zipPath)],
-            ['zipBasenameNoExt', basename(zipPath, extname(zipPath))],
-        ]);
+        const folderPath = renderUnzipFolder(srcPath, zipPath);
+        if (folderPath === null) {
+            return [];
+        }
         await mkdir(folderPath, { recursive: true });
         zipData.extractAllTo(folderPath, true);
         if (Settings.problem.deleteAfterUnzip) {

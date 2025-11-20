@@ -15,10 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { homedir, tmpdir } from 'os';
 import { ConfigurationTarget, workspace } from 'vscode';
 import Logger from '../helpers/logger';
-import { renderTemplate } from '../utils/strTemplate';
+import { renderPath } from '../utils/strTemplate';
 
 class SettingsSection {
     protected logger: Logger = new Logger('settings');
@@ -106,12 +105,7 @@ class CacheSection extends SettingsSection {
         super('cache');
     }
     get directory(): string {
-        const directory = renderTemplate(this.get('directory') as string, [
-            ['tmp', tmpdir()],
-            ['home', homedir()],
-        ]);
-        this.logger.debug('Cache directory resolved:', directory);
-        return directory;
+        return renderPath(this.get('directory') as string);
     }
     get cleanOnStartup(): boolean {
         return this.get('cleanOnStartup') as boolean;
@@ -231,16 +225,10 @@ class ProblemSection extends SettingsSection {
         return this.get('templateFile') as string;
     }
     get problemFilePath(): string {
-        return renderTemplate(this.get('problemFilePath') as string, [
-            ['tmp', tmpdir()],
-            ['home', homedir()],
-        ]);
+        return this.get('problemFilePath') as string;
     }
     get unzipFolder(): string {
-        return renderTemplate(this.get('unzipFolder') as string, [
-            ['tmp', tmpdir()],
-            ['home', homedir()],
-        ]);
+        return this.get('unzipFolder') as string;
     }
     get deleteAfterUnzip(): boolean {
         return this.get('deleteAfterUnzip') as boolean;

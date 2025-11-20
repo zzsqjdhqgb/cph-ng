@@ -281,17 +281,10 @@ class Companion {
                     templateFile: Settings.problem.templateFile,
                 });
                 try {
-                    const template = await readFile(
-                        Settings.problem.templateFile,
-                        'utf-8',
+                    await writeFile(
+                        problem.src.path,
+                        await renderTemplate(problem),
                     );
-                    const renderedTemplate = renderTemplate(template, [
-                        ['title', problem.name],
-                        ['timeLimit', problem.timeLimit.toString()],
-                        ['memoryLimit', problem.memoryLimit.toString()],
-                        ['url', problem.url || ''],
-                    ]);
-                    await writeFile(problem.src.path, renderedTemplate);
                     Companion.logger.info('Template applied successfully', {
                         srcPath: problem.src.path,
                     });
