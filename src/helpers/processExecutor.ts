@@ -203,7 +203,7 @@ export default class ProcessExecutor {
                     return;
                 }
                 try {
-                    this.logger.info('Reading runner output', launch);
+                    this.logger.debug('Reading runner output', launch);
                     const runInfo = JSON.parse(launch.stdout) as RunnerOutput;
                     this.logger.info('Runner output', runInfo);
                     if (runInfo.error) {
@@ -407,10 +407,12 @@ export default class ProcessExecutor {
         this.logger.debug(`Process ${launch.child.pid} close`, data);
         return {
             codeOrSignal: data,
-            abortReason: launch.acSignal.reason as AbortReason | undefined,
+            stdout: launch.stdout,
+            stderr: launch.stderr,
             // A fallback for time if not set
             time: (launch.endTime ?? Date.now()) - launch.startTime,
-            ...launch,
+            memory: launch.memory,
+            abortReason: launch.acSignal.reason as AbortReason | undefined,
         };
     }
     private static toErrorResult(data: Error | string): ExecuteResult {

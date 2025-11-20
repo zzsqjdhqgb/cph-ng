@@ -60,6 +60,7 @@ export class ProcessResultHandler {
         ignoreExitCode: boolean = false,
     ): ProcessResult {
         this.logger.trace('parse', { result, ignoreExitCode });
+        this.logger.info('Parsing process result', { result, ignoreExitCode });
         if (result instanceof Error) {
             return {
                 verdict: TCVerdicts.SE,
@@ -121,7 +122,10 @@ export class ProcessResultHandler {
         return {
             ...this.getTestlibVerdict(result.codeOrSignal),
             data: {
-                ...result,
+                time: result.time,
+                memory: result.memory,
+                stdout: result.stdout,
+                stderr: result.stderr,
             },
         };
     }

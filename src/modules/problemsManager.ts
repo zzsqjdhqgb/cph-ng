@@ -78,7 +78,7 @@ export default class ProblemsManager {
         return fullProblem;
     }
     public static async dataRefresh() {
-        this.logger.info('data refresh');
+        this.logger.trace('data refresh');
         const activePath = getActivePath();
         const idles: FullProblem[] = this.fullProblems.filter(
             (fullProblem) =>

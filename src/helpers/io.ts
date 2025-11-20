@@ -50,7 +50,7 @@ export default class Io {
     }
 
     static set compilationMsg(msg: string) {
-        this.logger.info('Setting compilation message', msg);
+        this.logger.debug('Setting compilation message', msg);
         compilationChannel.clear();
         compilationChannel.appendLine(msg);
         if (msg.trim()) {
