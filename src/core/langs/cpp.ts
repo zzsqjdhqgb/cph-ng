@@ -151,7 +151,7 @@ export class LangCpp extends Lang {
                 } else if (result.abortReason === AbortReason.UserAbort) {
                     return {
                         verdict: TCVerdicts.RJ,
-                        msg: l10n.t('Compilation aborted by user.'),
+                        msg: l10n.t('Compilation aborted by user'),
                     };
                 } else if (result.abortReason === AbortReason.Timeout) {
                     return {
@@ -181,7 +181,7 @@ export class LangCpp extends Lang {
                 } else if (result.abortReason === AbortReason.UserAbort) {
                     return {
                         verdict: TCVerdicts.RJ,
-                        msg: l10n.t('Compilation aborted by user.'),
+                        msg: l10n.t('Compilation aborted by user'),
                     };
                 } else if (result.abortReason === AbortReason.Timeout) {
                     return {

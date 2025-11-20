@@ -89,14 +89,12 @@ export default class ProcessExecutor {
     ): Promise<ExecuteResult> {
         this.logger.trace('executeWithRunner', options);
         if (options.debug) {
-            return ProcessExecutor.toResult(
-                null,
+            return ProcessExecutor.toErrorResult(
                 l10n.t('Debug mode not supported with runner'),
             );
         }
         if (!options.stdin) {
-            return ProcessExecutor.toResult(
-                null,
+            return ProcessExecutor.toErrorResult(
                 l10n.t('stdin is required for runner execution'),
             );
         }
@@ -104,8 +102,7 @@ export default class ProcessExecutor {
         const runnerPath = join(Settings.cache.directory, 'bin', 'runner.a');
         if (!(await exists(runnerPath))) {
             if (!['win32', 'linux'].includes(platform)) {
-                return ProcessExecutor.toResult(
-                    null,
+                return ProcessExecutor.toErrorResult(
                     l10n.t(`Runner is unsupported for {platform}`, {
                         platform,
                     }),
@@ -131,14 +128,12 @@ export default class ProcessExecutor {
             });
             if (result instanceof Error) {
                 Io.compilationMsg = result.message;
-                return ProcessExecutor.toResult(
-                    null,
+                return ProcessExecutor.toErrorResult(
                     l10n.t('Failed to compile runner program'),
                 );
             } else if (result.codeOrSignal) {
                 Io.compilationMsg = result.stderr;
-                return ProcessExecutor.toResult(
-                    null,
+                return ProcessExecutor.toErrorResult(
                     l10n.t('Failed to compile runner program'),
                 );
             }
@@ -174,15 +169,10 @@ export default class ProcessExecutor {
             runnerCmd.push('--unlimited-stack');
         }
 
+        // We use our own timeout handling to allow graceful exit
         const launch = await this.launch({
             cmd: runnerCmd,
         });
-
-        // Handle killing the process in a special way to allow graceful exit
-        const killProcess = () => {
-            launch.child.stdin.write('k');
-            launch.child.stdin.end();
-        };
 
         const timeoutId = setTimeout(() => {
             this.logger.warn(
@@ -191,19 +181,19 @@ export default class ProcessExecutor {
                 'due to timeout',
                 timeout,
             );
-            killProcess();
+            unifiedAc.abort(AbortReason.Timeout);
         }, timeout);
-        unifiedAc.signal.addEventListener('abort', killProcess);
+        unifiedAc.signal.addEventListener('abort', () => {
+            launch.child.stdin.write('k');
+            launch.child.stdin.end();
+        });
 
         return new Promise(async (resolve) => {
             launch.child.on('close', async (code, signal) => {
                 clearTimeout(timeoutId);
-                unifiedAc.signal.removeEventListener('abort', killProcess);
-
                 if (code || signal) {
                     resolve(
-                        this.toResult(
-                            launch,
+                        this.toErrorResult(
                             l10n.t(
                                 'Runner does not exit properly with code {code}',
                                 { code: code ?? signal! },
@@ -213,12 +203,12 @@ export default class ProcessExecutor {
                     return;
                 }
                 try {
+                    this.logger.info('Reading runner output', launch);
                     const runInfo = JSON.parse(launch.stdout) as RunnerOutput;
                     this.logger.info('Runner output', runInfo);
                     if (runInfo.error) {
                         resolve(
-                            this.toResult(
-                                launch,
+                            this.toErrorResult(
                                 l10n.t('Runner error {type} with code {code}', {
                                     type: runInfo.error_type,
                                     code: runInfo.error_code,
@@ -230,6 +220,7 @@ export default class ProcessExecutor {
                             this.toResult(
                                 {
                                     ...launch,
+                                    acSignal: unifiedAc.signal,
                                     stdout: await readFile(outputFile, 'utf8'),
                                     stderr: await readFile(errorFile, 'utf8'),
                                     // Just need to ensure endTime - startTime = time
@@ -237,10 +228,9 @@ export default class ProcessExecutor {
                                     endTime: runInfo.time,
                                     memory: runInfo.memory,
                                 },
-                                runInfo.exitCode ??
-                                    (Object.entries(constants.signals).find(
-                                        ([, val]) => val === runInfo.signal,
-                                    )?.[0] as NodeJS.Signals),
+                                (Object.entries(constants.signals).find(
+                                    ([, val]) => val === runInfo.signal,
+                                )?.[0] as NodeJS.Signals) || runInfo.exitCode,
                             ),
                         );
                     }
@@ -248,15 +238,13 @@ export default class ProcessExecutor {
                     this.logger.error('Error parsing runner output', e);
                     if (e instanceof SyntaxError) {
                         resolve(
-                            this.toResult(
-                                launch,
+                            this.toErrorResult(
                                 l10n.t('Runner output is invalid JSON'),
                             ),
                         );
                     } else {
                         resolve(
-                            this.toResult(
-                                launch,
+                            this.toErrorResult(
                                 l10n.t(
                                     'Error occurred while processing runner output',
                                 ),
@@ -267,9 +255,7 @@ export default class ProcessExecutor {
             });
             launch.child.on('error', (error) => {
                 clearTimeout(timeoutId);
-                unifiedAc.signal.removeEventListener('abort', killProcess);
-
-                resolve(this.toResult(launch, error));
+                resolve(this.toErrorResult(error));
             });
         });
     }
@@ -284,7 +270,8 @@ export default class ProcessExecutor {
                 resolve(this.toResult(launch, code ?? signal!));
             });
             launch.child.on('error', (error) => {
-                resolve(this.toResult(launch, error));
+                error.name === 'AbortError' ||
+                    resolve(this.toErrorResult(error));
             });
         });
     }
@@ -331,12 +318,18 @@ export default class ProcessExecutor {
                 checkCompletion();
             });
             process1.child.on('error', (error) => {
-                results.process1 ||= this.toResult(process1, error);
+                if (error.name === 'AbortError') {
+                    return;
+                }
+                results.process1 ||= this.toErrorResult(error);
                 results.process2 || process2.child.kill();
                 checkCompletion();
             });
             process2.child.on('error', (error) => {
-                results.process2 ||= this.toResult(process2, error);
+                if (error.name === 'AbortError') {
+                    return;
+                }
+                results.process2 ||= this.toErrorResult(error);
                 results.process1 || process1.child.kill();
                 checkCompletion();
             });
@@ -407,27 +400,24 @@ export default class ProcessExecutor {
     }
 
     private static toResult(
-        launch: LaunchResult | null,
-        data: number | NodeJS.Signals | Error | string,
+        launch: LaunchResult,
+        data: number | NodeJS.Signals,
     ): ExecuteResult {
-        this.logger.trace('createResult', { launch, data });
+        this.logger.trace('toResult', { launch, data });
+        this.logger.debug(`Process ${launch.child.pid} close`, data);
+        return {
+            codeOrSignal: data,
+            abortReason: launch.acSignal.reason as AbortReason | undefined,
+            // A fallback for time if not set
+            time: (launch.endTime ?? Date.now()) - launch.startTime,
+            ...launch,
+        };
+    }
+    private static toErrorResult(data: Error | string): ExecuteResult {
+        this.logger.trace('toErrorResult', { data });
         if (data instanceof Error) {
             return data;
-        } else if (typeof data === 'string') {
-            return new Error(data);
-        } else if (launch) {
-            this.logger.debug(`Process ${launch.child.pid} close`, data);
-            return {
-                codeOrSignal: data,
-                abortReason: launch.acSignal.reason as AbortReason | undefined,
-                // A fallback for time if not set
-                time: (launch.endTime ?? Date.now()) - launch.startTime,
-                ...launch,
-            };
         }
-        // Should not reach here
-        return new Error(
-            l10n.t('Process failed to launch but there is a return code'),
-        );
+        return new Error(data);
     }
 }

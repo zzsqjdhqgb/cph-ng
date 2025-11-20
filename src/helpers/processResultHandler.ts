@@ -59,6 +59,7 @@ export class ProcessResultHandler {
         result: ExecuteResult,
         ignoreExitCode: boolean = false,
     ): ProcessResult {
+        this.logger.trace('parse', { result, ignoreExitCode });
         if (result instanceof Error) {
             return {
                 verdict: TCVerdicts.SE,

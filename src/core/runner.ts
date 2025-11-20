@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import assert from 'assert';
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
@@ -170,52 +169,53 @@ export class Runner {
                 },
                 compileData.interactor?.outputPath,
             );
+            if (runResult.data) {
+                const { time, memory, stdout, stderr } = runResult.data;
+
+                // Update time and memory
+                result.time = time;
+                result.memory = memory;
+
+                // Handle stdout and stderr
+                if (
+                    tc.answer.useFile ||
+                    (Settings.runner.stdoutThreshold !== -1 &&
+                        stdout.length >= Settings.runner.stdoutThreshold)
+                ) {
+                    result.stdout = {
+                        useFile: true,
+                        path: join(
+                            Settings.cache.directory,
+                            'out',
+                            `${this.getTCHash(problem, tc)}.out`,
+                        ),
+                    };
+                } else {
+                    result.stdout.useFile = false;
+                }
+                result.stdout = await write2TcIo(result.stdout, stdout);
+                if (
+                    Settings.runner.stderrThreshold !== -1 &&
+                    stderr.length >= Settings.runner.stderrThreshold
+                ) {
+                    result.stderr = {
+                        useFile: true,
+                        path: join(
+                            Settings.cache.directory,
+                            'out',
+                            `${this.getTCHash(problem, tc)}.err`,
+                        ),
+                    };
+                } else {
+                    result.stderr.useFile = false;
+                }
+                result.stderr = await write2TcIo(result.stderr, stderr);
+                await ProblemsManager.dataRefresh();
+            }
             if (assignResult(result, runResult)) {
                 return;
             }
-            assert(runResult.data);
-            const { time, memory, stdout, stderr } = runResult.data;
-
-            // Update time and memory
-            result.time = time;
-            result.memory = memory;
             result.verdict = TCVerdicts.JGD;
-
-            // Handle stdout and stderr
-            if (
-                tc.answer.useFile ||
-                (Settings.runner.stdoutThreshold !== -1 &&
-                    stdout.length >= Settings.runner.stdoutThreshold)
-            ) {
-                result.stdout = {
-                    useFile: true,
-                    path: join(
-                        Settings.cache.directory,
-                        'out',
-                        `${this.getTCHash(problem, tc)}.out`,
-                    ),
-                };
-            } else {
-                result.stdout.useFile = false;
-            }
-            result.stdout = await write2TcIo(result.stdout, stdout);
-            if (
-                Settings.runner.stderrThreshold !== -1 &&
-                stderr.length >= Settings.runner.stderrThreshold
-            ) {
-                result.stderr = {
-                    useFile: true,
-                    path: join(
-                        Settings.cache.directory,
-                        'out',
-                        `${this.getTCHash(problem, tc)}.err`,
-                    ),
-                };
-            } else {
-                result.stderr.useFile = false;
-            }
-            result.stderr = await write2TcIo(result.stderr, stderr);
-            await ProblemsManager.dataRefresh();
 
             // Determine verdict
             if (result.time && result.time > problem.timeLimit) {
@@ -234,9 +234,9 @@ export class Runner {
                               ac,
                           )
                         : ProcessResultHandler.compareOutputs(
-                              stdout,
+                              await tcIo2Str(result.stdout),
                               await tcIo2Str(tc.answer),
-                              stderr,
+                              await tcIo2Str(result.stderr),
                           ),
                 );
             }
