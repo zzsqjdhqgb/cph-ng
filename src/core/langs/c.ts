@@ -103,9 +103,10 @@ export class LangC extends Lang {
                 msg: l10n.t('Compilation timed out'),
             };
         } else if (result.codeOrSignal) {
+            Io.compilationMsg = result.stderr.trim();
             return {
                 verdict: TCVerdicts.CE,
-                msg: l10n.t('Compilation exited with code {code}', {
+                msg: l10n.t('Compiler exited with code {code}', {
                     code: result.codeOrSignal,
                 }),
             };
