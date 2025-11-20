@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Box from '@mui/material/Box';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
 import { msg } from '../utils';
+import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
 import ErrorBoundary from './base/errorBoundary';
 import ProblemActions from './problemActions';
@@ -41,7 +41,8 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
                     startTime={startTime}
                 />
             </ErrorBoundary>
-            <Box
+            <CphFlex
+                column
                 flex={1}
                 width={'100%'}
                 sx={{
@@ -59,11 +60,13 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
                                 msg({ type: 'clearStatus' });
                             },
                         }}
+                        flex={1}
+                        width={'100%'}
                     >
                         <TcsView problem={problem} />
                     </CphMenu>
                 </ErrorBoundary>
-            </Box>
+            </CphFlex>
             <ErrorBoundary>
                 <ProblemActions problem={problem} />
             </ErrorBoundary>

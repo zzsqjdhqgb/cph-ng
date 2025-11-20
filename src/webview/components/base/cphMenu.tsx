@@ -15,21 +15,22 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { BoxProps } from '@mui/material/Box';
+import Box, { BoxProps } from '@mui/material/Box';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { PopoverPosition } from '@mui/material/Popover';
 import React, { useState } from 'react';
+import { delProps } from '../../utils';
 
 interface CphMenuProps extends BoxProps {
     children: React.ReactNode;
     menu: Record<string, () => void>;
 }
 
-const CphMenu = ({ children, menu }: CphMenuProps) => {
+const CphMenu = (props: CphMenuProps) => {
     const [contextMenu, setContextMenu] = useState<PopoverPosition>();
     return (
-        <div
+        <Box
             onContextMenu={(e: React.MouseEvent) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -39,15 +40,16 @@ const CphMenu = ({ children, menu }: CphMenuProps) => {
                 });
             }}
             style={{ cursor: 'context-menu' }}
+            {...delProps(props, ['children', 'menu'])}
         >
-            {children}
+            {props.children}
             <Menu
                 open={!!contextMenu}
                 onClose={() => setContextMenu(undefined)}
                 anchorReference='anchorPosition'
                 anchorPosition={contextMenu}
             >
-                {Object.entries(menu).map(([key, value]) => (
+                {Object.entries(props.menu).map(([key, value]) => (
                     <MenuItem
                         dense
                         key={key}
@@ -60,7 +62,7 @@ const CphMenu = ({ children, menu }: CphMenuProps) => {
                     </MenuItem>
                 ))}
             </Menu>
-        </div>
+        </Box>
     );
 };
 
