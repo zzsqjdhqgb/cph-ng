@@ -38,22 +38,30 @@ async function getAllFiles(dirPath: string): Promise<string[]> {
     return files.flat();
 }
 
+interface ParticleTCIO {
+    stdin?: TCIO;
+    answer?: TCIO;
+}
+
 export default class TcFactory {
-    public static async fromFile(path: string, isInput?: boolean): Promise<TC> {
+    public static async fromFile(
+        path: string,
+        isInput?: boolean,
+    ): Promise<ParticleTCIO> {
         if (isInput === undefined) {
             isInput = Settings.problem.inputFileExtensionList.includes(
                 extname(path).toLowerCase(),
             );
         }
-        let stdinFile: string | undefined, answerFile: string | undefined;
-        isInput ? (stdinFile = path) : (answerFile = path);
+        let stdin: string | undefined, answer: string | undefined;
+        isInput ? (stdin = path) : (answer = path);
         const pairExt = isInput
             ? Settings.problem.outputFileExtensionList
             : Settings.problem.inputFileExtensionList;
         const behavior = Settings.problem.foundMatchTestCaseBehavior;
         if (behavior !== 'never') {
             for (const ext of pairExt) {
-                const pairPath = path.replace(extname(path), `.${ext}`);
+                const pairPath = path.replace(extname(path), ext);
                 if (!(await exists(pairPath))) {
                     continue;
                 }
@@ -74,21 +82,14 @@ export default class TcFactory {
                 ) {
                     continue;
                 }
-                isInput ? (answerFile = pairPath) : (stdinFile = pairPath);
+                isInput ? (answer = pairPath) : (stdin = pairPath);
                 break;
             }
         }
-        const stdin = (
-            stdinFile
-                ? { useFile: true, path: stdinFile }
-                : { useFile: false, data: '' }
-        ) satisfies TCIO;
-        const answer = (
-            answerFile
-                ? { useFile: true, path: answerFile }
-                : { useFile: false, data: '' }
-        ) satisfies TCIO;
-        return { stdin, answer, isExpand: false, isDisabled: false };
+        const result: ParticleTCIO = {};
+        stdin && (result.stdin = { useFile: true, path: stdin });
+        answer && (result.answer = { useFile: true, path: answer });
+        return result;
     }
 
     public static async fromZip(

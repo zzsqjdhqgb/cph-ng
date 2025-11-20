@@ -452,7 +452,7 @@ export default class ProblemsManager {
                 type: isInput ? l10n.t('stdin') : l10n.t('answer'),
             }),
             filters: {
-                [l10n.t('Text files')]: mainExt,
+                [l10n.t('Text files')]: mainExt.map((ext) => ext.substring(1)),
                 [l10n.t('All files')]: ['*'],
             },
         });
@@ -511,12 +511,12 @@ export default class ProblemsManager {
             }
         } else {
             const ext = {
-                stdin: Settings.problem.inputFileExtensionList[0] || 'in',
-                answer: Settings.problem.outputFileExtensionList[0] || 'ans',
+                stdin: Settings.problem.inputFileExtensionList[0] || '.in',
+                answer: Settings.problem.outputFileExtensionList[0] || '.ans',
             }[msg.label];
             let tempFilePath: string | undefined = join(
                 dirname(fullProblem.problem.src.path),
-                `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.id + 1}.${ext}`,
+                `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${msg.id + 1}${ext}`,
             );
             tempFilePath = await window
                 .showSaveDialog({
@@ -956,7 +956,13 @@ export default class ProblemsManager {
                 Settings.problem.outputFileExtensionList.includes(ext)
             ) {
                 const uuid = randomUUID();
-                fullProblem.problem.tcs[uuid] = await TcFactory.fromFile(item);
+                const { stdin, answer } = await TcFactory.fromFile(item);
+                fullProblem.problem.tcs[uuid] = {
+                    stdin: stdin ?? { useFile: false, data: '' },
+                    answer: answer ?? { useFile: false, data: '' },
+                    isDisabled: false,
+                    isExpand: false,
+                };
                 fullProblem.problem.tcOrder.push(uuid);
             }
         }
