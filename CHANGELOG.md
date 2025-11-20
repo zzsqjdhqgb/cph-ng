@@ -7,6 +7,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: drag and drop to webview
 - **refactor**: change core process logic
 - **feat**: add support for unlimited stack size in runner
+- **fix**: remove source file indicator in problem title
 
 ## 0.4.7
 

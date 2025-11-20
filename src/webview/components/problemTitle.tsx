@@ -32,7 +32,7 @@ import TextField from '@mui/material/TextField';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Problem } from '../../utils/types';
-import { basename, msg } from '../utils';
+import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphMenu from './base/cphMenu';
@@ -195,18 +195,6 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                                 </CphLink>
                             </>
                         )}
-                        &emsp;
-                        <CphLink
-                            name={problem.src.path}
-                            onClick={() => {
-                                msg({
-                                    type: 'openFile',
-                                    path: problem.src.path,
-                                });
-                            }}
-                        >
-                            {basename(problem.src.path)}
-                        </CphLink>
                         &emsp;
                         <span
                             title={t('problemTitle.timeElapsed')}
