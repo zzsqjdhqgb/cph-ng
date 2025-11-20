@@ -134,11 +134,11 @@ export class Runner {
         const intProcessResult = ProcessResultHandler.parseChecker(intResult);
         const solProcessResult = ProcessResultHandler.parse(solResult);
         return {
-            ...(intProcessResult.verdict !== TCVerdicts.UKE
-                ? intProcessResult
-                : solProcessResult),
-            data: solProcessResult.data && {
-                ...solProcessResult.data,
+            ...(solProcessResult.verdict !== TCVerdicts.UKE
+                ? solProcessResult
+                : intProcessResult),
+            data: intProcessResult.data && {
+                ...intProcessResult.data,
                 stdout: await readFile(outputFile, 'utf-8'),
             },
         } satisfies ProcessResult;
