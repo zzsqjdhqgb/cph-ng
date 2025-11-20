@@ -216,7 +216,13 @@ export default class ProblemsManager {
             if (!zipFile) {
                 return undefined;
             }
-            await TcFactory.fromZip(fullProblem.problem, zipFile[0].fsPath);
+            await TcFactory.applyTcs(
+                fullProblem.problem,
+                await TcFactory.fromZip(
+                    fullProblem.problem.src.path,
+                    zipFile[0].fsPath,
+                ),
+            );
         } else if (option === 'folder') {
             const folderUri = await FolderChooser.chooseFolder(
                 l10n.t('Choose a folder containing test cases'),
@@ -224,7 +230,10 @@ export default class ProblemsManager {
             if (!folderUri) {
                 return undefined;
             }
-            await TcFactory.fromFolder(fullProblem.problem, folderUri.fsPath);
+            await TcFactory.applyTcs(
+                fullProblem.problem,
+                await TcFactory.fromFolder(folderUri.fsPath),
+            );
         }
         await this.dataRefresh();
     }
@@ -939,7 +948,7 @@ export default class ProblemsManager {
             if (msg.items[item] === 'folder') {
                 await TcFactory.applyTcs(
                     fullProblem.problem,
-                    await TcFactory.fromFolder(fullProblem.problem, item),
+                    await TcFactory.fromFolder(item),
                 );
                 break;
             }
@@ -947,7 +956,7 @@ export default class ProblemsManager {
             if (ext === '.zip') {
                 await TcFactory.applyTcs(
                     fullProblem.problem,
-                    await TcFactory.fromZip(fullProblem.problem, item),
+                    await TcFactory.fromZip(fullProblem.problem.src.path, item),
                 );
                 break;
             }

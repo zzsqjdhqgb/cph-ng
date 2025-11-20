@@ -93,10 +93,9 @@ export default class TcFactory {
     }
 
     public static async fromZip(
-        problem: Problem,
+        srcPath: string,
         zipPath: string,
     ): Promise<TC[]> {
-        const srcPath = problem.src.path;
         const zipData = new AdmZip(zipPath);
         const folderPath = renderUnzipFolder(srcPath, zipPath);
         if (folderPath === null) {
@@ -107,12 +106,9 @@ export default class TcFactory {
         if (Settings.problem.deleteAfterUnzip) {
             await unlink(zipPath);
         }
-        return await this.fromFolder(problem, folderPath);
+        return await this.fromFolder(folderPath);
     }
-    public static async fromFolder(
-        problem: Problem,
-        folderPath: string,
-    ): Promise<TC[]> {
+    public static async fromFolder(folderPath: string): Promise<TC[]> {
         const allFiles = await getAllFiles(folderPath);
         const tcs: TC[] = [];
         for (const filePath of allFiles) {
