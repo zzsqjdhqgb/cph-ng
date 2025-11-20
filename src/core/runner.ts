@@ -80,14 +80,19 @@ export class Runner {
         }
 
         // Adjust time limit for runner overhead
-        const launchOptions = {
-            ...options,
-            timeout: options.timeLimit + Settings.runner.timeAddition,
-        };
         return ProcessResultHandler.parse(
             await (Settings.runner.useRunner && options.enableRunner
-                ? ProcessExecutor.executeWithRunner(launchOptions)
-                : ProcessExecutor.execute(launchOptions)),
+                ? ProcessExecutor.executeWithRunner({
+                      ...options,
+                      timeout: options.timeLimit + Settings.runner.timeAddition,
+                  })
+                : ProcessExecutor.execute({
+                      ...options,
+                      cmd: Settings.runner.unlimitedStack
+                          ? [...options.cmd, '--unlimited-stack']
+                          : options.cmd,
+                      timeout: options.timeLimit + Settings.runner.timeAddition,
+                  })),
         );
     }
 
