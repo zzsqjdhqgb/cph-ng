@@ -134,7 +134,10 @@ export default class Problems {
             return false;
         }
         path = path.toLowerCase();
-        if (extname(path) in Settings.problem.testCaseExtensionList) {
+        if (
+            Settings.problem.inputFileExtensionList.includes(extname(path)) ||
+            Settings.problem.outputFileExtensionList.includes(extname(path))
+        ) {
             return true;
         }
         if (

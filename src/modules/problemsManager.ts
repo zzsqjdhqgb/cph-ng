@@ -441,7 +441,9 @@ export default class ProblemsManager {
             return;
         }
         const isInput = msg.label === 'stdin';
-        const mainExt = isInput ? ['in'] : ['ans', 'out'];
+        const mainExt = isInput
+            ? Settings.problem.inputFileExtensionList
+            : Settings.problem.outputFileExtensionList;
         const fileUri = await window.showOpenDialog({
             canSelectFiles: true,
             canSelectFolders: false,
@@ -509,8 +511,8 @@ export default class ProblemsManager {
             }
         } else {
             const ext = {
-                stdin: 'in',
-                answer: 'ans',
+                stdin: Settings.problem.inputFileExtensionList[0] || 'in',
+                answer: Settings.problem.outputFileExtensionList[0] || 'ans',
             }[msg.label];
             let tempFilePath: string | undefined = join(
                 dirname(fullProblem.problem.src.path),
@@ -941,14 +943,18 @@ export default class ProblemsManager {
                 );
                 break;
             }
-            if (extname(item) === '.zip') {
+            const ext = extname(item).toLowerCase();
+            if (ext === '.zip') {
                 await TcFactory.applyTcs(
                     fullProblem.problem,
                     await TcFactory.fromZip(fullProblem.problem, item),
                 );
                 break;
             }
-            if (extname(item) === '.in') {
+            if (
+                Settings.problem.inputFileExtensionList.includes(ext) ||
+                Settings.problem.outputFileExtensionList.includes(ext)
+            ) {
                 const uuid = randomUUID();
                 fullProblem.problem.tcs[uuid] = await TcFactory.fromFile(item);
                 fullProblem.problem.tcOrder.push(uuid);

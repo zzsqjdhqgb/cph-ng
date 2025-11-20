@@ -8,6 +8,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **refactor**: change core process logic
 - **feat**: add support for unlimited stack size in runner
 - **fix**: remove source file indicator in problem title
+- **feat**: unified test case extension
 
 ## 0.4.7
 

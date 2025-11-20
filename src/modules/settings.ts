@@ -251,8 +251,11 @@ class ProblemSection extends SettingsSection {
     get maxInlineDataLength(): number {
         return this.get('maxInlineDataLength') as number;
     }
-    get testCaseExtensionList(): string[] {
-        return this.get('testCaseExtensionList') as string[];
+    get inputFileExtensionList(): string[] {
+        return this.get('inputFileExtensionList') as string[];
+    }
+    get outputFileExtensionList(): string[] {
+        return this.get('outputFileExtensionList') as string[];
     }
 }
 

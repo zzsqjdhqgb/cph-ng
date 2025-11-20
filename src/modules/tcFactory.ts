@@ -41,11 +41,15 @@ async function getAllFiles(dirPath: string): Promise<string[]> {
 export default class TcFactory {
     public static async fromFile(path: string, isInput?: boolean): Promise<TC> {
         if (isInput === undefined) {
-            isInput = !(extname(path) in ['.out', '.ans']);
+            isInput = Settings.problem.inputFileExtensionList.includes(
+                extname(path).toLowerCase(),
+            );
         }
         let stdinFile: string | undefined, answerFile: string | undefined;
         isInput ? (stdinFile = path) : (answerFile = path);
-        const pairExt = isInput ? ['ans', 'out'] : ['in'];
+        const pairExt = isInput
+            ? Settings.problem.outputFileExtensionList
+            : Settings.problem.inputFileExtensionList;
         const behavior = Settings.problem.foundMatchTestCaseBehavior;
         if (behavior !== 'never') {
             for (const ext of pairExt) {
@@ -126,7 +130,7 @@ export default class TcFactory {
         for (const filePath of allFiles) {
             const fileName = basename(filePath);
             const ext = extname(fileName).toLowerCase();
-            if (ext === '.in') {
+            if (Settings.problem.inputFileExtensionList.includes(ext)) {
                 tcs.push({
                     stdin: { useFile: true, path: filePath },
                     answer: { useFile: false, data: '' },
@@ -138,13 +142,17 @@ export default class TcFactory {
         for (const filePath of allFiles) {
             const fileName = basename(filePath);
             const ext = extname(fileName).toLowerCase();
-            if (ext === '.ans' || ext === '.out') {
-                const inputFile = join(
-                    dirname(filePath),
-                    fileName.replace(ext, '.in'),
+            if (Settings.problem.outputFileExtensionList.includes(ext)) {
+                const inputFiles = Settings.problem.inputFileExtensionList.map(
+                    (inputExt) =>
+                        join(
+                            dirname(filePath),
+                            fileName.replace(ext, `.${inputExt}`),
+                        ),
                 );
                 const existingTestCase = tcs.find(
-                    (tc) => tc.stdin.useFile && tc.stdin.path === inputFile,
+                    (tc) =>
+                        tc.stdin.useFile && inputFiles.includes(tc.stdin.path),
                 );
                 if (existingTestCase) {
                     existingTestCase.answer = {

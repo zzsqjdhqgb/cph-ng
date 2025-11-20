@@ -446,16 +446,20 @@
                         "default": 65536,
                         "markdownDescription": "%cph-ng.configuration.problem.properties.maxInlineDataLength.markdownDescription%"
                     },
-                    "cph-ng.problem.testCaseExtensionList": {
+                    "cph-ng.problem.inputFileExtensionList": {
                         "type": "array",
                         "default": [
-                            ".in",
-                            ".out",
-                            ".ans",
-                            ".txt",
-                            ".csv"
+                            ".in"
                         ],
-                        "markdownDescription": "%cph-ng.configuration.problem.properties.testCaseExtensionList.markdownDescription%"
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.inputFileExtensionList.markdownDescription%"
+                    },
+                    "cph-ng.problem.outputFileExtensionList": {
+                        "type": "array",
+                        "default": [
+                            ".ans",
+                            ".out"
+                        ],
+                        "markdownDescription": "%cph-ng.configuration.problem.properties.outputFileExtensionList.markdownDescription%"
                     }
                 }
             },
