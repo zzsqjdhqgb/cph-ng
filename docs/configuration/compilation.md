@@ -51,8 +51,8 @@
 
 ### 相关功能 { #basic_relatives }
 
-- [运行单个测试用例](../features/run-single-test.md)
-- [运行所有测试用例](../features/run-all-tests.md)
+- [运行单个测试样例](../features/run-single-test.md)
+- [运行所有测试样例](../features/run-all-tests.md)
 - [特殊评测](../features/special-judge.md)
 - [交互式题目](../features/interactive-problems.md)
 - [暴力对拍](../features/brute-force-compare.md)

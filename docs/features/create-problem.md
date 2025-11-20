@@ -6,7 +6,7 @@
 
 创建题目功能为当前活动的源文件初始化一个新题目。
 它创建题目元数据结构并根据您的设置设置默认配置。
-文件文件格式为由 Gzip 压缩的 JSON 数据，包含题目元数据和测试用例。
+文件文件格式为由 Gzip 压缩的 JSON 数据，包含题目元数据和测试样例。
 
 ## 交互 { #interaction }
 
@@ -47,7 +47,7 @@
 
 ## 相关功能 { #relatives }
 
-- [添加测试用例](add-test-case.md)
+- [添加测试样例](add-test-case.md)
 - [编辑题目](edit-problem.md)
 - [导入题目](import-problem.md)
 - [删除题目](delete-problem.md)

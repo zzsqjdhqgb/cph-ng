@@ -75,7 +75,7 @@ Competitive Companion 浏览器扩展集成的设置。
 
 1. 在评测网站上点击浏览器扩展图标
 2. 扩展向 `listenPort` 发送题目数据
-3. CPH-NG 接收题目元数据和测试用例
+3. CPH-NG 接收题目元数据和测试样例
 4. 创建具有 `defaultExtension` 的新文件
 5. 题目数据保存在 `.cph-ng/` 中
 
@@ -85,7 +85,7 @@ Competitive Companion 浏览器扩展集成的设置。
 
 - 源文件：在工作区根或选定文件夹中
 - 题目数据：`.cph-ng/{filename}.bin`
-- 测试用例：内联或外部文件
+- 测试样例：内联或外部文件
 
 ## 相关功能
 

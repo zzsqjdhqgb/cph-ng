@@ -13,7 +13,7 @@ nav:
           - features/import-problem.md
           - features/edit-problem.md
           - features/delete-problem.md
-      - 测试用例管理:
+      - 测试样例管理:
           - features/add-test-case.md
           - features/load-test-cases.md
           - features/edit-test-case.md

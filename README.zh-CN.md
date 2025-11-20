@@ -2,7 +2,7 @@
 
 简体中文 | [English](https://github.com/langningchen/cph-ng/blob/main/README.md)
 
-> 在 VSCode 中快速编译、运行和评测编程竞赛题目。可自动下载测试用例，或编写和测试自己的题目。
+> 在 VSCode 中快速编译、运行和评测编程竞赛题目。可自动下载测试样例，或编写和测试自己的题目。
 
 这是 [Competitive Programming Helper](https://github.com/agrawal-d/cph) 的下一代版本。
 
@@ -26,7 +26,7 @@
 | 本地题目支持          | ✅                       | ✅                      |
 | 语言支持              | ✅ C/C++ 和其他 8 种语言 | ⚠️ 仅 C/C++ 和 Java     |
 | 自动提交集成          | ✅ Codeforces 和 Kattis  | ⚠️ 仅 Codeforces        |
-| 加载本地测试用例      | ❌                       | ✅                      |
+| 加载本地测试样例      | ❌                       | ✅                      |
 | 支持的评测结果        | ⚠️ 仅 3 种               | ✅ AC 和其他 10 种 [^1] |
 | 存储评测结果和时间    | ❌                       | ✅                      |
 | 缓存已编译程序        | ❌                       | ✅ [^2]                 |

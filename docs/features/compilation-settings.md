@@ -77,5 +77,5 @@
 ## 相关功能 { #relatives }
 
 - [编辑题目](edit-problem.md)
-- [运行所有测试用例](run-all-tests.md)
-- [运行单个测试用例](run-single-test.md)
+- [运行所有测试样例](run-all-tests.md)
+- [运行单个测试样例](run-single-test.md)

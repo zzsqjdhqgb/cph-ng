@@ -21,7 +21,7 @@
 
 ### `problemFilePath` <small>字符串</small> { #problemFilePath }
 
-指定**题目文件路径**，这是存储题目定义和测试用例的位置。
+指定**题目文件路径**，这是存储题目定义和测试样例的位置。
 
 你可以使用以下占位符：
 
@@ -64,7 +64,7 @@
 
 - **类型**：布尔值
 - **默认值**：`false`
-- **用户影响**：加载测试用例前是否清除现有测试用例。
+- **用户影响**：加载测试样例前是否清除现有测试样例。
 
 ### `deleteAfterUnzip`
 
@@ -81,5 +81,5 @@
 ### 相关功能
 
 - [创建题目](../features/create-problem.md) - 使用默认限制
-- [加载测试用例](../features/load-test-cases.md) - 使用导入设置
+- [加载测试样例](../features/load-test-cases.md) - 使用导入设置
 - [切换文件/内联](../features/toggle-file-inline.md) - 受 maxInlineDataLength 影响

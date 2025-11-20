@@ -13,4 +13,4 @@
 
 | 默认值 | 相关功能 |
 |:-:|:-:|
-|`tree`| [加载测试用例](../features/load-test-cases.md) &emsp; [Competitive Companion 集成](../features/competitive-companion.md) &emsp; [CPH 导入](../features/cph-import.md) |
+|`tree`| [加载测试样例](../features/load-test-cases.md) &emsp; [Competitive Companion 集成](../features/competitive-companion.md) &emsp; [CPH 导入](../features/cph-import.md) |
