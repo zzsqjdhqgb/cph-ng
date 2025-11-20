@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import assert from 'assert';
 import { randomUUID, UUID } from 'crypto';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
@@ -257,9 +258,6 @@ export default class ProblemsManager {
             verdict: TCVerdicts.CP,
             stdout: { useFile: false, data: '' },
             stderr: { useFile: false, data: '' },
-            memory: undefined,
-            time: 0,
-            msg: '',
         };
         tc.isExpand = false;
         await this.dataRefresh();
@@ -348,9 +346,6 @@ export default class ProblemsManager {
                 verdict: TCVerdicts.CP,
                 stdout: { useFile: false, data: '' },
                 stderr: { useFile: false, data: '' },
-                memory: undefined,
-                time: 0,
-                msg: '',
             };
             tcs[tcId].isExpand = false;
         }
@@ -696,14 +691,13 @@ export default class ProblemsManager {
                 cnt,
             });
             await this.dataRefresh();
-            const generatorRunResult = await Runner.doRun(
-                [compileData.bfCompare.generator.outputPath],
-                Settings.bfCompare.generatorTimeLimit,
-                { useFile: false, data: '' },
-                fullProblem.ac,
-                undefined,
-                false,
-            );
+            const generatorRunResult = await Runner.doRun({
+                cmd: [compileData.bfCompare.generator.outputPath],
+                timeLimit: Settings.bfCompare.generatorTimeLimit,
+                stdin: { useFile: false, data: '' },
+                ac: fullProblem.ac,
+                enableRunner: false,
+            });
             if (generatorRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
                     bfCompare.msg = l10n.t('Generator run failed: {msg}', {
@@ -712,19 +706,19 @@ export default class ProblemsManager {
                 }
                 break;
             }
+            assert(generatorRunResult.data);
 
             bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
                 cnt,
             });
             await this.dataRefresh();
-            const bruteForceRunResult = await Runner.doRun(
-                [compileData.bfCompare.bruteForce.outputPath],
-                Settings.bfCompare.bruteForceTimeLimit,
-                { useFile: false, data: generatorRunResult.stdout },
-                fullProblem.ac,
-                undefined,
-                false,
-            );
+            const bruteForceRunResult = await Runner.doRun({
+                cmd: [compileData.bfCompare.bruteForce.outputPath],
+                timeLimit: Settings.bfCompare.bruteForceTimeLimit,
+                stdin: { useFile: false, data: generatorRunResult.data.stdout },
+                ac: fullProblem.ac,
+                enableRunner: false,
+            });
             if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
                 if (generatorRunResult.verdict !== TCVerdicts.RJ) {
                     bfCompare.msg = l10n.t('Brute force run failed: {msg}', {
@@ -733,16 +727,17 @@ export default class ProblemsManager {
                 }
                 break;
             }
+            assert(bruteForceRunResult.data);
 
             bfCompare.msg = l10n.t('#{cnt} Running solution...', {
                 cnt,
             });
             await this.dataRefresh();
             const tempTc: TC = {
-                stdin: { useFile: false, data: generatorRunResult.stdout },
+                stdin: { useFile: false, data: generatorRunResult.data.stdout },
                 answer: {
                     useFile: false,
-                    data: bruteForceRunResult.stdout,
+                    data: bruteForceRunResult.data.stdout,
                 },
                 isExpand: true,
                 isDisabled: false,
@@ -750,9 +745,6 @@ export default class ProblemsManager {
                     verdict: TCVerdicts.CP,
                     stdout: { useFile: false, data: '' },
                     stderr: { useFile: false, data: '' },
-                    memory: undefined,
-                    time: 0,
-                    msg: '',
                 },
             } satisfies TC;
             await Runner.run(

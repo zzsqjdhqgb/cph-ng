@@ -159,7 +159,7 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
 
             result.content.push(
                 new LanguageModelTextPart(
-                    l10n.t('Created new test case {id}.', { id: newId }),
+                    l10n.t('Created new test case {id}', { id: newId }),
                 ),
             );
             return result;

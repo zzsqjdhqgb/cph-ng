@@ -20,7 +20,7 @@ import { TCVerdicts } from './types.backend';
 
 interface Result<T> {
     verdict: TCVerdict;
-    msg: string;
+    msg?: string;
     data?: T;
 }
 

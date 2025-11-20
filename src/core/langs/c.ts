@@ -21,7 +21,7 @@ import { basename, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor from '../../helpers/processExecutor';
+import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
 import { FileWithHash } from '../../utils/types';
 import { TCVerdicts } from '../../utils/types.backend';
@@ -69,68 +69,54 @@ export class LangC extends Lang {
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
-                msg: '',
                 data: { outputPath, hash },
             };
         }
 
         const { timeout } = Settings.compilation;
+        const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-        try {
-            this.logger.info('Starting compilation', {
-                compiler,
-                args,
-                src: src.path,
-                outputPath,
-            });
-
-            const compilerArgs = args.split(/\s+/).filter(Boolean);
-
-            const cmdArgs = [
-                compiler,
-                src.path,
-                ...compilerArgs,
-                '-o',
-                outputPath,
-            ];
-            if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
-                cmdArgs.push('-Wl,--stack,268435456');
-            }
-            if (debug) {
-                cmdArgs.push('-g');
-                cmdArgs.push('-O0');
-            }
-
-            const result = await ProcessExecutor.execute({
-                cmd: cmdArgs,
-                ac,
-                timeout,
-            });
-
-            this.logger.debug('Compilation completed successfully', {
-                path: src.path,
-                outputPath,
-            });
-            Io.compilationMsg = result.stderr.trim();
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: l10n.t('Compilation aborted by user.'),
-                };
-            }
-            return {
-                verdict: await access(outputPath, constants.X_OK)
-                    .then(() => TCVerdicts.UKE)
-                    .catch(() => TCVerdicts.CE),
-                msg: '',
-                data: { outputPath, hash },
-            };
-        } catch (e) {
-            this.logger.error('Compilation failed', e);
-            Io.compilationMsg = (e as Error).message;
-            return { verdict: TCVerdicts.CE, msg: '' };
+        const cmd = [compiler, src.path, ...compilerArgs, '-o', outputPath];
+        if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
+            cmd.push('-Wl,--stack,268435456');
         }
+        debug && cmd.push('-g', '-O0');
+
+        const result = await ProcessExecutor.execute({ cmd, ac, timeout });
+        if (result instanceof Error) {
+            return { verdict: TCVerdicts.SE, msg: result.message };
+        }
+        this.logger.debug('Compilation completed successfully', {
+            path: src.path,
+            outputPath,
+        });
+
+        Io.compilationMsg = result.stderr.trim();
+        if (result.abortReason === AbortReason.UserAbort) {
+            return {
+                verdict: TCVerdicts.RJ,
+                msg: l10n.t('Compilation aborted by user.'),
+            };
+        } else if (result.abortReason === AbortReason.Timeout) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation timed out'),
+            };
+        } else if (result.codeOrSignal) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation exited with code {code}', {
+                    code: result.codeOrSignal,
+                }),
+            };
+        }
+
+        return {
+            verdict: await access(outputPath, constants.X_OK)
+                .then(() => TCVerdicts.UKE)
+                .catch(() => TCVerdicts.CE),
+            data: { outputPath, hash },
+        };
     }
     public async runCommand(target: string): Promise<string[]> {
         this.logger.trace('runCommand', { target });

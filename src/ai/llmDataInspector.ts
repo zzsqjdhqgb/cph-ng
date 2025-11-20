@@ -331,7 +331,7 @@ class LlmDataInspector implements LanguageModelTool<LlmDataInspectorParams> {
                 }
                 default:
                     pushText(
-                        l10n.t("Error: Unsupported data type '{type}'.", {
+                        l10n.t('Error: Unsupported data type {type}', {
                             type: dataType,
                         }),
                     );

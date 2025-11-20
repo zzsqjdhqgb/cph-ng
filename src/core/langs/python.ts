@@ -20,7 +20,7 @@ import { basename, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor from '../../helpers/processExecutor';
+import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
 import { FileWithHash } from '../../utils/types';
 import { TCVerdicts } from '../../utils/types.backend';
@@ -67,70 +67,57 @@ export class LangPython extends Lang {
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
-                msg: '',
                 data: { outputPath, hash },
             };
         }
 
         const { timeout } = Settings.compilation;
+        const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-        try {
-            this.logger.info('Starting compilation', {
+        const result = await ProcessExecutor.execute({
+            cmd: [
                 compiler,
-                args,
-                src: src.path,
-                cacheDir,
-            });
-
-            const compilerArgs = args.split(/\s+/).filter(Boolean);
-
-            // Compile Python to bytecode using py_compile to the cache directory
-            const result = await ProcessExecutor.execute({
-                cmd: [
-                    compiler,
-                    '-c',
-                    `import py_compile; py_compile.compile(r'${src.path}', cfile=r'${outputPath}', doraise=True)`,
-                    ...compilerArgs,
-                ],
-                ac,
-                timeout,
-            });
-
-            this.logger.debug('Compilation completed successfully', {
-                path: src.path,
-                outputPath,
-            });
-            Io.compilationMsg = result.stderr.trim();
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: l10n.t('Compilation aborted by user.'),
-                };
-            }
-            if (result.killed) {
-                return {
-                    verdict: TCVerdicts.CE,
-                    msg: l10n.t('Compilation failed because of timeout'),
-                };
-            }
-            if (result.exitCode) {
-                return { verdict: TCVerdicts.CE, msg: '' };
-            }
-
-            // Check if the compiled .pyc file exists
-            return {
-                verdict: await access(outputPath, constants.R_OK)
-                    .then(() => TCVerdicts.UKE)
-                    .catch(() => TCVerdicts.CE),
-                msg: '',
-                data: { outputPath, hash },
-            };
-        } catch (e) {
-            this.logger.error('Compilation failed', e);
-            Io.compilationMsg = (e as Error).message;
-            return { verdict: TCVerdicts.CE, msg: '' };
+                '-c',
+                `import py_compile; py_compile.compile(r'${src.path}', cfile=r'${outputPath}', doraise=True)`,
+                ...compilerArgs,
+            ],
+            ac,
+            timeout,
+        });
+        if (result instanceof Error) {
+            return { verdict: TCVerdicts.SE, msg: result.message };
         }
+        this.logger.debug('Compilation completed successfully', {
+            path: src.path,
+            outputPath,
+        });
+
+        Io.compilationMsg = result.stderr.trim();
+        if (result.abortReason === AbortReason.UserAbort) {
+            return {
+                verdict: TCVerdicts.RJ,
+                msg: l10n.t('Compilation aborted by user.'),
+            };
+        } else if (result.abortReason === AbortReason.Timeout) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation timed out'),
+            };
+        } else if (result.codeOrSignal) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation exited with code {code}', {
+                    code: result.codeOrSignal,
+                }),
+            };
+        }
+
+        return {
+            verdict: await access(outputPath, constants.R_OK)
+                .then(() => TCVerdicts.UKE)
+                .catch(() => TCVerdicts.CE),
+            data: { outputPath, hash },
+        };
     }
 
     public async runCommand(

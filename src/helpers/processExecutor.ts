@@ -32,44 +32,36 @@ import { TCIO } from '../utils/types';
 import { tcIo2Path } from '../utils/types.backend';
 import Io from './io';
 
-interface ProcessExecutorOptions {
+interface LaunchOptions {
     cmd: string[];
     timeout?: number;
-    stdin?: TCIO;
     ac?: AbortController;
     debug?: boolean;
+    stdin?: TCIO;
 }
-
-interface ProcessRunnerExecutorOptions {
-    cmd: string[];
-    timeout: number;
-    stdin: TCIO;
-    ac: AbortController;
-}
-
-export interface ProcessResult {
-    exitCode: number | null;
-    signal: NodeJS.Signals | null;
-    stdout: string;
-    stderr: string;
-    errorMsg?: string;
-    killed: boolean;
-    startTime: number;
-    endTime: number;
-    memory?: number;
-}
-
-interface ProcessInfo {
+interface LaunchResult {
     child: ChildProcessWithoutNullStreams;
+    acSignal: AbortSignal;
     stdout: string;
     stderr: string;
-    killed: boolean;
     startTime: number;
     endTime?: number;
     memory?: number;
 }
 
-type RunInfo =
+export type ExecuteResult =
+    | Error
+    | {
+          // The exit code or signal that terminated the process
+          codeOrSignal: number | NodeJS.Signals;
+          stdout: string;
+          stderr: string;
+          time: number;
+          memory?: number;
+          abortReason?: AbortReason;
+      };
+
+type RunnerOutput =
     | {
           error: false;
           killed: boolean;
@@ -84,18 +76,35 @@ type RunInfo =
           error_code: number;
       };
 
+export enum AbortReason {
+    UserAbort = 'user_abort',
+    Timeout = 'timeout',
+}
+
 export default class ProcessExecutor {
     private static logger: Logger = new Logger('processExecutor');
 
     public static async executeWithRunner(
-        options: ProcessRunnerExecutorOptions,
-    ): Promise<ProcessResult> {
+        options: LaunchOptions,
+    ): Promise<ExecuteResult> {
         this.logger.trace('executeWithRunner', options);
+        if (options.debug) {
+            return ProcessExecutor.toResult(
+                null,
+                l10n.t('Debug mode not supported with runner'),
+            );
+        }
+        if (!options.stdin) {
+            return ProcessExecutor.toResult(
+                null,
+                l10n.t('stdin is required for runner execution'),
+            );
+        }
 
         const runnerPath = join(Settings.cache.directory, 'bin', 'runner.a');
         if (!(await exists(runnerPath))) {
             if (!['win32', 'linux'].includes(platform)) {
-                return ProcessExecutor.createErrorResult(
+                return ProcessExecutor.toResult(
                     null,
                     l10n.t(`Runner is unsupported for {platform}`, {
                         platform,
@@ -120,9 +129,15 @@ export default class ProcessExecutor {
                           ]),
                 ],
             });
-            if (result.exitCode !== 0) {
+            if (result instanceof Error) {
+                Io.compilationMsg = result.message;
+                return ProcessExecutor.toResult(
+                    null,
+                    l10n.t('Failed to compile runner program'),
+                );
+            } else if (result.codeOrSignal) {
                 Io.compilationMsg = result.stderr;
-                return ProcessExecutor.createErrorResult(
+                return ProcessExecutor.toResult(
                     null,
                     l10n.t('Failed to compile runner program'),
                 );
@@ -130,6 +145,12 @@ export default class ProcessExecutor {
         }
 
         const { cmd, stdin, ac, timeout } = options;
+        const unifiedAc = new AbortController();
+        if (ac) {
+            ac.signal.addEventListener('abort', () =>
+                unifiedAc.abort(AbortReason.UserAbort),
+            );
+        }
 
         const hash = SHA256(`${cmd.join(' ')}-${Date.now()}-${Math.random()}`)
             .toString()
@@ -152,133 +173,140 @@ export default class ProcessExecutor {
         if (Settings.runner.unlimitedStack) {
             runnerCmd.push('--unlimited-stack');
         }
-        const process = await this.createProcess({
+
+        const launch = await this.launch({
             cmd: runnerCmd,
         });
+
+        // Handle killing the process in a special way to allow graceful exit
+        const killProcess = () => {
+            launch.child.stdin.write('k');
+            launch.child.stdin.end();
+        };
+
         const timeoutId = setTimeout(() => {
             this.logger.warn(
                 'Soft killing runner',
-                process.child.pid,
+                launch.child.pid,
                 'due to timeout',
                 timeout,
             );
             killProcess();
         }, timeout);
-        const killProcess = () => {
-            process.child.stdin.write('k');
-            process.child.stdin.end();
-        };
-        ac.signal.addEventListener('abort', killProcess);
-        return new Promise(async (resolve) => {
-            process.child.on('close', async (code, _signal) => {
-                clearTimeout(timeoutId);
-                ac.signal.removeEventListener('abort', killProcess);
+        unifiedAc.signal.addEventListener('abort', killProcess);
 
-                if (code && code !== 0) {
+        return new Promise(async (resolve) => {
+            launch.child.on('close', async (code, signal) => {
+                clearTimeout(timeoutId);
+                unifiedAc.signal.removeEventListener('abort', killProcess);
+
+                if (code || signal) {
                     resolve(
-                        this.createErrorResult(
-                            process,
-                            l10n.t('Runner exited with code {code}', {
-                                code,
-                            }),
+                        this.toResult(
+                            launch,
+                            l10n.t(
+                                'Runner does not exit properly with code {code}',
+                                { code: code ?? signal! },
+                            ),
                         ),
                     );
                     return;
                 }
                 try {
-                    const runInfo = JSON.parse(process.stdout) as RunInfo;
-                    this.logger.debug('Runner info', runInfo);
+                    const runInfo = JSON.parse(launch.stdout) as RunnerOutput;
+                    this.logger.info('Runner output', runInfo);
                     if (runInfo.error) {
                         resolve(
-                            this.createErrorResult(
-                                process,
-                                l10n.t(
-                                    'Runner error {type} with code {code}.',
-                                    {
-                                        type: runInfo.error_type,
-                                        code: runInfo.error_code,
-                                    },
-                                ),
+                            this.toResult(
+                                launch,
+                                l10n.t('Runner error {type} with code {code}', {
+                                    type: runInfo.error_type,
+                                    code: runInfo.error_code,
+                                }),
                             ),
                         );
                     } else {
                         resolve(
-                            this.createResult(
+                            this.toResult(
                                 {
-                                    child: process.child,
+                                    ...launch,
                                     stdout: await readFile(outputFile, 'utf8'),
                                     stderr: await readFile(errorFile, 'utf8'),
-                                    killed: runInfo.killed,
+                                    // Just need to ensure endTime - startTime = time
                                     startTime: 0,
                                     endTime: runInfo.time,
                                     memory: runInfo.memory,
                                 },
-                                runInfo.exitCode,
-                                Object.entries(constants.signals).find(
-                                    ([, val]) => val === runInfo.signal,
-                                )?.[0] as NodeJS.Signals,
+                                runInfo.exitCode ??
+                                    (Object.entries(constants.signals).find(
+                                        ([, val]) => val === runInfo.signal,
+                                    )?.[0] as NodeJS.Signals),
                             ),
                         );
                     }
                 } catch (e) {
-                    resolve(this.createErrorResult(process, e as Error));
+                    this.logger.error('Error parsing runner output', e);
+                    if (e instanceof SyntaxError) {
+                        resolve(
+                            this.toResult(
+                                launch,
+                                l10n.t('Runner output is invalid JSON'),
+                            ),
+                        );
+                    } else {
+                        resolve(
+                            this.toResult(
+                                launch,
+                                l10n.t(
+                                    'Error occurred while processing runner output',
+                                ),
+                            ),
+                        );
+                    }
                 }
             });
-            process.child.on('error', (error) => {
+            launch.child.on('error', (error) => {
                 clearTimeout(timeoutId);
-                ac.signal.removeEventListener('abort', killProcess);
+                unifiedAc.signal.removeEventListener('abort', killProcess);
 
-                resolve(this.createErrorResult(process, error));
+                resolve(this.toResult(launch, error));
             });
         });
-    }
-
-    public static async launch(
-        options: ProcessExecutorOptions,
-    ): Promise<ProcessInfo> {
-        this.logger.trace('launch', options);
-        const process = await this.createProcess(options);
-        if (options.stdin) {
-            const stdin = process.child.stdin;
-            if (options.stdin.useFile) {
-                pipeline(createReadStream(options.stdin.path), stdin);
-            } else {
-                stdin.write(options.stdin.data);
-                stdin.end();
-            }
-        }
-        return process;
     }
 
     public static async execute(
-        options: ProcessExecutorOptions,
-    ): Promise<ProcessResult> {
+        options: LaunchOptions,
+    ): Promise<ExecuteResult> {
         this.logger.trace('execute', options);
-        const process = await this.launch(options);
+        const launch = await this.launch(options);
         return new Promise(async (resolve) => {
-            process.child.on('close', (code, signal) => {
-                resolve(this.createResult(process, code, signal));
+            launch.child.on('close', (code, signal) => {
+                resolve(this.toResult(launch, code ?? signal!));
             });
-            process.child.on('error', (error) => {
-                resolve(this.createErrorResult(process, error));
+            launch.child.on('error', (error) => {
+                resolve(this.toResult(launch, error));
             });
         });
     }
 
-    public static async executeWithPipe(
-        process1Options: ProcessExecutorOptions,
-        process2Options: ProcessExecutorOptions,
-    ): Promise<{ process1: ProcessResult; process2: ProcessResult }> {
-        const process1 = await this.createProcess(process1Options);
-        const process2 = await this.createProcess(process2Options);
+    public static async launchWithPipe(
+        process1Options: LaunchOptions,
+        process2Options: LaunchOptions,
+    ): Promise<{ process1: ExecuteResult; process2: ExecuteResult }> {
+        const process1 = await this.launch(process1Options);
+        const process2 = await this.launch(process2Options);
+
+        // Pipe the processes
         pipeline(process2.child.stdout, process1.child.stdin);
         pipeline(process1.child.stdout, process2.child.stdin);
 
+        // Wait for both processes to complete
         return new Promise(async (resolve) => {
             const results: {
-                process1?: ProcessResult;
-                process2?: ProcessResult;
+                process1?: ExecuteResult;
+                process2?: ExecuteResult;
             } = {};
+
             const checkCompletion = () => {
                 this.logger.trace('checkCompletion', {
                     results,
@@ -290,37 +318,58 @@ export default class ProcessExecutor {
                     });
                 }
             };
+
+            // Handle any process exit or error
+            // https://nodejs.org/docs/latest/api/child_process.html#event-close
+            // "One of the two will always be non-null."
             process1.child.on('close', (code, signal) => {
-                results.process1 = this.createResult(process1, code, signal);
+                results.process1 ||= this.toResult(process1, code ?? signal!);
                 checkCompletion();
             });
             process2.child.on('close', (code, signal) => {
-                results.process2 = this.createResult(process2, code, signal);
+                results.process2 ||= this.toResult(process2, code ?? signal!);
                 checkCompletion();
             });
             process1.child.on('error', (error) => {
-                results.process1 = this.createErrorResult(process1, error);
-                process2.child.kill();
+                results.process1 ||= this.toResult(process1, error);
+                results.process2 || process2.child.kill();
                 checkCompletion();
             });
             process2.child.on('error', (error) => {
-                results.process2 = this.createErrorResult(process2, error);
-                process1.child.kill();
+                results.process2 ||= this.toResult(process2, error);
+                results.process1 || process1.child.kill();
                 checkCompletion();
             });
         });
     }
 
-    private static async createProcess(
-        options: ProcessExecutorOptions,
-    ): Promise<ProcessInfo> {
+    public static async launch(options: LaunchOptions): Promise<LaunchResult> {
         this.logger.trace('createProcess', options);
-        const { cmd, ac, timeout } = options;
+        const { cmd, ac, timeout, debug, stdin } = options;
+
+        // Use a unified AbortController to handle both external and internal aborts
+        const unifiedAc = new AbortController();
+        if (ac) {
+            ac.signal.addEventListener('abort', () =>
+                unifiedAc.abort(AbortReason.UserAbort),
+            );
+        }
+
         const child = spawn(cmd[0], cmd.slice(1), {
             cwd: cmd[0] ? dirname(cmd[0]) : cwd(),
-            signal: ac?.signal,
+            signal: unifiedAc.signal,
         });
-        if (options.debug) {
+        this.logger.info('Running executable', options, child.pid);
+        const result: LaunchResult = {
+            child,
+            acSignal: unifiedAc.signal,
+            stdout: '',
+            stderr: '',
+            startTime: Date.now(),
+        };
+
+        // Send SIGSTOP for debugging
+        if (debug) {
             if (!child.kill('SIGSTOP')) {
                 this.logger.error(
                     'Failed to stop process for debugging',
@@ -328,76 +377,57 @@ export default class ProcessExecutor {
                 );
             }
         }
-        const process: ProcessInfo = {
-            child,
-            stdout: '',
-            stderr: '',
-            killed: false,
-            startTime: Date.now(),
-        };
-        this.logger.info('Running executable', cmd, child.pid);
+
+        // Process timeout
         if (timeout) {
             const timeoutId = setTimeout(() => {
                 this.logger.warn(
-                    'Killing process',
-                    child.pid,
-                    'due to timeout',
-                    timeout,
+                    `Process ${child.pid} reached timeout ${timeout}ms`,
                 );
-                process.killed = true;
-                child.kill();
+                unifiedAc.abort(AbortReason.Timeout);
             }, timeout);
             child.on('close', () => clearTimeout(timeoutId));
             child.on('error', () => clearTimeout(timeoutId));
         }
+
+        // Process stdio
+        if (stdin) {
+            stdin.useFile
+                ? pipeline(createReadStream(stdin.path), child.stdin)
+                : (child.stdin.write(stdin.data), child.stdin.end());
+        }
         child.stdout.on('data', (data) => {
-            process.stdout += data.toString();
+            result.stdout += data.toString();
         });
         child.stderr.on('data', (data) => {
-            process.stderr += data.toString();
+            result.stderr += data.toString();
         });
-        return process;
+
+        return result;
     }
 
-    private static createResult(
-        process: ProcessInfo,
-        exitCode: number | null,
-        signal: NodeJS.Signals | null,
-    ): ProcessResult {
-        this.logger.trace('createResult', { process, exitCode, signal });
-        this.logger.debug('Process close', {
-            pid: process.child.pid,
-            exitCode,
-            signal,
-        });
-        return {
-            exitCode,
-            signal,
-            ...process,
-            endTime: process.endTime ?? Date.now(),
-        } satisfies ProcessResult;
-    }
-
-    private static createErrorResult(
-        process: ProcessInfo | null,
-        error: Error | string,
-    ): ProcessResult {
-        this.logger.trace('createErrorResult', { process, error });
-        this.logger.error('Process error', {
-            process: process?.child.pid,
-            error,
-        });
-        return {
-            exitCode: null,
-            signal: null,
-            ...(process || {
-                stdout: '',
-                stderr: '',
-                killed: false,
-                startTime: Date.now(),
-            }),
-            endTime: Date.now(),
-            errorMsg: typeof error === 'string' ? error : error.message,
-        };
+    private static toResult(
+        launch: LaunchResult | null,
+        data: number | NodeJS.Signals | Error | string,
+    ): ExecuteResult {
+        this.logger.trace('createResult', { launch, data });
+        if (data instanceof Error) {
+            return data;
+        } else if (typeof data === 'string') {
+            return new Error(data);
+        } else if (launch) {
+            this.logger.debug(`Process ${launch.child.pid} close`, data);
+            return {
+                codeOrSignal: data,
+                abortReason: launch.acSignal.reason as AbortReason | undefined,
+                // A fallback for time if not set
+                time: (launch.endTime ?? Date.now()) - launch.startTime,
+                ...launch,
+            };
+        }
+        // Should not reach here
+        return new Error(
+            l10n.t('Process failed to launch but there is a return code'),
+        );
     }
 }

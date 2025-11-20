@@ -15,17 +15,25 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import assert from 'assert';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
 import Result from '../utils/result';
 import { TCVerdict } from '../utils/types';
 import { TCVerdicts } from '../utils/types.backend';
-import { ProcessResult } from './processExecutor';
+import { AbortReason, ExecuteResult } from './processExecutor';
 
 export interface WrapperData {
-    time: number;
+    time: number; // in nanoseconds
 }
+
+export type ProcessResult = Result<{
+    time: number;
+    memory?: number;
+    stdout: string;
+    stderr: string;
+}>;
 
 export class ProcessResultHandler {
     private static logger: Logger = new Logger('processResultHandler');
@@ -47,84 +55,77 @@ export class ProcessResultHandler {
         return { cleanStderr: stderr };
     }
 
-    public static toRunner(
-        result: ProcessResult,
-        abortController?: AbortController,
+    public static parse(
+        result: ExecuteResult,
         ignoreExitCode: boolean = false,
-    ): Result<undefined> & {
-        time: number;
-        memory: number | undefined;
-        stdout: string;
-        stderr: string;
-    } {
+    ): ProcessResult {
+        if (result instanceof Error) {
+            return {
+                verdict: TCVerdicts.SE,
+                msg: result.message,
+            };
+        }
         const { wrapperData, cleanStderr } = this.extractWrapperData(
             result.stderr,
         );
 
-        let time = result.endTime - result.startTime;
-        if (wrapperData) {
-            time = Math.max(wrapperData.time, 1) / 1000.0;
-        }
+        // Use wrapper time if available
+        const time = wrapperData
+            ? Math.max(wrapperData.time, 1) / 1000.0
+            : result.time;
 
         let verdict: TCVerdict = TCVerdicts.UKE;
         let msg: string = '';
 
-        if (result.killed) {
+        if (result.abortReason === AbortReason.Timeout) {
             verdict = TCVerdicts.TLE;
             msg = l10n.t('Killed due to timeout');
+        } else if (result.abortReason === AbortReason.UserAbort) {
+            verdict = TCVerdicts.RJ;
+            msg = l10n.t('Aborted by user');
         } else if (
-            !ignoreExitCode &&
-            result.exitCode !== null &&
-            result.exitCode !== 0
+            // Always handle signal termination
+            // Handle exit code only when not ignored
+            typeof result.codeOrSignal === 'string' ||
+            (!ignoreExitCode && result.codeOrSignal !== 0)
         ) {
             verdict = TCVerdicts.RE;
             msg = l10n.t('Process exited with code: {code}.', {
-                code: result.exitCode,
+                code: result.codeOrSignal,
             });
-        } else if (result.signal) {
-            verdict = TCVerdicts.RE;
-            msg = l10n.t('Process exited with signal: {signal}.', {
-                signal: result.signal,
-            });
-        } else if (result.errorMsg) {
-            verdict = TCVerdicts.SE;
-            msg = result.errorMsg;
-        } else if (result.exitCode === null) {
-            verdict = abortController?.signal.aborted
-                ? TCVerdicts.RJ
-                : TCVerdicts.SE;
-            msg = l10n.t('Process failed to start');
         }
 
         return {
             verdict,
             msg,
-            time,
-            memory: result.memory,
-            stdout: result.stdout,
-            stderr: cleanStderr,
+            data: {
+                time,
+                memory: result.memory,
+                stdout: result.stdout,
+                stderr: cleanStderr,
+            },
         };
     }
 
-    public static toChecker(
-        result: ProcessResult,
-        abortController?: AbortController,
-    ): Result<undefined> {
-        const preResult = this.toRunner(result, abortController, true);
+    public static parseChecker(result: ExecuteResult): ProcessResult {
+        const preResult = this.parse(result, true);
         if (preResult.verdict !== TCVerdicts.UKE) {
             return preResult;
         }
-        const { verdict, msg } = this.getTestlibVerdict(result.exitCode!);
+
+        // We have already handled these two cases in parse
+        assert(!(result instanceof Error));
+        assert(typeof result.codeOrSignal === 'number');
+
         return {
-            verdict,
-            msg: `${result.stderr.trim() || result.stdout.trim()}\n${msg || ''}`.trim(),
+            ...this.getTestlibVerdict(result.codeOrSignal),
+            data: {
+                ...result,
+            },
         };
     }
 
-    private static getTestlibVerdict(code: number): {
-        verdict: TCVerdict;
-        msg?: string;
-    } {
+    private static getTestlibVerdict(code: number): Result<undefined> {
         switch (code) {
             case 0:
                 return { verdict: TCVerdicts.AC };

@@ -47,7 +47,6 @@ export class Compiler {
         }
         return {
             verdict: TCVerdicts.UKE,
-            msg: '',
             data: {
                 outputPath: file.path,
                 hash: '',
@@ -133,7 +132,6 @@ export class Compiler {
         }
         return {
             verdict: TCVerdicts.UKE,
-            msg: '',
             data,
         };
     }

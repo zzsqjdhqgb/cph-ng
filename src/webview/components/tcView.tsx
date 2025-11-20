@@ -371,7 +371,7 @@ const TcView = ({
                                             label={t('tcView.message')}
                                             value={{
                                                 useFile: false,
-                                                data: tc.result.msg,
+                                                data: tc.result.msg ?? '',
                                             }}
                                             readOnly={true}
                                         />

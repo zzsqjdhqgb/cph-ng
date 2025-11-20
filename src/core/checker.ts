@@ -15,60 +15,35 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
-import { ProcessResultHandler } from '../helpers/processResultHandler';
-import Result from '../utils/result';
+import {
+    ProcessResult,
+    ProcessResultHandler,
+} from '../helpers/processResultHandler';
 import { TC } from '../utils/types';
-import { tcIo2Path, TCVerdicts } from '../utils/types.backend';
+import { tcIo2Path } from '../utils/types.backend';
 
 export class Checker {
     private static logger: Logger = new Logger('checker');
 
     public static async runChecker(
-        checkerOutputPath: string,
+        path: string,
         tc: TC,
-        abortController: AbortController,
-    ): Promise<Result<undefined>> {
-        this.logger.trace('runChecker', {
-            checkerOutputPath,
-            tc,
-            abortController,
+        ac: AbortController,
+    ): Promise<ProcessResult> {
+        this.logger.trace('runChecker', { path, tc, ac });
+
+        const inputFile = await tcIo2Path(tc.stdin);
+        const outputFile = await tcIo2Path(tc.result!.stdout);
+        const answerFile = await tcIo2Path(tc.answer);
+
+        const result = await ProcessExecutor.execute({
+            cmd: [path, inputFile, outputFile, answerFile],
+            ac: ac,
         });
 
-        try {
-            const inputFile = await tcIo2Path(tc.stdin);
-            const outputFile = await tcIo2Path(tc.result!.stdout);
-            const answerFile = await tcIo2Path(tc.answer);
-
-            this.logger.info(
-                'Running checker',
-                checkerOutputPath,
-                'with arguments',
-                [inputFile, outputFile, answerFile],
-            );
-
-            const result = await ProcessExecutor.execute({
-                cmd: [checkerOutputPath, inputFile, outputFile, answerFile],
-                ac: abortController,
-            });
-
-            this.logger.debug('Checker completed', {
-                stdout: result.stdout,
-                stderr: result.stderr,
-                exitCode: result.exitCode,
-            });
-
-            return ProcessResultHandler.toChecker(result, abortController);
-        } catch (e) {
-            this.logger.warn('Checker setup failed', e);
-            return {
-                verdict: TCVerdicts.SE,
-                msg: l10n.t('Checker setup failed: {msg}', {
-                    msg: (e as Error).message,
-                }),
-            };
-        }
+        this.logger.debug('Checker completed', result);
+        return ProcessResultHandler.parseChecker(result);
     }
 }

@@ -49,11 +49,11 @@ export type TCIO =
 
 export interface TCResult {
     verdict: TCVerdict;
+    time?: number;
     memory?: number;
-    time: number;
     stdout: TCIO;
     stderr: TCIO;
-    msg: string;
+    msg?: string;
 }
 
 export interface TC {

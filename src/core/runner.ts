@@ -15,28 +15,33 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import assert from 'assert';
 import { SHA256 } from 'crypto-js';
 import { readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
-import { ProcessResultHandler } from '../helpers/processResultHandler';
+import {
+    ProcessResult,
+    ProcessResultHandler,
+} from '../helpers/processResultHandler';
 import ProblemsManager from '../modules/problemsManager';
 import Settings from '../modules/settings';
-import Result, { assignResult } from '../utils/result';
+import { assignResult } from '../utils/result';
 import { Problem, TC, TCIO, TCResult } from '../utils/types';
 import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
 import { Checker } from './checker';
 import { CompileResult } from './compiler';
 import { Lang } from './langs/lang';
 
-type RunnerResult = Result<undefined> & {
-    time: number;
-    memory: number | undefined;
-    stdout: string;
-    stderr: string;
-};
+interface RunOptions {
+    cmd: string[];
+    timeLimit: number;
+    stdin: TCIO;
+    ac: AbortController;
+    enableRunner: boolean;
+}
 
 export class Runner {
     private static logger: Logger = new Logger('runner');
@@ -51,133 +56,94 @@ export class Runner {
             .substring(64 - 6);
     }
 
+    // The ProcessResult.data must be not-null when verdict is UKE
     public static async doRun(
-        runCommand: string[],
-        timeLimit: number,
-        stdin: TCIO,
-        abortController: AbortController,
-        interactor: string | undefined,
-        enableRunner: boolean,
-    ): Promise<RunnerResult> {
-        this.logger.trace('runExecutable', {
-            runCommand,
-            timeLimit,
-            stdin,
-            interactor,
-        });
-
-        if (interactor) {
-            return this.runWithInteractor(
-                runCommand,
-                timeLimit,
-                stdin,
-                abortController,
-                interactor,
-            );
-        } else {
-            return this.runWithoutInteractor(
-                runCommand,
-                timeLimit,
-                stdin,
-                abortController,
-                enableRunner,
-            );
-        }
+        options: RunOptions,
+        interactor?: string,
+    ): Promise<ProcessResult> {
+        this.logger.trace('runExecutable', { options, interactor });
+        return interactor
+            ? this.runWithInteractor(interactor, options)
+            : this.runWithoutInteractor(options);
     }
 
     private static async runWithoutInteractor(
-        cmd: string[],
-        timeLimit: number,
-        stdin: TCIO,
-        abortController: AbortController,
-        enableRunner: boolean,
-    ): Promise<RunnerResult> {
+        options: RunOptions,
+    ): Promise<ProcessResult> {
         if (Settings.runner.useRunner && Settings.compilation.useWrapper) {
             return {
                 verdict: TCVerdicts.RJ,
                 msg: l10n.t(
-                    'Use Runner option cannot be used with Use Wrapper option.',
+                    'Cannot use both runner and wrapper at the same time',
                 ),
-                time: 0,
-                memory: undefined,
-                stdout: '',
-                stderr: '',
             };
         }
-        return ProcessResultHandler.toRunner(
-            Settings.runner.useRunner && enableRunner
-                ? await ProcessExecutor.executeWithRunner({
-                      cmd,
-                      timeout: timeLimit + Settings.runner.timeAddition,
-                      stdin,
-                      ac: abortController,
-                  })
-                : await ProcessExecutor.execute({
-                      cmd,
-                      timeout: timeLimit + Settings.runner.timeAddition,
-                      stdin,
-                      ac: abortController,
-                  }),
-            abortController,
+
+        // Adjust time limit for runner overhead
+        const launchOptions = {
+            ...options,
+            timeout: options.timeLimit + Settings.runner.timeAddition,
+        };
+        return ProcessResultHandler.parse(
+            await (Settings.runner.useRunner && options.enableRunner
+                ? ProcessExecutor.executeWithRunner(launchOptions)
+                : ProcessExecutor.execute(launchOptions)),
         );
     }
 
     private static async runWithInteractor(
-        runCommand: string[],
-        timeLimit: number,
-        stdin: TCIO,
-        ac: AbortController,
         interactor: string,
-    ): Promise<RunnerResult> {
+        options: RunOptions,
+    ): Promise<ProcessResult> {
+        // Prepare input and output files
         const hash = SHA256(
-            `${runCommand.join(' ')}-${Date.now()}-${Math.random()}`,
+            `${options.cmd.join(' ')}-${Date.now()}-${Math.random()}`,
         )
             .toString()
             .substring(0, 8);
-
         const ioDir = join(Settings.cache.directory, 'io');
         const inputFile = join(ioDir, `${hash}.in`);
         const outputFile = join(ioDir, `${hash}.out`);
-
-        await writeFile(inputFile, await tcIo2Str(stdin));
+        await writeFile(inputFile, await tcIo2Str(options.stdin));
         await writeFile(outputFile, '');
 
+        // Launch both processes with pipe
         const { process1: solResult, process2: intResult } =
-            await ProcessExecutor.executeWithPipe(
+            await ProcessExecutor.launchWithPipe(
                 {
-                    cmd: runCommand,
-                    timeout: timeLimit + Settings.runner.timeAddition,
-                    ac: ac,
+                    cmd: options.cmd,
+                    timeout: options.timeLimit + Settings.runner.timeAddition,
+                    ac: options.ac,
                 },
                 {
                     cmd: [interactor, inputFile, outputFile],
-                    timeout: timeLimit + Settings.runner.timeAddition,
-                    ac: ac,
+                    timeout: options.timeLimit + Settings.runner.timeAddition,
+                    ac: options.ac,
                 },
             );
-
         this.logger.debug('Interactor execution completed', {
             solResult,
             intResult,
         });
 
-        const intProcessResult = ProcessResultHandler.toChecker(intResult, ac);
-        const solProcessResult = ProcessResultHandler.toRunner(solResult, ac);
+        // Process results
+        const intProcessResult = ProcessResultHandler.parseChecker(intResult);
+        const solProcessResult = ProcessResultHandler.parse(solResult);
         return {
             ...(intProcessResult.verdict !== TCVerdicts.UKE
                 ? intProcessResult
                 : solProcessResult),
-            memory: undefined,
-            time: solProcessResult.time,
-            stdout: await readFile(outputFile, 'utf-8'),
-            stderr: solProcessResult.stderr,
-        } satisfies RunnerResult;
+            data: solProcessResult.data && {
+                ...solProcessResult.data,
+                stdout: await readFile(outputFile, 'utf-8'),
+            },
+        } satisfies ProcessResult;
     }
 
     public static async run(
         problem: Problem,
         result: TCResult,
-        abortController: AbortController,
+        ac: AbortController,
         lang: Lang,
         tc: TC,
         compileData: NonNullable<CompileResult['data']>,
@@ -187,23 +153,34 @@ export class Runner {
             await ProblemsManager.dataRefresh();
 
             const runResult = await this.doRun(
-                await lang.runCommand(
-                    compileData.src.outputPath,
-                    problem.compilationSettings,
-                ),
-                problem.timeLimit,
-                tc.stdin,
-                abortController,
+                {
+                    cmd: await lang.runCommand(
+                        compileData.src.outputPath,
+                        problem.compilationSettings,
+                    ),
+                    timeLimit: problem.timeLimit,
+                    stdin: tc.stdin,
+                    ac,
+                    enableRunner: lang.enableRunner,
+                },
                 compileData.interactor?.outputPath,
-                lang.enableRunner,
             );
-            result.time = runResult.time;
-            result.memory = runResult.memory;
+            if (assignResult(result, runResult)) {
+                return;
+            }
+            assert(runResult.data);
+            const { time, memory, stdout, stderr } = runResult.data;
+
+            // Update time and memory
+            result.time = time;
+            result.memory = memory;
             result.verdict = TCVerdicts.JGD;
+
+            // Handle stdout and stderr
             if (
                 tc.answer.useFile ||
                 (Settings.runner.stdoutThreshold !== -1 &&
-                    runResult.stdout.length >= Settings.runner.stdoutThreshold)
+                    stdout.length >= Settings.runner.stdoutThreshold)
             ) {
                 result.stdout = {
                     useFile: true,
@@ -216,11 +193,10 @@ export class Runner {
             } else {
                 result.stdout.useFile = false;
             }
-            result.stdout = await write2TcIo(result.stdout, runResult.stdout);
-
+            result.stdout = await write2TcIo(result.stdout, stdout);
             if (
                 Settings.runner.stderrThreshold !== -1 &&
-                runResult.stderr.length >= Settings.runner.stderrThreshold
+                stderr.length >= Settings.runner.stderrThreshold
             ) {
                 result.stderr = {
                     useFile: true,
@@ -233,11 +209,11 @@ export class Runner {
             } else {
                 result.stderr.useFile = false;
             }
-            result.stderr = await write2TcIo(result.stderr, runResult.stderr);
+            result.stderr = await write2TcIo(result.stderr, stderr);
             await ProblemsManager.dataRefresh();
 
-            if (assignResult(result, runResult)) {
-            } else if (result.time && result.time > problem.timeLimit) {
+            // Determine verdict
+            if (result.time && result.time > problem.timeLimit) {
                 result.verdict = TCVerdicts.TLE;
             } else if (result.memory && result.memory > problem.memoryLimit) {
                 result.verdict = TCVerdicts.MLE;
@@ -250,21 +226,23 @@ export class Runner {
                         ? await Checker.runChecker(
                               compileData.checker.outputPath,
                               tc,
-                              abortController,
+                              ac,
                           )
                         : ProcessResultHandler.compareOutputs(
-                              runResult.stdout,
+                              stdout,
                               await tcIo2Str(tc.answer),
-                              runResult.stderr,
+                              stderr,
                           ),
                 );
             }
-            await ProblemsManager.dataRefresh();
         } catch (e) {
             assignResult(result, {
                 verdict: TCVerdicts.SE,
-                msg: (e as Error).message,
+                msg: l10n.t('Runtime error occurred: {error}', {
+                    error: (e as Error).message,
+                }),
             });
+        } finally {
             await ProblemsManager.dataRefresh();
         }
     }

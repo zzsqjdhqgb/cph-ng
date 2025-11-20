@@ -20,7 +20,7 @@ import { basename, dirname, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor from '../../helpers/processExecutor';
+import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
 import { FileWithHash } from '../../utils/types';
 import { TCVerdicts } from '../../utils/types.backend';
@@ -65,53 +65,52 @@ export class LangJava extends Lang {
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
-                msg: '',
                 data: { outputPath, hash },
             };
         }
 
         const { timeout } = Settings.compilation;
+        const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-        try {
-            this.logger.info('Starting compilation', {
-                compiler,
-                args,
-                src: src.path,
-                classDir,
-            });
-
-            const compilerArgs = args.split(/\s+/).filter(Boolean);
-
-            const result = await ProcessExecutor.execute({
-                cmd: [compiler, ...compilerArgs, '-d', classDir, src.path],
-                ac,
-                timeout,
-            });
-
-            this.logger.debug('Compilation completed successfully', {
-                path: src.path,
-                outputPath,
-            });
-            Io.compilationMsg = result.stderr.trim();
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: l10n.t('Compilation aborted by user.'),
-                };
-            }
-            return {
-                verdict: await access(outputPath, constants.R_OK)
-                    .then(() => TCVerdicts.UKE)
-                    .catch(() => TCVerdicts.CE),
-                msg: '',
-                data: { outputPath, hash },
-            };
-        } catch (e) {
-            this.logger.error('Compilation failed', e);
-            Io.compilationMsg = (e as Error).message;
-            return { verdict: TCVerdicts.CE, msg: '' };
+        const result = await ProcessExecutor.execute({
+            cmd: [compiler, ...compilerArgs, '-d', classDir, src.path],
+            ac,
+            timeout,
+        });
+        if (result instanceof Error) {
+            return { verdict: TCVerdicts.SE, msg: result.message };
         }
+
+        this.logger.debug('Compilation completed successfully', {
+            path: src.path,
+            outputPath,
+        });
+        Io.compilationMsg = result.stderr.trim();
+        if (result.abortReason === AbortReason.UserAbort) {
+            return {
+                verdict: TCVerdicts.RJ,
+                msg: l10n.t('Compilation aborted by user.'),
+            };
+        } else if (result.abortReason === AbortReason.Timeout) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation timed out'),
+            };
+        } else if (result.codeOrSignal) {
+            return {
+                verdict: TCVerdicts.CE,
+                msg: l10n.t('Compilation exited with code {code}', {
+                    code: result.codeOrSignal,
+                }),
+            };
+        }
+
+        return {
+            verdict: await access(outputPath, constants.R_OK)
+                .then(() => TCVerdicts.UKE)
+                .catch(() => TCVerdicts.CE),
+            data: { outputPath, hash },
+        };
     }
 
     public async runCommand(

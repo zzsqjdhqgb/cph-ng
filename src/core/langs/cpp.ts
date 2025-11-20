@@ -21,7 +21,7 @@ import { basename, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor from '../../helpers/processExecutor';
+import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
 import { extensionPath } from '../../utils/global';
 import { FileWithHash } from '../../utils/types';
@@ -74,7 +74,6 @@ export class LangCpp extends Lang {
         if (skip) {
             return {
                 verdict: TCVerdicts.UKE,
-                msg: '',
                 data: { outputPath, hash },
             };
         }
@@ -126,7 +125,7 @@ export class LangCpp extends Lang {
                 );
             } else {
                 const compilerArgs = args.split(/\s+/).filter(Boolean);
-                const cmdArgs = [
+                const cmd = [
                     compiler,
                     src.path,
                     ...compilerArgs,
@@ -134,71 +133,83 @@ export class LangCpp extends Lang {
                     outputPath,
                 ];
                 if (Settings.runner.unlimitedStack && type() === 'Windows_NT') {
-                    cmdArgs.push('-Wl,--stack,268435456');
+                    cmd.push('-Wl,--stack,268435456');
                 }
-                if (debug) {
-                    cmdArgs.push('-g');
-                    cmdArgs.push('-O0');
-                }
-                compileCommands.push(cmdArgs);
+                debug && cmd.push('-g', '-O0');
+                compileCommands.push(cmd);
             }
-            this.logger.info('Starting compilation', {
-                compileCommands,
-                postCommands,
-            });
 
             const compileResults = await Promise.all(
                 compileCommands.map((cmd) =>
-                    ProcessExecutor.execute({
-                        cmd,
-                        ac,
-                        timeout,
-                    }),
+                    ProcessExecutor.execute({ cmd, ac, timeout }),
                 ),
             );
-            this.logger.trace('Compile results', { compileResults });
-            const postResults: typeof compileResults = [];
-            for (const cmd of postCommands) {
-                postResults.push(
-                    await ProcessExecutor.execute({
-                        cmd,
-                        ac,
-                        timeout,
-                    }),
-                );
+            const results: string[] = [];
+            for (const result of compileResults) {
+                if (result instanceof Error) {
+                    return { verdict: TCVerdicts.SE, msg: result.message };
+                } else if (result.abortReason === AbortReason.UserAbort) {
+                    return {
+                        verdict: TCVerdicts.RJ,
+                        msg: l10n.t('Compilation aborted by user.'),
+                    };
+                } else if (result.abortReason === AbortReason.Timeout) {
+                    return {
+                        verdict: TCVerdicts.CE,
+                        msg: l10n.t('Compilation timed out'),
+                    };
+                } else if (result.codeOrSignal) {
+                    return {
+                        verdict: TCVerdicts.CE,
+                        msg: l10n.t('Compilation exited with code {code}', {
+                            code: result.codeOrSignal,
+                        }),
+                    };
+                }
+                results.push(result.stderr);
             }
-            this.logger.trace('Post-process results', { postResults });
-            const results = [...compileResults, ...postResults];
+
+            for (const cmd of postCommands) {
+                const result = await ProcessExecutor.execute({
+                    cmd,
+                    ac,
+                    timeout,
+                });
+                if (result instanceof Error) {
+                    return { verdict: TCVerdicts.SE, msg: result.message };
+                } else if (result.abortReason === AbortReason.UserAbort) {
+                    return {
+                        verdict: TCVerdicts.RJ,
+                        msg: l10n.t('Compilation aborted by user.'),
+                    };
+                } else if (result.abortReason === AbortReason.Timeout) {
+                    return {
+                        verdict: TCVerdicts.CE,
+                        msg: l10n.t('Compilation timed out'),
+                    };
+                } else if (result.codeOrSignal) {
+                    return {
+                        verdict: TCVerdicts.CE,
+                        msg: l10n.t('Compilation exited with code {code}', {
+                            code: result.codeOrSignal,
+                        }),
+                    };
+                }
+                results.push(result.stderr);
+            }
 
             this.logger.debug('Compilation completed successfully', {
                 path: src.path,
                 outputPath,
             });
             Io.compilationMsg = results
-                .map((result) => result.stderr.trim())
+                .map((result) => result.trim())
                 .filter((msg) => msg)
                 .join('\n\n');
-            if (ac.signal.aborted) {
-                this.logger.warn('Compilation aborted by user');
-                return {
-                    verdict: TCVerdicts.RJ,
-                    msg: l10n.t('Compilation aborted by user.'),
-                };
-            }
-            if (results.some((res) => res.killed)) {
-                return {
-                    verdict: TCVerdicts.CE,
-                    msg: l10n.t('Compilation failed because of timeout'),
-                };
-            }
-            if (results.some((res) => !!res.exitCode)) {
-                return { verdict: TCVerdicts.CE, msg: '' };
-            }
             return {
                 verdict: await access(outputPath, constants.X_OK)
                     .then(() => TCVerdicts.UKE)
                     .catch(() => TCVerdicts.CE),
-                msg: '',
                 data: { outputPath, hash },
             };
         } catch (e) {
