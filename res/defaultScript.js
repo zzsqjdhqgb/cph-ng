@@ -15,10 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-const process = () => {
+const process = async () => {
     if (!workspaceFolders || workspaceFolders.length === 0) {
         return 'No workspace folder found';
     }
+    const folder = workspaceFolders[0].path;
+    // const folder = await ui.chooseFolder();
 
     const ext = 'cpp';
     const results = [];
@@ -99,7 +101,7 @@ const process = () => {
             }
 
             logger.debug('Generated filename', { filename });
-            results.push(path.join(workspaceFolders[0].path, filename));
+            results.push(path.join(folder, filename));
         } catch (e) {
             logger.error(
                 'Error generating filename for problem',

@@ -27,7 +27,8 @@ import {
     sep,
 } from 'path';
 import { createContext, Script } from 'vm';
-import { l10n, OpenDialogOptions, Uri, window } from 'vscode';
+import { l10n, window } from 'vscode';
+import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { CompanionProblem } from './companion';
@@ -76,21 +77,12 @@ export default class UserScriptManager {
                 error: this.outputChannel.error,
             },
             ui: {
-                chooseFolder: async (title?: string, defaultPath?: string) => {
-                    const options: OpenDialogOptions = {
-                        canSelectFiles: false,
-                        canSelectFolders: true,
-                        canSelectMany: false,
-                        title: title || l10n.t('Choose folder for problem'),
-                        defaultUri: defaultPath
-                            ? Uri.file(defaultPath)
-                            : undefined,
-                    };
-                    const result = await window.showOpenDialog(options);
-                    return result && result.length > 0
-                        ? result[0].fsPath
-                        : null;
-                },
+                chooseFolder: async (title?: string) =>
+                    (
+                        await FolderChooser.chooseFolder(
+                            title || l10n.t('Choose folder for problem'),
+                        )
+                    )?.fsPath,
                 chooseItem: async (items: string[], placeholder?: string) => {
                     return await window.showQuickPick(items, {
                         placeHolder: placeholder,
