@@ -225,20 +225,24 @@ export class Runner {
             } else {
                 result.verdict = TCVerdicts.CMP;
                 await ProblemsManager.dataRefresh();
-                assignResult(
-                    result,
-                    compileData.checker
-                        ? await Checker.runChecker(
-                              compileData.checker.outputPath,
-                              tc,
-                              ac,
-                          )
-                        : ProcessResultHandler.compareOutputs(
-                              await tcIo2Str(result.stdout),
-                              await tcIo2Str(tc.answer),
-                              await tcIo2Str(result.stderr),
-                          ),
-                );
+                if (compileData.checker) {
+                    const checkerResult = await Checker.runChecker(
+                        compileData.checker.outputPath,
+                        tc,
+                        ac,
+                    );
+                    assignResult(result, checkerResult);
+                    result.msg ||= checkerResult.data?.stderr;
+                } else {
+                    assignResult(
+                        result,
+                        ProcessResultHandler.compareOutputs(
+                            await tcIo2Str(result.stdout),
+                            await tcIo2Str(tc.answer),
+                            await tcIo2Str(result.stderr),
+                        ),
+                    );
+                }
             }
         } catch (e) {
             assignResult(result, {

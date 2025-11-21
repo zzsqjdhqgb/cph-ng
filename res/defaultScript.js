@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-// Default script: accepts `problems` array and returns an array of filenames (one per problem)
-
 const process = () => {
     if (!workspaceFolders || workspaceFolders.length === 0) {
         return 'No workspace folder found';
