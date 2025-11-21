@@ -131,7 +131,7 @@ export default class TcFactory {
                     (inputExt) =>
                         join(
                             dirname(filePath),
-                            fileName.replace(ext, `.${inputExt}`),
+                            fileName.replace(ext, inputExt),
                         ),
                 );
                 const existingTestCase = tcs.find(
