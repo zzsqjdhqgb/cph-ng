@@ -158,7 +158,6 @@
     "Test cases run successfully.": "测试样例运行成功。",
     "Test cases run successfully. Summary: {summary}": "测试样例运行成功。摘要：{summary}",
     "Testlib returned unknown exit code: {code}": "Testlib 返回了未知的退出代码：{code}",
-    "Testlib run failed": "Testlib 运行失败",
     "Text files": "文本文件",
     "The file size is {size} bytes, which may be large. Are you sure you want to load it inline?": "文件大小为 {size} 字节，可能较大。确定要以内联方式加载吗？",
     "Time Limit Exceed": "时间超限",

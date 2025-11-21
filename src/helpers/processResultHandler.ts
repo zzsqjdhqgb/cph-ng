@@ -150,10 +150,7 @@ export class ProcessResultHandler {
             case 2:
                 return { verdict: TCVerdicts.PE };
             case 3:
-                return {
-                    verdict: TCVerdicts.SE,
-                    msg: l10n.t('Testlib run failed'),
-                };
+                return { verdict: TCVerdicts.SE };
             case 4:
                 return {
                     verdict: TCVerdicts.WA,
