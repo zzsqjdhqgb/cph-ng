@@ -38,32 +38,6 @@ Companion 是一个浏览器扩展，可将在线评测的题目数据直接发�
 - **默认值**：`27121`
 - 浏览器扩展发送到此端口
 
-### 命名约定
-
-#### `cph-ng.companion.shortCodeforcesName`
-
-- **默认值**：`true`
-- 使用短题目名称（A、B、C）而不是完整标题
-
-#### `cph-ng.companion.shortLuoguName`
-
-- 缩短洛谷题目名称
-
-#### `cph-ng.companion.shortAtCoderName`
-
-- 缩短 AtCoder 题目名称
-
-### 文件处理
-
-#### `cph-ng.companion.defaultExtension`
-
-- **默认值**：`.cpp`
-- 自动创建文件的扩展名
-
-#### `cph-ng.companion.chooseSaveFolder`
-
-- 是否提示保存位置
-
 ## 工作原理
 
 1. 用户点击题目页面上的扩展图标

@@ -15,19 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, readFile, writeFile } from 'fs/promises';
+import { access, mkdir, readFile, writeFile } from 'fs/promises';
 import { createServer, Server } from 'http';
 import PQueue from 'p-queue';
+import { dirname } from 'path';
 import { l10n, ProgressLocation, Uri, window, workspace } from 'vscode';
-import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types';
-import CphCapable, { CphProblem } from './cphCapable';
+import CphCapable from './cphCapable';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
+import UserScriptManager, { WorkspaceFolderCtx } from './userScriptManager';
 
 type CphSubmitEmpty = {
     empty: true;
@@ -41,6 +42,39 @@ type CphSubmitData = {
 };
 type CphSubmitResponse = CphSubmitEmpty | CphSubmitData;
 
+export interface CompanionProblem {
+    name: string;
+    group: string;
+    url: string;
+    interactive: boolean;
+    memoryLimit: number;
+    timeLimit: number;
+    tests: {
+        input: string;
+        output: string;
+    }[];
+    testType: 'single' | 'multiNumber';
+    input: {
+        type: 'stdin' | 'file' | 'regex';
+        fileName?: string;
+        pattern?: string;
+    };
+    output: {
+        type: 'stdout' | 'file';
+        fileName?: string;
+    };
+    languages: {
+        java: {
+            mainClass: string;
+            taskClass: string;
+        };
+    };
+    batch: {
+        id: string;
+        size: number;
+    };
+}
+
 class Companion {
     private static logger: Logger = new Logger('companion');
     static server: Server;
@@ -51,6 +85,7 @@ class Companion {
     >;
     private static pendingSubmitResolve?: () => void;
     private static problemQueue: PQueue = new PQueue({ concurrency: 1 });
+    private static batches: Map<string, CompanionProblem[]> = new Map();
 
     public static init() {
         Companion.logger.trace('init');
@@ -64,9 +99,28 @@ class Companion {
             request.on('close', async () => {
                 Companion.logger.debug('Received request', requestData);
                 if (request.url === '/') {
-                    Companion.problemQueue.add(async () => {
-                        await Companion.processProblem(requestData);
-                    });
+                    if (requestData.trim() === '') {
+                        Companion.logger.warn('Empty request data, ignoring');
+                    } else {
+                        try {
+                            const data: CompanionProblem =
+                                JSON.parse(requestData);
+                            Companion.handleIncomingProblem(data);
+                        } catch (e) {
+                            this.logger.error('Error parsing request data', e);
+                            if (e instanceof SyntaxError) {
+                                Io.warn(
+                                    l10n.t('Companion data is invalid JSON'),
+                                );
+                            } else {
+                                Io.warn(
+                                    l10n.t(
+                                        'Error occurred while processing companion data',
+                                    ),
+                                );
+                            }
+                        }
+                    }
                     response.statusCode = 200;
                 } else if (request.url === '/getSubmit') {
                     response.statusCode = 200;
@@ -103,43 +157,99 @@ class Companion {
     public static stopServer() {
         Companion.logger.trace('stopServer');
         Companion.server.close();
+        Companion.batches.clear();
     }
 
-    private static async processProblem(requestData: string) {
-        if (requestData.trim() === '') {
-            Companion.logger.warn('Empty request data, ignoring');
+    private static handleIncomingProblem(data: CompanionProblem) {
+        const batchId = data.batch.id;
+        const batchSize = data.batch.size;
+
+        let currentBatch = Companion.batches.get(batchId);
+        if (!currentBatch) {
+            currentBatch = [];
+            Companion.batches.set(batchId, currentBatch);
+        }
+
+        currentBatch.push(data);
+        Companion.logger.info(
+            `Received problem ${data.name} for batch ${batchId} (${currentBatch.length}/${batchSize})`,
+        );
+
+        if (currentBatch.length >= batchSize) {
+            const problemsToProcess = [...currentBatch];
+            Companion.batches.delete(batchId);
+
+            Companion.problemQueue.add(async () => {
+                await Companion.processProblem(problemsToProcess);
+            });
+        }
+    }
+
+    private static async processProblem(companionProblems: CompanionProblem[]) {
+        Companion.logger.trace('processProblem', { companionProblems });
+        const workspaceFolders: WorkspaceFolderCtx[] =
+            workspace.workspaceFolders?.map((f) => ({
+                index: f.index,
+                name: f.name,
+                path: f.uri.fsPath,
+            })) || [];
+
+        let code: string;
+        try {
+            code = await readFile(Settings.companion.customPathScript, 'utf-8');
+        } catch (e) {
+            this.logger.error('Could not read user script', e);
+            Io.error(l10n.t('Could not read user script'));
             return;
         }
-        Companion.logger.trace('processProblem', { requestData });
-        try {
-            const problem = CphCapable.toProblem(
-                JSON.parse(requestData) satisfies CphProblem,
-            );
-            const folder = Settings.companion.chooseSaveFolder
-                ? await FolderChooser.chooseFolder(
-                      l10n.t('Select a folder to save the problem source file'),
-                  )
-                : workspace.workspaceFolders?.[0].uri;
 
-            if (!folder) {
-                Companion.logger.warn('No folder selected');
-                Io.info(
-                    l10n.t('No folder selected, problem creation cancelled.'),
-                );
-                return;
+        const srcPaths = await UserScriptManager.resolvePath(
+            code,
+            companionProblems,
+            workspaceFolders,
+        );
+        if (!srcPaths) {
+            return;
+        }
+
+        const createdDocuments: Uri[] = [];
+        for (let i = 0; i < companionProblems.length; i++) {
+            const companionProblem = companionProblems[i];
+            const srcPath = srcPaths[i];
+            if (!srcPath) {
+                continue;
             }
 
-            Companion.logger.trace('Using folder', { folder });
-            problem.src = {
-                path: Uri.joinPath(
-                    folder,
-                    Companion.getProblemFileName(problem.name, problem.url),
-                ).fsPath,
-            };
-            Companion.logger.info(
+            const problem = CphCapable.toProblem({
+                name: companionProblem.name,
+                url: companionProblem.url,
+                tests: companionProblem.tests.map((test, id) => ({
+                    ...test,
+                    id,
+                })),
+                interactive: companionProblem.interactive,
+                memoryLimit: companionProblem.memoryLimit,
+                timeLimit: companionProblem.timeLimit,
+                srcPath,
+                group: companionProblem.group,
+                local: true,
+            });
+            Companion.logger.debug(
                 'Created problem source path',
                 problem.src.path,
             );
+
+            try {
+                await mkdir(dirname(problem.src.path), { recursive: true });
+            } catch (e) {
+                Companion.logger.error('Failed to create directory', e);
+                Io.error(
+                    l10n.t('Failed to create directory for problem: {msg}', {
+                        msg: (e as Error).message,
+                    }),
+                );
+                continue;
+            }
 
             try {
                 await access(problem.src.path);
@@ -147,30 +257,38 @@ class Companion {
                     srcPath: problem.src.path,
                 });
             } catch {
-                Companion.logger.info('Creating new source file', {
+                Companion.logger.debug('Creating new source file', {
                     srcPath: problem.src.path,
                 });
                 await Companion.createSourceFile(problem);
             }
 
-            const document = await workspace.openTextDocument(problem.src.path);
-            Companion.logger.info('Opened document', {
+            await Problems.saveProblem(problem);
+            createdDocuments.push(Uri.file(problem.src.path));
+        }
+
+        if (createdDocuments.length > 0) {
+            const document = await workspace.openTextDocument(
+                createdDocuments[0],
+            );
+            Companion.logger.debug('Opened document', {
                 document: document.fileName,
             });
-            await Problems.saveProblem(problem);
             await window.showTextDocument(
                 document,
                 Settings.companion.showPanel,
             );
-            await ProblemsManager.dataRefresh();
-        } catch (e) {
-            Companion.logger.warn('Parse data from companion failed', e);
-            Io.warn(
-                l10n.t('Parse data from companion failed: {msg}.', {
-                    msg: (e as Error).message,
-                }),
-            );
+
+            if (createdDocuments.length > 1) {
+                Io.info(
+                    l10n.t('Created {count} problems', {
+                        count: createdDocuments.length,
+                    }),
+                );
+            }
         }
+
+        await ProblemsManager.dataRefresh();
     }
 
     public static async submit(problem?: Problem): Promise<void> {
@@ -204,7 +322,7 @@ class Companion {
         }
 
         const sourceCode = await readFile(problem.src.path, 'utf-8');
-        Companion.logger.info('Read source code for submission', {
+        Companion.logger.debug('Read source code for submission', {
             srcPath: problem.src.path,
             sourceCode,
         });
@@ -212,7 +330,10 @@ class Companion {
             Io.warn(l10n.t('Source code is empty. Submission cancelled.'));
             return;
         }
-        const requestData: Exclude<CphSubmitResponse, { empty: true }> = {
+        Companion.logger.info(
+            `Submitting problem ${problem.name} using language ${submitLanguageId} and file ${problem.src.path}`,
+        );
+        const requestData: Exclude<CphSubmitResponse, CphSubmitEmpty> = {
             empty: false,
             problemName: problem.name,
             url: problem.url || '',
@@ -263,7 +384,6 @@ class Companion {
         const data = Companion.pendingSubmitData;
         if (data) {
             Companion.logger.debug('Pending submission data found', data);
-            Companion.logger.info('Serving pending submission to companion');
             Companion.pendingSubmitData = undefined;
             return data;
         }
@@ -277,7 +397,7 @@ class Companion {
         });
         try {
             if (Settings.problem.templateFile) {
-                Companion.logger.info('Using template file', {
+                Companion.logger.debug('Using template file', {
                     templateFile: Settings.problem.templateFile,
                 });
                 try {
@@ -285,7 +405,7 @@ class Companion {
                         problem.src.path,
                         await renderTemplate(problem),
                     );
-                    Companion.logger.info('Template applied successfully', {
+                    Companion.logger.debug('Template applied successfully', {
                         srcPath: problem.src.path,
                     });
                 } catch (e) {
@@ -297,12 +417,12 @@ class Companion {
                         ),
                     );
                     await writeFile(problem.src.path, '');
-                    Companion.logger.info('Created empty source file', {
+                    Companion.logger.debug('Created empty source file', {
                         srcPath: problem.src.path,
                     });
                 }
             } else {
-                Companion.logger.info(
+                Companion.logger.debug(
                     'No template file configured, creating empty file',
                 );
                 await writeFile(problem.src.path, '');
@@ -313,60 +433,6 @@ class Companion {
                 `Failed to create source file: ${(e as Error).message}`,
             );
         }
-    }
-
-    private static getProblemFileName(name: string, url?: string) {
-        Companion.logger.trace('getProblemFileName', { name, url });
-        const { shortCodeforcesName, shortLuoguName, shortAtCoderName } =
-            Settings.companion;
-        const ext = Settings.companion.defaultExtension;
-        if (url) {
-            try {
-                const u = new URL(url);
-                const isHost = (host: string) =>
-                    u.hostname === host || u.hostname.endsWith(`.${host}`);
-                if (isHost('codeforces.com') && shortCodeforcesName) {
-                    const regexPatterns = [
-                        /\/contest\/(\d+)\/problem\/(\w+)/,
-                        /\/problemset\/problem\/(\d+)\/(\w+)/,
-                        /\/gym\/(\d+)\/problem\/(\w+)/,
-                    ];
-                    for (const regex of regexPatterns) {
-                        const match = url.match(regex);
-                        if (match) {
-                            return `${match[1]}${match[2]}.${ext}`;
-                        }
-                    }
-                }
-                if (isHost('luogu.com.cn') && shortLuoguName) {
-                    const match = url.match(/problem\/(\w+)/);
-                    if (match) {
-                        return `${match[1]}.${ext}`;
-                    }
-                }
-                if (isHost('atcoder.jp') && shortAtCoderName) {
-                    const match = url.match(/tasks\/(\w+)_(\w+)/);
-                    if (match) {
-                        return `${match[1]}${match[2]}.${ext}`;
-                    }
-                }
-            } catch (e) {
-                Companion.logger.warn(
-                    `Failed to parse URL: ${url}. Error: ${(e as Error).message}`,
-                    e,
-                );
-            }
-        }
-        const words = name.match(/[\p{L}]+|[0-9]+/gu);
-        const fileName =
-            (words ? `${words.join('_')}` : `${name.replace(/\W+/g, '_')}`) +
-            `.${ext}`;
-        Companion.logger.debug('Generated problem file name', {
-            originalName: name,
-            url,
-            fileName,
-        });
-        return fileName;
     }
 }
 

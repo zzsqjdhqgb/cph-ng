@@ -13,41 +13,7 @@ Competitive Companion 浏览器扩展集成的设置。
 - **用户影响**：CPH-NG 监听来自浏览器扩展的连接的端口。必须与 Competitive
   Companion 配置匹配。
 
-## 文件扩展名
-
-### `cph-ng.companion.defaultExtension`
-
-- **类型**：字符串
-- **默认值**：`".cpp"`
-- **用户影响**：从浏览器导入题目时创建的文件扩展名。
-
-## 题目命名
-
-### `cph-ng.companion.shortCodeforcesName`
-
-- **类型**：布尔值
-- **默认值**：`true`
-- **用户影响**：使用短题目名称（A、B、C）而不是完整标题用于 Codeforces。
-
-### `cph-ng.companion.shortLuoguName`
-
-- **类型**：布尔值
-- **默认值**：`true`
-- **用户影响**：缩短洛谷题目名称。
-
-### `cph-ng.companion.shortAtCoderName`
-
-- **类型**：布尔值
-- **默认值**：`true`
-- **用户影响**：缩短 AtCoder 题目名称。
-
 ## 文件保存
-
-### `cph-ng.companion.chooseSaveFolder`
-
-- **类型**：布尔值
-- **默认值**：`false`
-- **用户影响**：导入题目时是否提示选择保存位置。
 
 ### `cph-ng.companion.showPanel`
 

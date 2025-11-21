@@ -128,8 +128,8 @@ class CompanionSection extends SettingsSection {
     get listenPort(): number {
         return this.get('listenPort') as number;
     }
-    get defaultExtension(): string {
-        return this.get('defaultExtension') as string;
+    get customPathScript(): string {
+        return renderPath(this.get('customPathScript') as string);
     }
     get submitLanguage(): number {
         return this.get('submitLanguage') as number;
@@ -140,20 +140,8 @@ class CompanionSection extends SettingsSection {
     get addTimestamp(): number {
         return this.get('addTimestamp') as number;
     }
-    get chooseSaveFolder(): boolean {
-        return this.get('chooseSaveFolder') as boolean;
-    }
     get showPanel(): number {
         return this.get('showPanel') as number;
-    }
-    get shortCodeforcesName(): boolean {
-        return this.get('shortCodeforcesName') as boolean;
-    }
-    get shortLuoguName(): boolean {
-        return this.get('shortLuoguName') as boolean;
-    }
-    get shortAtCoderName(): boolean {
-        return this.get('shortAtCoderName') as boolean;
     }
 }
 

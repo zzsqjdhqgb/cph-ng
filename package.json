@@ -497,30 +497,15 @@
                 "order": 8,
                 "title": "%cph-ng.configuration.companion.title%",
                 "properties": {
-                    "cph-ng.companion.shortCodeforcesName": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%cph-ng.configuration.companion.properties.shortCodeforcesName.markdownDescription%"
-                    },
-                    "cph-ng.companion.shortLuoguName": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%cph-ng.configuration.companion.properties.shortLuoguName.markdownDescription%"
-                    },
-                    "cph-ng.companion.shortAtCoderName": {
-                        "type": "boolean",
-                        "default": true,
-                        "markdownDescription": "%cph-ng.configuration.companion.properties.shortAtCoderName.markdownDescription%"
-                    },
                     "cph-ng.companion.listenPort": {
                         "type": "number",
                         "default": 27121,
                         "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
                     },
-                    "cph-ng.companion.defaultExtension": {
+                    "cph-ng.companion.customPathScript": {
                         "type": "string",
-                        "default": "cpp",
-                        "markdownDescription": "%cph-ng.configuration.companion.properties.defaultExtension.markdownDescription%"
+                        "default": "${extensionPath}/res/defaultScript.js",
+                        "markdownDescription": "%cph-ng.configuration.companion.properties.customPathScript.markdownDescription%"
                     },
                     "cph-ng.companion.submitLanguage": {
                         "type": "number",
@@ -543,11 +528,6 @@
                         "type": "boolean",
                         "default": true,
                         "markdownDescription": "%cph-ng.configuration.companion.properties.addTimestamp.markdownDescription%"
-                    },
-                    "cph-ng.companion.chooseSaveFolder": {
-                        "type": "boolean",
-                        "default": false,
-                        "markdownDescription": "%cph-ng.configuration.companion.properties.chooseSaveFolder.markdownDescription%"
                     },
                     "cph-ng.companion.showPanel": {
                         "type": "number",

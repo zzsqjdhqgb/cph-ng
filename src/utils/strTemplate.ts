@@ -21,6 +21,7 @@ import { basename, dirname, extname, normalize, relative } from 'path';
 import { l10n, Uri, workspace } from 'vscode';
 import Io from '../helpers/io';
 import Settings from '../modules/settings';
+import { extensionPath } from './global';
 import { Problem } from './types';
 
 const renderString = (original: string, replacements: [string, string][]) => {
@@ -44,6 +45,7 @@ export const renderPath = (original: string) => {
         renderString(original, [
             ['tmp', tmpdir()],
             ['home', homedir()],
+            ['extensionPath', extensionPath],
         ]),
     );
 };

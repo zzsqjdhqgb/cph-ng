@@ -9,6 +9,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: add support for unlimited stack size in runner
 - **fix**: remove source file indicator in problem title
 - **feat**: unified test case extension
+- **feat**: add customizable companion data handling
 
 ## 0.4.7
 
