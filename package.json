@@ -376,12 +376,12 @@
                 "properties": {
                     "cph-ng.bfCompare.generatorTimeLimit": {
                         "type": "number",
-                        "default": 10,
+                        "default": 10000,
                         "markdownDescription": "%cph-ng.configuration.bfCompare.properties.generatorTimeLimit.markdownDescription%"
                     },
                     "cph-ng.bfCompare.bruteForceTimeLimit": {
                         "type": "number",
-                        "default": 60,
+                        "default": 60000,
                         "markdownDescription": "%cph-ng.configuration.bfCompare.properties.bruteForceTimeLimit.markdownDescription%"
                     }
                 }

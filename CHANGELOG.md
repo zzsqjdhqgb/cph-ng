@@ -10,6 +10,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: remove source file indicator in problem title
 - **feat**: unified test case extension
 - **feat**: add customizable companion data handling
+- **fix**: use correct unit for brute force compare
 
 ## 0.4.7
 
