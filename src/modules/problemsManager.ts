@@ -263,50 +263,48 @@ export default class ProblemsManager {
         }
         fullProblem.ac && fullProblem.ac.abort();
         fullProblem.ac = new AbortController();
-        const beforeReturn = async () => {
+
+        try {
+            const tc = fullProblem.problem.tcs[msg.id];
+            tc.result = {
+                verdict: TCVerdicts.CP,
+                stdout: { useFile: false, data: '' },
+                stderr: { useFile: false, data: '' },
+            };
+            tc.isExpand = false;
+            await this.dataRefresh();
+            const result = tc.result;
+
+            const compileResult = await Compiler.compileAll(
+                fullProblem.problem,
+                srcLang,
+                msg.compile,
+                fullProblem.ac,
+            );
+            if (assignResult(result, compileResult)) {
+                tc.isExpand = true;
+                return;
+            }
+            const compileData = compileResult.data;
+            if (!compileData) {
+                result.verdict = TCVerdicts.SE;
+                result.msg = l10n.t('Compile data is empty.');
+                return;
+            }
+
+            await Runner.run(
+                fullProblem.problem,
+                result,
+                fullProblem.ac,
+                srcLang,
+                tc,
+                compileData,
+            );
+            tc.isExpand = isExpandVerdict(result.verdict);
+        } finally {
             fullProblem.ac = null;
             await this.dataRefresh();
-        };
-
-        const tc = fullProblem.problem.tcs[msg.id];
-        tc.result = {
-            verdict: TCVerdicts.CP,
-            stdout: { useFile: false, data: '' },
-            stderr: { useFile: false, data: '' },
-        };
-        tc.isExpand = false;
-        await this.dataRefresh();
-        const result = tc.result;
-
-        const compileResult = await Compiler.compileAll(
-            fullProblem.problem,
-            srcLang,
-            msg.compile,
-            fullProblem.ac,
-        );
-        if (assignResult(result, compileResult)) {
-            tc.isExpand = true;
-            await beforeReturn();
-            return;
         }
-        const compileData = compileResult.data;
-        if (!compileData) {
-            result.verdict = TCVerdicts.SE;
-            result.msg = l10n.t('Compile data is empty.');
-            await beforeReturn();
-            return;
-        }
-
-        await Runner.run(
-            fullProblem.problem,
-            result,
-            fullProblem.ac,
-            srcLang,
-            tc,
-            compileData,
-        );
-        tc.isExpand = isExpandVerdict(result.verdict);
-        await beforeReturn();
     }
     public static async toggleDisable(msg: msgs.ToggleDisableMsg) {
         const fullProblem = await this.getFullProblem(msg.activePath);
@@ -660,7 +658,134 @@ export default class ProblemsManager {
         }
         fullProblem.ac && fullProblem.ac.abort();
         fullProblem.ac = new AbortController();
-        const beforeReturn = async () => {
+
+        let cnt = 0;
+        try {
+            bfCompare.running = true;
+            bfCompare.msg = l10n.t('Compiling...');
+            await this.dataRefresh();
+            const compileResult = await Compiler.compileAll(
+                fullProblem.problem,
+                srcLang,
+                msg.compile,
+                fullProblem.ac,
+                true,
+            );
+            if (compileResult.verdict !== TCVerdicts.UKE) {
+                bfCompare.msg = l10n.t('Solution compilation failed.');
+                return;
+            }
+            const compileData = compileResult.data;
+            if (!compileData || !compileData.bfCompare) {
+                bfCompare.msg = l10n.t('Compile data is empty.');
+                return;
+            }
+
+            while (true) {
+                cnt++;
+                if (fullProblem.ac.signal.aborted) {
+                    bfCompare.msg = l10n.t(
+                        'Brute Force comparison stopped by user.',
+                    );
+                    break;
+                }
+
+                bfCompare.msg = l10n.t('#{cnt} Running generator...', {
+                    cnt,
+                });
+                await this.dataRefresh();
+                const generatorRunResult = await Runner.doRun({
+                    cmd: [compileData.bfCompare.generator.outputPath],
+                    timeLimit: Settings.bfCompare.generatorTimeLimit,
+                    stdin: { useFile: false, data: '' },
+                    ac: fullProblem.ac,
+                    enableRunner: false,
+                });
+                if (generatorRunResult.verdict !== TCVerdicts.UKE) {
+                    if (generatorRunResult.verdict !== TCVerdicts.RJ) {
+                        bfCompare.msg = l10n.t('Generator run failed: {msg}', {
+                            msg: generatorRunResult.msg,
+                        });
+                    }
+                    break;
+                }
+                assert(generatorRunResult.data);
+                const stdin: TCIO = {
+                    useFile: true,
+                    path: generatorRunResult.data.stdoutPath,
+                };
+
+                bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
+                    cnt,
+                });
+                await this.dataRefresh();
+                const bruteForceRunResult = await Runner.doRun({
+                    cmd: [compileData.bfCompare.bruteForce.outputPath],
+                    timeLimit: Settings.bfCompare.bruteForceTimeLimit,
+                    stdin,
+                    ac: fullProblem.ac,
+                    enableRunner: false,
+                });
+                if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
+                    if (generatorRunResult.verdict !== TCVerdicts.RJ) {
+                        bfCompare.msg = l10n.t(
+                            'Brute force run failed: {msg}',
+                            {
+                                msg: bruteForceRunResult.msg,
+                            },
+                        );
+                    }
+                    break;
+                }
+                assert(bruteForceRunResult.data);
+
+                bfCompare.msg = l10n.t('#{cnt} Running solution...', {
+                    cnt,
+                });
+                await this.dataRefresh();
+                const tempTc: TC = {
+                    stdin,
+                    answer: {
+                        useFile: true,
+                        path: bruteForceRunResult.data.stdoutPath,
+                    },
+                    isExpand: true,
+                    isDisabled: false,
+                    result: {
+                        verdict: TCVerdicts.CP,
+                        stdout: { useFile: false, data: '' },
+                        stderr: { useFile: false, data: '' },
+                    },
+                } satisfies TC;
+                await Runner.run(
+                    fullProblem.problem,
+                    tempTc.result!,
+                    fullProblem.ac,
+                    srcLang,
+                    tempTc,
+                    compileResult.data!,
+                );
+                if (tempTc.result?.verdict !== TCVerdicts.AC) {
+                    if (tempTc.result?.verdict !== TCVerdicts.RJ) {
+                        const uuid = randomUUID();
+                        fullProblem.problem.tcs[uuid] = {
+                            stdin: await TcFactory.inlineSmallTc(tempTc.stdin),
+                            answer: await TcFactory.inlineSmallTc(
+                                tempTc.answer,
+                            ),
+                            isDisabled: false,
+                            isExpand: true,
+                        };
+                        fullProblem.problem.tcOrder.push(uuid);
+                        bfCompare.msg = l10n.t(
+                            'Found a difference in #{cnt} run.',
+                            { cnt },
+                        );
+                    }
+                    break;
+                }
+            }
+        } finally {
             bfCompare.running = false;
             if (fullProblem.ac?.signal.aborted) {
                 bfCompare.msg = l10n.t(
@@ -670,131 +795,7 @@ export default class ProblemsManager {
             }
             fullProblem.ac = null;
             await this.dataRefresh();
-        };
-
-        bfCompare.running = true;
-        bfCompare.msg = l10n.t('Compiling...');
-        await this.dataRefresh();
-        const compileResult = await Compiler.compileAll(
-            fullProblem.problem,
-            srcLang,
-            msg.compile,
-            fullProblem.ac,
-            true,
-        );
-        if (compileResult.verdict !== TCVerdicts.UKE) {
-            bfCompare.msg = l10n.t('Solution compilation failed.');
-            await beforeReturn();
-            return;
         }
-        const compileData = compileResult.data;
-        if (!compileData || !compileData.bfCompare) {
-            bfCompare.msg = l10n.t('Compile data is empty.');
-            await beforeReturn();
-            return;
-        }
-
-        let cnt = 0;
-        while (true) {
-            cnt++;
-            if (fullProblem.ac.signal.aborted) {
-                bfCompare.msg = l10n.t(
-                    'Brute Force comparison stopped by user.',
-                );
-                break;
-            }
-
-            bfCompare.msg = l10n.t('#{cnt} Running generator...', {
-                cnt,
-            });
-            await this.dataRefresh();
-            const generatorRunResult = await Runner.doRun({
-                cmd: [compileData.bfCompare.generator.outputPath],
-                timeLimit: Settings.bfCompare.generatorTimeLimit,
-                stdin: { useFile: false, data: '' },
-                ac: fullProblem.ac,
-                enableRunner: false,
-            });
-            if (generatorRunResult.verdict !== TCVerdicts.UKE) {
-                if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                    bfCompare.msg = l10n.t('Generator run failed: {msg}', {
-                        msg: generatorRunResult.msg,
-                    });
-                }
-                break;
-            }
-            assert(generatorRunResult.data);
-            const stdin: TCIO = {
-                useFile: true,
-                path: generatorRunResult.data.stdoutPath,
-            };
-
-            bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
-                cnt,
-            });
-            await this.dataRefresh();
-            const bruteForceRunResult = await Runner.doRun({
-                cmd: [compileData.bfCompare.bruteForce.outputPath],
-                timeLimit: Settings.bfCompare.bruteForceTimeLimit,
-                stdin,
-                ac: fullProblem.ac,
-                enableRunner: false,
-            });
-            if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
-                if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                    bfCompare.msg = l10n.t('Brute force run failed: {msg}', {
-                        msg: bruteForceRunResult.msg,
-                    });
-                }
-                break;
-            }
-            assert(bruteForceRunResult.data);
-
-            bfCompare.msg = l10n.t('#{cnt} Running solution...', {
-                cnt,
-            });
-            await this.dataRefresh();
-            const tempTc: TC = {
-                stdin,
-                answer: {
-                    useFile: true,
-                    path: bruteForceRunResult.data.stdoutPath,
-                },
-                isExpand: true,
-                isDisabled: false,
-                result: {
-                    verdict: TCVerdicts.CP,
-                    stdout: { useFile: false, data: '' },
-                    stderr: { useFile: false, data: '' },
-                },
-            } satisfies TC;
-            await Runner.run(
-                fullProblem.problem,
-                tempTc.result!,
-                fullProblem.ac,
-                srcLang,
-                tempTc,
-                compileResult.data!,
-            );
-            if (tempTc.result?.verdict !== TCVerdicts.AC) {
-                if (tempTc.result?.verdict !== TCVerdicts.RJ) {
-                    const uuid = randomUUID();
-                    fullProblem.problem.tcs[uuid] = {
-                        stdin: await TcFactory.inlineSmallTc(tempTc.stdin),
-                        answer: await TcFactory.inlineSmallTc(tempTc.answer),
-                        isDisabled: false,
-                        isExpand: true,
-                    };
-                    fullProblem.problem.tcOrder.push(uuid);
-                    bfCompare.msg = l10n.t(
-                        'Found a difference in #{cnt} run.',
-                        { cnt },
-                    );
-                }
-                break;
-            }
-        }
-        await beforeReturn();
     }
     public static async stopBfCompare(
         msg: msgs.StopBfCompareMsg,
