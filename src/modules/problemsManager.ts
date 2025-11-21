@@ -31,7 +31,13 @@ import ProcessExecutor from '../helpers/processExecutor';
 import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
 import { exists } from '../utils/process';
 import { assignResult } from '../utils/result';
-import { isExpandVerdict, isRunningVerdict, Problem, TC } from '../utils/types';
+import {
+    isExpandVerdict,
+    isRunningVerdict,
+    Problem,
+    TC,
+    TCIO,
+} from '../utils/types';
 import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import * as msgs from '../webview/msgs';
 import Companion from './companion';
@@ -718,6 +724,10 @@ export default class ProblemsManager {
                 break;
             }
             assert(generatorRunResult.data);
+            const stdin: TCIO = {
+                useFile: true,
+                path: generatorRunResult.data.stdoutPath,
+            };
 
             bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
                 cnt,
@@ -726,7 +736,7 @@ export default class ProblemsManager {
             const bruteForceRunResult = await Runner.doRun({
                 cmd: [compileData.bfCompare.bruteForce.outputPath],
                 timeLimit: Settings.bfCompare.bruteForceTimeLimit,
-                stdin: { useFile: false, data: generatorRunResult.data.stdout },
+                stdin,
                 ac: fullProblem.ac,
                 enableRunner: false,
             });
@@ -745,10 +755,10 @@ export default class ProblemsManager {
             });
             await this.dataRefresh();
             const tempTc: TC = {
-                stdin: { useFile: false, data: generatorRunResult.data.stdout },
+                stdin,
                 answer: {
-                    useFile: false,
-                    data: bruteForceRunResult.data.stdout,
+                    useFile: true,
+                    path: bruteForceRunResult.data.stdoutPath,
                 },
                 isExpand: true,
                 isDisabled: false,
@@ -768,38 +778,13 @@ export default class ProblemsManager {
             );
             if (tempTc.result?.verdict !== TCVerdicts.AC) {
                 if (tempTc.result?.verdict !== TCVerdicts.RJ) {
-                    if (
-                        !tempTc.stdin.useFile &&
-                        tempTc.stdin.data.length >
-                            Settings.problem.maxInlineDataLength &&
-                        (await Io.confirm(
-                            l10n.t(
-                                'The brute force compare found a difference, but the input file is {size} bytes, which may be large. Do you want to save it in file instead?',
-                                { size: tempTc.stdin.data.length },
-                            ),
-                            true,
-                        ))
-                    ) {
-                        let tempFilePath: string | undefined = join(
-                            dirname(fullProblem.problem.src.path),
-                            `${basename(fullProblem.problem.src.path, extname(fullProblem.problem.src.path))}-${cnt}.in`,
-                        );
-                        tempFilePath = await window
-                            .showSaveDialog({
-                                defaultUri: Uri.file(tempFilePath),
-                                saveLabel: l10n.t('Select location to save'),
-                            })
-                            .then((uri) => (uri ? uri.fsPath : undefined));
-                        if (tempFilePath) {
-                            await writeFile(tempFilePath, tempTc.stdin.data);
-                            tempTc.stdin = {
-                                useFile: true,
-                                path: tempFilePath,
-                            };
-                        }
-                    }
                     const uuid = randomUUID();
-                    fullProblem.problem.tcs[uuid] = tempTc;
+                    fullProblem.problem.tcs[uuid] = {
+                        stdin: await TcFactory.inlineSmallTc(tempTc.stdin),
+                        answer: await TcFactory.inlineSmallTc(tempTc.answer),
+                        isDisabled: false,
+                        isExpand: true,
+                    };
                     fullProblem.problem.tcOrder.push(uuid);
                     bfCompare.msg = l10n.t(
                         'Found a difference in #{cnt} run.',

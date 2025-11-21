@@ -11,6 +11,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: unified test case extension
 - **feat**: add customizable companion data handling
 - **fix**: use correct unit for brute force compare
+- **fix**: use file to enhance robustness
 
 ## 0.4.7
 

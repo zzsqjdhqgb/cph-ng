@@ -16,8 +16,8 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { SHA256 } from 'crypto-js';
-import { createReadStream } from 'fs';
+import { randomUUID } from 'crypto';
+import { createReadStream, createWriteStream } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { constants } from 'os';
 import { dirname, join } from 'path';
@@ -42,8 +42,8 @@ interface LaunchOptions {
 interface LaunchResult {
     child: ChildProcessWithoutNullStreams;
     acSignal: AbortSignal;
-    stdout: string;
-    stderr: string;
+    stdoutPath: string;
+    stderrPath: string;
     startTime: number;
     endTime?: number;
     memory?: number;
@@ -54,8 +54,8 @@ export type ExecuteResult =
     | {
           // The exit code or signal that terminated the process
           codeOrSignal: number | NodeJS.Signals;
-          stdout: string;
-          stderr: string;
+          stdoutPath: string;
+          stderrPath: string;
           time: number;
           memory?: number;
           abortReason?: AbortReason;
@@ -132,7 +132,7 @@ export default class ProcessExecutor {
                     l10n.t('Failed to compile runner program'),
                 );
             } else if (result.codeOrSignal) {
-                Io.compilationMsg = result.stderr;
+                Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
                 return ProcessExecutor.toErrorResult(
                     l10n.t('Failed to compile runner program'),
                 );
@@ -147,23 +147,18 @@ export default class ProcessExecutor {
             );
         }
 
-        const hash = SHA256(`${cmd.join(' ')}-${Date.now()}-${Math.random()}`)
-            .toString()
-            .substring(0, 8);
-
-        const ioDir = join(Settings.cache.directory, 'io');
         const inputFile = await tcIo2Path(stdin);
-        const outputFile = join(ioDir, `${hash}.out`);
-        const errorFile = join(ioDir, `${hash}.err`);
-        await writeFile(outputFile, '');
-        await writeFile(errorFile, '');
+        const stdoutPath = join(Settings.cache.directory, 'io', randomUUID());
+        const stderrPath = join(Settings.cache.directory, 'io', randomUUID());
+        await writeFile(stdoutPath, '');
+        await writeFile(stderrPath, '');
 
         const runnerCmd = [
             runnerPath,
             cmd.join(' '),
             inputFile,
-            outputFile,
-            errorFile,
+            stdoutPath,
+            stderrPath,
         ];
         if (Settings.runner.unlimitedStack) {
             runnerCmd.push('--unlimited-stack');
@@ -204,7 +199,9 @@ export default class ProcessExecutor {
                 }
                 try {
                     this.logger.debug('Reading runner output', launch);
-                    const runInfo = JSON.parse(launch.stdout) as RunnerOutput;
+                    const runInfo = JSON.parse(
+                        await readFile(launch.stdoutPath, 'utf-8'),
+                    ) as RunnerOutput;
                     this.logger.info('Runner output', runInfo);
                     if (runInfo.error) {
                         resolve(
@@ -221,8 +218,8 @@ export default class ProcessExecutor {
                                 {
                                     ...launch,
                                     acSignal: unifiedAc.signal,
-                                    stdout: await readFile(outputFile, 'utf8'),
-                                    stderr: await readFile(errorFile, 'utf8'),
+                                    stdoutPath,
+                                    stderrPath,
                                     // Just need to ensure endTime - startTime = time
                                     startTime: 0,
                                     endTime: runInfo.time,
@@ -356,8 +353,8 @@ export default class ProcessExecutor {
         const result: LaunchResult = {
             child,
             acSignal: unifiedAc.signal,
-            stdout: '',
-            stderr: '',
+            stdoutPath: join(Settings.cache.directory, 'io', randomUUID()),
+            stderrPath: join(Settings.cache.directory, 'io', randomUUID()),
             startTime: Date.now(),
         };
 
@@ -389,13 +386,8 @@ export default class ProcessExecutor {
                 ? pipeline(createReadStream(stdin.path), child.stdin)
                 : (child.stdin.write(stdin.data), child.stdin.end());
         }
-        child.stdout.on('data', (data) => {
-            result.stdout += data.toString();
-        });
-        child.stderr.on('data', (data) => {
-            result.stderr += data.toString();
-        });
-
+        pipeline(child.stdout, createWriteStream(result.stdoutPath));
+        pipeline(child.stderr, createWriteStream(result.stderrPath));
         return result;
     }
 
@@ -407,8 +399,8 @@ export default class ProcessExecutor {
         this.logger.debug(`Process ${launch.child.pid} close`, data);
         return {
             codeOrSignal: data,
-            stdout: launch.stdout,
-            stderr: launch.stderr,
+            stdoutPath: launch.stdoutPath,
+            stderrPath: launch.stderrPath,
             // A fallback for time if not set
             time: (launch.endTime ?? Date.now()) - launch.startTime,
             memory: launch.memory,

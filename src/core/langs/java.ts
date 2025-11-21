@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants } from 'fs/promises';
+import { access, constants, readFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import { l10n } from 'vscode';
 import Io from '../../helpers/io';
@@ -85,7 +85,7 @@ export class LangJava extends Lang {
             path: src.path,
             outputPath,
         });
-        Io.compilationMsg = result.stderr.trim();
+        Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
         if (result.abortReason === AbortReason.UserAbort) {
             return {
                 verdict: TCVerdicts.RJ,
@@ -97,7 +97,7 @@ export class LangJava extends Lang {
                 msg: l10n.t('Compilation timed out'),
             };
         } else if (result.codeOrSignal) {
-            Io.compilationMsg = result.stderr.trim();
+            Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
             return {
                 verdict: TCVerdicts.CE,
                 msg: l10n.t('Compiler exited with code {code}', {

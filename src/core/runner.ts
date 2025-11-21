@@ -27,9 +27,10 @@ import {
 } from '../helpers/processResultHandler';
 import ProblemsManager from '../modules/problemsManager';
 import Settings from '../modules/settings';
+import TcFactory from '../modules/tcFactory';
 import { assignResult } from '../utils/result';
 import { Problem, TC, TCIO, TCResult } from '../utils/types';
-import { tcIo2Str, TCVerdicts, write2TcIo } from '../utils/types.backend';
+import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
 import { Checker } from './checker';
 import { CompileResult } from './compiler';
 import { Lang } from './langs/lang';
@@ -79,7 +80,7 @@ export class Runner {
         }
 
         // Adjust time limit for runner overhead
-        return ProcessResultHandler.parse(
+        return await ProcessResultHandler.parse(
             await (Settings.runner.useRunner && options.enableRunner
                 ? ProcessExecutor.executeWithRunner({
                       ...options,
@@ -131,19 +132,21 @@ export class Runner {
         });
 
         // Process results
-        const intProcessResult = ProcessResultHandler.parseChecker(intResult);
-        const solProcessResult = ProcessResultHandler.parse(solResult);
+        const intProcessResult =
+            await ProcessResultHandler.parseChecker(intResult);
+        const solProcessResult = await ProcessResultHandler.parse(solResult);
         return {
             ...(solProcessResult.verdict !== TCVerdicts.UKE
                 ? solProcessResult
                 : intProcessResult),
             data: intProcessResult.data && {
                 ...intProcessResult.data,
-                stdout: await readFile(outputFile, 'utf-8'),
+                stdoutPath: outputFile,
             },
         } satisfies ProcessResult;
     }
 
+    // We pass a result besides tc to ensure that tc.result is always defined
     public static async run(
         problem: Problem,
         result: TCResult,
@@ -170,46 +173,21 @@ export class Runner {
                 compileData.interactor?.outputPath,
             );
             if (runResult.data) {
-                const { time, memory, stdout, stderr } = runResult.data;
+                const { time, memory, stdoutPath, stderrPath } = runResult.data;
 
                 // Update time and memory
                 result.time = time;
                 result.memory = memory;
 
                 // Handle stdout and stderr
-                if (
-                    tc.answer.useFile ||
-                    (Settings.runner.stdoutThreshold !== -1 &&
-                        stdout.length >= Settings.runner.stdoutThreshold)
-                ) {
-                    result.stdout = {
-                        useFile: true,
-                        path: join(
-                            Settings.cache.directory,
-                            'out',
-                            `${this.getTCHash(problem, tc)}.out`,
-                        ),
-                    };
-                } else {
-                    result.stdout.useFile = false;
-                }
-                result.stdout = await write2TcIo(result.stdout, stdout);
-                if (
-                    Settings.runner.stderrThreshold !== -1 &&
-                    stderr.length >= Settings.runner.stderrThreshold
-                ) {
-                    result.stderr = {
-                        useFile: true,
-                        path: join(
-                            Settings.cache.directory,
-                            'out',
-                            `${this.getTCHash(problem, tc)}.err`,
-                        ),
-                    };
-                } else {
-                    result.stderr.useFile = false;
-                }
-                result.stderr = await write2TcIo(result.stderr, stderr);
+                result.stdout = await TcFactory.inlineSmallTc({
+                    useFile: true,
+                    path: stdoutPath,
+                });
+                result.stderr = await TcFactory.inlineSmallTc({
+                    useFile: true,
+                    path: stderrPath,
+                });
                 await ProblemsManager.dataRefresh();
             }
             if (assignResult(result, runResult)) {
@@ -232,7 +210,10 @@ export class Runner {
                         ac,
                     );
                     assignResult(result, checkerResult);
-                    result.msg ||= checkerResult.data?.stderr;
+                    const stderrPath = checkerResult.data?.stderrPath;
+                    if (stderrPath) {
+                        result.msg ||= await readFile(stderrPath, 'utf-8');
+                    }
                 } else {
                     assignResult(
                         result,

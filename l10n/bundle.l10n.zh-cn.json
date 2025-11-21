@@ -160,7 +160,6 @@
     "Testlib returned unknown exit code: {code}": "Testlib 返回了未知的退出代码：{code}",
     "Testlib run failed": "Testlib 运行失败",
     "Text files": "文本文件",
-    "The brute force compare found a difference, but the input file is {size} bytes, which may be large. Do you want to save it in file instead?": "对拍发现差异，但输入文件大小为 {size} 字节，可能较大。是否将其保存为文件？",
     "The file size is {size} bytes, which may be large. Are you sure you want to load it inline?": "文件大小为 {size} 字节，可能较大。确定要以内联方式加载吗？",
     "Time Limit Exceed": "时间超限",
     "Time: {time}ms": "时间：{time}ms",

@@ -17,7 +17,7 @@
 
 import AdmZip from 'adm-zip';
 import { randomUUID } from 'crypto';
-import { mkdir, readdir, unlink } from 'fs/promises';
+import { mkdir, readdir, readFile, stat, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
 import { l10n, window } from 'vscode';
@@ -44,6 +44,22 @@ interface ParticleTCIO {
 }
 
 export default class TcFactory {
+    public static async inlineSmallTc(tcIo: TCIO): Promise<TCIO> {
+        const threshold = Settings.runner.stdoutThreshold;
+        if (tcIo.useFile) {
+            try {
+                const stats = await stat(tcIo.path);
+                if (stats.size <= threshold) {
+                    return {
+                        useFile: false,
+                        data: await readFile(tcIo.path, 'utf-8'),
+                    };
+                }
+            } catch {}
+        }
+        return tcIo;
+    }
+
     public static async fromFile(
         path: string,
         isInput?: boolean,

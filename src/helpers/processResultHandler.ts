@@ -16,6 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import assert from 'assert';
+import { readFile, writeFile } from 'fs/promises';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
@@ -31,34 +32,44 @@ export interface WrapperData {
 export type ProcessResult = Result<{
     time: number;
     memory?: number;
-    stdout: string;
-    stderr: string;
+    stdoutPath: string;
+    stderrPath: string;
 }>;
 
 export class ProcessResultHandler {
     private static logger: Logger = new Logger('processResultHandler');
 
-    public static extractWrapperData(stderr: string): {
-        wrapperData?: WrapperData;
-        cleanStderr: string;
-    } {
-        const match = stderr.match(/-----CPH DATA STARTS-----(\{.*\})-----/);
+    public static async extractWrapperData(
+        stderrPath: string,
+    ): Promise<WrapperData | undefined> {
+        const stderrContent = await readFile(stderrPath, 'utf-8');
+        const wrapperDataRegex = /-----CPH DATA STARTS-----(\{.*?\})-----/s;
+        const match = stderrContent.match(wrapperDataRegex);
         if (match) {
+            const wrapperDataStr = match[1];
+            let wrapperData: WrapperData | undefined;
             try {
-                const wrapperData = JSON.parse(match[1]) as WrapperData;
-                const cleanStderr = stderr.replace(match[0], '').trimEnd();
-                return { wrapperData, cleanStderr };
+                wrapperData = JSON.parse(wrapperDataStr) as WrapperData;
             } catch (e) {
-                this.logger.error('Failed to parse wrapper data', e);
+                this.logger.error(
+                    'Failed to parse wrapper data JSON',
+                    e as Error,
+                );
             }
+            await writeFile(
+                stderrPath,
+                stderrContent.replace(wrapperDataRegex, '').trim(),
+            );
+            return wrapperData;
+        } else {
+            return undefined;
         }
-        return { cleanStderr: stderr };
     }
 
-    public static parse(
+    public static async parse(
         result: ExecuteResult,
         ignoreExitCode: boolean = false,
-    ): ProcessResult {
+    ): Promise<ProcessResult> {
         this.logger.trace('parse', { result, ignoreExitCode });
         this.logger.info('Parsing process result', { result, ignoreExitCode });
         if (result instanceof Error) {
@@ -67,9 +78,7 @@ export class ProcessResultHandler {
                 msg: result.message,
             };
         }
-        const { wrapperData, cleanStderr } = this.extractWrapperData(
-            result.stderr,
-        );
+        const wrapperData = await this.extractWrapperData(result.stderrPath);
 
         // Use wrapper time if available
         const time = wrapperData
@@ -103,14 +112,16 @@ export class ProcessResultHandler {
             data: {
                 time,
                 memory: result.memory,
-                stdout: result.stdout,
-                stderr: cleanStderr,
+                stdoutPath: result.stdoutPath,
+                stderrPath: result.stderrPath,
             },
         };
     }
 
-    public static parseChecker(result: ExecuteResult): ProcessResult {
-        const preResult = this.parse(result, true);
+    public static async parseChecker(
+        result: ExecuteResult,
+    ): Promise<ProcessResult> {
+        const preResult = await this.parse(result, true);
         if (preResult.verdict !== TCVerdicts.UKE) {
             return preResult;
         }
@@ -124,8 +135,8 @@ export class ProcessResultHandler {
             data: {
                 time: result.time,
                 memory: result.memory,
-                stdout: result.stdout,
-                stderr: result.stderr,
+                stdoutPath: result.stdoutPath,
+                stderrPath: result.stderrPath,
             },
         };
     }
