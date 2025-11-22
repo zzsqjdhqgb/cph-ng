@@ -45,7 +45,7 @@ interface ParticleTCIO {
 
 export default class TcFactory {
     public static async inlineSmallTc(tcIo: TCIO): Promise<TCIO> {
-        const threshold = Settings.runner.stdoutThreshold;
+        const threshold = Settings.problem.maxInlineDataLength;
         if (tcIo.useFile) {
             try {
                 const stats = await stat(tcIo.path);

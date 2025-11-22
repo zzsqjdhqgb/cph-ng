@@ -152,12 +152,6 @@ class RunnerSection extends SettingsSection {
     get timeAddition(): number {
         return this.get('timeAddition') as number;
     }
-    get stdoutThreshold(): number {
-        return this.get('stdoutThreshold') as number;
-    }
-    get stderrThreshold(): number {
-        return this.get('stderrThreshold') as number;
-    }
     get useRunner(): boolean {
         return this.get('useRunner') as boolean;
     }
