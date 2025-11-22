@@ -18,32 +18,37 @@
 import Logger from '../helpers/logger';
 import ProcessExecutor from '../helpers/processExecutor';
 import {
-    ProcessResult,
+    ProcessData,
     ProcessResultHandler,
 } from '../helpers/processResultHandler';
-import { TC } from '../utils/types';
-import { tcIo2Path } from '../utils/types.backend';
+import { KnownResult } from '../utils/result';
+import { TCWithResult } from '../utils/types.backend';
 
 export class Checker {
     private static logger: Logger = new Logger('checker');
 
     public static async runChecker(
-        path: string,
-        tc: TC,
+        checkerPath: string,
+        tc: TCWithResult,
         ac: AbortController,
-    ): Promise<ProcessResult> {
-        this.logger.trace('runChecker', { path, tc, ac });
+    ): Promise<KnownResult<ProcessData>> {
+        this.logger.debug('Running checker', checkerPath, 'on tc', tc);
 
-        const inputFile = await tcIo2Path(tc.stdin);
-        const outputFile = await tcIo2Path(tc.result!.stdout);
-        const answerFile = await tcIo2Path(tc.answer);
-
+        // checker <InputFile> <OutputFile> <AnswerFile>
+        // https://github.com/MikeMirzayanov/testlib?tab=readme-ov-file#checker
         const result = await ProcessExecutor.execute({
-            cmd: [path, inputFile, outputFile, answerFile],
-            ac: ac,
+            cmd: [
+                checkerPath,
+                await tc.stdin.toPath(),
+                await tc.result.stdout.toPath(),
+                await tc.answer.toPath(),
+            ],
+            ac,
         });
-
         this.logger.debug('Checker completed', result);
-        return ProcessResultHandler.parseChecker(result);
+
+        const checkerResult = await ProcessResultHandler.parseChecker(result);
+        this.logger.debug('Parsed checker result', checkerResult);
+        return checkerResult;
     }
 }

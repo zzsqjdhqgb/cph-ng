@@ -26,7 +26,7 @@ import {
     LanguageModelToolResult,
     PreparedToolInvocation,
 } from 'vscode';
-import Io from '../helpers/io';
+import { CompilationIo } from '../helpers/io';
 import ProblemsManager from '../modules/problemsManager';
 
 interface CphTestRunnerParams {
@@ -179,9 +179,9 @@ class LlmTcRunner implements LanguageModelTool<CphTestRunnerParams> {
                     }),
                 );
             }
-            if (Io.compilationMsg.trim()) {
+            if (CompilationIo.toString()) {
                 outputParts.push('');
-                outputParts.push(Io.compilationMsg);
+                outputParts.push(CompilationIo.toString());
             }
         } else {
             const verdictSummary = new Map<

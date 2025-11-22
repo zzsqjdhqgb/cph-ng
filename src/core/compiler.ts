@@ -17,122 +17,134 @@
 
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
-import Result from '../utils/result';
-import { FileWithHash, Problem } from '../utils/types';
-import { TCVerdicts } from '../utils/types.backend';
-import { Lang, LangCompileResult } from './langs/lang';
+import { KnownResult, Result, UnknownResult } from '../utils/result';
+import { FileWithHash, Problem, TCVerdicts } from '../utils/types.backend';
+import { Lang, LangCompileData, LangCompileResult } from './langs/lang';
 import Langs from './langs/langs';
 
-export type CompileResult = Result<{
-    src: NonNullable<LangCompileResult['data']>;
-    checker?: NonNullable<LangCompileResult['data']>;
-    interactor?: NonNullable<LangCompileResult['data']>;
+export interface CompileData {
+    src: LangCompileData;
+    srcLang: Lang;
+    checker?: LangCompileData;
+    interactor?: LangCompileData;
     bfCompare?: {
-        generator: NonNullable<LangCompileResult['data']>;
-        bruteForce: NonNullable<LangCompileResult['data']>;
+        generator: LangCompileData;
+        bruteForce: LangCompileData;
     };
-}>;
+}
+type CompileResult = Result<CompileData>;
 
 export class Compiler {
     private static logger: Logger = new Logger('compiler');
 
+    /**
+     * Compile if the file given is a compilable language
+     * @returns UKE if compiled or not compilable; otherwise returns the compile error
+     */
     private static async optionalCompile(
         file: FileWithHash,
         ac: AbortController,
-        compile: boolean | null,
+        forceCompile: boolean | null,
     ): Promise<LangCompileResult> {
-        const checkerLang = Langs.getLang(file.path, true);
+        const checkerLang = Langs.getLang(file.path);
         if (checkerLang) {
-            return await checkerLang.compile(file, ac, compile);
+            return await checkerLang.compile(file, ac, forceCompile);
         }
-        return {
-            verdict: TCVerdicts.UKE,
-            data: {
-                outputPath: file.path,
-                hash: '',
-            },
-        };
+        return new UnknownResult({ outputPath: file.path });
     }
 
     public static async compileAll(
         problem: Problem,
-        lang: Lang,
         compile: boolean | null,
         ac: AbortController,
-        includeBfCompare: boolean = false,
     ): Promise<CompileResult> {
-        const result = await lang.compile(problem.src, ac, compile, {
+        // Compile source code
+        const srcLang = Langs.getLang(problem.src.path);
+        if (!srcLang) {
+            return new KnownResult(
+                TCVerdicts.SE,
+                l10n.t(
+                    'Cannot determine the programming language of the source file: {file}.',
+                    { file: problem.src.path },
+                ),
+            );
+        }
+        const result = await srcLang.compile(problem.src, ac, compile, {
             canUseWrapper: true,
             compilationSettings: problem.compilationSettings,
         });
-        if (result.verdict !== TCVerdicts.UKE) {
-            return { ...result, data: undefined };
+        if (result instanceof KnownResult) {
+            return result;
         }
-        problem.src.hash = result.data!.hash;
-        const data: CompileResult['data'] = {
-            src: result.data!,
+        problem.src.hash = result.data.hash;
+        const data: CompileData = {
+            src: result.data,
+            srcLang,
         };
+
+        // Compile checker
         if (problem.checker) {
             const checkerResult = await this.optionalCompile(
                 problem.checker,
                 ac,
                 compile,
             );
-            if (checkerResult.verdict !== TCVerdicts.UKE) {
+            if (checkerResult instanceof KnownResult) {
                 return { ...checkerResult, data };
             }
-            problem.checker.hash = checkerResult.data!.hash;
-            data.checker = checkerResult.data!;
+            problem.checker.hash = checkerResult.data.hash;
+            data.checker = checkerResult.data;
         }
+
+        // Compile interactor
         if (problem.interactor) {
             const interactorResult = await this.optionalCompile(
                 problem.interactor,
                 ac,
                 compile,
             );
-            if (interactorResult.verdict !== TCVerdicts.UKE) {
+            if (interactorResult instanceof KnownResult) {
                 return { ...interactorResult, data };
             }
-            problem.interactor.hash = interactorResult.data!.hash;
-            data.interactor = interactorResult.data!;
+            problem.interactor.hash = interactorResult.data.hash;
+            data.interactor = interactorResult.data;
         }
-        if (includeBfCompare) {
-            if (
-                !problem.bfCompare ||
-                !problem.bfCompare.generator ||
-                !problem.bfCompare.bruteForce
-            ) {
-                return {
-                    verdict: TCVerdicts.SE,
-                    msg: l10n.t('Brute Force comparison data not found.'),
-                };
+
+        // Compile brute force comparison programs
+        if (problem.bfCompare) {
+            if (!problem.bfCompare.generator || !problem.bfCompare.bruteForce) {
+                return new KnownResult(
+                    TCVerdicts.RJ,
+                    l10n.t(
+                        'Both generator and brute force source files must be provided for brute force comparison.',
+                    ),
+                );
             }
+
             const generatorResult = await this.optionalCompile(
                 problem.bfCompare.generator,
                 ac,
                 compile,
             );
-            if (generatorResult.verdict !== TCVerdicts.UKE) {
+            if (generatorResult instanceof KnownResult) {
                 return { ...generatorResult, data };
             }
-            problem.bfCompare.generator.hash = generatorResult.data!.hash;
+            problem.bfCompare.generator.hash = generatorResult.data.hash;
+
             const bruteForceResult = await this.optionalCompile(
                 problem.bfCompare.bruteForce,
                 ac,
                 compile,
             );
-            if (bruteForceResult.verdict !== TCVerdicts.UKE) {
+            if (bruteForceResult instanceof KnownResult) {
                 return { ...bruteForceResult, data };
             }
-            problem.bfCompare.bruteForce.hash = bruteForceResult.data!.hash;
+            problem.bfCompare.bruteForce.hash = bruteForceResult.data.hash;
             data.bfCompare = {
-                generator: generatorResult.data!,
-                bruteForce: bruteForceResult.data!,
+                generator: generatorResult.data,
+                bruteForce: bruteForceResult.data,
             };
         }
-        return {
-            verdict: TCVerdicts.UKE,
-            data,
-        };
+        return new UnknownResult(data);
     }
 }

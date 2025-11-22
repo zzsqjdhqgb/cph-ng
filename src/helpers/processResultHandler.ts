@@ -20,8 +20,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
-import Result from '../utils/result';
-import { TCVerdict } from '../utils/types';
+import { KnownResult, Result, UnknownResult } from '../utils/result';
 import { TCVerdicts } from '../utils/types.backend';
 import { AbortReason, ExecuteResult } from './processExecutor';
 
@@ -29,12 +28,12 @@ export interface WrapperData {
     time: number; // in nanoseconds
 }
 
-export type ProcessResult = Result<{
+export type ProcessData = {
     time: number;
     memory?: number;
     stdoutPath: string;
     stderrPath: string;
-}>;
+};
 
 export class ProcessResultHandler {
     private static logger: Logger = new Logger('processResultHandler');
@@ -69,7 +68,7 @@ export class ProcessResultHandler {
     public static async parse(
         result: ExecuteResult,
         ignoreExitCode: boolean = false,
-    ): Promise<ProcessResult> {
+    ): Promise<Result<ProcessData>> {
         this.logger.trace('parse', { result, ignoreExitCode });
         this.logger.info('Parsing process result', { result, ignoreExitCode });
         if (result instanceof Error) {
@@ -84,45 +83,52 @@ export class ProcessResultHandler {
         const time = wrapperData
             ? Math.max(wrapperData.time, 1) / 1000.0
             : result.time;
-
-        let verdict: TCVerdict = TCVerdicts.UKE;
-        let msg: string = '';
+        const processData = {
+            time,
+            memory: result.memory,
+            stdoutPath: result.stdoutPath,
+            stderrPath: result.stderrPath,
+        };
 
         if (result.abortReason === AbortReason.Timeout) {
-            verdict = TCVerdicts.TLE;
-            msg = l10n.t('Killed due to timeout');
+            return new KnownResult(
+                TCVerdicts.TLE,
+                l10n.t('Killed due to timeout'),
+                processData,
+            );
         } else if (result.abortReason === AbortReason.UserAbort) {
-            verdict = TCVerdicts.RJ;
-            msg = l10n.t('Aborted by user');
+            return new KnownResult(
+                TCVerdicts.RJ,
+                l10n.t('Aborted by user'),
+                processData,
+            );
         } else if (
             // Always handle signal termination
             // Handle exit code only when not ignored
             typeof result.codeOrSignal === 'string' ||
             (!ignoreExitCode && result.codeOrSignal !== 0)
         ) {
-            verdict = TCVerdicts.RE;
-            msg = l10n.t('Process exited with code: {code}.', {
-                code: result.codeOrSignal,
-            });
+            return new KnownResult(
+                TCVerdicts.RE,
+                l10n.t('Process exited with code: {code}.', {
+                    code: result.codeOrSignal,
+                }),
+                processData,
+            );
         }
-
-        return {
-            verdict,
-            msg,
-            data: {
-                time,
-                memory: result.memory,
-                stdoutPath: result.stdoutPath,
-                stderrPath: result.stderrPath,
-            },
-        };
+        return new UnknownResult({
+            time,
+            memory: result.memory,
+            stdoutPath: result.stdoutPath,
+            stderrPath: result.stderrPath,
+        });
     }
 
     public static async parseChecker(
         result: ExecuteResult,
-    ): Promise<ProcessResult> {
+    ): Promise<KnownResult<ProcessData>> {
         const preResult = await this.parse(result, true);
-        if (preResult.verdict !== TCVerdicts.UKE) {
+        if (preResult instanceof KnownResult) {
             return preResult;
         }
 
@@ -141,31 +147,28 @@ export class ProcessResultHandler {
         };
     }
 
-    private static getTestlibVerdict(code: number): Result<undefined> {
+    private static getTestlibVerdict(code: number): KnownResult {
         switch (code) {
             case 0:
-                return { verdict: TCVerdicts.AC };
+                return new KnownResult(TCVerdicts.AC);
             case 1:
-                return { verdict: TCVerdicts.WA };
+                return new KnownResult(TCVerdicts.WA);
             case 2:
-                return { verdict: TCVerdicts.PE };
+                return new KnownResult(TCVerdicts.PE);
             case 3:
-                return { verdict: TCVerdicts.SE };
+                return new KnownResult(TCVerdicts.SE);
             case 4:
-                return {
-                    verdict: TCVerdicts.WA,
-                    msg: l10n.t('Unexpected EOF'),
-                };
+                return new KnownResult(TCVerdicts.WA, l10n.t('Unexpected EOF'));
             case 7:
-                return { verdict: TCVerdicts.PC };
+                return new KnownResult(TCVerdicts.PC);
             default:
                 this.logger.warn('Testlib returned unknown exit code', code);
-                return {
-                    verdict: TCVerdicts.SE,
-                    msg: l10n.t('Testlib returned unknown exit code: {code}', {
+                return new KnownResult(
+                    TCVerdicts.SE,
+                    l10n.t('Testlib returned unknown exit code: {code}', {
                         code,
                     }),
-                };
+                );
         }
     }
 
@@ -173,9 +176,9 @@ export class ProcessResultHandler {
         stdout: string,
         answer: string,
         stderr: string,
-    ): Result<undefined> {
+    ): KnownResult {
         if (!Settings.comparing.ignoreError && stderr) {
-            return { verdict: TCVerdicts.RE, msg: '' };
+            return new KnownResult(TCVerdicts.RE);
         }
 
         const fixedOutput = stdout
@@ -192,17 +195,17 @@ export class ProcessResultHandler {
             Settings.comparing.oleSize &&
             fixedOutput.length > fixedAnswer.length * Settings.comparing.oleSize
         ) {
-            return { verdict: TCVerdicts.OLE, msg: '' };
+            return new KnownResult(TCVerdicts.OLE);
         }
 
         const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
         const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
         if (compressOutput !== compressAnswer) {
-            return { verdict: TCVerdicts.WA, msg: '' };
+            return new KnownResult(TCVerdicts.WA);
         }
         if (fixedOutput !== fixedAnswer && !Settings.comparing.regardPEAsAC) {
-            return { verdict: TCVerdicts.PE, msg: '' };
+            return new KnownResult(TCVerdicts.PE);
         }
-        return { verdict: TCVerdicts.AC, msg: '' };
+        return new KnownResult(TCVerdicts.AC);
     }
 }

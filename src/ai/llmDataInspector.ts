@@ -28,7 +28,7 @@ import {
     PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
-import { TCIO } from '../utils/types';
+import { TCIO } from '../utils/types.backend';
 
 const MAX_PREVIEW_LENGTH = 1000;
 
@@ -57,7 +57,7 @@ const cloneInline = (io: TCIO | undefined): string | undefined => {
 
 const readFromTcIo = async (io: TCIO): Promise<string> => {
     if (io.useFile) {
-        const content = await readFile(io.path, 'utf-8');
+        const content = await readFile(io.data, 'utf-8');
         return content;
     }
     return io.data;

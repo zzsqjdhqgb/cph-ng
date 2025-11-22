@@ -21,16 +21,12 @@ import { createReadStream, createWriteStream } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { constants } from 'os';
 import { dirname, join } from 'path';
-import { cwd, platform } from 'process';
+import { cwd } from 'process';
 import { pipeline } from 'stream/promises';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
-import { extensionPath } from '../utils/global';
-import { exists } from '../utils/process';
-import { TCIO } from '../utils/types';
-import { tcIo2Path } from '../utils/types.backend';
-import Io from './io';
+import { TCIO } from '../utils/types.backend';
 
 interface LaunchOptions {
     cmd: string[];
@@ -86,57 +82,18 @@ export default class ProcessExecutor {
 
     public static async executeWithRunner(
         options: LaunchOptions,
+        runnerPath: string,
     ): Promise<ExecuteResult> {
         this.logger.trace('executeWithRunner', options);
         if (options.debug) {
-            return ProcessExecutor.toErrorResult(
+            return this.toErrorResult(
                 l10n.t('Debug mode not supported with runner'),
             );
         }
         if (!options.stdin) {
-            return ProcessExecutor.toErrorResult(
+            return this.toErrorResult(
                 l10n.t('stdin is required for runner execution'),
             );
-        }
-
-        const runnerPath = join(Settings.cache.directory, 'bin', 'runner.a');
-        if (!(await exists(runnerPath))) {
-            if (!['win32', 'linux'].includes(platform)) {
-                return ProcessExecutor.toErrorResult(
-                    l10n.t(`Runner is unsupported for {platform}`, {
-                        platform,
-                    }),
-                );
-            }
-            const result = await ProcessExecutor.execute({
-                cmd: [
-                    Settings.compilation.cppCompiler,
-                    '-o',
-                    runnerPath,
-                    ...(platform === 'win32'
-                        ? [
-                              join(extensionPath, 'res', 'runner-windows.cpp'),
-                              '-lpsapi',
-                              '-ladvapi32',
-                              '-static',
-                          ]
-                        : [
-                              join(extensionPath, 'res', 'runner-linux.cpp'),
-                              '-pthread',
-                          ]),
-                ],
-            });
-            if (result instanceof Error) {
-                Io.compilationMsg = result.message;
-                return ProcessExecutor.toErrorResult(
-                    l10n.t('Failed to compile runner program'),
-                );
-            } else if (result.codeOrSignal) {
-                Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
-                return ProcessExecutor.toErrorResult(
-                    l10n.t('Failed to compile runner program'),
-                );
-            }
         }
 
         const { cmd, stdin, ac, timeout } = options;
@@ -147,7 +104,7 @@ export default class ProcessExecutor {
             );
         }
 
-        const inputFile = await tcIo2Path(stdin);
+        const inputFile = await stdin.toPath();
         const stdoutPath = join(Settings.cache.directory, 'io', randomUUID());
         const stderrPath = join(Settings.cache.directory, 'io', randomUUID());
         await writeFile(stdoutPath, '');
@@ -383,7 +340,7 @@ export default class ProcessExecutor {
         // Process stdio
         if (stdin) {
             stdin.useFile
-                ? pipeline(createReadStream(stdin.path), child.stdin)
+                ? pipeline(createReadStream(stdin.data), child.stdin)
                 : (child.stdin.write(stdin.data), child.stdin.end());
         }
         pipeline(child.stdout, createWriteStream(result.stdoutPath));

@@ -48,20 +48,26 @@ export default class Io {
             'Yes'
         );
     }
+}
 
-    static set compilationMsg(msg: string) {
-        this.logger.debug('Setting compilation message', msg);
+export class CompilationIo {
+    private static _compilationMsg: string = '';
+    public static clear() {
         compilationChannel.clear();
-        compilationChannel.appendLine(msg);
-        if (msg.trim()) {
-            compilationChannel.show();
-        } else {
-            compilationChannel.hide();
-        }
-        this._compilationMsg = msg;
+        this._compilationMsg = '';
+        compilationChannel.hide();
     }
-
-    static get compilationMsg(): string {
+    public static append(msg: string) {
+        msg = msg.trimEnd();
+        if (!msg) {
+            return;
+        }
+        msg += '\n';
+        this._compilationMsg += msg + '\n';
+        compilationChannel.appendLine(msg);
+        compilationChannel.show();
+    }
+    public static toString(): string {
         return this._compilationMsg;
     }
 }

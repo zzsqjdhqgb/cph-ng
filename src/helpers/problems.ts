@@ -19,11 +19,10 @@ import { mkdir, readFile, writeFile } from 'fs/promises';
 import { basename, dirname, extname } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
-import { version } from '../../package.json';
 import Settings from '../modules/settings';
 import { migration, OldProblem } from '../utils/migration';
 import { renderPathWithFile } from '../utils/strTemplate';
-import { Problem, TCIO } from '../utils/types';
+import { Problem, TCIO } from '../utils/types.backend';
 import Io from './io';
 import Logger from './logger';
 
@@ -39,16 +38,7 @@ export default class Problems {
     }
 
     public static createProblem(srcFile: string): Problem {
-        return {
-            version,
-            name: basename(srcFile, extname(srcFile)),
-            src: { path: srcFile },
-            tcs: {},
-            tcOrder: [],
-            timeLimit: Settings.problem.defaultTimeLimit,
-            memoryLimit: Settings.problem.defaultMemoryLimit,
-            timeElapsed: 0,
-        } satisfies Problem;
+        return new Problem(basename(srcFile, extname(srcFile)), srcFile);
     }
 
     public static async loadProblem(srcFile: string): Promise<Problem | null> {
@@ -138,7 +128,7 @@ export default class Problems {
             return true;
         }
         const tcIoRelated = (tcIo?: TCIO) =>
-            tcIo && tcIo.useFile && tcIo.path.toLowerCase() === path;
+            tcIo && tcIo.useFile && tcIo.data.toLowerCase() === path;
         for (const tc of Object.values(problem.tcs)) {
             if (
                 tcIoRelated(tc.stdin) ||

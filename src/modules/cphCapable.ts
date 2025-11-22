@@ -17,17 +17,15 @@
 
 import { randomUUID } from 'crypto';
 import { enc, MD5 } from 'crypto-js';
-import { readFile } from 'fs/promises';
+import { readdir, readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
-import { FileType, l10n, window, workspace } from 'vscode';
-import { version } from '../../package.json';
-import FolderChooser from '../helpers/folderChooser';
+import { l10n } from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
-import Problems from '../helpers/problems';
-import { Problem } from '../utils/types';
+import { version } from '../utils/packageInfo';
+import { Problem, TC, TCIO } from '../utils/types.backend';
 
-export interface CphProblem {
+export interface ICphProblem {
     name: string;
     url: string;
     tests: { id: number; input: string; output: string }[];
@@ -39,127 +37,89 @@ export interface CphProblem {
     local: boolean;
 }
 
-export default class CphCapable {
-    private static logger: Logger = new Logger('cphCapable');
+export class CphProblem implements ICphProblem {
+    private static logger: Logger = new Logger('CphProblem');
+
+    public name: string;
+    public url: string;
+    public tests: { id: number; input: string; output: string }[];
+    public interactive: boolean;
+    public memoryLimit: number;
+    public timeLimit: number;
+    public srcPath: string;
+    public group: string;
+    public local: boolean;
+
+    constructor(data: ICphProblem) {
+        this.name = data.name;
+        this.url = data.url;
+        this.tests = data.tests;
+        this.interactive = data.interactive;
+        this.memoryLimit = data.memoryLimit;
+        this.timeLimit = data.timeLimit;
+        this.srcPath = data.srcPath;
+        this.group = data.group;
+        this.local = data.local;
+    }
 
     public static getProbBySrc(srcFile: string): string {
-        this.logger.trace('getProbBySrc', { srcFile });
-        const probPath = join(
+        return join(
             dirname(srcFile),
             '.cph',
             `.${basename(srcFile)}_${MD5(srcFile).toString(enc.Hex)}.prob`,
         );
-        this.logger.debug('Generated problem file path', { probPath });
-        return probPath;
     }
-
-    public static toProblem(cphProblem: CphProblem): Problem {
-        this.logger.trace('toProblem', { cphProblem });
-        const problem: Problem = {
-            version,
-            name: cphProblem.name,
-            url: cphProblem.url,
-            tcs: {},
-            tcOrder: [],
-            timeLimit: cphProblem.timeLimit,
-            memoryLimit: cphProblem.memoryLimit,
-            src: { path: cphProblem.srcPath },
-            timeElapsed: 0,
-        } satisfies Problem;
-        for (const test of cphProblem.tests) {
-            const id = randomUUID();
-            problem.tcs[id] = {
-                stdin: { useFile: false, data: test.input },
-                answer: { useFile: false, data: test.output },
-                isExpand: false,
-                isDisabled: false,
-            };
-            problem.tcOrder.push(id);
-        }
-        this.logger.info('Converted CphProblem to Problem', { problem });
-        return problem;
-    }
-
-    public static async loadProblem(probFile: string): Promise<Problem | null> {
-        this.logger.trace('loadProblem', { probFile });
+    public static async fromFile(
+        probFile: string,
+    ): Promise<CphProblem | undefined> {
         try {
-            const problem = CphCapable.toProblem(
-                JSON.parse(
-                    await readFile(probFile, 'utf-8'),
-                ) satisfies CphProblem,
-            );
-            this.logger.debug('Loaded problem from file', {
-                probFile,
-                problem,
-            });
-            return problem;
+            const data = await readFile(probFile, 'utf-8');
+            return new CphProblem(JSON.parse(data) as ICphProblem);
         } catch (e) {
-            this.logger.error('Failed to load problem', e);
-            return null;
+            CphProblem.logger.error('Failed to read CPH problem file', e);
+            Io.error(
+                l10n.t('Failed to read CPH problem file {file}: {error}', {
+                    file: probFile,
+                    error: (e as Error).message,
+                }),
+            );
+            return undefined;
         }
     }
-
-    public static async importFromCph(): Promise<void> {
-        this.logger.trace('importFromCph');
-        const uri = await FolderChooser.chooseFolder(
-            l10n.t('Please select the .cph folder contains the problem files'),
-        );
-        if (!uri) {
-            this.logger.info('No folder selected, aborting import');
-            return;
-        }
-        this.logger.info('Selected folder for import', { uri });
-        const probFiles = await workspace.fs.readDirectory(uri);
-        this.logger.debug('Read directory contents', { probFiles });
-        const problems: Problem[] = [];
-        for (const [name, type] of probFiles) {
-            if (type === FileType.File && name.endsWith('.prob')) {
-                const probFilePath = join(uri.fsPath, name);
-                const problem = await this.loadProblem(probFilePath);
-                if (problem) {
-                    problems.push(problem);
-                    this.logger.info('Imported problem', { probFilePath });
-                } else {
-                    this.logger.warn('Failed to import problem', {
-                        probFilePath,
-                    });
+    public static async fromFolder(folderUri: string): Promise<CphProblem[]> {
+        const problems: CphProblem[] = [];
+        const dirEntries = await readdir(folderUri, { withFileTypes: true });
+        for (const entry of dirEntries) {
+            if (entry.isFile() && entry.name.endsWith('.prob')) {
+                const probFilePath = join(folderUri, entry.name);
+                const cphProblem = await CphProblem.fromFile(probFilePath);
+                if (cphProblem) {
+                    problems.push(cphProblem);
                 }
             }
         }
-        if (problems.length === 0) {
-            Io.info(l10n.t('No problem files found in the selected folder.'));
-            return;
+        return problems;
+    }
+
+    public toProblem(): Problem {
+        const problem = Problem.fromI({
+            version,
+            name: this.name,
+            url: this.url,
+            tcs: {},
+            tcOrder: [],
+            timeLimit: this.timeLimit,
+            memoryLimit: this.memoryLimit,
+            src: { path: this.srcPath },
+            timeElapsed: 0,
+        });
+        for (const test of this.tests) {
+            const id = randomUUID();
+            problem.tcs[id] = new TC();
+            problem.tcs[id].stdin = new TCIO(false, test.input);
+            problem.tcs[id].answer = new TCIO(false, test.output);
+            problem.tcOrder.push(id);
         }
-        const chosenIdx = await window.showQuickPick(
-            problems.map((p, idx) => ({
-                label: p.name,
-                description: [
-                    l10n.t('Number of test cases: {cnt}', {
-                        cnt: p.tcOrder.length,
-                    }),
-                    p.checker ? l10n.t('Special Judge') : '',
-                    p.interactor ? l10n.t('Interactive') : '',
-                    p.bfCompare ? l10n.t('Brute Force Comparison') : '',
-                ]
-                    .join(' ')
-                    .trim(),
-                detail: p.url,
-                picked: true,
-                value: idx,
-            })),
-            {
-                canPickMany: true,
-                title: l10n.t('Select problems to import'),
-            },
-        );
-        if (!chosenIdx || chosenIdx.length === 0) {
-            this.logger.info('No problems selected for import, aborting');
-            return;
-        }
-        this.logger.info('Selected problems for import', { chosenIdx });
-        const selectedProblems = chosenIdx.map((idx) => problems[idx.value]);
-        for (const problem of selectedProblems) {
-            await Problems.saveProblem(problem);
-        }
+        return problem;
     }
 }

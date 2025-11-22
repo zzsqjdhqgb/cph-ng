@@ -12,6 +12,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: add customizable companion data handling
 - **fix**: use correct unit for brute force compare
 - **fix**: use file to enhance robustness
+- **refactor**: types and imports for backend compatibility
 
 ## 0.4.7
 

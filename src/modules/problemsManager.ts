@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import assert from 'assert';
 import { randomUUID, UUID } from 'crypto';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
-import { commands, debug, l10n, Uri, window, workspace } from 'vscode';
+import { commands, debug, l10n, Uri, window } from 'vscode';
 import { Compiler } from '../core/compiler';
 import Langs from '../core/langs/langs';
 import { Runner } from '../core/runner';
@@ -30,18 +29,19 @@ import Problems from '../helpers/problems';
 import ProcessExecutor from '../helpers/processExecutor';
 import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
 import { exists } from '../utils/process';
-import { assignResult } from '../utils/result';
+import { KnownResult } from '../utils/result';
+import { isExpandVerdict, isRunningVerdict } from '../utils/types';
 import {
-    isExpandVerdict,
-    isRunningVerdict,
     Problem,
     TC,
     TCIO,
-} from '../utils/types';
-import { tcIo2Str, TCVerdicts } from '../utils/types.backend';
+    TCResult,
+    TCVerdicts,
+    TCWithResult,
+} from '../utils/types.backend';
 import * as msgs from '../webview/msgs';
 import Companion from './companion';
-import CphCapable from './cphCapable';
+import { CphProblem } from './cphCapable';
 import ExtensionManager from './extensionManager';
 import FileSystemProvider, { generateTcUri } from './fileSystemProvider';
 import Settings from './settings';
@@ -104,7 +104,7 @@ export default class ProblemsManager {
 
         const fullProblem = await this.getFullProblem(activePath);
         const canImport =
-            !!activePath && (await exists(CphCapable.getProbBySrc(activePath)));
+            !!activePath && (await exists(CphProblem.getProbBySrc(activePath)));
         sidebarProvider.event.emit('problem', {
             problem: fullProblem && {
                 problem: fullProblem.problem,
@@ -180,12 +180,7 @@ export default class ProblemsManager {
             return;
         }
         const uuid = randomUUID();
-        fullProblem.problem.tcs[uuid] = {
-            stdin: { useFile: false, data: '' },
-            answer: { useFile: false, data: '' },
-            isExpand: true,
-            isDisabled: false,
-        };
+        fullProblem.problem.tcs[uuid] = new TC();
         fullProblem.problem.tcOrder.push(uuid);
         await this.dataRefresh();
     }
@@ -248,7 +243,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        fullProblem.problem.tcs[msg.id] = msg.tc;
+        fullProblem.problem.tcs[msg.id] = TC.fromI(msg.tc);
         await this.dataRefresh();
     }
 
@@ -257,50 +252,38 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(fullProblem.problem.src.path);
-        if (!srcLang) {
-            return;
-        }
         fullProblem.ac && fullProblem.ac.abort();
         fullProblem.ac = new AbortController();
 
         try {
-            const tc = fullProblem.problem.tcs[msg.id];
-            tc.result = {
-                verdict: TCVerdicts.CP,
-                stdout: { useFile: false, data: '' },
-                stderr: { useFile: false, data: '' },
-            };
+            const tc = fullProblem.problem.tcs[msg.id] as TCWithResult;
+            tc.result = new TCResult();
+            tc.result.verdict = TCVerdicts.CP;
             tc.isExpand = false;
             await this.dataRefresh();
-            const result = tc.result;
 
+            // Compile
             const compileResult = await Compiler.compileAll(
                 fullProblem.problem,
-                srcLang,
                 msg.compile,
                 fullProblem.ac,
             );
-            if (assignResult(result, compileResult)) {
+            if (compileResult instanceof KnownResult) {
+                tc.result.fromResult(compileResult);
                 tc.isExpand = true;
                 return;
             }
-            const compileData = compileResult.data;
-            if (!compileData) {
-                result.verdict = TCVerdicts.SE;
-                result.msg = l10n.t('Compile data is empty.');
-                return;
-            }
+            tc.result.verdict = TCVerdicts.CPD;
 
+            // Run
             await Runner.run(
                 fullProblem.problem,
-                result,
-                fullProblem.ac,
-                srcLang,
                 tc,
-                compileData,
+                compileResult.data.srcLang,
+                fullProblem.ac,
+                compileResult.data,
             );
-            tc.isExpand = isExpandVerdict(result.verdict);
+            tc.isExpand = isExpandVerdict(tc.result.verdict);
         } finally {
             fullProblem.ac = null;
             await this.dataRefresh();
@@ -339,97 +322,72 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(fullProblem.problem.src.path);
-        if (!srcLang) {
-            return;
-        }
         fullProblem.ac && fullProblem.ac.abort();
         fullProblem.ac = new AbortController();
-        const beforeReturn = async () => {
-            fullProblem.ac = null;
+
+        try {
+            const tcs = fullProblem.problem.tcs;
+            const tcOrder = [...fullProblem.problem.tcOrder].filter(
+                (id) => !tcs[id].isDisabled,
+            );
+            for (const tcId of tcOrder) {
+                tcs[tcId].result = new TCResult(TCVerdicts.CP);
+                tcs[tcId].isExpand = false;
+            }
             await this.dataRefresh();
-        };
 
-        const tcs = fullProblem.problem.tcs;
-        const tcOrder = [...fullProblem.problem.tcOrder].filter(
-            (id) => !tcs[id].isDisabled,
-        );
-        for (const tcId of tcOrder) {
-            tcs[tcId].result = {
-                verdict: TCVerdicts.CP,
-                stdout: { useFile: false, data: '' },
-                stderr: { useFile: false, data: '' },
-            };
-            tcs[tcId].isExpand = false;
-        }
-        await this.dataRefresh();
-
-        const compileResult = await Compiler.compileAll(
-            fullProblem.problem,
-            srcLang,
-            msg.compile,
-            fullProblem.ac,
-        );
-        if (compileResult.verdict !== TCVerdicts.UKE) {
+            // Compile
+            const compileResult = await Compiler.compileAll(
+                fullProblem.problem,
+                msg.compile,
+                fullProblem.ac,
+            );
+            if (compileResult instanceof KnownResult) {
+                for (const tcId of tcOrder) {
+                    tcs[tcId].result?.fromResult(compileResult);
+                }
+                return;
+            }
             for (const tcId of tcOrder) {
                 const result = tcs[tcId].result;
                 if (result) {
-                    assignResult(result, compileResult);
+                    result.verdict = TCVerdicts.CPD;
                 }
             }
-            await beforeReturn();
-            return;
-        }
-        const compileData = compileResult.data;
-        if (!compileData) {
-            for (const tcId of tcOrder) {
-                const result = tcs[tcId].result;
-                if (result) {
-                    result.verdict = TCVerdicts.SE;
-                    result.msg = l10n.t('Compile data is empty.');
-                }
-            }
-            await beforeReturn();
-            return;
-        }
-        for (const tcId of tcOrder) {
-            const result = tcs[tcId].result;
-            if (result) {
-                result.verdict = TCVerdicts.CPD;
-            }
-        }
-        await this.dataRefresh();
+            await this.dataRefresh();
 
-        let hasExpandStatus = false;
-        for (const tcId of tcOrder) {
-            const tc = tcs[tcId];
-            const result = tc.result;
-            if (!result) {
-                continue;
-            }
-            if (fullProblem.ac.signal.aborted) {
-                if (fullProblem.ac.signal.reason === 'onlyOne') {
-                    fullProblem.ac = new AbortController();
-                } else {
-                    result.verdict = TCVerdicts.SK;
+            // Run
+            let hasExpandStatus = false;
+            for (const tcId of tcOrder) {
+                const tc = tcs[tcId] as TCWithResult;
+                if (!tc.result) {
                     continue;
                 }
+                if (fullProblem.ac.signal.aborted) {
+                    if (fullProblem.ac.signal.reason === 'onlyOne') {
+                        fullProblem.ac = new AbortController();
+                    } else {
+                        tc.result.verdict = TCVerdicts.SK;
+                        continue;
+                    }
+                }
+                await Runner.run(
+                    fullProblem.problem,
+                    tc,
+                    compileResult.data.srcLang,
+                    fullProblem.ac,
+                    compileResult.data,
+                );
+                if (!hasExpandStatus) {
+                    tc.isExpand = isExpandVerdict(tc.result.verdict);
+                    await this.dataRefresh();
+                    hasExpandStatus = tc.isExpand;
+                }
             }
-            await Runner.run(
-                fullProblem.problem,
-                result,
-                fullProblem.ac,
-                srcLang,
-                tc,
-                compileData,
-            );
-            if (!hasExpandStatus) {
-                tc.isExpand = isExpandVerdict(result.verdict);
-                await this.dataRefresh();
-                hasExpandStatus = tc.isExpand;
-            }
+        } finally {
+            fullProblem.ac = null;
+            await this.dataRefresh();
         }
-        await beforeReturn();
     }
 
     public static async stopTcs(msg: msgs.StopTcsMsg): Promise<void> {
@@ -472,10 +430,11 @@ export default class ProblemsManager {
         if (!fileUri || !fileUri.length) {
             return;
         }
-        fullProblem.problem.tcs[msg.id] = {
-            ...fullProblem.problem.tcs[msg.id],
-            ...(await TcFactory.fromFile(fileUri[0].fsPath, isInput)),
-        };
+        const partialTc = await TcFactory.fromFile(fileUri[0].fsPath, isInput);
+        partialTc.stdin &&
+            (fullProblem.problem.tcs[msg.id].stdin = partialTc.stdin);
+        partialTc.answer &&
+            (fullProblem.problem.tcs[msg.id].answer = partialTc.answer);
         await this.dataRefresh();
     }
     public static async compareTc(msg: msgs.CompareTcMsg): Promise<void> {
@@ -509,7 +468,7 @@ export default class ProblemsManager {
         const tc = fullProblem.problem.tcs[msg.id];
         const fileIo = tc[msg.label];
         if (fileIo.useFile) {
-            const data = await tcIo2Str(fileIo);
+            const data = await fileIo.toString();
             if (
                 data.length <= Settings.problem.maxInlineDataLength ||
                 (await Io.confirm(
@@ -520,7 +479,7 @@ export default class ProblemsManager {
                     true,
                 ))
             ) {
-                tc[msg.label] = { useFile: false, data };
+                tc[msg.label] = new TCIO(false, data);
             }
         } else {
             const ext = {
@@ -541,7 +500,7 @@ export default class ProblemsManager {
                 return;
             }
             await writeFile(tempFilePath, fileIo.data);
-            tc[msg.label] = { useFile: true, path: tempFilePath };
+            tc[msg.label] = new TCIO(true, tempFilePath);
         }
         await this.dataRefresh();
     }
@@ -666,18 +625,12 @@ export default class ProblemsManager {
             await this.dataRefresh();
             const compileResult = await Compiler.compileAll(
                 fullProblem.problem,
-                srcLang,
                 msg.compile,
                 fullProblem.ac,
-                true,
             );
-            if (compileResult.verdict !== TCVerdicts.UKE) {
-                bfCompare.msg = l10n.t('Solution compilation failed.');
-                return;
-            }
-            const compileData = compileResult.data;
-            if (!compileData || !compileData.bfCompare) {
-                bfCompare.msg = l10n.t('Compile data is empty.');
+            if (compileResult instanceof KnownResult) {
+                bfCompare.msg =
+                    compileResult.msg || l10n.t('Solution compilation failed');
                 return;
             }
 
@@ -695,87 +648,77 @@ export default class ProblemsManager {
                 });
                 await this.dataRefresh();
                 const generatorRunResult = await Runner.doRun({
-                    cmd: [compileData.bfCompare.generator.outputPath],
+                    cmd: [compileResult.data.bfCompare!.generator.outputPath],
                     timeLimit: Settings.bfCompare.generatorTimeLimit,
-                    stdin: { useFile: false, data: '' },
+                    stdin: new TCIO(false, ''),
                     ac: fullProblem.ac,
                     enableRunner: false,
                 });
-                if (generatorRunResult.verdict !== TCVerdicts.UKE) {
-                    if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                        bfCompare.msg = l10n.t('Generator run failed: {msg}', {
+                if (generatorRunResult instanceof KnownResult) {
+                    generatorRunResult.verdict !== TCVerdicts.RJ &&
+                        (bfCompare.msg = l10n.t('Generator run failed: {msg}', {
                             msg: generatorRunResult.msg,
-                        });
-                    }
+                        }));
                     break;
                 }
-                assert(generatorRunResult.data);
-                const stdin: TCIO = {
-                    useFile: true,
-                    path: generatorRunResult.data.stdoutPath,
-                };
+                const stdin = new TCIO(
+                    true,
+                    generatorRunResult.data.stdoutPath,
+                );
 
                 bfCompare.msg = l10n.t('#{cnt} Running brute force...', {
                     cnt,
                 });
                 await this.dataRefresh();
                 const bruteForceRunResult = await Runner.doRun({
-                    cmd: [compileData.bfCompare.bruteForce.outputPath],
+                    cmd: [compileResult.data.bfCompare!.bruteForce.outputPath],
                     timeLimit: Settings.bfCompare.bruteForceTimeLimit,
                     stdin,
                     ac: fullProblem.ac,
                     enableRunner: false,
                 });
-                if (bruteForceRunResult.verdict !== TCVerdicts.UKE) {
-                    if (generatorRunResult.verdict !== TCVerdicts.RJ) {
-                        bfCompare.msg = l10n.t(
+                if (bruteForceRunResult instanceof KnownResult) {
+                    bruteForceRunResult.verdict !== TCVerdicts.RJ &&
+                        (bfCompare.msg = l10n.t(
                             'Brute force run failed: {msg}',
                             {
                                 msg: bruteForceRunResult.msg,
                             },
-                        );
-                    }
+                        ));
                     break;
                 }
-                assert(bruteForceRunResult.data);
 
                 bfCompare.msg = l10n.t('#{cnt} Running solution...', {
                     cnt,
                 });
                 await this.dataRefresh();
-                const tempTc: TC = {
+                const tempTc = TC.fromI({
                     stdin,
-                    answer: {
-                        useFile: true,
-                        path: bruteForceRunResult.data.stdoutPath,
-                    },
+                    answer: new TCIO(true, bruteForceRunResult.data.stdoutPath),
                     isExpand: true,
                     isDisabled: false,
-                    result: {
-                        verdict: TCVerdicts.CP,
-                        stdout: { useFile: false, data: '' },
-                        stderr: { useFile: false, data: '' },
-                    },
-                } satisfies TC;
+                    result: new TCResult(TCVerdicts.CP),
+                }) as TCWithResult;
                 await Runner.run(
                     fullProblem.problem,
-                    tempTc.result!,
-                    fullProblem.ac,
-                    srcLang,
                     tempTc,
+                    srcLang,
+                    fullProblem.ac,
                     compileResult.data!,
                 );
-                if (tempTc.result?.verdict !== TCVerdicts.AC) {
-                    if (tempTc.result?.verdict !== TCVerdicts.RJ) {
+                if (tempTc.result.verdict !== TCVerdicts.AC) {
+                    if (tempTc.result.verdict !== TCVerdicts.RJ) {
                         const uuid = randomUUID();
-                        fullProblem.problem.tcs[uuid] = {
-                            stdin: await TcFactory.inlineSmallTc(tempTc.stdin),
-                            answer: await TcFactory.inlineSmallTc(
-                                tempTc.answer,
-                            ),
+                        fullProblem.problem.tcs[uuid] = TC.fromI({
+                            stdin: tempTc.stdin,
+                            answer: tempTc.answer,
                             isDisabled: false,
                             isExpand: true,
-                        };
+                        });
+                        await fullProblem.problem.tcs[uuid].stdin.inlineSmall();
+                        await fullProblem.problem.tcs[
+                            uuid
+                        ].answer.inlineSmall();
                         fullProblem.problem.tcOrder.push(uuid);
                         bfCompare.msg = l10n.t(
                             'Found a difference in #{cnt} run.',
@@ -825,21 +768,20 @@ export default class ProblemsManager {
     }
     public static async openFile(msg: msgs.OpenFileMsg): Promise<void> {
         if (!msg.isVirtual) {
-            var document = await workspace.openTextDocument(msg.path);
-        } else {
-            const fullProblem = await this.getFullProblem(msg.activePath);
-            if (!fullProblem) {
-                return;
-            }
-            var document = await workspace.openTextDocument(
-                Uri.from({
-                    scheme: FileSystemProvider.scheme,
-                    authority: fullProblem.problem.src.path,
-                    path: msg.path,
-                }),
-            );
+            await commands.executeCommand('vscode.open', Uri.file(msg.path));
         }
-        await window.showTextDocument(document);
+        const fullProblem = await this.getFullProblem(msg.activePath);
+        if (!fullProblem) {
+            return;
+        }
+        await commands.executeCommand(
+            'vscode.open',
+            Uri.from({
+                scheme: FileSystemProvider.scheme,
+                authority: fullProblem.problem.src.path,
+                path: msg.path,
+            }),
+        );
     }
     public static async debugTc(msg: msgs.DebugTcMsg): Promise<void> {
         try {
@@ -863,7 +805,7 @@ export default class ProblemsManager {
                     debug: true,
                 },
             );
-            if (result.verdict !== TCVerdicts.UKE) {
+            if (result instanceof KnownResult) {
                 Io.error(
                     l10n.t('Failed to compile the program: {msg}', {
                         msg: result.msg,
@@ -952,12 +894,9 @@ export default class ProblemsManager {
             ) {
                 const uuid = randomUUID();
                 const { stdin, answer } = await TcFactory.fromFile(item);
-                fullProblem.problem.tcs[uuid] = {
-                    stdin: stdin ?? { useFile: false, data: '' },
-                    answer: answer ?? { useFile: false, data: '' },
-                    isDisabled: false,
-                    isExpand: false,
-                };
+                fullProblem.problem.tcs[uuid] = new TC();
+                fullProblem.problem.tcs[uuid].stdin = stdin ?? new TCIO();
+                fullProblem.problem.tcs[uuid].answer = answer ?? new TCIO();
                 fullProblem.problem.tcOrder.push(uuid);
             }
         }

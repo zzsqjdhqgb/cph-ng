@@ -28,8 +28,7 @@ import {
     FileType,
     Uri,
 } from 'vscode';
-import { Problem } from '../utils/types';
-import { write2TcIo } from '../utils/types.backend';
+import { Problem } from '../utils/types.backend';
 import ProblemsManager from './problemsManager';
 
 export type UriTypes = 'stdin' | 'answer' | 'stdout' | 'stderr';
@@ -90,13 +89,10 @@ export class FileSystemProvider implements FileSystemProvider {
                                 'stdin',
                                 {
                                     data: tc.stdin.useFile
-                                        ? Uri.file(tc.stdin.path)
+                                        ? Uri.file(tc.stdin.data)
                                         : tc.stdin.data,
                                     set: async (data: string) => {
-                                        tc.stdin = await write2TcIo(
-                                            tc.stdin,
-                                            data,
-                                        );
+                                        tc.stdin.fromString(data);
                                     },
                                 },
                             ],
@@ -104,13 +100,10 @@ export class FileSystemProvider implements FileSystemProvider {
                                 'answer',
                                 {
                                     data: tc.answer.useFile
-                                        ? Uri.file(tc.answer.path)
+                                        ? Uri.file(tc.answer.data)
                                         : tc.answer.data,
                                     set: async (data: string) => {
-                                        tc.answer = await write2TcIo(
-                                            tc.answer,
-                                            data,
-                                        );
+                                        tc.answer.fromString(data);
                                     },
                                 },
                             ],
@@ -120,16 +113,13 @@ export class FileSystemProvider implements FileSystemProvider {
                                 'stdout',
                                 {
                                     data: tc.result.stdout.useFile
-                                        ? Uri.file(tc.result.stdout.path)
+                                        ? Uri.file(tc.result.stdout.data)
                                         : tc.result.stdout.data,
                                     set: async (data: string) => {
                                         if (!tc.result) {
                                             throw this.notFound;
                                         }
-                                        tc.result.stdout = await write2TcIo(
-                                            tc.result!.stdout,
-                                            data,
-                                        );
+                                        tc.result.stdout.fromString(data);
                                     },
                                 },
                             ]);
@@ -137,16 +127,13 @@ export class FileSystemProvider implements FileSystemProvider {
                                 'stderr',
                                 {
                                     data: tc.result.stderr.useFile
-                                        ? Uri.file(tc.result.stderr.path)
+                                        ? Uri.file(tc.result.stderr.data)
                                         : tc.result.stderr.data,
                                     set: async (data: string) => {
                                         if (!tc.result) {
                                             throw this.notFound;
                                         }
-                                        tc.result.stderr = await write2TcIo(
-                                            tc.result!.stderr,
-                                            data,
-                                        );
+                                        tc.result.stderr.fromString(data);
                                     },
                                 },
                             ]);

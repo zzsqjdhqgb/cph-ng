@@ -27,7 +27,7 @@ import { UUID } from 'crypto';
 import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, TC } from '../../utils/types';
+import { isRunningVerdict, ITC } from '../../utils/types';
 import { getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
@@ -37,7 +37,7 @@ import CphButton from './cphButton';
 import TcDataView from './tcDataView';
 
 interface TcViewProp {
-    tc: TC;
+    tc: ITC;
     idx: number;
     id: UUID;
     onDragStart?: (e: React.DragEvent) => void;
@@ -371,7 +371,7 @@ const TcView = ({
                                             label={t('tcView.message')}
                                             value={{
                                                 useFile: false,
-                                                data: tc.result.msg ?? '',
+                                                data: tc.result.msg.join('\n'),
                                             }}
                                             readOnly={true}
                                         />

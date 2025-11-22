@@ -15,15 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, readFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
-import { l10n } from 'vscode';
-import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
-import { FileWithHash } from '../../utils/types';
-import { TCVerdicts } from '../../utils/types.backend';
+import { KnownResult, UnknownResult } from '../../utils/result';
+import { FileWithHash } from '../../utils/types.backend';
 import {
     CompileAdditionalData,
     DefaultCompileAdditionalData,
@@ -62,59 +58,22 @@ export class LangJava extends Lang {
             compiler + args,
             forceCompile,
         );
-        if (skip) {
-            return {
-                verdict: TCVerdicts.UKE,
-                data: { outputPath, hash },
-            };
+        if (!skip) {
+            return new UnknownResult({ outputPath, hash });
         }
 
-        const { timeout } = Settings.compilation;
         const compilerArgs = args.split(/\s+/).filter(Boolean);
 
-        const result = await ProcessExecutor.execute({
-            cmd: [compiler, ...compilerArgs, '-d', classDir, src.path],
+        const result = await this._executeCompiler(
+            [compiler, ...compilerArgs, '-d', classDir, src.path],
             ac,
-            timeout,
-        });
-        if (result instanceof Error) {
-            return { verdict: TCVerdicts.SE, msg: result.message };
-        }
-
-        this.logger.debug('Compilation completed successfully', {
-            path: src.path,
-            outputPath,
-        });
-        Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
-        if (result.abortReason === AbortReason.UserAbort) {
-            return {
-                verdict: TCVerdicts.RJ,
-                msg: l10n.t('Compilation aborted by user'),
-            };
-        } else if (result.abortReason === AbortReason.Timeout) {
-            return {
-                verdict: TCVerdicts.CE,
-                msg: l10n.t('Compilation timed out'),
-            };
-        } else if (result.codeOrSignal) {
-            Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
-            return {
-                verdict: TCVerdicts.CE,
-                msg: l10n.t('Compiler exited with code {code}', {
-                    code: result.codeOrSignal,
-                }),
-            };
-        }
-
-        return {
-            verdict: await access(outputPath, constants.R_OK)
-                .then(() => TCVerdicts.UKE)
-                .catch(() => TCVerdicts.CE),
-            data: { outputPath, hash },
-        };
+        );
+        return result instanceof KnownResult
+            ? result
+            : new UnknownResult({ outputPath, hash });
     }
 
-    public async runCommand(
+    public async getRunCommand(
         target: string,
         compilationSettings?: CompileAdditionalData['compilationSettings'],
     ): Promise<string[]> {

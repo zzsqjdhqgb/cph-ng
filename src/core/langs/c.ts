@@ -15,16 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { access, constants, readFile } from 'fs/promises';
 import { type } from 'os';
 import { basename, extname, join } from 'path';
-import { l10n } from 'vscode';
-import Io from '../../helpers/io';
 import Logger from '../../helpers/logger';
-import ProcessExecutor, { AbortReason } from '../../helpers/processExecutor';
 import Settings from '../../modules/settings';
-import { FileWithHash } from '../../utils/types';
-import { TCVerdicts } from '../../utils/types.backend';
+import { KnownResult, UnknownResult } from '../../utils/result';
+import { FileWithHash } from '../../utils/types.backend';
 import {
     CompileAdditionalData,
     DefaultCompileAdditionalData,
@@ -67,13 +63,9 @@ export class LangC extends Lang {
             forceCompile,
         );
         if (skip) {
-            return {
-                verdict: TCVerdicts.UKE,
-                data: { outputPath, hash },
-            };
+            return new UnknownResult({ outputPath, hash });
         }
 
-        const { timeout } = Settings.compilation;
         const compilerArgs = args.split(/\s+/).filter(Boolean);
 
         const cmd = [compiler, src.path, ...compilerArgs, '-o', outputPath];
@@ -82,44 +74,12 @@ export class LangC extends Lang {
         }
         debug && cmd.push('-g', '-O0');
 
-        const result = await ProcessExecutor.execute({ cmd, ac, timeout });
-        if (result instanceof Error) {
-            return { verdict: TCVerdicts.SE, msg: result.message };
-        }
-        this.logger.debug('Compilation completed successfully', {
-            path: src.path,
-            outputPath,
-        });
-
-        Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
-        if (result.abortReason === AbortReason.UserAbort) {
-            return {
-                verdict: TCVerdicts.RJ,
-                msg: l10n.t('Compilation aborted by user'),
-            };
-        } else if (result.abortReason === AbortReason.Timeout) {
-            return {
-                verdict: TCVerdicts.CE,
-                msg: l10n.t('Compilation timed out'),
-            };
-        } else if (result.codeOrSignal) {
-            Io.compilationMsg = await readFile(result.stderrPath, 'utf-8');
-            return {
-                verdict: TCVerdicts.CE,
-                msg: l10n.t('Compiler exited with code {code}', {
-                    code: result.codeOrSignal,
-                }),
-            };
-        }
-
-        return {
-            verdict: await access(outputPath, constants.X_OK)
-                .then(() => TCVerdicts.UKE)
-                .catch(() => TCVerdicts.CE),
-            data: { outputPath, hash },
-        };
+        const result = await this._executeCompiler(cmd, ac);
+        return result instanceof KnownResult
+            ? result
+            : new UnknownResult({ outputPath, hash });
     }
-    public async runCommand(target: string): Promise<string[]> {
+    public async getRunCommand(target: string): Promise<string[]> {
         this.logger.trace('runCommand', { target });
         return [target];
     }

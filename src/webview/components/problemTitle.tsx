@@ -31,7 +31,7 @@ import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Problem } from '../../utils/types';
+import { IProblem } from '../../utils/types';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -40,7 +40,7 @@ import CphText from './base/cphText';
 import CphButton from './cphButton';
 
 interface ProblemTitleProps {
-    problem: Problem;
+    problem: IProblem;
     startTime: number;
 }
 
