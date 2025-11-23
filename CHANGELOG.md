@@ -15,6 +15,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **feat**: unify file limit threshold
 - **refactor**: types and imports for backend compatibility
 - **fix**: stop running may not work
+- **fix**: subprocess may exist before we start listening
 
 ## 0.4.7
 

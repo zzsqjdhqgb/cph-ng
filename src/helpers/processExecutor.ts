@@ -209,6 +209,18 @@ export default class ProcessExecutor {
                 clearTimeout(timeoutId);
                 resolve(this.toErrorResult(error));
             });
+
+            const codeOrSignal =
+                launch.child.exitCode ?? launch.child.signalCode;
+            if (codeOrSignal !== null) {
+                this.logger.debug(
+                    'Child',
+                    launch.child.pid,
+                    'already exited',
+                    codeOrSignal,
+                );
+                resolve(this.toResult(launch, codeOrSignal));
+            }
         });
     }
 
@@ -225,6 +237,21 @@ export default class ProcessExecutor {
                 error.name === 'AbortError' ||
                     resolve(this.toErrorResult(error));
             });
+
+            // We have to check if the child already exists
+            // Because the child process may have already exited
+            // before we attach the listeners
+            const codeOrSignal =
+                launch.child.exitCode ?? launch.child.signalCode;
+            if (codeOrSignal !== null) {
+                this.logger.debug(
+                    'Child',
+                    launch.child.pid,
+                    'already exited',
+                    codeOrSignal,
+                );
+                resolve(this.toResult(launch, codeOrSignal));
+            }
         });
     }
 
@@ -285,6 +312,35 @@ export default class ProcessExecutor {
                 results.process1 || process1.child.kill();
                 checkCompletion();
             });
+
+            const process1CodeOrSignal =
+                process1.child.exitCode ?? process1.child.signalCode;
+            if (process1CodeOrSignal !== null) {
+                this.logger.debug(
+                    'Child',
+                    process1.child.pid,
+                    'already exited',
+                    process1CodeOrSignal,
+                );
+                results.process1 ||= this.toResult(
+                    process1,
+                    process1CodeOrSignal,
+                );
+            }
+            const process2CodeOrSignal =
+                process2.child.exitCode ?? process2.child.signalCode;
+            if (process2CodeOrSignal !== null) {
+                this.logger.debug(
+                    'Child',
+                    process2.child.pid,
+                    'already exited',
+                    process2CodeOrSignal,
+                );
+                results.process2 ||= this.toResult(
+                    process2,
+                    process2CodeOrSignal,
+                );
+            }
         });
     }
 
@@ -333,6 +389,7 @@ export default class ProcessExecutor {
             }, timeout);
             child.on('close', () => clearTimeout(timeoutId));
             child.on('error', () => clearTimeout(timeoutId));
+            (child.exitCode ?? child.signalCode) && clearTimeout(timeoutId);
         }
 
         // Process stdio

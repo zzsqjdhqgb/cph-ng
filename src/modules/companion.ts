@@ -100,7 +100,6 @@ class Companion {
             request.on('data', (chunk) => {
                 requestData += chunk;
             });
-
             request.on('close', async () => {
                 Companion.logger.debug('Received request', requestData);
                 if (request.url === '/') {
