@@ -68,13 +68,21 @@ export default class ProblemsManager {
         }
         for (const fullProblem of this.fullProblems) {
             if (Problems.isRelated(fullProblem.problem, path)) {
+                this.logger.debug(
+                    'Found loaded problem',
+                    fullProblem.problem.src.path,
+                    'for path',
+                    path,
+                );
                 return fullProblem;
             }
         }
         const problem = await Problems.loadProblem(path);
         if (!problem) {
+            this.logger.debug('Failed to load problem for path', path);
             return null;
         }
+        this.logger.debug('Loaded problem', problem.src.path, 'for path', path);
         const fullProblem = {
             problem,
             ac: null,
@@ -84,7 +92,7 @@ export default class ProblemsManager {
         return fullProblem;
     }
     public static async dataRefresh() {
-        this.logger.trace('data refresh');
+        this.logger.trace('Starting data refresh');
         const activePath = getActivePath();
         const idles: FullProblem[] = this.fullProblems.filter(
             (fullProblem) =>
@@ -99,6 +107,7 @@ export default class ProblemsManager {
                 ),
             );
             await Problems.saveProblem(idle.problem);
+            this.logger.debug('Closed idle problem', idle.problem.src.path);
         }
         this.fullProblems = this.fullProblems.filter((p) => !idles.includes(p));
 
@@ -769,6 +778,7 @@ export default class ProblemsManager {
     public static async openFile(msg: msgs.OpenFileMsg): Promise<void> {
         if (!msg.isVirtual) {
             await commands.executeCommand('vscode.open', Uri.file(msg.path));
+            return;
         }
         const fullProblem = await this.getFullProblem(msg.activePath);
         if (!fullProblem) {

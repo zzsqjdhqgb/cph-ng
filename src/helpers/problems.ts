@@ -77,26 +77,27 @@ export default class Problems {
             return null;
         }
         problem.src.path = srcFile;
-        this.logger.info('Problem loaded', { binPath, problem });
+        this.logger.info('Problem', problem.src.path, 'loaded');
+        this.logger.trace('Loaded problem data', { problem });
         return problem;
     }
 
-    public static async saveProblem(problem: Problem): Promise<Boolean> {
-        this.logger.trace('saveProblem', { problem });
+    public static async saveProblem(problem: Problem): Promise<boolean> {
         const binPath = await this.getBinBySrc(problem.src.path);
         if (!binPath) {
-            Io.warn(l10n.t('No workspace folder is open.'));
             return false;
         }
-        this.logger.info('Saving problem', { binPath, problem });
+        this.logger.trace('Saving problem data', { binPath, problem });
         try {
             await mkdir(dirname(binPath), { recursive: true });
             await writeFile(
                 binPath,
                 gzipSync(Buffer.from(JSON.stringify(problem))),
             );
+            this.logger.info('Saved problem', problem.src.path);
             return true;
         } catch (e) {
+            this.logger.error('Failed to save problem', problem.src.path, e);
             Io.error(
                 l10n.t('Failed to save problem: {msg}', {
                     msg: (e as Error).message,
