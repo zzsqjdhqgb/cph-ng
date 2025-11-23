@@ -27,7 +27,12 @@ import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
 import ProcessExecutor from '../helpers/processExecutor';
-import { getActivePath, sidebarProvider, waitUntil } from '../utils/global';
+import {
+    getActivePath,
+    problemFs,
+    sidebarProvider,
+    waitUntil,
+} from '../utils/global';
 import { exists } from '../utils/process';
 import { KnownResult } from '../utils/result';
 import { isExpandVerdict, isRunningVerdict } from '../utils/types';
@@ -135,6 +140,8 @@ export default class ProblemsManager {
             canImport,
             isRunning: !!fullProblem?.ac,
         });
+        fullProblem &&
+            (await problemFs.fireAuthorityChange(fullProblem.problem.src.path));
     }
     public static async closeAll() {
         for (const fullProblem of this.fullProblems) {

@@ -148,6 +148,47 @@ export class ProblemFs implements FileSystemProvider {
         }
         return current;
     }
+    public async fireAuthorityChange(authority: string): Promise<void> {
+        const fullProblem = await ProblemsManager.getFullProblem(authority);
+        if (!fullProblem) {
+            return;
+        }
+        const events: FileChangeEvent[] = [];
+        const baseUri = Uri.from({
+            scheme: ProblemFs.scheme,
+            authority,
+            path: '/',
+        });
+        events.push({
+            type: FileChangeType.Changed,
+            uri: baseUri,
+        });
+        events.push({
+            type: FileChangeType.Changed,
+            uri: Uri.joinPath(baseUri, 'problem.cph-ng.json'),
+        });
+        for (const [id, tc] of Object.entries(fullProblem.problem.tcs)) {
+            events.push({
+                type: FileChangeType.Changed,
+                uri: Uri.joinPath(baseUri, 'tcs', id, 'stdin'),
+            });
+            events.push({
+                type: FileChangeType.Changed,
+                uri: Uri.joinPath(baseUri, 'tcs', id, 'answer'),
+            });
+            if (tc.result) {
+                events.push({
+                    type: FileChangeType.Changed,
+                    uri: Uri.joinPath(baseUri, 'tcs', id, 'stdout'),
+                });
+                events.push({
+                    type: FileChangeType.Changed,
+                    uri: Uri.joinPath(baseUri, 'tcs', id, 'stderr'),
+                });
+            }
+        }
+        this.changeEmitter.fire(events);
+    }
 
     async stat(uri: Uri): Promise<FileStat> {
         const item = await this.parseUri(uri);
