@@ -286,20 +286,25 @@ export class Problem implements IProblem {
             }
             return oldPath;
         };
-        const fixTcIo = async (tcIo: TcIo) =>
+        const fixTcIo = async (tcIo: TcIo) => {
             tcIo.useFile && (tcIo.data = await fixPath(tcIo.data));
-        const fixFileWithHash = async (fileWithHash?: FileWithHash) =>
+        };
+        const fixFileWithHash = async (fileWithHash?: FileWithHash) => {
             fileWithHash &&
-            (fileWithHash.path = await fixPath(fileWithHash.path));
-        await Promise.all([
-            ...Object.values(problem.tcs)
-                .map((tc) => [fixTcIo(tc.stdin), fixTcIo(tc.answer)])
-                .flat(),
+                (fileWithHash.path = await fixPath(fileWithHash.path));
+        };
+
+        const promises: Promise<void>[] = [];
+        for (const tc of Object.values(problem.tcs)) {
+            promises.push(fixTcIo(tc.stdin), fixTcIo(tc.answer));
+        }
+        promises.push(
             fixFileWithHash(problem.checker),
             fixFileWithHash(problem.interactor),
             fixFileWithHash(problem.bfCompare?.generator),
             fixFileWithHash(problem.bfCompare?.bruteForce),
-        ]);
+        );
+        await Promise.all(promises);
         problem.src.path = srcPath;
 
         this.logger.info('Problem', problem.src.path, 'loaded');
