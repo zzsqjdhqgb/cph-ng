@@ -165,21 +165,21 @@ export class FileSystemProvider implements FileSystemProvider {
             return {
                 type: FileType.Directory,
                 ctime: 0,
-                mtime: 0,
+                mtime: Date.now(),
                 size: 0,
             };
         } else if (item.data instanceof Uri) {
             return {
                 type: FileType.File | FileType.SymbolicLink,
                 ctime: 0,
-                mtime: 0,
+                mtime: Date.now(),
                 size: 0,
             };
         } else {
             return {
                 type: FileType.File,
                 ctime: 0,
-                mtime: 0,
+                mtime: Date.now(),
                 size: item.data.length,
             };
         }
