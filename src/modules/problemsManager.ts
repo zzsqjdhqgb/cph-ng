@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { randomUUID, UUID } from 'crypto';
+import { UUID } from 'crypto';
 import { unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import { commands, debug, l10n, Uri, window } from 'vscode';
@@ -188,9 +188,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const uuid = randomUUID();
-        fullProblem.problem.tcs[uuid] = new Tc();
-        fullProblem.problem.tcOrder.push(uuid);
+        fullProblem.problem.addTc(new Tc());
         await this.dataRefresh();
     }
     public static async loadTcs(msg: msgs.LoadTcsMsg) {
@@ -717,18 +715,11 @@ export default class ProblemsManager {
                 );
                 if (tempTc.result.verdict !== TcVerdicts.AC) {
                     if (tempTc.result.verdict !== TcVerdicts.RJ) {
-                        const uuid = randomUUID();
-                        fullProblem.problem.tcs[uuid] = Tc.fromI({
-                            stdin: tempTc.stdin,
-                            answer: tempTc.answer,
-                            isDisabled: false,
-                            isExpand: true,
-                        });
-                        await fullProblem.problem.tcs[uuid].stdin.inlineSmall();
-                        await fullProblem.problem.tcs[
-                            uuid
-                        ].answer.inlineSmall();
-                        fullProblem.problem.tcOrder.push(uuid);
+                        await tempTc.stdin.inlineSmall();
+                        await tempTc.answer.inlineSmall();
+                        fullProblem.problem.addTc(
+                            new Tc(tempTc.stdin, tempTc.answer, true),
+                        );
                         bfCompare.msg = l10n.t(
                             'Found a difference in #{cnt} run.',
                             { cnt },
@@ -902,12 +893,10 @@ export default class ProblemsManager {
                 Settings.problem.inputFileExtensionList.includes(ext) ||
                 Settings.problem.outputFileExtensionList.includes(ext)
             ) {
-                const uuid = randomUUID();
                 const { stdin, answer } = await TcFactory.fromFile(item);
-                fullProblem.problem.tcs[uuid] = new Tc();
-                fullProblem.problem.tcs[uuid].stdin = stdin ?? new TcIo();
-                fullProblem.problem.tcs[uuid].answer = answer ?? new TcIo();
-                fullProblem.problem.tcOrder.push(uuid);
+                fullProblem.problem.addTc(
+                    new Tc(stdin ?? new TcIo(), answer ?? new TcIo()),
+                );
             }
         }
         await this.dataRefresh();

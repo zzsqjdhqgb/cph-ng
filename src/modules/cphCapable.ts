@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { randomUUID } from 'crypto';
 import { enc, MD5 } from 'crypto-js';
 import { readdir, readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
@@ -114,11 +113,12 @@ export class CphProblem implements ICphProblem {
             timeElapsed: 0,
         });
         for (const test of this.tests) {
-            const id = randomUUID();
-            problem.tcs[id] = new Tc();
-            problem.tcs[id].stdin = new TcIo(false, test.input);
-            problem.tcs[id].answer = new TcIo(false, test.output);
-            problem.tcOrder.push(id);
+            problem.addTc(
+                new Tc(
+                    new TcIo(false, test.input),
+                    new TcIo(false, test.output),
+                ),
+            );
         }
         return problem;
     }

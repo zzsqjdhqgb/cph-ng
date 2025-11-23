@@ -15,11 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { UUID } from 'crypto';
-import { SHA256 } from 'crypto-js';
+import { randomUUID, UUID } from 'crypto';
 import { readFile, stat, writeFile } from 'fs/promises';
-import { join } from 'path';
 import { l10n } from 'vscode';
+import Cache from '../modules/cache';
 import Settings from '../modules/settings';
 import { version } from './packageInfo';
 import { KnownResult } from './result';
@@ -94,11 +93,7 @@ export class TcIo {
         if (this.useFile) {
             return this.data;
         } else {
-            const path = join(
-                Settings.cache.directory,
-                'io',
-                SHA256(this.data).toString().substring(0, 8),
-            );
+            const path = await Cache.createIo();
             await writeFile(path, this.data);
             return path;
         }
@@ -117,12 +112,13 @@ export class TcIo {
 }
 
 export class Tc implements ITc {
-    public stdin: TcIo = new TcIo();
-    public answer: TcIo = new TcIo();
-    public isExpand: boolean = false;
-    public isDisabled: boolean = false;
-    public result?: TcResult;
-
+    constructor(
+        public stdin: TcIo = new TcIo(),
+        public answer: TcIo = new TcIo(),
+        public isExpand: boolean = false,
+        public isDisabled: boolean = false,
+        public result?: TcResult,
+    ) {}
     public static fromI(tc: ITc): Tc {
         const instance = new Tc();
         instance.fromI(tc);
@@ -224,5 +220,12 @@ export class Problem implements IProblem {
         if (problem.compilationSettings) {
             this.compilationSettings = { ...problem.compilationSettings };
         }
+    }
+
+    public addTc(tc: Tc): UUID {
+        const uuid = randomUUID();
+        this.tcs[uuid] = tc;
+        this.tcOrder.push(uuid);
+        return uuid;
     }
 }

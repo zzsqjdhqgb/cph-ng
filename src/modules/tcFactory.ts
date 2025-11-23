@@ -16,7 +16,6 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import AdmZip from 'adm-zip';
-import { randomUUID } from 'crypto';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
@@ -202,9 +201,7 @@ export default class TcFactory {
             problem.tcOrder = [];
         }
         for (const tc of tcs) {
-            const uuid = randomUUID();
-            problem.tcs[uuid] = Tc.fromI(tc);
-            problem.tcOrder.push(uuid);
+            problem.addTc(Tc.fromI(tc));
         }
     }
 }

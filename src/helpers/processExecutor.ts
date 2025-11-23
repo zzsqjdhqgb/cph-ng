@@ -16,15 +16,15 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
-import { randomUUID } from 'crypto';
 import { createReadStream, createWriteStream } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { constants } from 'os';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 import { cwd } from 'process';
 import { pipeline } from 'stream/promises';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
+import Cache from '../modules/cache';
 import Settings from '../modules/settings';
 import { TcIo } from '../utils/types.backend';
 
@@ -105,10 +105,8 @@ export default class ProcessExecutor {
         }
 
         const inputFile = await stdin.toPath();
-        const stdoutPath = join(Settings.cache.directory, 'io', randomUUID());
-        const stderrPath = join(Settings.cache.directory, 'io', randomUUID());
-        await writeFile(stdoutPath, '');
-        await writeFile(stderrPath, '');
+        const stdoutPath = await Cache.createIo();
+        const stderrPath = await Cache.createIo();
 
         const runnerCmd = [
             runnerPath,
@@ -310,8 +308,8 @@ export default class ProcessExecutor {
         const result: LaunchResult = {
             child,
             acSignal: unifiedAc.signal,
-            stdoutPath: join(Settings.cache.directory, 'io', randomUUID()),
-            stderrPath: join(Settings.cache.directory, 'io', randomUUID()),
+            stdoutPath: await Cache.createIo(),
+            stderrPath: await Cache.createIo(),
             startTime: Date.now(),
         };
 

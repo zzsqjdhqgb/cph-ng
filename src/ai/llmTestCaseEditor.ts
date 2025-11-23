@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { randomUUID, UUID } from 'crypto';
+import { UUID } from 'crypto';
 import {
     CancellationToken,
     l10n,
@@ -145,12 +145,13 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
                 return result;
             }
 
-            const newId = randomUUID();
-            problem.tcs[newId] = new Tc();
-            problem.tcs[newId].stdin = new TcIo(false, stdin ?? '');
-            problem.tcs[newId].answer = new TcIo(false, answer ?? '');
-            problem.tcs[newId].isExpand = true;
-            problem.tcOrder.push(newId);
+            const newId = problem.addTc(
+                new Tc(
+                    new TcIo(false, stdin ?? ''),
+                    new TcIo(false, answer ?? ''),
+                    true,
+                ),
+            );
             await ProblemsManager.dataRefresh();
 
             result.content.push(

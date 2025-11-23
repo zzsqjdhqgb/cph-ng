@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { mkdir, readFile, rm } from 'fs/promises';
+import { readFile, rm } from 'fs/promises';
 import { release } from 'os';
 import { join } from 'path';
 import { EventEmitter } from 'stream';
@@ -51,6 +51,7 @@ import {
     sidebarProvider,
 } from '../utils/global';
 import { version } from '../utils/packageInfo';
+import Cache from './cache';
 import { CphProblem } from './cphCapable';
 import CphNg from './cphNg';
 import ProblemFs from './problemFs';
@@ -92,17 +93,7 @@ export default class ExtensionManager {
                 });
             }
 
-            await Promise.all([
-                mkdir(join(Settings.cache.directory, 'bin'), {
-                    recursive: true,
-                }),
-                mkdir(join(Settings.cache.directory, 'out'), {
-                    recursive: true,
-                }),
-                mkdir(join(Settings.cache.directory, 'io'), {
-                    recursive: true,
-                }),
-            ]);
+            await Cache.ensureDir();
             ExtensionManager.logger.info(
                 'Cache directories created successfully',
             );

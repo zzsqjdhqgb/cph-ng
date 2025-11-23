@@ -15,8 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { SHA256 } from 'crypto-js';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { platform } from 'process';
 import { l10n } from 'vscode';
@@ -26,6 +25,7 @@ import {
     ProcessData,
     ProcessResultHandler,
 } from '../helpers/processResultHandler';
+import Cache from '../modules/cache';
 import ProblemsManager from '../modules/problemsManager';
 import Settings from '../modules/settings';
 import { extensionPath } from '../utils/global';
@@ -141,16 +141,8 @@ export class Runner {
         options: RunOptions,
     ): Promise<KnownResult<ProcessData>> {
         // Prepare input and output files
-        const hash = SHA256(
-            `${options.cmd.join(' ')}-${Date.now()}-${Math.random()}`,
-        )
-            .toString()
-            .substring(0, 8);
-        const ioDir = join(Settings.cache.directory, 'io');
-        const inputFile = join(ioDir, `${hash}.in`);
-        const outputFile = join(ioDir, `${hash}.out`);
-        await writeFile(inputFile, await options.stdin.toString());
-        await writeFile(outputFile, '');
+        const inputFile = await options.stdin.toPath();
+        const outputFile = await Cache.createIo();
 
         // Launch both processes with pipe
         const { process1: solResult, process2: intResult } =
