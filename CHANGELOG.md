@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.8
 
 - **feat**: drag and drop to webview
 - **refactor**: change core process logic
