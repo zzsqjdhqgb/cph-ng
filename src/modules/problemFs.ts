@@ -23,6 +23,7 @@ import {
     EventEmitter,
     FileChangeEvent,
     FileChangeType,
+    FilePermission,
     FileStat,
     FileSystemError,
     FileSystemProvider,
@@ -42,7 +43,7 @@ export const generateTcUri = (problem: Problem, id: UUID, type: UriTypes) =>
 
 type CphFsFile = {
     data: string | Uri;
-    set: (data: string) => Promise<void>;
+    set?: (data: string) => Promise<void>;
 };
 type CphFsDirItem = [string, CphFsItem];
 type CphFsDir = CphFsDirItem[];
@@ -116,12 +117,6 @@ export class ProblemFs implements FileSystemProvider {
                                     data: tc.result.stdout.useFile
                                         ? Uri.file(tc.result.stdout.data)
                                         : tc.result.stdout.data,
-                                    set: async (data: string) => {
-                                        if (!tc.result) {
-                                            throw this.notFound;
-                                        }
-                                        tc.result.stdout.fromString(data);
-                                    },
                                 },
                             ]);
                             items.push([
@@ -130,12 +125,6 @@ export class ProblemFs implements FileSystemProvider {
                                     data: tc.result.stderr.useFile
                                         ? Uri.file(tc.result.stderr.data)
                                         : tc.result.stderr.data,
-                                    set: async (data: string) => {
-                                        if (!tc.result) {
-                                            throw this.notFound;
-                                        }
-                                        tc.result.stderr.fromString(data);
-                                    },
                                 },
                             ]);
                         }
@@ -168,6 +157,7 @@ export class ProblemFs implements FileSystemProvider {
                 ctime: 0,
                 mtime: Date.now(),
                 size: 0,
+                permissions: FilePermission.Readonly,
             };
         } else if (item.data instanceof Uri) {
             return {
@@ -175,6 +165,7 @@ export class ProblemFs implements FileSystemProvider {
                 ctime: 0,
                 mtime: Date.now(),
                 size: 0,
+                permissions: item.set ? undefined : FilePermission.Readonly,
             };
         } else {
             return {
@@ -182,6 +173,7 @@ export class ProblemFs implements FileSystemProvider {
                 ctime: 0,
                 mtime: Date.now(),
                 size: item.data.length,
+                permissions: item.set ? undefined : FilePermission.Readonly,
             };
         }
     }
@@ -201,6 +193,9 @@ export class ProblemFs implements FileSystemProvider {
         const item = await this.parseUri(uri);
         if (Array.isArray(item)) {
             throw this.isDir;
+        }
+        if (!item.set) {
+            throw this.noPermissions;
         }
         await item.set(content.toString());
         this.changeEmitter.fire([{ type: FileChangeType.Changed, uri }]);
