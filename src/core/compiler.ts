@@ -18,7 +18,7 @@
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import { KnownResult, Result, UnknownResult } from '../utils/result';
-import { FileWithHash, Problem, TCVerdicts } from '../utils/types.backend';
+import { FileWithHash, Problem, TcVerdicts } from '../utils/types.backend';
 import { Lang, LangCompileData, LangCompileResult } from './langs/lang';
 import Langs from './langs/langs';
 
@@ -62,7 +62,7 @@ export class Compiler {
         const srcLang = Langs.getLang(problem.src.path);
         if (!srcLang) {
             return new KnownResult(
-                TCVerdicts.SE,
+                TcVerdicts.SE,
                 l10n.t(
                     'Cannot determine the programming language of the source file: {file}.',
                     { file: problem.src.path },
@@ -114,7 +114,7 @@ export class Compiler {
         if (problem.bfCompare) {
             if (!problem.bfCompare.generator || !problem.bfCompare.bruteForce) {
                 return new KnownResult(
-                    TCVerdicts.RJ,
+                    TcVerdicts.RJ,
                     l10n.t(
                         'Both generator and brute force source files must be provided for brute force comparison.',
                     ),

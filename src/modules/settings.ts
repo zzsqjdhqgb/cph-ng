@@ -175,7 +175,7 @@ class ComparingSection extends SettingsSection {
     }
 }
 
-class BFCompareSection extends SettingsSection {
+class BfCompareSection extends SettingsSection {
     constructor() {
         super('bfCompare');
     }
@@ -261,7 +261,7 @@ export default class Settings {
     static companion = new CompanionSection();
     static runner = new RunnerSection();
     static comparing = new ComparingSection();
-    static bfCompare = new BFCompareSection();
+    static bfCompare = new BfCompareSection();
     static problem = new ProblemSection();
     static sidebar = new SidebarSection();
 }

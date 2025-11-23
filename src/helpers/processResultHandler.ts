@@ -21,7 +21,7 @@ import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
 import { KnownResult, Result, UnknownResult } from '../utils/result';
-import { TCVerdicts } from '../utils/types.backend';
+import { TcVerdicts } from '../utils/types.backend';
 import { AbortReason, ExecuteResult } from './processExecutor';
 
 export interface WrapperData {
@@ -73,7 +73,7 @@ export class ProcessResultHandler {
         this.logger.info('Parsing process result', { result, ignoreExitCode });
         if (result instanceof Error) {
             return {
-                verdict: TCVerdicts.SE,
+                verdict: TcVerdicts.SE,
                 msg: result.message,
             };
         }
@@ -92,13 +92,13 @@ export class ProcessResultHandler {
 
         if (result.abortReason === AbortReason.Timeout) {
             return new KnownResult(
-                TCVerdicts.TLE,
+                TcVerdicts.TLE,
                 l10n.t('Killed due to timeout'),
                 processData,
             );
         } else if (result.abortReason === AbortReason.UserAbort) {
             return new KnownResult(
-                TCVerdicts.RJ,
+                TcVerdicts.RJ,
                 l10n.t('Aborted by user'),
                 processData,
             );
@@ -109,7 +109,7 @@ export class ProcessResultHandler {
             (!ignoreExitCode && result.codeOrSignal !== 0)
         ) {
             return new KnownResult(
-                TCVerdicts.RE,
+                TcVerdicts.RE,
                 l10n.t('Process exited with code: {code}.', {
                     code: result.codeOrSignal,
                 }),
@@ -150,21 +150,21 @@ export class ProcessResultHandler {
     private static getTestlibVerdict(code: number): KnownResult {
         switch (code) {
             case 0:
-                return new KnownResult(TCVerdicts.AC);
+                return new KnownResult(TcVerdicts.AC);
             case 1:
-                return new KnownResult(TCVerdicts.WA);
+                return new KnownResult(TcVerdicts.WA);
             case 2:
-                return new KnownResult(TCVerdicts.PE);
+                return new KnownResult(TcVerdicts.PE);
             case 3:
-                return new KnownResult(TCVerdicts.SE);
+                return new KnownResult(TcVerdicts.SE);
             case 4:
-                return new KnownResult(TCVerdicts.WA, l10n.t('Unexpected EOF'));
+                return new KnownResult(TcVerdicts.WA, l10n.t('Unexpected EOF'));
             case 7:
-                return new KnownResult(TCVerdicts.PC);
+                return new KnownResult(TcVerdicts.PC);
             default:
                 this.logger.warn('Testlib returned unknown exit code', code);
                 return new KnownResult(
-                    TCVerdicts.SE,
+                    TcVerdicts.SE,
                     l10n.t('Testlib returned unknown exit code: {code}', {
                         code,
                     }),
@@ -178,7 +178,7 @@ export class ProcessResultHandler {
         stderr: string,
     ): KnownResult {
         if (!Settings.comparing.ignoreError && stderr) {
-            return new KnownResult(TCVerdicts.RE);
+            return new KnownResult(TcVerdicts.RE);
         }
 
         const fixedOutput = stdout
@@ -195,17 +195,17 @@ export class ProcessResultHandler {
             Settings.comparing.oleSize &&
             fixedOutput.length > fixedAnswer.length * Settings.comparing.oleSize
         ) {
-            return new KnownResult(TCVerdicts.OLE);
+            return new KnownResult(TcVerdicts.OLE);
         }
 
         const compressOutput = stdout.replace(/\r|\n|\t|\s/g, '');
         const compressAnswer = answer.replace(/\r|\n|\t|\s/g, '');
         if (compressOutput !== compressAnswer) {
-            return new KnownResult(TCVerdicts.WA);
+            return new KnownResult(TcVerdicts.WA);
         }
         if (fixedOutput !== fixedAnswer && !Settings.comparing.regardPEAsAC) {
-            return new KnownResult(TCVerdicts.PE);
+            return new KnownResult(TcVerdicts.PE);
         }
-        return new KnownResult(TCVerdicts.AC);
+        return new KnownResult(TcVerdicts.AC);
     }
 }

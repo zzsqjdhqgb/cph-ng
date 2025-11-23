@@ -27,7 +27,7 @@ import {
     PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problemsManager';
-import { TC, TCIO } from '../utils/types.backend';
+import { Tc, TcIo } from '../utils/types.backend';
 
 interface LlmTestCaseEditorParams {
     activePath: string;
@@ -123,10 +123,10 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
                 }
 
                 if (stdin !== undefined) {
-                    tc.stdin = new TCIO(false, stdin);
+                    tc.stdin = new TcIo(false, stdin);
                 }
                 if (answer !== undefined) {
-                    tc.answer = new TCIO(false, answer);
+                    tc.answer = new TcIo(false, answer);
                 }
                 // Clear previous execution result so it can be re-run
                 tc.result = undefined;
@@ -146,9 +146,9 @@ class LlmTestCaseEditor implements LanguageModelTool<LlmTestCaseEditorParams> {
             }
 
             const newId = randomUUID();
-            problem.tcs[newId] = new TC();
-            problem.tcs[newId].stdin = new TCIO(false, stdin ?? '');
-            problem.tcs[newId].answer = new TCIO(false, answer ?? '');
+            problem.tcs[newId] = new Tc();
+            problem.tcs[newId].stdin = new TcIo(false, stdin ?? '');
+            problem.tcs[newId].answer = new TcIo(false, answer ?? '');
             problem.tcs[newId].isExpand = true;
             problem.tcOrder.push(newId);
             await ProblemsManager.dataRefresh();

@@ -24,17 +24,17 @@ import Settings from '../modules/settings';
 import { version } from './packageInfo';
 import { KnownResult } from './result';
 import {
-    IBFCompare,
+    IBfCompare,
     ICompilationSettings,
     IFileWithHash,
     IProblem,
-    ITC,
-    ITCIO,
-    ITCResult,
-    ITCVerdict,
+    ITc,
+    ITcIo,
+    ITcResult,
+    ITcVerdict,
 } from './types';
 
-export class TCVerdict implements ITCVerdict {
+export class TcVerdict implements ITcVerdict {
     constructor(
         public name: string,
         public fullName: string,
@@ -42,15 +42,15 @@ export class TCVerdict implements ITCVerdict {
     ) {}
 }
 
-export class TCResult implements ITCResult {
+export class TcResult implements ITcResult {
     public time?: number;
     public memory?: number;
-    public stdout: TCIO = new TCIO();
-    public stderr: TCIO = new TCIO();
+    public stdout: TcIo = new TcIo();
+    public stderr: TcIo = new TcIo();
     public msg: string[] = [];
 
-    constructor(public verdict: TCVerdict = TCVerdicts.UKE) {}
-    public fromI(result: ITCResult): void {
+    constructor(public verdict: TcVerdict = TcVerdicts.UKE) {}
+    public fromI(result: ITcResult): void {
         this.verdict = result.verdict;
         this.time = result.time;
         this.memory = result.memory;
@@ -63,7 +63,7 @@ export class TCResult implements ITCResult {
         result.msg && this.msg.push(result.msg);
     }
 }
-export class TCIO {
+export class TcIo {
     useFile: boolean;
     data: string;
 
@@ -72,7 +72,7 @@ export class TCIO {
         this.data = data || '';
     }
 
-    public fromI(tc: ITCIO) {
+    public fromI(tc: ITcIo) {
         this.useFile = tc.useFile;
         this.data = tc.data;
     }
@@ -116,28 +116,28 @@ export class TCIO {
     }
 }
 
-export class TC implements ITC {
-    public stdin: TCIO = new TCIO();
-    public answer: TCIO = new TCIO();
+export class Tc implements ITc {
+    public stdin: TcIo = new TcIo();
+    public answer: TcIo = new TcIo();
     public isExpand: boolean = false;
     public isDisabled: boolean = false;
-    public result?: TCResult;
+    public result?: TcResult;
 
-    public static fromI(tc: ITC): TC {
-        const instance = new TC();
+    public static fromI(tc: ITc): Tc {
+        const instance = new Tc();
         instance.fromI(tc);
         return instance;
     }
-    public fromI(tc: ITC): void {
+    public fromI(tc: ITc): void {
         (this.stdin.fromI(tc.stdin), this.answer.fromI(tc.answer));
         ((this.isExpand = tc.isExpand), (this.isDisabled = tc.isDisabled));
         if (tc.result) {
-            this.result = new TCResult();
+            this.result = new TcResult();
             this.result.fromI(tc.result);
         }
     }
 }
-export type TCWithResult = TC & { result: TCResult };
+export type TcWithResult = Tc & { result: TcResult };
 
 export class FileWithHash implements IFileWithHash {
     constructor(
@@ -146,42 +146,42 @@ export class FileWithHash implements IFileWithHash {
     ) {}
 }
 
-export const TCVerdicts = {
-    UKE: new TCVerdict('UKE', l10n.t('Unknown Error'), '#0000ff'),
-    AC: new TCVerdict('AC', l10n.t('Accepted'), '#49cd32'),
-    PC: new TCVerdict('PC', l10n.t('Partially Correct'), '#ed9813'),
-    PE: new TCVerdict('PE', l10n.t('Presentation Error'), '#ff778e'),
-    WA: new TCVerdict('WA', l10n.t('Wrong Answer'), '#d3140d'),
-    TLE: new TCVerdict('TLE', l10n.t('Time Limit Exceed'), '#0c0066'),
-    MLE: new TCVerdict('MLE', l10n.t('Memory Limit Exceed'), '#5300a7'),
-    OLE: new TCVerdict('OLE', l10n.t('Output Limit Exceed'), '#8300a7'),
-    RE: new TCVerdict('RE', l10n.t('Runtime Error'), '#1a26c8'),
-    RF: new TCVerdict('RF', l10n.t('Restricted Function'), '#008f81'),
-    CE: new TCVerdict('CE', l10n.t('Compilation Error'), '#8b7400'),
-    SE: new TCVerdict('SE', l10n.t('System Error'), '#000000'),
-    WT: new TCVerdict('WT', l10n.t('Waiting'), '#4100d9'),
-    FC: new TCVerdict('FC', l10n.t('Fetched'), '#4c00ff'),
-    CP: new TCVerdict('CP', l10n.t('Compiling'), '#5e19ff'),
-    CPD: new TCVerdict('CPD', l10n.t('Compiled'), '#7340ff'),
-    JG: new TCVerdict('JG', l10n.t('Judging'), '#844fff'),
-    JGD: new TCVerdict('JGD', l10n.t('Judged'), '#967fff'),
-    CMP: new TCVerdict('CMP', l10n.t('Comparing'), '#a87dff'),
-    SK: new TCVerdict('SK', l10n.t('Skipped'), '#4b4b4b'),
-    RJ: new TCVerdict('RJ', l10n.t('Rejected'), '#4e0000'),
+export const TcVerdicts = {
+    UKE: new TcVerdict('UKE', l10n.t('Unknown Error'), '#0000ff'),
+    AC: new TcVerdict('AC', l10n.t('Accepted'), '#49cd32'),
+    PC: new TcVerdict('PC', l10n.t('Partially Correct'), '#ed9813'),
+    PE: new TcVerdict('PE', l10n.t('Presentation Error'), '#ff778e'),
+    WA: new TcVerdict('WA', l10n.t('Wrong Answer'), '#d3140d'),
+    TLE: new TcVerdict('TLE', l10n.t('Time Limit Exceed'), '#0c0066'),
+    MLE: new TcVerdict('MLE', l10n.t('Memory Limit Exceed'), '#5300a7'),
+    OLE: new TcVerdict('OLE', l10n.t('Output Limit Exceed'), '#8300a7'),
+    RE: new TcVerdict('RE', l10n.t('Runtime Error'), '#1a26c8'),
+    RF: new TcVerdict('RF', l10n.t('Restricted Function'), '#008f81'),
+    CE: new TcVerdict('CE', l10n.t('Compilation Error'), '#8b7400'),
+    SE: new TcVerdict('SE', l10n.t('System Error'), '#000000'),
+    WT: new TcVerdict('WT', l10n.t('Waiting'), '#4100d9'),
+    FC: new TcVerdict('FC', l10n.t('Fetched'), '#4c00ff'),
+    CP: new TcVerdict('CP', l10n.t('Compiling'), '#5e19ff'),
+    CPD: new TcVerdict('CPD', l10n.t('Compiled'), '#7340ff'),
+    JG: new TcVerdict('JG', l10n.t('Judging'), '#844fff'),
+    JGD: new TcVerdict('JGD', l10n.t('Judged'), '#967fff'),
+    CMP: new TcVerdict('CMP', l10n.t('Comparing'), '#a87dff'),
+    SK: new TcVerdict('SK', l10n.t('Skipped'), '#4b4b4b'),
+    RJ: new TcVerdict('RJ', l10n.t('Rejected'), '#4e0000'),
 } as const;
 
 export class Problem implements IProblem {
     public version: string = version;
     public name: string;
     public url?: string;
-    public tcs: Record<UUID, TC> = {};
+    public tcs: Record<UUID, Tc> = {};
     public tcOrder: UUID[] = [];
     public timeLimit: number = Settings.problem.defaultTimeLimit;
     public memoryLimit: number = Settings.problem.defaultMemoryLimit;
     public src: FileWithHash;
     public checker?: FileWithHash;
     public interactor?: FileWithHash;
-    public bfCompare?: IBFCompare;
+    public bfCompare?: IBfCompare;
     public timeElapsed: number = 0;
     public compilationSettings?: ICompilationSettings;
 
@@ -200,7 +200,7 @@ export class Problem implements IProblem {
         this.name = problem.name;
         this.url = problem.url;
         this.tcs = Object.fromEntries(
-            Object.entries(problem.tcs).map(([id, tc]) => [id, TC.fromI(tc)]),
+            Object.entries(problem.tcs).map(([id, tc]) => [id, Tc.fromI(tc)]),
         );
         this.tcOrder = [...problem.tcOrder];
         this.timeLimit = problem.timeLimit;

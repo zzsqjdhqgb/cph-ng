@@ -22,14 +22,14 @@ import {
     ProcessResultHandler,
 } from '../helpers/processResultHandler';
 import { KnownResult } from '../utils/result';
-import { TCWithResult } from '../utils/types.backend';
+import { TcWithResult } from '../utils/types.backend';
 
 export class Checker {
     private static logger: Logger = new Logger('checker');
 
     public static async runChecker(
         checkerPath: string,
-        tc: TCWithResult,
+        tc: TcWithResult,
         ac: AbortController,
     ): Promise<KnownResult<ProcessData>> {
         this.logger.debug('Running checker', checkerPath, 'on tc', tc);

@@ -32,9 +32,9 @@ import { extensionPath } from '../utils/global';
 import { KnownResult, Result } from '../utils/result';
 import {
     Problem,
-    TCIO,
-    TCVerdicts,
-    TCWithResult,
+    TcIo,
+    TcVerdicts,
+    TcWithResult,
 } from '../utils/types.backend';
 import { Checker } from './checker';
 import { CompileData } from './compiler';
@@ -44,7 +44,7 @@ import { Lang } from './langs/lang';
 interface RunOptions {
     cmd: string[];
     timeLimit: number;
-    stdin: TCIO;
+    stdin: TcIo;
     ac: AbortController;
     enableRunner: boolean;
 }
@@ -99,7 +99,7 @@ export class Runner {
     ): Promise<Result<ProcessData>> {
         if (Settings.runner.useRunner && Settings.compilation.useWrapper) {
             return new KnownResult(
-                TCVerdicts.RJ,
+                TcVerdicts.RJ,
                 l10n.t('Cannot use both runner and wrapper at the same time'),
             );
         }
@@ -109,7 +109,7 @@ export class Runner {
             runnerPath = await this.getRunnerPath();
             if (!runnerPath) {
                 return new KnownResult(
-                    TCVerdicts.SE,
+                    TcVerdicts.SE,
                     l10n.t('Failed to compile runner program'),
                 );
             }
@@ -188,13 +188,13 @@ export class Runner {
 
     public static async run(
         problem: Problem,
-        tc: TCWithResult,
+        tc: TcWithResult,
         lang: Lang,
         ac: AbortController,
         compileData: CompileData,
     ) {
         try {
-            tc.result.verdict = TCVerdicts.JG;
+            tc.result.verdict = TcVerdicts.JG;
             await ProblemsManager.dataRefresh();
 
             const runResult = await this.doRun(
@@ -218,9 +218,9 @@ export class Runner {
                 tc.result.memory = memory;
 
                 // Handle stdout and stderr
-                ((tc.result.stdout = new TCIO(true, stdoutPath)),
+                ((tc.result.stdout = new TcIo(true, stdoutPath)),
                     await tc.result.stdout.inlineSmall());
-                ((tc.result.stderr = new TCIO(true, stderrPath)),
+                ((tc.result.stderr = new TcIo(true, stderrPath)),
                     await tc.result.stderr.inlineSmall());
                 await ProblemsManager.dataRefresh();
             }
@@ -228,18 +228,18 @@ export class Runner {
                 tc.result.fromResult(runResult);
                 return;
             }
-            tc.result.verdict = TCVerdicts.JGD;
+            tc.result.verdict = TcVerdicts.JGD;
 
             // Determine verdict
             if (tc.result.time && tc.result.time > problem.timeLimit) {
-                tc.result.verdict = TCVerdicts.TLE;
+                tc.result.verdict = TcVerdicts.TLE;
             } else if (
                 tc.result.memory &&
                 tc.result.memory > problem.memoryLimit
             ) {
-                tc.result.verdict = TCVerdicts.MLE;
+                tc.result.verdict = TcVerdicts.MLE;
             } else {
-                tc.result.verdict = TCVerdicts.CMP;
+                tc.result.verdict = TcVerdicts.CMP;
                 await ProblemsManager.dataRefresh();
                 if (compileData.checker) {
                     const checkerResult = await Checker.runChecker(
@@ -263,7 +263,7 @@ export class Runner {
                 }
             }
         } catch (e) {
-            tc.result.verdict = TCVerdicts.SE;
+            tc.result.verdict = TcVerdicts.SE;
             tc.result.msg.push(
                 l10n.t('Runtime error occurred: {error}', {
                     error: (e as Error).message,

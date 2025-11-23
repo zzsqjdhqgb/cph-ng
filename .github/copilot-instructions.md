@@ -37,11 +37,11 @@ for the schema.
 
 - `Problem`: Source file, test cases (keyed by UUID), time/memory limits,
   optional checker/interactor/brute-force
-- `TC`: Test case with stdin/answer (inline data or file paths), result verdict,
+- `Tc`: Test case with stdin/answer (inline data or file paths), result verdict,
   and expand state
 - `TCIO`: Union type for inline data (`{useFile: false, data: string}`) or file
   reference (`{useFile: true, path: string}`)
-- `TCVerdict`: Result status (AC, WA, TLE, etc.) with name, full name, and color
+- `TcVerdict`: Result status (AC, WA, TLE, etc.) with name, full name, and color
 
 ### Language Support
 
@@ -140,7 +140,7 @@ Pass `compile: boolean | null` to control behavior:
 
 ### Test Case Execution
 
-**Single TC**: `runTc()` compiles once, runs one test case **All TCs**:
+**Single Tc**: `runTc()` compiles once, runs one test case **All TCs**:
 `runTcs()` compiles once, iterates through `tcOrder[]` array **Abort handling**:
 `AbortController` with special reason `'onlyOne'` stops batch but allows
 continuation
@@ -168,9 +168,9 @@ views.
 
 Two tools registered for GitHub Copilot/AI assistants:
 
-1. `run_test_cases`: Execute test cases (parameter: `idx` for specific TC or
+1. `run_test_cases`: Execute test cases (parameter: `idx` for specific Tc or
    omit for all)
-2. `read_problem_file`: Read TC files (parameters: `fileType` enum, `idx` for TC
+2. `read_problem_file`: Read Tc files (parameters: `fileType` enum, `idx` for Tc
    number)
 
 See `src/ai/llmTcRunner.ts` and `src/ai/llmFileReader.ts` for implementations.
@@ -181,7 +181,7 @@ See `src/ai/llmTcRunner.ts` and `src/ai/llmFileReader.ts` for implementations.
   fish - avoid bash heredocs, use `printf` or `echo`
 - **Path templates**: Settings use template syntax like `${workspace}`,
   `${dirname}`, `${basename}` - see `src/utils/strTemplate.ts`
-- **TC ordering**: Always iterate via `problem.tcOrder[]` not
+- **Tc ordering**: Always iterate via `problem.tcOrder[]` not
   `Object.keys(problem.tcs)` - order is user-defined
 - **Cache directory**: Configurable via `cph-ng.cache.directory` (default:
   `${tmp}/cph-ng`), cleaned on startup if `cleanOnStartup` enabled

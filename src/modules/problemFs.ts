@@ -25,6 +25,7 @@ import {
     FileChangeType,
     FileStat,
     FileSystemError,
+    FileSystemProvider,
     FileType,
     Uri,
 } from 'vscode';
@@ -34,7 +35,7 @@ import ProblemsManager from './problemsManager';
 export type UriTypes = 'stdin' | 'answer' | 'stdout' | 'stderr';
 export const generateTcUri = (problem: Problem, id: UUID, type: UriTypes) =>
     Uri.from({
-        scheme: FileSystemProvider.scheme,
+        scheme: ProblemFs.scheme,
         authority: problem.src.path,
         path: `/tcs/${id}/${type}`,
     });
@@ -47,7 +48,7 @@ type CphFsDirItem = [string, CphFsItem];
 type CphFsDir = CphFsDirItem[];
 type CphFsItem = CphFsFile | CphFsDir;
 
-export class FileSystemProvider implements FileSystemProvider {
+export class ProblemFs implements FileSystemProvider {
     public static readonly scheme = 'cph-ng';
 
     private notFound = FileSystemError.FileNotFound();
@@ -230,4 +231,4 @@ export class FileSystemProvider implements FileSystemProvider {
     }
 }
 
-export default FileSystemProvider;
+export default ProblemFs;

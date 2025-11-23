@@ -26,14 +26,14 @@ import { pipeline } from 'stream/promises';
 import { l10n } from 'vscode';
 import Logger from '../helpers/logger';
 import Settings from '../modules/settings';
-import { TCIO } from '../utils/types.backend';
+import { TcIo } from '../utils/types.backend';
 
 interface LaunchOptions {
     cmd: string[];
     timeout?: number;
     ac?: AbortController;
     debug?: boolean;
-    stdin?: TCIO;
+    stdin?: TcIo;
 }
 interface LaunchResult {
     child: ChildProcessWithoutNullStreams;

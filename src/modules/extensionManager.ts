@@ -44,8 +44,8 @@ import SidebarProvider from '../modules/sidebarProvider';
 import { debounce } from '../utils/debounce';
 import {
     extensionPath,
-    fileSystemProvider,
     getActivePath,
+    problemFs,
     setActivePath,
     setExtensionUri,
     sidebarProvider,
@@ -53,7 +53,7 @@ import {
 import { version } from '../utils/packageInfo';
 import { CphProblem } from './cphCapable';
 import CphNg from './cphNg';
-import FileSystemProvider from './fileSystemProvider';
+import ProblemFs from './problemFs';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
 
@@ -123,8 +123,8 @@ export default class ExtensionManager {
             );
             context.subscriptions.push(
                 workspace.registerFileSystemProvider(
-                    FileSystemProvider.scheme,
-                    fileSystemProvider,
+                    ProblemFs.scheme,
+                    problemFs,
                     { isCaseSensitive: true },
                 ),
             );

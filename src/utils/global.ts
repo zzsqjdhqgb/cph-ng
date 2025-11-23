@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { TextEditor, Uri } from 'vscode';
-import FileSystemProvider from '../modules/fileSystemProvider';
+import ProblemFs from '../modules/problemFs';
 import SidebarProvider from '../modules/sidebarProvider';
 
 export let extensionUri: Uri;
@@ -25,7 +25,7 @@ export const setExtensionUri = (uri: Uri) => {
     extensionUri = uri;
     extensionPath = uri.fsPath;
 };
-export const fileSystemProvider = new FileSystemProvider();
+export const problemFs = new ProblemFs();
 export const sidebarProvider = new SidebarProvider();
 
 let _activePath: string | undefined;

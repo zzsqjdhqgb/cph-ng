@@ -3,8 +3,8 @@
     "title": "Problem",
     "type": "object",
     "definitions": {
-        "TCVerdict": {
-            "title": "TCVerdict",
+        "TcVerdict": {
+            "title": "TcVerdict",
             "type": "object",
             "properties": {
                 "name": {
@@ -67,12 +67,12 @@
                 }
             ]
         },
-        "TCResult": {
-            "title": "TCResult",
+        "TcResult": {
+            "title": "TcResult",
             "type": "object",
             "properties": {
                 "verdict": {
-                    "$ref": "#/definitions/TCVerdict"
+                    "$ref": "#/definitions/TcVerdict"
                 },
                 "memory": {
                     "type": "number"
@@ -93,8 +93,8 @@
             "required": ["verdict", "time", "stdout", "stderr", "msg"],
             "additionalProperties": false
         },
-        "TC": {
-            "title": "TC",
+        "Tc": {
+            "title": "Tc",
             "type": "object",
             "properties": {
                 "stdin": {
@@ -110,14 +110,14 @@
                     "type": "boolean"
                 },
                 "result": {
-                    "$ref": "#/definitions/TCResult"
+                    "$ref": "#/definitions/TcResult"
                 }
             },
             "required": ["stdin", "answer", "isExpand", "isDisabled"],
             "additionalProperties": false
         },
-        "BFCompare": {
-            "title": "BFCompare",
+        "BfCompare": {
+            "title": "BfCompare",
             "type": "object",
             "properties": {
                 "generator": {
@@ -173,7 +173,7 @@
                 "format": "uuid"
             },
             "additionalProperties": {
-                "$ref": "#/definitions/TC"
+                "$ref": "#/definitions/Tc"
             }
         },
         "tcOrder": {
@@ -201,7 +201,7 @@
             "$ref": "#/definitions/FileWithHash"
         },
         "bfCompare": {
-            "$ref": "#/definitions/BFCompare"
+            "$ref": "#/definitions/BfCompare"
         },
         "timeElapsed": {
             "type": "integer",

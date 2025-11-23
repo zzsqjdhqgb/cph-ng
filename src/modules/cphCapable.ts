@@ -23,7 +23,7 @@ import { l10n } from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { version } from '../utils/packageInfo';
-import { Problem, TC, TCIO } from '../utils/types.backend';
+import { Problem, Tc, TcIo } from '../utils/types.backend';
 
 export interface ICphProblem {
     name: string;
@@ -115,9 +115,9 @@ export class CphProblem implements ICphProblem {
         });
         for (const test of this.tests) {
             const id = randomUUID();
-            problem.tcs[id] = new TC();
-            problem.tcs[id].stdin = new TCIO(false, test.input);
-            problem.tcs[id].answer = new TCIO(false, test.output);
+            problem.tcs[id] = new Tc();
+            problem.tcs[id].stdin = new TcIo(false, test.input);
+            problem.tcs[id].answer = new TcIo(false, test.output);
             problem.tcOrder.push(id);
         }
         return problem;

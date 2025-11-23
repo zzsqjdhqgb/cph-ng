@@ -24,8 +24,8 @@ import { l10n, window } from 'vscode';
 import Io from '../helpers/io';
 import { exists } from '../utils/process';
 import { renderUnzipFolder } from '../utils/strTemplate';
-import { ITC } from '../utils/types';
-import { Problem, TC, TCIO } from '../utils/types.backend';
+import { ITc } from '../utils/types';
+import { Problem, Tc, TcIo } from '../utils/types.backend';
 import Settings from './settings';
 
 async function getAllFiles(dirPath: string): Promise<string[]> {
@@ -39,16 +39,16 @@ async function getAllFiles(dirPath: string): Promise<string[]> {
     return files.flat();
 }
 
-type ParticleTC = {
-    stdin?: TCIO;
-    answer?: TCIO;
+type ParticleTc = {
+    stdin?: TcIo;
+    answer?: TcIo;
 };
 
 export default class TcFactory {
     public static async fromFile(
         path: string,
         isInput?: boolean,
-    ): Promise<ParticleTC> {
+    ): Promise<ParticleTc> {
         if (isInput === undefined) {
             isInput = Settings.problem.inputFileExtensionList.includes(
                 extname(path).toLowerCase(),
@@ -87,16 +87,16 @@ export default class TcFactory {
                 break;
             }
         }
-        const result: ParticleTC = {};
-        stdin && (result.stdin = new TCIO(true, stdin));
-        answer && (result.answer = new TCIO(true, answer));
+        const result: ParticleTc = {};
+        stdin && (result.stdin = new TcIo(true, stdin));
+        answer && (result.answer = new TcIo(true, answer));
         return result;
     }
 
     public static async fromZip(
         srcPath: string,
         zipPath: string,
-    ): Promise<ITC[]> {
+    ): Promise<ITc[]> {
         const zipData = new AdmZip(zipPath);
         const folderPath = renderUnzipFolder(srcPath, zipPath);
         if (folderPath === null) {
@@ -109,9 +109,9 @@ export default class TcFactory {
         }
         return await this.fromFolder(folderPath);
     }
-    public static async fromFolder(folderPath: string): Promise<ITC[]> {
+    public static async fromFolder(folderPath: string): Promise<ITc[]> {
         const allFiles = await getAllFiles(folderPath);
-        const tcs: ITC[] = [];
+        const tcs: ITc[] = [];
         for (const filePath of allFiles) {
             const fileName = basename(filePath);
             const ext = extname(fileName).toLowerCase();
@@ -197,13 +197,13 @@ export default class TcFactory {
         }
         return chosenIdx.map((idx) => orderedTcs[idx.value]);
     }
-    public static async applyTcs(problem: Problem, tcs: ITC[]) {
+    public static async applyTcs(problem: Problem, tcs: ITc[]) {
         if (Settings.problem.clearBeforeLoad) {
             problem.tcOrder = [];
         }
         for (const tc of tcs) {
             const uuid = randomUUID();
-            problem.tcs[uuid] = TC.fromI(tc);
+            problem.tcs[uuid] = Tc.fromI(tc);
             problem.tcOrder.push(uuid);
         }
     }

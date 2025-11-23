@@ -26,7 +26,7 @@ import { waitUntil } from '../../utils/global';
 import { exists } from '../../utils/process';
 import { KnownResult, Result, UnknownResult } from '../../utils/result';
 import { ICompilationSettings } from '../../utils/types';
-import { FileWithHash, TCVerdicts } from '../../utils/types.backend';
+import { FileWithHash, TcVerdicts } from '../../utils/types.backend';
 
 export interface LangCompileData {
     outputPath: string;
@@ -132,7 +132,7 @@ export class Lang {
                 !(await exists(langCompileResult.data.outputPath))
             ) {
                 return new KnownResult(
-                    TCVerdicts.CE,
+                    TcVerdicts.CE,
                     l10n.t('Compilation failed'),
                 );
             }
@@ -140,7 +140,7 @@ export class Lang {
         } catch (e) {
             logger.error('Compilation failed', e);
             CompilationIo.append((e as Error).message);
-            return new KnownResult(TCVerdicts.CE, l10n.t('Compilation failed'));
+            return new KnownResult(TcVerdicts.CE, l10n.t('Compilation failed'));
         }
     }
     protected async _compile(
@@ -161,17 +161,17 @@ export class Lang {
             timeout: Settings.compilation.timeout,
         });
         if (result instanceof Error) {
-            return new KnownResult(TCVerdicts.SE, result.message);
+            return new KnownResult(TcVerdicts.SE, result.message);
         }
         if (result.abortReason === AbortReason.UserAbort) {
             return new KnownResult(
-                TCVerdicts.RJ,
+                TcVerdicts.RJ,
                 l10n.t('Compilation aborted by user'),
             );
         }
         if (result.abortReason === AbortReason.Timeout) {
             return new KnownResult(
-                TCVerdicts.CE,
+                TcVerdicts.CE,
                 l10n.t('Compilation timed out'),
             );
         }
@@ -179,7 +179,7 @@ export class Lang {
         CompilationIo.append(await readFile(result.stderrPath, 'utf-8'));
         if (result.codeOrSignal) {
             return new KnownResult(
-                TCVerdicts.CE,
+                TcVerdicts.CE,
                 l10n.t('Compiler exited with code {code}', {
                     code: result.codeOrSignal,
                 }),

@@ -22,7 +22,7 @@ import { gunzipSync, gzipSync } from 'zlib';
 import Settings from '../modules/settings';
 import { migration, OldProblem } from '../utils/migration';
 import { renderPathWithFile } from '../utils/strTemplate';
-import { Problem, TCIO } from '../utils/types.backend';
+import { Problem, TcIo } from '../utils/types.backend';
 import Io from './io';
 import Logger from './logger';
 
@@ -128,7 +128,7 @@ export default class Problems {
         ) {
             return true;
         }
-        const tcIoRelated = (tcIo?: TCIO) =>
+        const tcIoRelated = (tcIo?: TcIo) =>
             tcIo && tcIo.useFile && tcIo.data.toLowerCase() === path;
         for (const tc of Object.values(problem.tcs)) {
             if (

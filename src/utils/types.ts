@@ -17,44 +17,44 @@
 
 import { UUID } from 'crypto';
 
-export const isRunningVerdict = (verdict?: ITCVerdict): boolean => {
+export const isRunningVerdict = (verdict?: ITcVerdict): boolean => {
     return (
         verdict !== undefined &&
         ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
     );
 };
-export const isExpandVerdict = (verdict?: ITCVerdict): boolean => {
+export const isExpandVerdict = (verdict?: ITcVerdict): boolean => {
     return !(
         (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
         isRunningVerdict(verdict)
     );
 };
 
-export interface ITCVerdict {
+export interface ITcVerdict {
     name: string;
     fullName: string;
     color: string;
 }
 
-export interface ITCIO {
+export interface ITcIo {
     useFile: boolean;
     data: string;
 }
 
-export interface ITCResult {
-    verdict: ITCVerdict;
+export interface ITcResult {
+    verdict: ITcVerdict;
     time?: number;
     memory?: number;
-    stdout: ITCIO;
-    stderr: ITCIO;
+    stdout: ITcIo;
+    stderr: ITcIo;
     msg: string[];
 }
-export interface ITC {
-    stdin: ITCIO;
-    answer: ITCIO;
+export interface ITc {
+    stdin: ITcIo;
+    answer: ITcIo;
     isExpand: boolean;
     isDisabled: boolean;
-    result?: ITCResult;
+    result?: ITcResult;
 }
 
 export interface IFileWithHash {
@@ -62,7 +62,7 @@ export interface IFileWithHash {
     hash?: string;
 }
 
-export interface IBFCompare {
+export interface IBfCompare {
     generator?: IFileWithHash;
     bruteForce?: IFileWithHash;
     running: boolean;
@@ -80,14 +80,14 @@ export interface IProblem {
     version: string;
     name: string;
     url?: string;
-    tcs: Record<UUID, ITC>;
+    tcs: Record<UUID, ITc>;
     tcOrder: UUID[];
     timeLimit: number;
     memoryLimit: number;
     src: IFileWithHash;
     checker?: IFileWithHash;
     interactor?: IFileWithHash;
-    bfCompare?: IBFCompare;
+    bfCompare?: IBfCompare;
     timeElapsed: number;
     compilationSettings?: ICompilationSettings;
 }

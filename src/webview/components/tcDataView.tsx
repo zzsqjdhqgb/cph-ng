@@ -26,7 +26,7 @@ import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
-import { ITCIO } from '../../utils/types';
+import { ITcIo } from '../../utils/types';
 import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -40,7 +40,7 @@ interface OutputActions {
 
 interface CodeMirrorSectionProps {
     label: string;
-    value: ITCIO;
+    value: ITcIo;
     onChange?: (value: string) => void;
     onChooseFile?: () => void;
     onToggleFile?: () => void;
