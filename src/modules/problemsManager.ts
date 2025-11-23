@@ -411,6 +411,7 @@ export default class ProblemsManager {
         }
         if (fullProblem.ac) {
             fullProblem.ac.abort(msg.onlyOne ? 'onlyOne' : undefined);
+            fullProblem.ac = null;
         } else {
             for (const tc of Object.values(fullProblem.problem.tcs)) {
                 if (tc.result && isRunningVerdict(tc.result.verdict)) {
