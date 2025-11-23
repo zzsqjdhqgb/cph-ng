@@ -271,7 +271,7 @@ const TcView = ({
                                             id,
                                         });
                                     }}
-                                    onDbClick={() => {
+                                    onOpenVirtual={() => {
                                         msg({
                                             type: 'openFile',
                                             path: `/tcs/${id}/stdin`,
@@ -306,7 +306,7 @@ const TcView = ({
                                             id,
                                         });
                                     }}
-                                    onDbClick={() => {
+                                    onOpenVirtual={() => {
                                         msg({
                                             type: 'openFile',
                                             path: `/tcs/${id}/answer`,
@@ -343,7 +343,7 @@ const TcView = ({
                                                     });
                                                 },
                                             }}
-                                            onDbClick={() => {
+                                            onOpenVirtual={() => {
                                                 msg({
                                                     type: 'openFile',
                                                     path: `/tcs/${id}/stdout`,
@@ -357,7 +357,7 @@ const TcView = ({
                                             label={t('tcView.stderr')}
                                             value={tc.result.stderr}
                                             readOnly={true}
-                                            onDbClick={() => {
+                                            onOpenVirtual={() => {
                                                 msg({
                                                     type: 'openFile',
                                                     path: `/tcs/${id}/stderr`,

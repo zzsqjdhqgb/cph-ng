@@ -30,7 +30,6 @@ import { ITcIo } from '../../utils/types';
 import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
-import CphText from './base/cphText';
 import CphButton from './cphButton';
 
 interface OutputActions {
@@ -44,7 +43,7 @@ interface CodeMirrorSectionProps {
     onChange?: (value: string) => void;
     onChooseFile?: () => void;
     onToggleFile?: () => void;
-    onDbClick?: () => void;
+    onOpenVirtual?: () => void;
     outputActions?: OutputActions;
     readOnly?: boolean;
     autoFocus?: boolean;
@@ -109,7 +108,7 @@ const TcDataView = ({
     onChange,
     onChooseFile,
     onToggleFile,
-    onDbClick,
+    onOpenVirtual,
     outputActions,
     readOnly,
     autoFocus,
@@ -159,8 +158,15 @@ const TcDataView = ({
                     flex={1}
                     flexWrap={'wrap'}
                 >
-                    <CphText onDoubleClick={onDbClick}>{label}</CphText>
-                    {internalValue.useFile && (
+                    <CphLink
+                        color='inherit'
+                        name={label}
+                        onClick={onOpenVirtual}
+                        fontSize={'larger'}
+                    >
+                        {label}
+                    </CphLink>
+                    {internalValue.useFile && !readOnly && (
                         <CphLink
                             name={internalValue.data}
                             onClick={() => {
