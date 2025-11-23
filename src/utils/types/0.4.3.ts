@@ -17,77 +17,70 @@
 
 import { UUID } from 'crypto';
 
-export const isRunningVerdict = (verdict?: ITCVerdict): boolean => {
-    return (
-        verdict !== undefined &&
-        ['WT', 'CP', 'CPD', 'JG', 'JGD', 'CMP'].includes(verdict?.name)
-    );
-};
-export const isExpandVerdict = (verdict?: ITCVerdict): boolean => {
-    return !(
-        (verdict !== undefined && ['AC', 'SK', 'RJ'].includes(verdict.name)) ||
-        isRunningVerdict(verdict)
-    );
-};
-
-export interface ITCVerdict {
+export class TCVerdict {
     name: string;
     fullName: string;
     color: string;
+
+    constructor(name: string, fullName: string, color: string) {
+        this.name = name;
+        this.fullName = fullName;
+        this.color = color;
+    }
 }
 
-export interface ITCIO {
-    useFile: boolean;
-    data: string;
-}
+export type TCIO =
+    | { useFile: true; path: string }
+    | { useFile: false; data: string };
 
-export interface ITCResult {
-    verdict: ITCVerdict;
+export interface TCResult {
+    verdict: TCVerdict;
     time?: number;
     memory?: number;
-    stdout: ITCIO;
-    stderr: ITCIO;
-    msg: string[];
-}
-export interface ITC {
-    stdin: ITCIO;
-    answer: ITCIO;
-    isExpand: boolean;
-    isDisabled: boolean;
-    result?: ITCResult;
+    stdout: TCIO;
+    stderr: TCIO;
+    msg?: string;
 }
 
-export interface IFileWithHash {
+export interface TC {
+    stdin: TCIO;
+    answer: TCIO;
+    isExpand: boolean;
+    isDisabled: boolean;
+    result?: TCResult;
+}
+
+export interface FileWithHash {
     path: string;
     hash?: string;
 }
 
-export interface IBFCompare {
-    generator?: IFileWithHash;
-    bruteForce?: IFileWithHash;
+export interface BFCompare {
+    generator?: FileWithHash;
+    bruteForce?: FileWithHash;
     running: boolean;
     msg: string;
 }
 
-export interface ICompilationSettings {
+export interface CompilationSettings {
     compiler?: string;
     compilerArgs?: string;
     runner?: string;
     runnerArgs?: string;
 }
 
-export interface IProblem {
+export interface Problem {
     version: string;
     name: string;
     url?: string;
-    tcs: Record<UUID, ITC>;
+    tcs: Record<UUID, TC>;
     tcOrder: UUID[];
     timeLimit: number;
     memoryLimit: number;
-    src: IFileWithHash;
-    checker?: IFileWithHash;
-    interactor?: IFileWithHash;
-    bfCompare?: IBFCompare;
+    src: FileWithHash;
+    checker?: FileWithHash;
+    interactor?: FileWithHash;
+    bfCompare?: BFCompare;
     timeElapsed: number;
-    compilationSettings?: ICompilationSettings;
+    compilationSettings?: CompilationSettings;
 }

@@ -17,14 +17,15 @@
 
 import AdmZip from 'adm-zip';
 import { randomUUID } from 'crypto';
-import { mkdir, readdir, readFile, stat, unlink } from 'fs/promises';
+import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
 import { l10n, window } from 'vscode';
 import Io from '../helpers/io';
 import { exists } from '../utils/process';
 import { renderUnzipFolder } from '../utils/strTemplate';
-import { Problem, TC, TCIO } from '../utils/types';
+import { ITC } from '../utils/types';
+import { Problem, TC, TCIO } from '../utils/types.backend';
 import Settings from './settings';
 
 async function getAllFiles(dirPath: string): Promise<string[]> {
@@ -38,32 +39,16 @@ async function getAllFiles(dirPath: string): Promise<string[]> {
     return files.flat();
 }
 
-interface ParticleTCIO {
+type ParticleTC = {
     stdin?: TCIO;
     answer?: TCIO;
-}
+};
 
 export default class TcFactory {
-    public static async inlineSmallTc(tcIo: TCIO): Promise<TCIO> {
-        const threshold = Settings.problem.maxInlineDataLength;
-        if (tcIo.useFile) {
-            try {
-                const stats = await stat(tcIo.path);
-                if (stats.size <= threshold) {
-                    return {
-                        useFile: false,
-                        data: await readFile(tcIo.path, 'utf-8'),
-                    };
-                }
-            } catch {}
-        }
-        return tcIo;
-    }
-
     public static async fromFile(
         path: string,
         isInput?: boolean,
-    ): Promise<ParticleTCIO> {
+    ): Promise<ParticleTC> {
         if (isInput === undefined) {
             isInput = Settings.problem.inputFileExtensionList.includes(
                 extname(path).toLowerCase(),
@@ -102,16 +87,16 @@ export default class TcFactory {
                 break;
             }
         }
-        const result: ParticleTCIO = {};
-        stdin && (result.stdin = { useFile: true, path: stdin });
-        answer && (result.answer = { useFile: true, path: answer });
+        const result: ParticleTC = {};
+        stdin && (result.stdin = new TCIO(true, stdin));
+        answer && (result.answer = new TCIO(true, answer));
         return result;
     }
 
     public static async fromZip(
         srcPath: string,
         zipPath: string,
-    ): Promise<TC[]> {
+    ): Promise<ITC[]> {
         const zipData = new AdmZip(zipPath);
         const folderPath = renderUnzipFolder(srcPath, zipPath);
         if (folderPath === null) {
@@ -124,15 +109,15 @@ export default class TcFactory {
         }
         return await this.fromFolder(folderPath);
     }
-    public static async fromFolder(folderPath: string): Promise<TC[]> {
+    public static async fromFolder(folderPath: string): Promise<ITC[]> {
         const allFiles = await getAllFiles(folderPath);
-        const tcs: TC[] = [];
+        const tcs: ITC[] = [];
         for (const filePath of allFiles) {
             const fileName = basename(filePath);
             const ext = extname(fileName).toLowerCase();
             if (Settings.problem.inputFileExtensionList.includes(ext)) {
                 tcs.push({
-                    stdin: { useFile: true, path: filePath },
+                    stdin: { useFile: true, data: filePath },
                     answer: { useFile: false, data: '' },
                     isExpand: false,
                     isDisabled: false,
@@ -152,17 +137,17 @@ export default class TcFactory {
                 );
                 const existingTestCase = tcs.find(
                     (tc) =>
-                        tc.stdin.useFile && inputFiles.includes(tc.stdin.path),
+                        tc.stdin.useFile && inputFiles.includes(tc.stdin.data),
                 );
                 if (existingTestCase) {
                     existingTestCase.answer = {
                         useFile: true,
-                        path: filePath,
+                        data: filePath,
                     };
                 } else {
                     tcs.push({
                         stdin: { useFile: false, data: '' },
-                        answer: { useFile: true, path: filePath },
+                        answer: { useFile: true, data: filePath },
                         isExpand: false,
                         isDisabled: false,
                     });
@@ -177,26 +162,26 @@ export default class TcFactory {
             (it) => (it.stdin.useFile ? 0 : 1),
             (it) =>
                 it.stdin.useFile
-                    ? basename(it.stdin.path)
+                    ? basename(it.stdin.data)
                     : it.answer.useFile
-                      ? basename(it.answer.path)
+                      ? basename(it.answer.data)
                       : '',
         ]);
         const chosenIdx = await window.showQuickPick(
             orderedTcs.map((tc, idx) => ({
                 label: `${basename(
                     tc.stdin.useFile
-                        ? tc.stdin.path
+                        ? tc.stdin.data
                         : tc.answer.useFile
-                          ? tc.answer.path
+                          ? tc.answer.data
                           : 'unknown',
                 )}`,
                 description: l10n.t('Input {input}, Answer {answer}', {
                     input: tc.stdin.useFile
-                        ? tc.stdin.path.replace(folderPath + '/', '')
+                        ? tc.stdin.data.replace(folderPath + '/', '')
                         : l10n.t('not found'),
                     answer: tc.answer.useFile
-                        ? tc.answer.path.replace(folderPath + '/', '')
+                        ? tc.answer.data.replace(folderPath + '/', '')
                         : l10n.t('not found'),
                 }),
                 value: idx,
@@ -212,13 +197,13 @@ export default class TcFactory {
         }
         return chosenIdx.map((idx) => orderedTcs[idx.value]);
     }
-    public static async applyTcs(problem: Problem, tcs: TC[]) {
+    public static async applyTcs(problem: Problem, tcs: ITC[]) {
         if (Settings.problem.clearBeforeLoad) {
             problem.tcOrder = [];
         }
         for (const tc of tcs) {
             const uuid = randomUUID();
-            problem.tcs[uuid] = tc;
+            problem.tcs[uuid] = TC.fromI(tc);
             problem.tcOrder.push(uuid);
         }
     }

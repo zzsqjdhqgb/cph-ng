@@ -36,7 +36,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, Problem } from '../../utils/types';
+import { IProblem, isRunningVerdict } from '../../utils/types';
 import { basename, getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -44,7 +44,7 @@ import CphMenu from './base/cphMenu';
 import CphButton from './cphButton';
 
 interface ProblemActionsProps {
-    problem: Problem;
+    problem: IProblem;
 }
 
 const ProblemActions = ({ problem }: ProblemActionsProps) => {

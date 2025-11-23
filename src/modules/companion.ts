@@ -17,18 +17,24 @@
 
 import { access, mkdir, readFile, writeFile } from 'fs/promises';
 import { createServer, Server } from 'http';
-import PQueue from 'p-queue';
 import { dirname } from 'path';
-import { l10n, ProgressLocation, Uri, window, workspace } from 'vscode';
+import {
+    commands,
+    l10n,
+    ProgressLocation,
+    Uri,
+    window,
+    workspace,
+} from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
 import { renderTemplate } from '../utils/strTemplate';
-import { Problem } from '../utils/types';
-import CphCapable from './cphCapable';
+import { Problem } from '../utils/types.backend';
+import { CphProblem } from './cphCapable';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
-import UserScriptManager, { WorkspaceFolderCtx } from './userScriptManager';
+import UserScriptManager from './userScriptManager';
 
 type CphSubmitEmpty = {
     empty: true;
@@ -77,14 +83,13 @@ export interface CompanionProblem {
 
 class Companion {
     private static logger: Logger = new Logger('companion');
-    static server: Server;
+    private static server: Server;
     private static isSubmitting = false;
     private static pendingSubmitData?: Exclude<
         CphSubmitResponse,
         { empty: true }
     >;
     private static pendingSubmitResolve?: () => void;
-    private static problemQueue: PQueue = new PQueue({ concurrency: 1 });
     private static batches: Map<string, CompanionProblem[]> = new Map();
 
     public static init() {
@@ -103,9 +108,9 @@ class Companion {
                         Companion.logger.warn('Empty request data, ignoring');
                     } else {
                         try {
-                            const data: CompanionProblem =
-                                JSON.parse(requestData);
-                            Companion.handleIncomingProblem(data);
+                            await Companion.handleIncomingProblem(
+                                JSON.parse(requestData),
+                            );
                         } catch (e) {
                             this.logger.error('Error parsing request data', e);
                             if (e instanceof SyntaxError) {
@@ -160,57 +165,40 @@ class Companion {
         Companion.batches.clear();
     }
 
-    private static handleIncomingProblem(data: CompanionProblem) {
+    private static async handleIncomingProblem(data: CompanionProblem) {
+        this.logger.debug('Handling incoming problem', data);
+
         const batchId = data.batch.id;
         const batchSize = data.batch.size;
-
-        let currentBatch = Companion.batches.get(batchId);
-        if (!currentBatch) {
-            currentBatch = [];
+        const currentBatch = Companion.batches.get(batchId) ?? [];
+        if (!Companion.batches.has(batchId)) {
             Companion.batches.set(batchId, currentBatch);
         }
-
         currentBatch.push(data);
         Companion.logger.info(
             `Received problem ${data.name} for batch ${batchId} (${currentBatch.length}/${batchSize})`,
         );
 
         if (currentBatch.length >= batchSize) {
-            const problemsToProcess = [...currentBatch];
+            const companionProblems = [...currentBatch];
             Companion.batches.delete(batchId);
-
-            Companion.problemQueue.add(async () => {
-                await Companion.processProblem(problemsToProcess);
-            });
+            await Companion.processProblem(companionProblems);
         }
     }
 
     private static async processProblem(companionProblems: CompanionProblem[]) {
-        Companion.logger.trace('processProblem', { companionProblems });
-        const workspaceFolders: WorkspaceFolderCtx[] =
+        const srcPaths = await UserScriptManager.resolvePath(
+            companionProblems,
             workspace.workspaceFolders?.map((f) => ({
                 index: f.index,
                 name: f.name,
                 path: f.uri.fsPath,
-            })) || [];
-
-        let code: string;
-        try {
-            code = await readFile(Settings.companion.customPathScript, 'utf-8');
-        } catch (e) {
-            this.logger.error('Could not read user script', e);
-            Io.error(l10n.t('Could not read user script'));
-            return;
-        }
-
-        const srcPaths = await UserScriptManager.resolvePath(
-            code,
-            companionProblems,
-            workspaceFolders,
+            })) || [],
         );
         if (!srcPaths) {
             return;
         }
+        Companion.logger.debug('Created problem source path', srcPaths);
 
         const createdDocuments: Uri[] = [];
         for (let i = 0; i < companionProblems.length; i++) {
@@ -220,7 +208,7 @@ class Companion {
                 continue;
             }
 
-            const problem = CphCapable.toProblem({
+            const problem = new CphProblem({
                 name: companionProblem.name,
                 url: companionProblem.url,
                 tests: companionProblem.tests.map((test, id) => ({
@@ -233,11 +221,7 @@ class Companion {
                 srcPath,
                 group: companionProblem.group,
                 local: true,
-            });
-            Companion.logger.debug(
-                'Created problem source path',
-                problem.src.path,
-            );
+            }).toProblem();
 
             try {
                 await mkdir(dirname(problem.src.path), { recursive: true });
@@ -253,31 +237,18 @@ class Companion {
 
             try {
                 await access(problem.src.path);
-                Companion.logger.debug('Source file already exists', {
-                    srcPath: problem.src.path,
-                });
+                Companion.logger.debug('Source file already exists', srcPath);
             } catch {
-                Companion.logger.debug('Creating new source file', {
-                    srcPath: problem.src.path,
-                });
+                Companion.logger.debug('Creating new source file', srcPath);
                 await Companion.createSourceFile(problem);
             }
 
             await Problems.saveProblem(problem);
-            createdDocuments.push(Uri.file(problem.src.path));
+            createdDocuments.push(Uri.file(srcPath));
         }
 
         if (createdDocuments.length > 0) {
-            const document = await workspace.openTextDocument(
-                createdDocuments[0],
-            );
-            Companion.logger.debug('Opened document', {
-                document: document.fileName,
-            });
-            await window.showTextDocument(
-                document,
-                Settings.companion.showPanel,
-            );
+            await commands.executeCommand('vscode.open', createdDocuments[0]);
 
             if (createdDocuments.length > 1) {
                 Io.info(

@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Problem } from '../../utils/types';
+import { IProblem } from '../../utils/types';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
@@ -27,7 +27,7 @@ import ProblemTitle from './problemTitle';
 import TcsView from './tcsView';
 
 interface ProblemViewProps {
-    problem: Problem;
+    problem: IProblem;
     startTime: number;
 }
 

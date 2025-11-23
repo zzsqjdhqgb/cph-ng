@@ -15,9 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { basename, extname } from 'path';
-import { l10n } from 'vscode';
-import Io from '../../helpers/io';
+import { extname } from 'path';
 import Logger from '../../helpers/logger';
 import { LangC } from './c';
 import { LangCpp } from './cpp';
@@ -33,23 +31,13 @@ export default class Langs {
         new LangJava(),
         new LangPython(),
     ];
-    public static getLang(
-        filePath: string,
-        ignoreError: boolean = false,
-    ): Lang | null {
-        Langs.logger.trace('getLang', { filePath });
+
+    public static getLang(filePath: string): Lang | undefined {
         const ext = extname(filePath).toLowerCase().slice(1);
         const lang = this.langs.find((lang) => lang.extensions.includes(ext));
-        if (!lang) {
-            ignoreError ||
-                Io.error(
-                    l10n.t(
-                        'Cannot determine the programming language of the source file: {file}.',
-                        { file: basename(filePath) },
-                    ),
-                );
-            return null;
-        }
+        lang
+            ? this.logger.debug('Detected language for', filePath, lang.name)
+            : this.logger.debug('No language detected for', filePath);
         return lang;
     }
 }

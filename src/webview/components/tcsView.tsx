@@ -18,7 +18,7 @@
 import Box from '@mui/material/Box';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Problem } from '../../utils/types';
+import { IProblem } from '../../utils/types';
 import { msg } from '../utils';
 import AcCongrats from './acCongrats';
 import CphFlex from './base/cphFlex';
@@ -27,7 +27,7 @@ import NoTcs from './noTcs';
 import TcView from './tcView';
 
 interface TcsViewProps {
-    problem: Problem;
+    problem: IProblem;
 }
 
 const TcsView = ({ problem }: TcsViewProps) => {

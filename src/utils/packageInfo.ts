@@ -15,16 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { TCVerdict } from './types.backend';
+import pkg from '../../package.json';
 
-export class UnknownResult<T> {
-    constructor(public data: T) {}
-}
-export class KnownResult<T = never> {
-    constructor(
-        public verdict: TCVerdict,
-        public msg?: string,
-        public data?: T,
-    ) {}
-}
-export type Result<T> = UnknownResult<T> | KnownResult;
+export const version = pkg.version;

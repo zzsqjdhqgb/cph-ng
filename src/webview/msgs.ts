@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { UUID } from 'crypto';
-import { TC } from '../utils/types';
+import { ITC } from '../utils/types';
 
 export interface BaseMsg {
     type: string;
@@ -87,7 +87,7 @@ export interface ChooseTcFileMsg extends BaseMsg {
 export interface UpdateTcMsg extends BaseMsg {
     type: 'updateTc';
     id: UUID;
-    tc: TC;
+    tc: ITC;
 }
 export interface CompareTcMsg extends BaseMsg {
     type: 'compareTc';

@@ -30,7 +30,7 @@ import {
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { extensionUri, getActivePath, sidebarProvider } from '../utils/global';
-import { Problem } from '../utils/types';
+import { Problem } from '../utils/types.backend';
 import { WebviewMsg } from '../webview/msgs';
 import CphNg from './cphNg';
 import ProblemsManager from './problemsManager';

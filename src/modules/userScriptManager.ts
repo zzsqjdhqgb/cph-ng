@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { readFile } from 'fs/promises';
 import {
     basename,
     dirname,
@@ -32,6 +33,7 @@ import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import { CompanionProblem } from './companion';
+import Settings from './settings';
 
 export interface WorkspaceFolderCtx {
     index: number;
@@ -47,10 +49,18 @@ export default class UserScriptManager {
     );
 
     public static async resolvePath(
-        code: string,
         problems: CompanionProblem[],
         workspaceFolders: WorkspaceFolderCtx[],
     ): Promise<(string | null)[]> {
+        let code: string;
+        try {
+            code = await readFile(Settings.companion.customPathScript, 'utf-8');
+        } catch (e) {
+            this.logger.error('Could not read user script', e);
+            Io.error(l10n.t('Could not read user script'));
+            return problems.map(() => null);
+        }
+
         const context = createContext({
             URL,
             problems,

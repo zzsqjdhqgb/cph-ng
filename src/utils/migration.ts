@@ -18,7 +18,8 @@
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
 import Logger from '../helpers/logger';
-import { Problem, Problem as Problem_0_4_3 } from './types';
+import { IProblem, IProblem as Problem_0_4_8 } from './types';
+import { Problem } from './types.backend';
 import { Problem as Problem_0_0_1 } from './types/0.0.1';
 import { Problem as Problem_0_0_3 } from './types/0.0.3';
 import { Problem as Problem_0_0_4 } from './types/0.0.4';
@@ -29,10 +30,12 @@ import { Problem as Problem_0_2_1 } from './types/0.2.1';
 import { Problem as Problem_0_2_3 } from './types/0.2.3';
 import { Problem as Problem_0_2_4 } from './types/0.2.4';
 import { Problem as Problem_0_3_7 } from './types/0.3.7';
+import { Problem as Problem_0_4_3 } from './types/0.4.3';
 
 const logger = new Logger('migration');
 
 export type OldProblem =
+    | Problem_0_4_8
     | Problem_0_4_3
     | Problem_0_3_7
     | Problem_0_2_4
@@ -46,7 +49,40 @@ export type OldProblem =
     | Problem_0_0_1;
 
 const migrateFunctions: Record<string, (oldProblem: any) => any> = {
-    '0.4.3': (_: Problem_0_4_3): null => null,
+    '0.4.8': (_: Problem_0_4_8): null => null,
+    '0.4.3': (problem: Problem_0_4_3): Problem_0_4_8 => {
+        return {
+            ...problem,
+            tcs: Object.fromEntries(
+                Object.entries(problem.tcs).map(([id, tc]) => [
+                    id,
+                    {
+                        ...tc,
+                        stdin: tc.stdin.useFile
+                            ? {
+                                  useFile: true,
+                                  data: tc.stdin.path,
+                              }
+                            : {
+                                  useFile: false,
+                                  data: tc.stdin.data,
+                              },
+                        answer: tc.answer.useFile
+                            ? {
+                                  useFile: true,
+                                  data: tc.answer.path,
+                              }
+                            : {
+                                  useFile: false,
+                                  data: tc.answer.data,
+                              },
+                        result: undefined,
+                    },
+                ]),
+            ),
+            version: '0.4.8',
+        };
+    },
     '0.3.7': (problem: Problem_0_3_7): Problem_0_4_3 =>
         ({
             ...problem,
@@ -205,5 +241,5 @@ export const migration = (problem: OldProblem): Problem => {
             problem,
         });
     }
-    return problem as unknown as Problem;
+    return Problem.fromI(problem as unknown as IProblem);
 };

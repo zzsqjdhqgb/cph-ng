@@ -13,6 +13,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 - **fix**: use correct unit for brute force compare
 - **fix**: use file to enhance robustness
 - **feat**: unify file limit threshold
+- **refactor**: types and imports for backend compatibility
 
 ## 0.4.7
 

@@ -26,7 +26,7 @@ import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
-import { TCIO } from '../../utils/types';
+import { ITCIO } from '../../utils/types';
 import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -40,7 +40,7 @@ interface OutputActions {
 
 interface CodeMirrorSectionProps {
     label: string;
-    value: TCIO;
+    value: ITCIO;
     onChange?: (value: string) => void;
     onChooseFile?: () => void;
     onToggleFile?: () => void;
@@ -162,15 +162,15 @@ const TcDataView = ({
                     <CphText onDoubleClick={onDbClick}>{label}</CphText>
                     {internalValue.useFile && (
                         <CphLink
-                            name={internalValue.path}
+                            name={internalValue.data}
                             onClick={() => {
                                 msg({
                                     type: 'openFile',
-                                    path: internalValue.path,
+                                    path: internalValue.data,
                                 });
                             }}
                         >
-                            {basename(internalValue.path)}
+                            {basename(internalValue.data)}
                         </CphLink>
                     )}
                 </CphFlex>

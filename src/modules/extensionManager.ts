@@ -31,15 +31,15 @@ import {
     window,
     workspace,
 } from 'vscode';
-import { version } from '../../package.json';
 import LlmDataInspector from '../ai/llmDataInspector';
 import LlmTcRunner from '../ai/llmTcRunner';
 import LlmTestCaseEditor from '../ai/llmTestCaseEditor';
 import LlmTestCaseLister from '../ai/llmTestCaseLister';
+import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
+import Problems from '../helpers/problems';
 import Companion from '../modules/companion';
-import CphCapable from '../modules/cphCapable';
 import SidebarProvider from '../modules/sidebarProvider';
 import { debounce } from '../utils/debounce';
 import {
@@ -50,6 +50,8 @@ import {
     setExtensionUri,
     sidebarProvider,
 } from '../utils/global';
+import { version } from '../utils/packageInfo';
+import { CphProblem } from './cphCapable';
 import CphNg from './cphNg';
 import FileSystemProvider from './fileSystemProvider';
 import ProblemsManager from './problemsManager';
@@ -200,9 +202,58 @@ OS: ${release()}`;
                 }),
             );
             context.subscriptions.push(
-                commands.registerCommand('cph-ng.importFromCph', async () =>
-                    CphCapable.importFromCph(),
-                ),
+                commands.registerCommand('cph-ng.importFromCph', async () => {
+                    const uri = await FolderChooser.chooseFolder(
+                        l10n.t(
+                            'Please select the .cph folder contains the problem files',
+                        ),
+                    );
+                    if (!uri) {
+                        return;
+                    }
+                    const problems = (
+                        await CphProblem.fromFolder(uri.fsPath)
+                    ).map((p) => p.toProblem());
+                    if (problems.length === 0) {
+                        Io.info(
+                            l10n.t('No CPH problem files found in the folder.'),
+                        );
+                        return;
+                    }
+                    const chosenIdx = await window.showQuickPick(
+                        problems.map((p, idx) => ({
+                            label: p.name,
+                            description: [
+                                l10n.t('Number of test cases: {cnt}', {
+                                    cnt: p.tcOrder.length,
+                                }),
+                                p.checker ? l10n.t('Special Judge') : '',
+                                p.interactor ? l10n.t('Interactive') : '',
+                                p.bfCompare
+                                    ? l10n.t('Brute Force Comparison')
+                                    : '',
+                            ]
+                                .join(' ')
+                                .trim(),
+                            detail: p.url,
+                            picked: true,
+                            value: idx,
+                        })),
+                        {
+                            canPickMany: true,
+                            title: l10n.t('Select problems to import'),
+                        },
+                    );
+                    if (!chosenIdx || chosenIdx.length === 0) {
+                        return;
+                    }
+                    await Promise.all(
+                        chosenIdx.map((idx) =>
+                            Problems.saveProblem(problems[idx.value]),
+                        ),
+                    );
+                    await ProblemsManager.dataRefresh();
+                }),
             );
             context.subscriptions.push(
                 commands.registerCommand('cph-ng.createProblem', async () => {

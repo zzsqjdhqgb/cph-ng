@@ -22,7 +22,7 @@ import { l10n, Uri, workspace } from 'vscode';
 import Io from '../helpers/io';
 import Settings from '../modules/settings';
 import { extensionPath } from './global';
-import { Problem } from './types';
+import { Problem } from './types.backend';
 
 const renderString = (original: string, replacements: [string, string][]) => {
     for (const replacement of replacements) {

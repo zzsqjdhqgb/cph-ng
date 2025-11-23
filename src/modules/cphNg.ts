@@ -19,7 +19,7 @@ import { l10n } from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
 import Problems from '../helpers/problems';
-import CphCapable from './cphCapable';
+import { CphProblem } from './cphCapable';
 import ProblemsManager from './problemsManager';
 
 export default class CphNg {
@@ -55,8 +55,8 @@ export default class CphNg {
             Io.warn(l10n.t('Problem already exists for this file.'));
             return;
         }
-        const probFile = CphCapable.getProbBySrc(filePath);
-        const problem = await CphCapable.loadProblem(probFile);
+        const probFile = CphProblem.getProbBySrc(filePath);
+        const problem = (await CphProblem.fromFile(probFile))?.toProblem();
         if (problem) {
             await Problems.saveProblem(problem);
             await ProblemsManager.dataRefresh();
