@@ -16,7 +16,7 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { UUID } from 'crypto';
-import { unlink, writeFile } from 'fs/promises';
+import { writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import { commands, debug, l10n, Uri, window } from 'vscode';
 import { Compiler } from '../core/compiler';
@@ -25,7 +25,6 @@ import { Runner } from '../core/runner';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
-import Problems from '../helpers/problems';
 import ProcessExecutor from '../helpers/processExecutor';
 import {
     getActivePath,
@@ -72,7 +71,7 @@ export default class ProblemsManager {
             return null;
         }
         for (const fullProblem of this.fullProblems) {
-            if (Problems.isRelated(fullProblem.problem, path)) {
+            if (fullProblem.problem.isRelated(path)) {
                 this.logger.debug(
                     'Found loaded problem',
                     fullProblem.problem.src.path,
@@ -82,7 +81,7 @@ export default class ProblemsManager {
                 return fullProblem;
             }
         }
-        const problem = await Problems.loadProblem(path);
+        const problem = await Problem.fromSrc(path);
         if (!problem) {
             this.logger.debug('Failed to load problem for path', path);
             return null;
@@ -101,8 +100,7 @@ export default class ProblemsManager {
         const activePath = getActivePath();
         const idles: FullProblem[] = this.fullProblems.filter(
             (fullProblem) =>
-                !fullProblem.ac &&
-                !Problems.isRelated(fullProblem.problem, activePath),
+                !fullProblem.ac && !fullProblem.problem.isRelated(activePath),
         );
         for (const idle of idles) {
             idle.problem.timeElapsed += Date.now() - idle.startTime;
@@ -111,7 +109,7 @@ export default class ProblemsManager {
                     idle.problem.tcOrder.includes(key as UUID),
                 ),
             );
-            await Problems.saveProblem(idle.problem);
+            await idle.problem.save();
             this.logger.debug('Closed idle problem', idle.problem.src.path);
         }
         this.fullProblems = this.fullProblems.filter((p) => !idles.includes(p));
@@ -149,9 +147,57 @@ export default class ProblemsManager {
             await waitUntil(() => !fullProblem.ac);
             fullProblem.problem.timeElapsed +=
                 Date.now() - fullProblem.startTime;
-            await Problems.saveProblem(fullProblem.problem);
+            await fullProblem.problem.save();
         }
         this.fullProblems = [];
+    }
+
+    public static async createProblem(
+        msg: msgs.CreateProblemMsg,
+    ): Promise<void> {
+        const src = msg.activePath;
+        if (!src) {
+            Io.warn(
+                l10n.t(
+                    'No active editor found. Please open a file to create a problem.',
+                ),
+            );
+            return;
+        }
+        const binPath = await Problem.getBinBySrc(src);
+        if (binPath && (await exists(binPath))) {
+            Io.warn(l10n.t('Problem already exists for this file.'));
+            return;
+        }
+        const problem = new Problem(basename(src, extname(src)), src);
+        await problem.save();
+        await ProblemsManager.dataRefresh();
+    }
+    public static async importProblem(
+        msg: msgs.ImportProblemMsg,
+    ): Promise<void> {
+        const src = msg.activePath;
+        if (!src) {
+            Io.warn(
+                l10n.t(
+                    'No active editor found. Please open a file to create a problem.',
+                ),
+            );
+            return;
+        }
+        const binPath = await Problem.getBinBySrc(src);
+        if (binPath && (await exists(binPath))) {
+            Io.warn(l10n.t('Problem already exists for this file.'));
+            return;
+        }
+        const probFile = CphProblem.getProbBySrc(src);
+        const problem = (await CphProblem.fromFile(probFile))?.toProblem();
+        if (!problem) {
+            Io.warn(l10n.t('Failed to load problem from CPH.'));
+            return;
+        }
+        await problem.save();
+        await ProblemsManager.dataRefresh();
     }
 
     public static async editProblemDetails(msg: msgs.EditProblemDetailsMsg) {
@@ -171,21 +217,7 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const binPath = await Problems.getBinBySrc(
-            fullProblem.problem.src.path,
-        );
-        if (!binPath) {
-            return;
-        }
-        try {
-            await unlink(binPath);
-        } catch {
-            Io.warn(
-                l10n.t('Failed to delete problem file {file}.', {
-                    file: basename(binPath),
-                }),
-            );
-        }
+        await fullProblem.problem.del();
         this.fullProblems = this.fullProblems.filter((p) => p !== fullProblem);
         await this.dataRefresh();
     }

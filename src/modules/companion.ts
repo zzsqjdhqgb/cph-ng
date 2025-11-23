@@ -28,7 +28,6 @@ import {
 } from 'vscode';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
-import Problems from '../helpers/problems';
 import { renderTemplate } from '../utils/strTemplate';
 import { Problem } from '../utils/types.backend';
 import { CphProblem } from './cphCapable';
@@ -242,7 +241,7 @@ class Companion {
                 await Companion.createSourceFile(problem);
             }
 
-            await Problems.saveProblem(problem);
+            await problem.save();
             createdDocuments.push(Uri.file(srcPath));
         }
 

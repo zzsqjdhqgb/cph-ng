@@ -38,7 +38,6 @@ import LlmTestCaseLister from '../ai/llmTestCaseLister';
 import FolderChooser from '../helpers/folderChooser';
 import Io from '../helpers/io';
 import Logger from '../helpers/logger';
-import Problems from '../helpers/problems';
 import Companion from '../modules/companion';
 import SidebarProvider from '../modules/sidebarProvider';
 import { debounce } from '../utils/debounce';
@@ -53,7 +52,6 @@ import {
 import { version } from '../utils/packageInfo';
 import Cache from './cache';
 import { CphProblem } from './cphCapable';
-import CphNg from './cphNg';
 import ProblemFs from './problemFs';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
@@ -239,9 +237,7 @@ OS: ${release()}`;
                         return;
                     }
                     await Promise.all(
-                        chosenIdx.map((idx) =>
-                            Problems.saveProblem(problems[idx.value]),
-                        ),
+                        chosenIdx.map((idx) => problems[idx.value].save()),
                     );
                     await ProblemsManager.dataRefresh();
                 }),
@@ -249,13 +245,19 @@ OS: ${release()}`;
             context.subscriptions.push(
                 commands.registerCommand('cph-ng.createProblem', async () => {
                     sidebarProvider.focus();
-                    await CphNg.createProblem(getActivePath());
+                    await ProblemsManager.createProblem({
+                        type: 'createProblem',
+                        activePath: getActivePath(),
+                    });
                 }),
             );
             context.subscriptions.push(
                 commands.registerCommand('cph-ng.importProblem', async () => {
                     sidebarProvider.focus();
-                    await CphNg.importProblem(getActivePath());
+                    await ProblemsManager.importProblem({
+                        type: 'importProblem',
+                        activePath: getActivePath(),
+                    });
                 }),
             );
             context.subscriptions.push(

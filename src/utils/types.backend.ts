@@ -16,12 +16,19 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { randomUUID, UUID } from 'crypto';
-import { readFile, stat, writeFile } from 'fs/promises';
+import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
+import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
+import { gunzipSync, gzipSync } from 'zlib';
+import Io from '../helpers/io';
+import Logger from '../helpers/logger';
 import Cache from '../modules/cache';
 import Settings from '../modules/settings';
+import { migration, OldProblem } from './migration';
 import { version } from './packageInfo';
+import { exists } from './process';
 import { KnownResult } from './result';
+import { renderPathWithFile } from './strTemplate';
 import {
     IBfCompare,
     ICompilationSettings,
@@ -167,6 +174,8 @@ export const TcVerdicts = {
 } as const;
 
 export class Problem implements IProblem {
+    private static logger = new Logger('Problem');
+
     public version: string = version;
     public name: string;
     public url?: string;
@@ -221,11 +230,177 @@ export class Problem implements IProblem {
             this.compilationSettings = { ...problem.compilationSettings };
         }
     }
+    public static async fromSrc(srcPath: string): Promise<Problem | null> {
+        const binPath = await Problem.getBinBySrc(srcPath);
+        if (!binPath) {
+            return null;
+        }
+        try {
+            var data = await readFile(binPath);
+        } catch {
+            return null;
+        }
+
+        try {
+            var oldProblem = JSON.parse(
+                gunzipSync(data).toString(),
+            ) as OldProblem;
+        } catch (e) {
+            Io.warn(
+                l10n.t('Parse problem {file} failed: {msg}.', {
+                    file: basename(binPath),
+                    msg: (e as Error).message,
+                }),
+            );
+            return null;
+        }
+
+        // Migrate old problem data to the latest version
+        try {
+            var problem = migration(oldProblem);
+        } catch (e) {
+            Io.warn(
+                l10n.t('Migrate problem {file} failed: {msg}.', {
+                    file: basename(binPath),
+                    msg: (e as Error).message,
+                }),
+            );
+            return null;
+        }
+
+        // When the user moves the workspace
+        // we need to fix the paths in the problem data
+        const fixPath = async (oldPath: string): Promise<string> => {
+            if (await exists(oldPath)) {
+                return oldPath;
+            }
+            // Use the relative path from the old path to the src file
+            // and join it with the new src file path
+            const newPath = join(
+                dirname(srcPath),
+                relative(dirname(problem.src.path), oldPath),
+            );
+            if (await exists(newPath)) {
+                this.logger.debug('Fixed path', oldPath, 'to', newPath);
+                return newPath;
+            }
+            return oldPath;
+        };
+        const fixTcIo = async (tcIo: TcIo) =>
+            tcIo.useFile && (tcIo.data = await fixPath(tcIo.data));
+        const fixFileWithHash = async (fileWithHash?: FileWithHash) =>
+            fileWithHash &&
+            (fileWithHash.path = await fixPath(fileWithHash.path));
+        await Promise.all([
+            ...Object.values(problem.tcs)
+                .map((tc) => [fixTcIo(tc.stdin), fixTcIo(tc.answer)])
+                .flat(),
+            fixFileWithHash(problem.checker),
+            fixFileWithHash(problem.interactor),
+            fixFileWithHash(problem.bfCompare?.generator),
+            fixFileWithHash(problem.bfCompare?.bruteForce),
+        ]);
+        problem.src.path = srcPath;
+
+        this.logger.info('Problem', problem.src.path, 'loaded');
+        this.logger.trace('Loaded problem data', { problem });
+        return problem;
+    }
+
+    public static async getBinBySrc(srcPath: string): Promise<string | null> {
+        return renderPathWithFile(
+            Settings.problem.problemFilePath,
+            srcPath,
+            true,
+        );
+    }
+    public async getBin(): Promise<string | null> {
+        return Problem.getBinBySrc(this.src.path);
+    }
 
     public addTc(tc: Tc): UUID {
         const uuid = randomUUID();
         this.tcs[uuid] = tc;
         this.tcOrder.push(uuid);
         return uuid;
+    }
+    public isRelated(path?: string): boolean {
+        if (!path) {
+            return false;
+        }
+        path = path.toLowerCase();
+
+        // We always consider the IO files related to the problem
+        if (
+            Settings.problem.inputFileExtensionList.includes(extname(path)) ||
+            Settings.problem.outputFileExtensionList.includes(extname(path))
+        ) {
+            return true;
+        }
+
+        if (
+            path.startsWith(Settings.cache.directory.toLowerCase()) ||
+            this.src.path.toLowerCase() === path ||
+            this.checker?.path.toLowerCase() === path ||
+            this.interactor?.path.toLowerCase() === path ||
+            this.bfCompare?.bruteForce?.path.toLowerCase() === path ||
+            this.bfCompare?.generator?.path.toLowerCase() === path
+        ) {
+            return true;
+        }
+        const tcIoRelated = (tcIo?: TcIo) =>
+            tcIo && tcIo.useFile && tcIo.data.toLowerCase() === path;
+        for (const tc of Object.values(this.tcs)) {
+            if (
+                tcIoRelated(tc.stdin) ||
+                tcIoRelated(tc.answer) ||
+                tcIoRelated(tc.result?.stdout) ||
+                tcIoRelated(tc.result?.stderr)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public async save(): Promise<boolean> {
+        const binPath = await this.getBin();
+        if (!binPath) {
+            return false;
+        }
+        Problem.logger.trace('Saving problem data', this, 'to', binPath);
+        try {
+            await mkdir(dirname(binPath), { recursive: true });
+            await writeFile(
+                binPath,
+                gzipSync(Buffer.from(JSON.stringify(this))),
+            );
+            Problem.logger.info('Saved problem', this.src.path);
+            return true;
+        } catch (e) {
+            Problem.logger.error('Failed to save problem', this.src.path, e);
+            Io.error(
+                l10n.t('Failed to save problem: {msg}', {
+                    msg: (e as Error).message,
+                }),
+            );
+            return false;
+        }
+    }
+    public async del() {
+        const binPath = await this.getBin();
+        if (!binPath) {
+            return;
+        }
+        try {
+            await unlink(binPath);
+            Problem.logger.info('Deleted problem', this.src.path);
+        } catch (e) {
+            Problem.logger.warn(
+                l10n.t('Delete problem {file} failed: {msg}.', {
+                    file: binPath,
+                    msg: (e as Error).message,
+                }),
+            );
+        }
     }
 }

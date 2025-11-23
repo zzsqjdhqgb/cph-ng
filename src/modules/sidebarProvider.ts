@@ -32,7 +32,6 @@ import Logger from '../helpers/logger';
 import { extensionUri, getActivePath, sidebarProvider } from '../utils/global';
 import { Problem } from '../utils/types.backend';
 import { WebviewMsg } from '../webview/msgs';
-import CphNg from './cphNg';
 import ProblemsManager from './problemsManager';
 import Settings from './settings';
 
@@ -109,9 +108,9 @@ export default class SidebarProvider implements WebviewViewProvider {
                     });
                     await ProblemsManager.dataRefresh();
                 } else if (msg.type === 'createProblem') {
-                    await CphNg.createProblem(msg.activePath);
+                    await ProblemsManager.createProblem(msg);
                 } else if (msg.type === 'importProblem') {
-                    await CphNg.importProblem(msg.activePath);
+                    await ProblemsManager.importProblem(msg);
                 } else if (msg.type === 'editProblemDetails') {
                     await ProblemsManager.editProblemDetails(msg);
                 } else if (msg.type === 'delProblem') {
@@ -156,6 +155,10 @@ export default class SidebarProvider implements WebviewViewProvider {
                     await ProblemsManager.submitToCodeforces(msg);
                 } else if (msg.type === 'openFile') {
                     await ProblemsManager.openFile(msg);
+                } else if (msg.type === 'debugTc') {
+                    await ProblemsManager.debugTc(msg);
+                } else if (msg.type === 'dragDrop') {
+                    await ProblemsManager.dragDrop(msg);
                 } else if (msg.type === 'startChat') {
                     await commands.executeCommand(
                         'workbench.action.chat.open',
@@ -170,10 +173,6 @@ export default class SidebarProvider implements WebviewViewProvider {
                         'workbench.action.openSettings',
                         msg.item,
                     );
-                } else if (msg.type === 'debugTc') {
-                    await ProblemsManager.debugTc(msg);
-                } else if (msg.type === 'dragDrop') {
-                    await ProblemsManager.dragDrop(msg);
                 }
             } catch (e) {
                 Io.error(
