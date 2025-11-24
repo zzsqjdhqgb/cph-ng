@@ -293,6 +293,16 @@
                         "default": "",
                         "markdownDescription": "%cph-ng.configuration.compilation.properties.pythonRunArgs.markdownDescription%"
                     },
+                    "cph-ng.compilation.javascriptRunner": {
+                        "type": "string",
+                        "default": "node",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javascriptRunner.markdownDescription%"
+                    },
+                    "cph-ng.compilation.javascriptRunArgs": {
+                        "type": "string",
+                        "default": "",
+                        "markdownDescription": "%cph-ng.configuration.compilation.properties.javascriptRunArgs.markdownDescription%"
+                    },
                     "cph-ng.compilation.objcopy": {
                         "type": "string",
                         "default": "objcopy",
