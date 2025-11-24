@@ -68,6 +68,7 @@
     "tcDataView.copied": "Copied",
     "tcDataView.copy": "Copy",
     "tcDataView.loadFile": "Load from file",
+    "tcDataView.openVirtual": "Open Virtual File Location",
     "tcDataView.setAnswer": "Set as answer",
     "tcDataView.toggleFile": "Toggle Save to File",
     "tcView.answer": "Answer",

@@ -68,6 +68,7 @@
     "tcDataView.copied": "已复制",
     "tcDataView.copy": "复制",
     "tcDataView.loadFile": "从文件加载",
+    "tcDataView.openVirtual": "打开虚拟文件位置",
     "tcDataView.setAnswer": "设为答案",
     "tcDataView.toggleFile": "切换是否保存文件",
     "tcView.answer": "答案",

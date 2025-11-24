@@ -160,7 +160,7 @@ const TcDataView = ({
                 >
                     <CphLink
                         color='inherit'
-                        name={label}
+                        name={t('tcDataView.openVirtual')}
                         onClick={onOpenVirtual}
                         fontSize={'larger'}
                     >
