@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { Problem } from '@/utils/types.backend';
 import { UUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import {
@@ -30,8 +31,7 @@ import {
     FileType,
     Uri,
 } from 'vscode';
-import { Problem } from '../utils/types.backend';
-import ProblemsManager from './problemsManager';
+import ProblemsManager from './manager';
 
 export type UriTypes = 'stdin' | 'answer' | 'stdout' | 'stderr';
 export const generateTcUri = (problem: Problem, id: UUID, type: UriTypes) =>

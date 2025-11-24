@@ -15,28 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import Io from '@/helpers/io';
+import Settings from '@/helpers/settings';
+import { exists } from '@/utils/process';
+import { renderUnzipFolder } from '@/utils/strTemplate';
+import { ITc } from '@/utils/types';
+import { Tc, TcIo } from '@/utils/types.backend';
 import AdmZip from 'adm-zip';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
 import { l10n, window } from 'vscode';
-import Io from '../helpers/io';
-import { exists } from '../utils/process';
-import { renderUnzipFolder } from '../utils/strTemplate';
-import { ITc } from '../utils/types';
-import { Tc, TcIo } from '../utils/types.backend';
-import Settings from './settings';
-
-async function getAllFiles(dirPath: string): Promise<string[]> {
-    const entries = await readdir(dirPath, { withFileTypes: true });
-    const files = await Promise.all(
-        entries.map((entry) => {
-            const fullPath = join(dirPath, entry.name);
-            return entry.isDirectory() ? getAllFiles(fullPath) : fullPath;
-        }),
-    );
-    return files.flat();
-}
 
 type ParticleTc = {
     stdin?: TcIo;
@@ -44,6 +33,19 @@ type ParticleTc = {
 };
 
 export default class TcFactory {
+    private static async getAllFiles(dirPath: string): Promise<string[]> {
+        const entries = await readdir(dirPath, { withFileTypes: true });
+        const files = await Promise.all(
+            entries.map((entry) => {
+                const fullPath = join(dirPath, entry.name);
+                return entry.isDirectory()
+                    ? TcFactory.getAllFiles(fullPath)
+                    : fullPath;
+            }),
+        );
+        return files.flat();
+    }
+
     public static async fromFile(
         path: string,
         isInput?: boolean,
@@ -90,7 +92,6 @@ export default class TcFactory {
         answer && (result.answer = new TcIo(true, answer));
         return result;
     }
-
     public static async fromZip(
         srcPath: string,
         zipPath: string,
@@ -108,7 +109,7 @@ export default class TcFactory {
         return await this.fromFolder(folderPath);
     }
     public static async fromFolder(folderPath: string): Promise<Tc[]> {
-        const allFiles = await getAllFiles(folderPath);
+        const allFiles = await TcFactory.getAllFiles(folderPath);
         const tcs: ITc[] = [];
         for (const filePath of allFiles) {
             const fileName = basename(filePath);

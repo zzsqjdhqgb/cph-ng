@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { isRunningVerdict, ITc } from '@/utils/types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Accordion from '@mui/material/Accordion';
@@ -27,7 +28,6 @@ import { UUID } from 'crypto';
 import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isRunningVerdict, ITc } from '../../utils/types';
 import { getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';

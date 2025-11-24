@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import Cache from '@/helpers/cache';
+import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
+import Settings from '@/helpers/settings';
 import { randomUUID, UUID } from 'crypto';
 import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
-import Io from '../helpers/io';
-import Logger from '../helpers/logger';
-import Cache from '../modules/cache';
-import Settings from '../modules/settings';
 import { migration, OldProblem } from './migration';
 import { version } from './packageInfo';
 import { exists } from './process';

@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { IProblem, isRunningVerdict } from '@/utils/types';
 import AddIcon from '@mui/icons-material/Add';
 import BackupIcon from '@mui/icons-material/Backup';
 import CloseIcon from '@mui/icons-material/Close';
@@ -25,7 +26,6 @@ import FileOpenIcon from '@mui/icons-material/FileOpen';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PlaylistPlayIcon from '@mui/icons-material/PlaylistPlay';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
-
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -36,7 +36,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IProblem, isRunningVerdict } from '../../utils/types';
 import { basename, getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';

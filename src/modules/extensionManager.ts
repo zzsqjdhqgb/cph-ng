@@ -15,6 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import LlmDataInspector from '@/ai/llmDataInspector';
+import LlmTcRunner from '@/ai/llmTcRunner';
+import LlmTestCaseEditor from '@/ai/llmTestCaseEditor';
+import LlmTestCaseLister from '@/ai/llmTestCaseLister';
+import Cache from '@/helpers/cache';
+import FolderChooser from '@/helpers/folderChooser';
+import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
+import Settings from '@/helpers/settings';
+import Companion from '@/modules/companion';
+import { CphProblem } from '@/modules/problems/cphProblem';
+import ProblemsManager from '@/modules/problems/manager';
+import ProblemFs from '@/modules/problems/problemFs';
+import { debounce } from '@/utils/debounce';
+import {
+    extensionPath,
+    getActivePath,
+    problemFs,
+    setActivePath,
+    setExtensionUri,
+    sidebarProvider,
+} from '@/utils/global';
+import { version } from '@/utils/packageInfo';
 import { readFile, rm } from 'fs/promises';
 import { release } from 'os';
 import { join } from 'path';
@@ -31,30 +54,7 @@ import {
     window,
     workspace,
 } from 'vscode';
-import LlmDataInspector from '../ai/llmDataInspector';
-import LlmTcRunner from '../ai/llmTcRunner';
-import LlmTestCaseEditor from '../ai/llmTestCaseEditor';
-import LlmTestCaseLister from '../ai/llmTestCaseLister';
-import FolderChooser from '../helpers/folderChooser';
-import Io from '../helpers/io';
-import Logger from '../helpers/logger';
-import Companion from '../modules/companion';
-import SidebarProvider from '../modules/sidebarProvider';
-import { debounce } from '../utils/debounce';
-import {
-    extensionPath,
-    getActivePath,
-    problemFs,
-    setActivePath,
-    setExtensionUri,
-    sidebarProvider,
-} from '../utils/global';
-import { version } from '../utils/packageInfo';
-import Cache from './cache';
-import { CphProblem } from './cphCapable';
-import ProblemFs from './problemFs';
-import ProblemsManager from './problemsManager';
-import Settings from './settings';
+import SidebarProvider from './sidebar';
 
 interface ContextEvent {
     hasProblem: boolean;

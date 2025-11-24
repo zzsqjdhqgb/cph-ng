@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { renderPath } from '@/utils/strTemplate';
 import { ConfigurationTarget, workspace } from 'vscode';
-import Logger from '../helpers/logger';
-import { renderPath } from '../utils/strTemplate';
+import Logger from './logger';
 
 class SettingsSection {
     protected logger: Logger = new Logger('settings');

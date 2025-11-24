@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import Logger from '@/helpers/logger';
+import { KnownResult, Result, UnknownResult } from '@/utils/result';
+import { TcVerdicts } from '@/utils/types.backend';
 import assert from 'assert';
 import { readFile, writeFile } from 'fs/promises';
 import { l10n } from 'vscode';
-import Logger from '../helpers/logger';
-import Settings from '../modules/settings';
-import { KnownResult, Result, UnknownResult } from '../utils/result';
-import { TcVerdicts } from '../utils/types.backend';
 import { AbortReason, ExecuteResult } from './processExecutor';
+import Settings from './settings';
 
 export interface WrapperData {
     time: number; // in nanoseconds

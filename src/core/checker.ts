@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '../helpers/logger';
-import ProcessExecutor from '../helpers/processExecutor';
+import Logger from '@/helpers/logger';
+import ProcessExecutor from '@/helpers/processExecutor';
 import {
     ProcessData,
     ProcessResultHandler,
-} from '../helpers/processResultHandler';
-import { KnownResult } from '../utils/result';
-import { TcWithResult } from '../utils/types.backend';
+} from '@/helpers/processResultHandler';
+import { KnownResult } from '@/utils/result';
+import { TcWithResult } from '@/utils/types.backend';
 
 export class Checker {
     private static logger: Logger = new Logger('checker');

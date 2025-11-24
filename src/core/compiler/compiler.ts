@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { Lang, LangCompileData, LangCompileResult } from '@/core/langs/lang';
+import Langs from '@/core/langs/langs';
+import Logger from '@/helpers/logger';
+import { KnownResult, Result, UnknownResult } from '@/utils/result';
+import { FileWithHash, Problem, TcVerdicts } from '@/utils/types.backend';
 import { l10n } from 'vscode';
-import Logger from '../helpers/logger';
-import { KnownResult, Result, UnknownResult } from '../utils/result';
-import { FileWithHash, Problem, TcVerdicts } from '../utils/types.backend';
-import { Lang, LangCompileData, LangCompileResult } from './langs/lang';
-import Langs from './langs/langs';
 
 export interface CompileData {
     src: LangCompileData;

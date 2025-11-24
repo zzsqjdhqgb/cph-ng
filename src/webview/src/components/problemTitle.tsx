@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { IProblem } from '@/utils/types';
 import EditIcon from '@mui/icons-material/Edit';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
@@ -31,7 +32,6 @@ import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IProblem } from '../../utils/types';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';

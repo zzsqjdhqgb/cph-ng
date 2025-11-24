@@ -138,7 +138,7 @@ export default (env, argv) => {
     const webviewConfig = {
         ...baseConfig,
         target: 'web',
-        entry: './src/webview/App.tsx',
+        entry: './src/webview/src/App.tsx',
         output: {
             path: resolve(__dirname, 'dist'),
             filename: 'frontend.js',
@@ -146,7 +146,7 @@ export default (env, argv) => {
         plugins: [
             new CopyPlugin({
                 patterns: [
-                    { from: 'src/webview/styles.css', to: 'styles.css' },
+                    { from: 'src/webview/src/styles.css', to: 'styles.css' },
                 ],
             }),
         ],

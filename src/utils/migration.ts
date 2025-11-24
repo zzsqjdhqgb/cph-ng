@@ -15,22 +15,22 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import Logger from '@/helpers/logger';
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
-import Logger from '../helpers/logger';
+import { Problem as Problem_0_0_1 } from './history/0.0.1';
+import { Problem as Problem_0_0_3 } from './history/0.0.3';
+import { Problem as Problem_0_0_4 } from './history/0.0.4';
+import { Problem as Problem_0_0_5 } from './history/0.0.5';
+import { Problem as Problem_0_1_0 } from './history/0.1.0';
+import { Problem as Problem_0_1_1 } from './history/0.1.1';
+import { Problem as Problem_0_2_1 } from './history/0.2.1';
+import { Problem as Problem_0_2_3 } from './history/0.2.3';
+import { Problem as Problem_0_2_4 } from './history/0.2.4';
+import { Problem as Problem_0_3_7 } from './history/0.3.7';
+import { Problem as Problem_0_4_3 } from './history/0.4.3';
 import { IProblem, IProblem as Problem_0_4_8 } from './types';
 import { Problem } from './types.backend';
-import { Problem as Problem_0_0_1 } from './types/0.0.1';
-import { Problem as Problem_0_0_3 } from './types/0.0.3';
-import { Problem as Problem_0_0_4 } from './types/0.0.4';
-import { Problem as Problem_0_0_5 } from './types/0.0.5';
-import { Problem as Problem_0_1_0 } from './types/0.1.0';
-import { Problem as Problem_0_1_1 } from './types/0.1.1';
-import { Problem as Problem_0_2_1 } from './types/0.2.1';
-import { Problem as Problem_0_2_3 } from './types/0.2.3';
-import { Problem as Problem_0_2_4 } from './types/0.2.4';
-import { Problem as Problem_0_3_7 } from './types/0.3.7';
-import { Problem as Problem_0_4_3 } from './types/0.4.3';
 
 const logger = new Logger('migration');
 

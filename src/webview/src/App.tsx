@@ -24,7 +24,7 @@ import {
     ActivePathEvent,
     ProblemEvent,
     ProblemEventData,
-} from '../modules/sidebarProvider';
+} from '../../modules/sidebar';
 import CphFlex from './components/base/cphFlex';
 import ErrorBoundary from './components/base/errorBoundary';
 import BgProblemView from './components/bgProblemView';

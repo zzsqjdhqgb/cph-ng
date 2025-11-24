@@ -29,10 +29,10 @@ import {
 } from 'path';
 import { createContext, Script } from 'vm';
 import { l10n, window } from 'vscode';
-import FolderChooser from '../helpers/folderChooser';
-import Io from '../helpers/io';
-import Logger from '../helpers/logger';
-import { CompanionProblem } from './companion';
+import { CompanionProblem } from '../modules/companion';
+import FolderChooser from './folderChooser';
+import Io from './io';
+import Logger from './logger';
 import Settings from './settings';
 
 export interface WorkspaceFolderCtx {

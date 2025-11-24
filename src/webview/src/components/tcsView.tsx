@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { IProblem } from '@/utils/types';
 import Box from '@mui/material/Box';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IProblem } from '../../utils/types';
 import { msg } from '../utils';
 import AcCongrats from './acCongrats';
 import CphFlex from './base/cphFlex';
