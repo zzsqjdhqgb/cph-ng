@@ -65,6 +65,12 @@ export class BfCompare {
                     compileResult.msg || l10n.t('Solution compilation failed');
                 return;
             }
+            if (!compileResult.data.bfCompare) {
+                bfCompare.msg = l10n.t(
+                    'Both generator and brute force source files must be provided for brute force comparison.',
+                );
+                return;
+            }
 
             while (true) {
                 cnt++;

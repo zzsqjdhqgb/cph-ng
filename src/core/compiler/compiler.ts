@@ -111,16 +111,7 @@ export class Compiler {
         }
 
         // Compile brute force comparison programs
-        if (problem.bfCompare) {
-            if (!problem.bfCompare.generator || !problem.bfCompare.bruteForce) {
-                return new KnownResult(
-                    TcVerdicts.RJ,
-                    l10n.t(
-                        'Both generator and brute force source files must be provided for brute force comparison.',
-                    ),
-                );
-            }
-
+        if (problem.bfCompare?.generator && problem.bfCompare?.bruteForce) {
             const generatorResult = await this.optionalCompile(
                 problem.bfCompare.generator,
                 ac,
