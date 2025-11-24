@@ -145,6 +145,7 @@ export class Compiler {
                 bruteForce: bruteForceResult.data,
             };
         }
+        this.logger.trace('Compilation succeeded', data);
         return new UnknownResult(data);
     }
 }

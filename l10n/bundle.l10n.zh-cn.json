@@ -81,6 +81,7 @@
     "Failed to compile the program: {msg}": "编译程序失败：{msg}",
     "Failed to create directory for problem: {msg}": "创建题目目录失败：{msg}",
     "Failed to debug test case: {msg}": "调试测试样例失败：{msg}",
+    "Failed to detect language for source, generator, or brute force.": "无法检测源代码、生成器或暴力解法的语言。",
     "Failed to load problem from CPH.": "加载 CPH 题目失败。",
     "Failed to read CPH problem file {file}: {error}": "读取 CPH 题目文件 {file} 失败：{error}",
     "Failed to run test cases: {msg}": "运行测试样例失败：{msg}",

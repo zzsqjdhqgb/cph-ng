@@ -72,7 +72,7 @@ export default class ProblemsManager {
         }
         for (const fullProblem of this.fullProblems) {
             if (fullProblem.problem.isRelated(path)) {
-                this.logger.debug(
+                this.logger.trace(
                     'Found loaded problem',
                     fullProblem.problem.src.path,
                     'for path',
@@ -644,10 +644,6 @@ export default class ProblemsManager {
         if (!fullProblem) {
             return;
         }
-        const srcLang = Langs.getLang(fullProblem.problem.src.path);
-        if (!srcLang) {
-            return;
-        }
         const bfCompare = fullProblem.problem.bfCompare;
         if (!bfCompare || !bfCompare.generator || !bfCompare.bruteForce) {
             Io.warn(
@@ -663,6 +659,17 @@ export default class ProblemsManager {
         }
         fullProblem.ac && fullProblem.ac.abort();
         fullProblem.ac = new AbortController();
+        const srcLang = Langs.getLang(fullProblem.problem.src.path);
+        const generatorLang = Langs.getLang(bfCompare.generator.path);
+        const bruteForceLang = Langs.getLang(bfCompare.bruteForce.path);
+        if (!srcLang || !generatorLang || !bruteForceLang) {
+            Io.warn(
+                l10n.t(
+                    'Failed to detect language for source, generator, or brute force.',
+                ),
+            );
+            return;
+        }
 
         let cnt = 0;
         try {
@@ -694,7 +701,9 @@ export default class ProblemsManager {
                 });
                 await this.dataRefresh();
                 const generatorRunResult = await Runner.doRun({
-                    cmd: [compileResult.data.bfCompare!.generator.outputPath],
+                    cmd: await generatorLang.getRunCommand(
+                        compileResult.data.bfCompare!.generator.outputPath,
+                    ),
                     timeLimit: Settings.bfCompare.generatorTimeLimit,
                     stdin: new TcIo(false, ''),
                     ac: fullProblem.ac,
@@ -717,7 +726,9 @@ export default class ProblemsManager {
                 });
                 await this.dataRefresh();
                 const bruteForceRunResult = await Runner.doRun({
-                    cmd: [compileResult.data.bfCompare!.bruteForce.outputPath],
+                    cmd: await bruteForceLang.getRunCommand(
+                        compileResult.data.bfCompare!.bruteForce.outputPath,
+                    ),
                     timeLimit: Settings.bfCompare.bruteForceTimeLimit,
                     stdin,
                     ac: fullProblem.ac,
