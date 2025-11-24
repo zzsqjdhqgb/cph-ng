@@ -38,14 +38,15 @@ export default class Io {
         this.logger.error(msg);
         return window.showErrorMessage(msg, ...args);
     }
-    public static async confirm(
-        msg: string,
-        modal: boolean = false,
-    ): Promise<boolean> {
+    public static async confirm(msg: string): Promise<boolean> {
         this.logger.info(msg);
+        const yesOption = l10n.t('Yes');
         return (
-            (await window.showInformationMessage(msg, { modal }, 'Yes')) ===
-            'Yes'
+            (await window.showInformationMessage(
+                msg,
+                { modal: true },
+                yesOption,
+            )) === yesOption
         );
     }
 }

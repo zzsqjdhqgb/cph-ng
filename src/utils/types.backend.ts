@@ -329,6 +329,12 @@ export class Problem implements IProblem {
         this.tcOrder.push(uuid);
         return uuid;
     }
+    public applyTcs(tcs: Tc[]) {
+        Settings.problem.clearBeforeLoad && (this.tcOrder = []);
+        for (const tc of tcs) {
+            this.addTc(Tc.fromI(tc));
+        }
+    }
     public isRelated(path?: string): boolean {
         if (!path) {
             return false;

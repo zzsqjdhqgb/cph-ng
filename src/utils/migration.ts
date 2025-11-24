@@ -191,7 +191,7 @@ const migrateFunctions: Record<string, (oldProblem: any) => any> = {
 };
 
 export const migration = (problem: OldProblem): Problem => {
-    logger.trace('Starting migration', { problem });
+    logger.trace('Starting migration', problem);
     while (true) {
         const detectedVer: string = (() => {
             const problemAny = problem as any;
@@ -227,19 +227,13 @@ export const migration = (problem: OldProblem): Problem => {
             }
             return '0.0.1';
         })();
-        logger.debug('Detected version', { detectedVer });
+        logger.debug('Detected version', detectedVer);
         let newProblem = migrateFunctions[detectedVer](problem);
         if (newProblem === null) {
-            logger.debug(
-                'Migration function returned null, stopping migration',
-            );
             break;
         }
         problem = newProblem;
-        logger.debug('Migrated to version', {
-            version: detectedVer,
-            problem,
-        });
+        logger.trace('Migrated to version', problem);
     }
     return Problem.fromI(problem as unknown as IProblem);
 };

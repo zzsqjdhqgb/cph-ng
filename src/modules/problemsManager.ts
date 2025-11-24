@@ -263,8 +263,7 @@ export default class ProblemsManager {
             if (!zipFile) {
                 return undefined;
             }
-            await TcFactory.applyTcs(
-                fullProblem.problem,
+            fullProblem.problem.applyTcs(
                 await TcFactory.fromZip(
                     fullProblem.problem.src.path,
                     zipFile[0].fsPath,
@@ -277,8 +276,7 @@ export default class ProblemsManager {
             if (!folderUri) {
                 return undefined;
             }
-            await TcFactory.applyTcs(
-                fullProblem.problem,
+            fullProblem.problem.applyTcs(
                 await TcFactory.fromFolder(folderUri.fsPath),
             );
         }
@@ -443,12 +441,14 @@ export default class ProblemsManager {
         }
         if (fullProblem.ac) {
             fullProblem.ac.abort(msg.onlyOne ? 'onlyOne' : undefined);
-            fullProblem.ac = null;
-        } else {
-            for (const tc of Object.values(fullProblem.problem.tcs)) {
-                if (tc.result && isRunningVerdict(tc.result.verdict)) {
-                    tc.result.verdict = TcVerdicts.RJ;
-                }
+            if (msg.onlyOne) {
+                return;
+            }
+            await waitUntil(() => !fullProblem.ac);
+        }
+        for (const tc of Object.values(fullProblem.problem.tcs)) {
+            if (tc.result && isRunningVerdict(tc.result.verdict)) {
+                tc.result.verdict = TcVerdicts.RJ;
             }
         }
         await this.dataRefresh();
@@ -523,7 +523,6 @@ export default class ProblemsManager {
                         'The file size is {size} bytes, which may be large. Are you sure you want to load it inline?',
                         { size: data.length },
                     ),
-                    true,
                 ))
             ) {
                 tc[msg.label] = new TcIo(false, data);
@@ -915,16 +914,12 @@ export default class ProblemsManager {
         }
         for (const item in msg.items) {
             if (msg.items[item] === 'folder') {
-                await TcFactory.applyTcs(
-                    fullProblem.problem,
-                    await TcFactory.fromFolder(item),
-                );
+                fullProblem.problem.applyTcs(await TcFactory.fromFolder(item));
                 break;
             }
             const ext = extname(item).toLowerCase();
             if (ext === '.zip') {
-                await TcFactory.applyTcs(
-                    fullProblem.problem,
+                fullProblem.problem.applyTcs(
                     await TcFactory.fromZip(fullProblem.problem.src.path, item),
                 );
                 break;

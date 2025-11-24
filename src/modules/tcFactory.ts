@@ -24,7 +24,7 @@ import Io from '../helpers/io';
 import { exists } from '../utils/process';
 import { renderUnzipFolder } from '../utils/strTemplate';
 import { ITc } from '../utils/types';
-import { Problem, Tc, TcIo } from '../utils/types.backend';
+import { Tc, TcIo } from '../utils/types.backend';
 import Settings from './settings';
 
 async function getAllFiles(dirPath: string): Promise<string[]> {
@@ -65,9 +65,8 @@ export default class TcFactory {
                 if (!(await exists(pairPath))) {
                     continue;
                 }
-                if (
-                    behavior === 'ask' &&
-                    !(await Io.confirm(
+                if (behavior === 'ask') {
+                    const choice = await Io.confirm(
                         l10n.t(
                             'Found matching {found} file: {file}. Do you want to use it?',
                             {
@@ -77,10 +76,10 @@ export default class TcFactory {
                                 file: basename(pairPath),
                             },
                         ),
-                        true,
-                    ))
-                ) {
-                    continue;
+                    );
+                    if (!choice) {
+                        continue;
+                    }
                 }
                 isInput ? (answer = pairPath) : (stdin = pairPath);
                 break;
@@ -95,7 +94,7 @@ export default class TcFactory {
     public static async fromZip(
         srcPath: string,
         zipPath: string,
-    ): Promise<ITc[]> {
+    ): Promise<Tc[]> {
         const zipData = new AdmZip(zipPath);
         const folderPath = renderUnzipFolder(srcPath, zipPath);
         if (folderPath === null) {
@@ -108,7 +107,7 @@ export default class TcFactory {
         }
         return await this.fromFolder(folderPath);
     }
-    public static async fromFolder(folderPath: string): Promise<ITc[]> {
+    public static async fromFolder(folderPath: string): Promise<Tc[]> {
         const allFiles = await getAllFiles(folderPath);
         const tcs: ITc[] = [];
         for (const filePath of allFiles) {
@@ -194,14 +193,6 @@ export default class TcFactory {
         if (!chosenIdx) {
             return [];
         }
-        return chosenIdx.map((idx) => orderedTcs[idx.value]);
-    }
-    public static async applyTcs(problem: Problem, tcs: ITc[]) {
-        if (Settings.problem.clearBeforeLoad) {
-            problem.tcOrder = [];
-        }
-        for (const tc of tcs) {
-            problem.addTc(Tc.fromI(tc));
-        }
+        return chosenIdx.map((idx) => Tc.fromI(orderedTcs[idx.value]));
     }
 }

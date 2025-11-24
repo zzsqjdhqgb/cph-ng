@@ -66,7 +66,6 @@ export default class SidebarProvider implements WebviewViewProvider {
     }> = new EventEmitter();
 
     constructor() {
-        this.logger.trace('constructor');
         this.event.on('problem', (problem) => {
             this._view?.webview.postMessage({
                 type: 'problem',
@@ -82,14 +81,12 @@ export default class SidebarProvider implements WebviewViewProvider {
     }
 
     public focus() {
-        this.logger.trace('focus');
         const editor = window.activeTextEditor;
         commands.executeCommand('workbench.view.extension.cphNgContainer');
         editor && window.showTextDocument(editor.document);
     }
 
     public resolveWebviewView(webviewView: WebviewView) {
-        this.logger.trace('resolveWebviewView', { webviewView });
         this._view = webviewView;
 
         webviewView.webview.options = {
@@ -100,7 +97,8 @@ export default class SidebarProvider implements WebviewViewProvider {
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
         webviewView.webview.onDidReceiveMessage(async (msg: WebviewMsg) => {
-            this.logger.debug('Received message from webview', { msg });
+            this.logger.info('Received', msg.type, 'message');
+            this.logger.debug('Received message data from webview', msg);
             try {
                 if (msg.type === 'init') {
                     sidebarProvider.event.emit('activePath', {
@@ -175,6 +173,7 @@ export default class SidebarProvider implements WebviewViewProvider {
                     );
                 }
             } catch (e) {
+                this.logger.error('Error handling webview message', msg, e);
                 Io.error(
                     l10n.t(
                         'Error occurred when handling message {msgType}: {msg}.',
@@ -184,16 +183,11 @@ export default class SidebarProvider implements WebviewViewProvider {
                         },
                     ),
                 );
-                this.logger.error('Error handling webview message', {
-                    msgType: msg.type,
-                    msg: e as Error,
-                });
             }
         });
     }
 
     public refresh() {
-        this.logger.trace('refresh');
         if (this._view) {
             this._view.webview.html = this._getHtmlForWebview(
                 this._view.webview,
@@ -202,7 +196,7 @@ export default class SidebarProvider implements WebviewViewProvider {
     }
 
     private _getHtmlForWebview(webview: Webview): string {
-        this.logger.trace('_getHtmlForWebview', { webview });
+        this.logger.debug('Generating HTML for webview');
         const getUri = (filename: string) =>
             webview.asWebviewUri(Uri.joinPath(extensionUri, filename));
         let isDarkMode =
