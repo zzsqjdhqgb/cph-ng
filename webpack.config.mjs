@@ -125,7 +125,19 @@ export default (env, argv) => {
             clean: { keep: /generated\.json/ },
         },
         externals: { vscode: 'vscode' },
-        plugins: [generateBuildInfo()],
+        plugins: [
+            generateBuildInfo(),
+            new CopyPlugin({
+                patterns: [
+                    { from: 'testlib/testlib.h', to: 'testlib/testlib.h' },
+                    {
+                        from: 'testlib/checkers/*.cpp',
+                        to: 'testlib/[name].cpp',
+                    },
+                    { from: 'res/compare.cpp', to: 'testlib/compare.cpp' },
+                ],
+            }),
+        ],
         experiments: { outputModule: true },
         cache: {
             type: 'filesystem',
