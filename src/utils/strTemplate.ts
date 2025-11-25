@@ -21,8 +21,8 @@ import { readFile } from 'fs/promises';
 import { homedir, tmpdir } from 'os';
 import { basename, dirname, extname, normalize, relative } from 'path';
 import { l10n, Uri, workspace } from 'vscode';
+import { Problem } from '../types/types.backend';
 import { extensionPath } from './global';
-import { Problem } from './types.backend';
 
 const renderString = (original: string, replacements: [string, string][]) => {
     for (const replacement of replacements) {

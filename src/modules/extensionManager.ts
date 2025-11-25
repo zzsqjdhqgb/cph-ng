@@ -92,10 +92,7 @@ export default class ExtensionManager {
             }
 
             await Cache.ensureDir();
-            ExtensionManager.logger.info(
-                'Cache directories created successfully',
-            );
-
+            await Cache.startMonitor();
             Companion.init();
 
             context.subscriptions.push(

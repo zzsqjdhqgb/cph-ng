@@ -18,8 +18,8 @@
 import { Lang, LangCompileData, LangCompileResult } from '@/core/langs/lang';
 import Langs from '@/core/langs/langs';
 import Logger from '@/helpers/logger';
+import { FileWithHash, Problem, TcVerdicts } from '@/types';
 import { KnownResult, Result, UnknownResult } from '@/utils/result';
-import { FileWithHash, Problem, TcVerdicts } from '@/utils/types.backend';
 import { l10n } from 'vscode';
 
 export interface CompileData {

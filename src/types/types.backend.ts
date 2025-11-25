@@ -20,15 +20,16 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { randomUUID, UUID } from 'crypto';
+import { readFileSync, writeFileSync } from 'fs';
 import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
+import { version } from '../utils/packageInfo';
+import { exists } from '../utils/process';
+import { KnownResult } from '../utils/result';
+import { renderPathWithFile } from '../utils/strTemplate';
 import { migration, OldProblem } from './migration';
-import { version } from './packageInfo';
-import { exists } from './process';
-import { KnownResult } from './result';
-import { renderPathWithFile } from './strTemplate';
 import {
     IBfCompare,
     ICompilationSettings,
@@ -68,6 +69,10 @@ export class TcResult implements ITcResult {
         this.verdict = result.verdict;
         result.msg && this.msg.push(result.msg);
     }
+    public dispose() {
+        this.stdout.dispose();
+        this.stderr.dispose();
+    }
 }
 export class TcIo {
     useFile: boolean;
@@ -82,26 +87,26 @@ export class TcIo {
         this.useFile = tc.useFile;
         this.data = tc.data;
     }
-    public async fromString(data: string): Promise<void> {
+    public fromString(data: string): void {
         if (this.useFile) {
-            await writeFile(this.data, data);
+            writeFileSync(this.data, data);
         } else {
             this.data = data;
         }
     }
-    public async toString(): Promise<string> {
+    public toString(): string {
         if (this.useFile) {
-            return await readFile(this.data, 'utf-8');
+            return readFileSync(this.data, 'utf-8');
         } else {
             return this.data;
         }
     }
-    public async toPath(): Promise<string> {
+    public toPath(): string {
         if (this.useFile) {
             return this.data;
         } else {
-            const path = await Cache.createIo();
-            await writeFile(path, this.data);
+            const path = Cache.createIo();
+            writeFileSync(path, this.data);
             return path;
         }
     }
@@ -110,11 +115,16 @@ export class TcIo {
             try {
                 const stats = await stat(this.data);
                 if (stats.size <= Settings.problem.maxInlineDataLength) {
+                    const filePath = this.data;
                     this.useFile = false;
-                    this.data = await readFile(this.data, 'utf-8');
+                    this.data = await readFile(filePath, 'utf-8');
+                    Cache.dispose(filePath);
                 }
             } catch {}
         }
+    }
+    public dispose() {
+        this.useFile && Cache.dispose(this.data);
     }
 }
 
@@ -379,6 +389,15 @@ export class Problem implements IProblem {
             return false;
         }
         Problem.logger.trace('Saving problem data', this, 'to', binPath);
+        for (const [key, tc] of Object.entries(this.tcs)) {
+            this.tcOrder.includes(key as UUID) ||
+                (tc.stdin.dispose(), tc.answer.dispose(), tc.result?.dispose());
+        }
+        this.tcs = Object.fromEntries(
+            Object.entries(this.tcs).filter(([key]) =>
+                this.tcOrder.includes(key as UUID),
+            ),
+        );
         try {
             await mkdir(dirname(binPath), { recursive: true });
             await writeFile(

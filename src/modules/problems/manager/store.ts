@@ -1,5 +1,6 @@
 import Logger from '@/helpers/logger';
 import ExtensionManager from '@/modules/extensionManager';
+import { Problem } from '@/types';
 import {
     getActivePath,
     problemFs,
@@ -7,8 +8,6 @@ import {
     waitUntil,
 } from '@/utils/global';
 import { exists } from '@/utils/process';
-import { Problem } from '@/utils/types.backend';
-import { UUID } from 'crypto';
 import { CphProblem } from '../cphProblem';
 
 export interface FullProblem {
@@ -66,11 +65,6 @@ class Store {
         );
         for (const idle of idles) {
             idle.problem.timeElapsed += Date.now() - idle.startTime;
-            idle.problem.tcs = Object.fromEntries(
-                Object.entries(idle.problem.tcs).filter(([key]) =>
-                    idle.problem.tcOrder.includes(key as UUID),
-                ),
-            );
             await idle.problem.save();
             this.logger.debug('Closed idle problem', idle.problem.src.path);
         }

@@ -1,4 +1,4 @@
-import { Problem } from '@/utils/types.backend';
+import { Problem } from '@/types';
 
 export interface ProblemEventData {
     canImport: boolean;

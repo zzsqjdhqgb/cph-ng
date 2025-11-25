@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ITc } from '@/utils/types';
+import { ITc } from '@/types/types';
 import { UUID } from 'crypto';
 
 export interface BaseMsg {

@@ -16,8 +16,8 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import Logger from '@/helpers/logger';
+import { FileWithHash } from '@/types';
 import { exists } from '@/utils/process';
-import { FileWithHash } from '@/utils/types.backend';
 import { SHA256 } from 'crypto-js';
 import { readFile, unlink } from 'fs/promises';
 

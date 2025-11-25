@@ -1,21 +1,20 @@
 import { Compiler } from '@/core/compiler';
 import Langs from '@/core/langs/langs';
 import { Executor, Runner } from '@/core/runner';
+import Cache from '@/helpers/cache';
 import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
+import { Tc, TcIo, TcResult, TcVerdicts, TcWithResult } from '@/types';
+import { waitUntil } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
-import {
-    Tc,
-    TcIo,
-    TcResult,
-    TcVerdicts,
-    TcWithResult,
-} from '@/utils/types.backend';
 import * as msgs from '@/webview/src/msgs';
 import { l10n } from 'vscode';
 import Store from './store';
 
 export class BfCompare {
+    private static logger = new Logger('bfCompare');
+
     public static async startBfCompare(
         msg: msgs.StartBfCompareMsg,
     ): Promise<void> {
@@ -95,12 +94,18 @@ export class BfCompare {
                     enableRunner: false,
                 });
                 if (generatorRunResult instanceof KnownResult) {
+                    generatorRunResult.data &&
+                        Cache.dispose([
+                            generatorRunResult.data.stdoutPath,
+                            generatorRunResult.data.stderrPath,
+                        ]);
                     generatorRunResult.verdict !== TcVerdicts.RJ &&
                         (bfCompare.msg = l10n.t('Generator run failed: {msg}', {
                             msg: generatorRunResult.msg,
                         }));
                     break;
                 }
+                Cache.dispose(generatorRunResult.data.stderrPath);
                 const stdin = new TcIo(
                     true,
                     generatorRunResult.data.stdoutPath,
@@ -120,6 +125,12 @@ export class BfCompare {
                     enableRunner: false,
                 });
                 if (bruteForceRunResult instanceof KnownResult) {
+                    stdin.dispose();
+                    bruteForceRunResult.data &&
+                        Cache.dispose([
+                            bruteForceRunResult.data.stdoutPath,
+                            bruteForceRunResult.data.stderrPath,
+                        ]);
                     bruteForceRunResult.verdict !== TcVerdicts.RJ &&
                         (bfCompare.msg = l10n.t(
                             'Brute force run failed: {msg}',
@@ -129,6 +140,7 @@ export class BfCompare {
                         ));
                     break;
                 }
+                Cache.dispose(bruteForceRunResult.data.stderrPath);
 
                 bfCompare.msg = l10n.t('#{cnt} Running solution...', {
                     cnt,
@@ -162,6 +174,9 @@ export class BfCompare {
                     }
                     break;
                 }
+                tempTc.stdin.dispose();
+                tempTc.answer.dispose();
+                tempTc.result.dispose();
             }
         } finally {
             bfCompare.running = false;
@@ -191,6 +206,8 @@ export class BfCompare {
             return;
         }
         fullProblem.ac && fullProblem.ac.abort();
+        await waitUntil(() => !fullProblem.ac);
+        this.logger.info('Brute Force comparison stopped');
         await Store.dataRefresh();
     }
 }

@@ -1,9 +1,14 @@
 import { Compiler } from '@/core/compiler';
 import { Runner } from '@/core/runner';
+import {
+    isExpandVerdict,
+    isRunningVerdict,
+    TcResult,
+    TcVerdicts,
+    TcWithResult,
+} from '@/types';
 import { waitUntil } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
-import { isExpandVerdict, isRunningVerdict } from '@/utils/types';
-import { TcResult, TcVerdicts, TcWithResult } from '@/utils/types.backend';
 import * as msgs from '@/webview/src/msgs';
 import Store from './store';
 
@@ -18,8 +23,8 @@ export class TcRunner {
 
         try {
             const tc = fullProblem.problem.tcs[msg.id] as TcWithResult;
-            tc.result = new TcResult();
-            tc.result.verdict = TcVerdicts.CP;
+            tc.result?.dispose();
+            tc.result = new TcResult(TcVerdicts.CP);
             tc.isExpand = false;
             await Store.dataRefresh();
 
@@ -65,6 +70,7 @@ export class TcRunner {
                 (id) => !tcs[id].isDisabled,
             );
             for (const tcId of tcOrder) {
+                tcs[tcId].result?.dispose();
                 tcs[tcId].result = new TcResult(TcVerdicts.CP);
                 tcs[tcId].isExpand = false;
             }

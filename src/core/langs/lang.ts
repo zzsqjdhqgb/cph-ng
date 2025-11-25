@@ -16,15 +16,15 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { checkHash } from '@/core/compiler/cache';
+import Cache from '@/helpers/cache';
 import { CompilationIo } from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import ProcessExecutor, { AbortReason } from '@/helpers/processExecutor';
 import Settings from '@/helpers/settings';
+import { FileWithHash, ICompilationSettings, TcVerdicts } from '@/types';
 import { waitUntil } from '@/utils/global';
 import { exists } from '@/utils/process';
 import { KnownResult, Result, UnknownResult } from '@/utils/result';
-import { ICompilationSettings } from '@/utils/types';
-import { FileWithHash, TcVerdicts } from '@/utils/types.backend';
 import { readFile } from 'fs/promises';
 import { l10n, window } from 'vscode';
 
@@ -152,6 +152,7 @@ export class Lang {
                 }),
             );
         }
+        Cache.dispose([result.stdoutPath, result.stderrPath]);
         return new UnknownResult(undefined);
     }
 

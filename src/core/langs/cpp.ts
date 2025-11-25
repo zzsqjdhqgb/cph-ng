@@ -17,9 +17,9 @@
 
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
+import { FileWithHash } from '@/types';
 import { extensionPath } from '@/utils/global';
 import { KnownResult, UnknownResult } from '@/utils/result';
-import { FileWithHash } from '@/utils/types.backend';
 import { type } from 'os';
 import { basename, extname, join } from 'path';
 import {
@@ -48,7 +48,6 @@ export class LangCpp extends Lang {
 
         const outputPath = join(
             Settings.cache.directory,
-            'bin',
             basename(src.path, extname(src.path)) +
                 (type() === 'Windows_NT' ? '.exe' : ''),
         );

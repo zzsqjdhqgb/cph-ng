@@ -2,9 +2,9 @@ import Langs from '@/core/langs/langs';
 import Io from '@/helpers/io';
 import ProcessExecutor from '@/helpers/processExecutor';
 import Companion from '@/modules/companion';
+import { Problem } from '@/types';
 import { exists } from '@/utils/process';
 import { KnownResult } from '@/utils/result';
-import { Problem } from '@/utils/types.backend';
 import * as msgs from '@/webview/src/msgs';
 import { basename, dirname, extname } from 'path';
 import { commands, debug, l10n, Uri, window } from 'vscode';
@@ -214,7 +214,7 @@ export class ProblemActions {
                 return;
             }
 
-            const process = await ProcessExecutor.launch({
+            const process = ProcessExecutor.launch({
                 cmd: [outputPath],
                 stdin: fullProblem.problem.tcs[msg.id].stdin,
                 debug: true,

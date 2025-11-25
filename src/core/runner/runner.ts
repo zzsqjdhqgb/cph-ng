@@ -20,8 +20,8 @@ import { CompileData } from '@/core/compiler';
 import { Lang } from '@/core/langs/lang';
 import { ProcessResultHandler } from '@/helpers/processResultHandler';
 import ProblemsManager from '@/modules/problems/manager';
+import { Problem, TcIo, TcVerdicts, TcWithResult } from '@/types';
 import { KnownResult } from '@/utils/result';
-import { Problem, TcIo, TcVerdicts, TcWithResult } from '@/utils/types.backend';
 import { readFile } from 'fs/promises';
 import { l10n } from 'vscode';
 import { Executor } from './executor';
@@ -59,10 +59,8 @@ export class Runner {
                 tc.result.memory = memory;
 
                 // Handle stdout and stderr
-                ((tc.result.stdout = new TcIo(true, stdoutPath)),
-                    await tc.result.stdout.inlineSmall());
-                ((tc.result.stderr = new TcIo(true, stderrPath)),
-                    await tc.result.stderr.inlineSmall());
+                tc.result.stdout = new TcIo(true, stdoutPath);
+                tc.result.stderr = new TcIo(true, stderrPath);
                 await ProblemsManager.dataRefresh();
             }
             if (runResult instanceof KnownResult) {
@@ -96,9 +94,9 @@ export class Runner {
                 } else {
                     tc.result.fromResult(
                         ProcessResultHandler.compareOutputs(
-                            await tc.result.stdout.toString(),
-                            await tc.answer.toString(),
-                            await tc.result.stderr.toString(),
+                            tc.result.stdout.toString(),
+                            tc.answer.toString(),
+                            tc.result.stderr.toString(),
                         ),
                     );
                 }
@@ -111,6 +109,8 @@ export class Runner {
                 }),
             );
         } finally {
+            await tc.result.stdout.inlineSmall();
+            await tc.result.stderr.inlineSmall();
             await ProblemsManager.dataRefresh();
         }
     }

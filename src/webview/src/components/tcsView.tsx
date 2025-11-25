@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { IProblem } from '@/utils/types';
+import { IProblem } from '@/types/types';
 import Box from '@mui/material/Box';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';

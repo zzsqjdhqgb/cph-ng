@@ -17,8 +17,8 @@
 
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
+import { FileWithHash } from '@/types';
 import { UnknownResult } from '@/utils/result';
-import { FileWithHash } from '@/utils/types.backend';
 import { CompileAdditionalData, Lang, LangCompileResult } from './lang';
 
 export class LangJavascript extends Lang {

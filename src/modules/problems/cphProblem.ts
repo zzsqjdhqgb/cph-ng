@@ -17,8 +17,8 @@
 
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
+import { Problem, Tc, TcIo } from '@/types';
 import { version } from '@/utils/packageInfo';
-import { Problem, Tc, TcIo } from '@/utils/types.backend';
 import { enc, MD5 } from 'crypto-js';
 import { readdir, readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';

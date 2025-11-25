@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { TcIo } from '@/utils/types.backend';
+import { TcIo } from '@/types';
 import { UUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import {

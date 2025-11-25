@@ -17,10 +17,9 @@
 
 import Io from '@/helpers/io';
 import Settings from '@/helpers/settings';
+import { ITc, Tc, TcIo } from '@/types';
 import { exists } from '@/utils/process';
 import { renderUnzipFolder } from '@/utils/strTemplate';
-import { ITc } from '@/utils/types';
-import { Tc, TcIo } from '@/utils/types.backend';
 import AdmZip from 'adm-zip';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';

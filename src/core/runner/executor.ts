@@ -24,12 +24,13 @@ import {
     ProcessResultHandler,
 } from '@/helpers/processResultHandler';
 import Settings from '@/helpers/settings';
+import { TcIo, TcVerdicts } from '@/types';
 import { extensionPath } from '@/utils/global';
 import { exists } from '@/utils/process';
 import { KnownResult, Result } from '@/utils/result';
-import { TcIo, TcVerdicts } from '@/utils/types.backend';
+import { readFile, writeFile } from 'fs/promises';
+import { type } from 'os';
 import { join } from 'path';
-import { platform } from 'process';
 import { l10n } from 'vscode';
 
 export interface RunOptions {
@@ -56,13 +57,12 @@ export class Executor {
 
     private static async getRunnerPath(): Promise<string | null> {
         const srcPath =
-            platform === 'win32'
+            type() === 'Windows_NT'
                 ? join(extensionPath, 'res', 'runner-windows.cpp')
                 : join(extensionPath, 'res', 'runner-linux.cpp');
         const outputPath = join(
             Settings.cache.directory,
-            'bin',
-            platform === 'win32' ? 'runner-windows.exe' : 'runner-linux',
+            type() === 'Windows_NT' ? 'runner-windows.exe' : 'runner-linux',
         );
         if (await exists(outputPath)) {
             this.logger.debug('Using cached runner program', { outputPath });
@@ -78,7 +78,7 @@ export class Executor {
                 compilationSettings: {
                     compiler: Settings.compilation.cppCompiler,
                     compilerArgs:
-                        platform === 'win32'
+                        type() === 'Windows_NT'
                             ? '-lpsapi -ladvapi32 -static'
                             : '-pthread',
                 },
@@ -145,8 +145,12 @@ export class Executor {
         options: RunOptions,
     ): Promise<KnownResult<ProcessData>> {
         // Prepare input and output files
-        const inputFile = await options.stdin.toPath();
-        const outputFile = await Cache.createIo();
+        const inputPath = options.stdin.useFile
+            ? options.stdin.data
+            : Cache.createIo();
+        const stdoutPath = Cache.createIo();
+        options.stdin.useFile ||
+            (await writeFile(inputPath, options.stdin.data));
 
         // Launch both processes with pipe
         const { process1: solResult, process2: intResult } =
@@ -157,7 +161,7 @@ export class Executor {
                     ac: options.ac,
                 },
                 {
-                    cmd: [interactor, inputFile, outputFile],
+                    cmd: [interactor, inputPath, stdoutPath],
                     timeout: options.timeLimit + Settings.runner.timeAddition,
                     ac: options.ac,
                 },
@@ -167,18 +171,43 @@ export class Executor {
             intResult,
         });
 
+        // Dispose of input file if it was created by Cache
+        options.stdin.useFile || Cache.dispose(inputPath);
+
         // Process results
+        const solProcessResult = await ProcessResultHandler.parse(solResult);
         const intProcessResult =
             await ProcessResultHandler.parseChecker(intResult);
-        const solProcessResult = await ProcessResultHandler.parse(solResult);
+        if (solProcessResult instanceof KnownResult) {
+            intProcessResult.data &&
+                Cache.dispose([
+                    intProcessResult.data.stdoutPath,
+                    intProcessResult.data.stderrPath,
+                ]);
+            return solProcessResult;
+        }
+        if (intProcessResult.data) {
+            const msg = [
+                intProcessResult.msg,
+                await readFile(intProcessResult.data.stdoutPath, 'utf-8'),
+                await readFile(intProcessResult.data.stderrPath, 'utf-8'),
+            ]
+                .filter((m) => !!m)
+                .join('\n\n');
+            Cache.dispose([
+                intProcessResult.data.stdoutPath,
+                intProcessResult.data.stderrPath,
+            ]);
+            return {
+                verdict: intProcessResult.verdict,
+                msg,
+                data: solProcessResult.data,
+            };
+        }
         return {
-            ...(solProcessResult instanceof KnownResult
-                ? solProcessResult
-                : intProcessResult),
-            data: intProcessResult.data && {
-                ...intProcessResult.data,
-                stdoutPath: outputFile,
-            },
+            verdict: intProcessResult.verdict,
+            msg: intProcessResult.msg,
+            data: solProcessResult.data,
         };
     }
 }

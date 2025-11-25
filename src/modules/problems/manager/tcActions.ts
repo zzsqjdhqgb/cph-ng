@@ -1,7 +1,7 @@
 import FolderChooser from '@/helpers/folderChooser';
 import Io from '@/helpers/io';
 import Settings from '@/helpers/settings';
-import { Tc, TcIo } from '@/utils/types.backend';
+import { Tc, TcIo } from '@/types';
 import * as msgs from '@/webview/src/msgs';
 import { writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
