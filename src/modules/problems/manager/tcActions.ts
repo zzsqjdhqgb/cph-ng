@@ -8,6 +8,7 @@ import { basename, dirname, extname, join } from 'path';
 import { commands, l10n, Uri, window } from 'vscode';
 import { generateTcUri } from '../problemFs';
 import TcFactory from '../tcFactory';
+import { ProblemActions } from './problemActions';
 import Store from './store';
 
 export class TcActions {
@@ -224,10 +225,19 @@ export class TcActions {
         await Store.dataRefresh();
     }
     public static async dragDrop(msg: msgs.DragDropMsg): Promise<void> {
-        const fullProblem = await Store.getFullProblem(msg.activePath);
+        // Try to get the problem, if not exist, create a new one
+        let fullProblem = await Store.getFullProblem(msg.activePath);
         if (!fullProblem) {
-            return;
+            await ProblemActions.createProblem({
+                type: 'createProblem',
+                activePath: msg.activePath,
+            });
+            fullProblem = await Store.getFullProblem(msg.activePath);
+            if (!fullProblem) {
+                return;
+            }
         }
+
         for (const item in msg.items) {
             if (msg.items[item] === 'folder') {
                 fullProblem.problem.applyTcs(await TcFactory.fromFolder(item));
