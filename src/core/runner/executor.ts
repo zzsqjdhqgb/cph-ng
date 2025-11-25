@@ -25,6 +25,7 @@ import {
 } from '@/helpers/processResultHandler';
 import Settings from '@/helpers/settings';
 import { extensionPath } from '@/utils/global';
+import { exists } from '@/utils/process';
 import { KnownResult, Result } from '@/utils/result';
 import { TcIo, TcVerdicts } from '@/utils/types.backend';
 import { join } from 'path';
@@ -58,6 +59,15 @@ export class Executor {
             platform === 'win32'
                 ? join(extensionPath, 'res', 'runner-windows.cpp')
                 : join(extensionPath, 'res', 'runner-linux.cpp');
+        const outputPath = join(
+            Settings.cache.directory,
+            'bin',
+            platform === 'win32' ? 'runner-windows.exe' : 'runner-linux',
+        );
+        if (await exists(outputPath)) {
+            this.logger.debug('Using cached runner program', { outputPath });
+            return outputPath;
+        }
         const runnerLang = new LangCpp();
         const langCompileResult = await runnerLang.compile(
             { path: srcPath },
@@ -81,7 +91,11 @@ export class Executor {
             );
             return null;
         }
-        return langCompileResult.data.outputPath;
+        if (langCompileResult.data.outputPath !== outputPath) {
+            this.logger.error('Runner program output path mismatch');
+            return null;
+        }
+        return outputPath;
     }
 
     private static async runWithoutInteractor(
