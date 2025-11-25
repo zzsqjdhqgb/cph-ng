@@ -1,6 +1,7 @@
 import Langs from '@/core/langs/langs';
 import Io from '@/helpers/io';
 import ProcessExecutor from '@/helpers/processExecutor';
+import Settings from '@/helpers/settings';
 import Companion from '@/modules/companion';
 import { Problem } from '@/types';
 import { exists } from '@/utils/process';
@@ -160,7 +161,11 @@ export class ProblemActions {
     }
     public static async openFile(msg: msgs.OpenFileMsg): Promise<void> {
         if (!msg.isVirtual) {
-            await commands.executeCommand('vscode.open', Uri.file(msg.path));
+            await commands.executeCommand(
+                'vscode.open',
+                Uri.file(msg.path),
+                Settings.companion.showPanel,
+            );
             return;
         }
         const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -174,6 +179,7 @@ export class ProblemActions {
                 authority: fullProblem.problem.src.path,
                 path: msg.path,
             }),
+            Settings.companion.showPanel,
         );
     }
     public static async debugTc(msg: msgs.DebugTcMsg): Promise<void> {
