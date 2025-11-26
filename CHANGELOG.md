@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.10
 
 - **fix**: no editor
 - **fix**: robust the drag and drop
