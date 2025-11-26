@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.9
 
 - **feat**: enhance path handling for moved workspace in problem data
 - **feat**: add javascript language support
