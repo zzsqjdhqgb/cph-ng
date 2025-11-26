@@ -7,7 +7,7 @@ import { Problem } from '@/types';
 import { extensionPath } from '@/utils/global';
 import { exists } from '@/utils/process';
 import { KnownResult } from '@/utils/result';
-import * as msgs from '@/webview/src/msgs';
+import * as msgs from '@w/msgs';
 import { readdir } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import { commands, debug, l10n, Uri, window } from 'vscode';

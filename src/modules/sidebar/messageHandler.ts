@@ -1,7 +1,7 @@
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import { getActivePath, sidebarProvider } from '@/utils/global';
-import { WebviewMsg } from '@/webview/src/msgs';
+import { WebviewMsg } from '@w/msgs';
 import { commands, l10n } from 'vscode';
 import ProblemsManager from '../problems/manager';
 

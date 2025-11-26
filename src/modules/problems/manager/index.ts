@@ -1,4 +1,4 @@
-import * as msgs from '@/webview/src/msgs';
+import * as msgs from '@w/msgs';
 import { BfCompare } from './bfCompare';
 import { ProblemActions } from './problemActions';
 import Store, { FullProblem } from './store';
