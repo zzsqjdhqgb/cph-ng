@@ -3,7 +3,7 @@ import Io from '@/helpers/io';
 import Settings from '@/helpers/settings';
 import { Tc, TcIo } from '@/types';
 import * as msgs from '@w/msgs';
-import { writeFile } from 'fs/promises';
+import { stat, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join } from 'path';
 import { commands, l10n, Uri, window } from 'vscode';
 import { generateTcUri } from '../problemFs';
@@ -238,8 +238,12 @@ export class TcActions {
             }
         }
 
-        for (const item in msg.items) {
-            if (msg.items[item] === 'folder') {
+        for (const item of msg.items) {
+            if (
+                await stat(item)
+                    .then((s) => s.isDirectory())
+                    .catch(() => false)
+            ) {
                 fullProblem.problem.applyTcs(await TcFactory.fromFolder(item));
                 break;
             }

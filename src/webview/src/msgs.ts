@@ -151,7 +151,7 @@ export interface DebugTcMsg extends BaseMsg {
 }
 export interface DragDropMsg extends BaseMsg {
     type: 'dragDrop';
-    items: Record<string, 'folder' | 'file'>;
+    items: string[];
 }
 export type WebviewMsg =
     | CreateProblemMsg
