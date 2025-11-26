@@ -112,6 +112,9 @@ export interface OpenFileMsg extends BaseMsg {
     path: string;
     isVirtual?: boolean;
 }
+export interface OpenTestlibMsg extends BaseMsg {
+    type: 'openTestlib';
+}
 export type WebviewSrcFileTypes =
     | 'checker'
     | 'interactor'
@@ -171,6 +174,7 @@ export type WebviewMsg =
     | DelTcMsg
     | ReorderTcMsg
     | OpenFileMsg
+    | OpenTestlibMsg
     | ChooseSrcFileMsg
     | RemoveSrcFileMsg
     | StartBfCompareMsg

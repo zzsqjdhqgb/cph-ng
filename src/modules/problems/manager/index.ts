@@ -46,6 +46,9 @@ export default class ProblemsManager {
     public static async openFile(msg: msgs.OpenFileMsg) {
         return ProblemActions.openFile(msg);
     }
+    public static async openTestlib(msg: msgs.OpenTestlibMsg) {
+        return ProblemActions.openTestlib(msg);
+    }
     public static async debugTc(msg: msgs.DebugTcMsg) {
         return ProblemActions.debugTc(msg);
     }

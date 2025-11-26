@@ -1,3 +1,6 @@
+// Fast ASCII file compare
+// Provided by @xiezheyuan, modified by @langningchen
+
 #include "testlib.h"
 #include <vector>
 #include <string>
