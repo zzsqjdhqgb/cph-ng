@@ -664,11 +664,6 @@
                         "type": "boolean",
                         "default": true,
                         "markdownDescription": "%cph-ng.configuration.sidebar.properties.showTips.markdownDescription%"
-                    },
-                    "cph-ng.sidebar.fontFamily": {
-                        "type": "string",
-                        "default": "Monaspace, 'Cascadia Code', 'Source Code Pro', Consolas, 'Ubuntu Mono', monospace",
-                        "markdownDescription": "%cph-ng.configuration.sidebar.properties.fontFamily.markdownDescription%"
                     }
                 }
             }

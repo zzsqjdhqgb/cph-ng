@@ -98,7 +98,6 @@
     "cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.dark": "始终使用深色模式，无论 VSCode 主题如何。",
     "cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.light": "始终使用浅色模式，无论 VSCode 主题如何。",
     "cph-ng.configuration.sidebar.properties.colorTheme.markdownDescription": "选择侧边栏的**颜色主题**。这会影响侧边栏视图中元素的视觉外观。请从以下选项中选择：",
-    "cph-ng.configuration.sidebar.properties.fontFamily.markdownDescription": "设置侧边栏中样例文本的**字体系列**。你可以指定多个字体作为备用列表，用逗号分隔。系统上可用的第一个字体将被使用。例如：`Monaspace, 'Cascadia Code', 'Source Code Pro', Consolas, 'Ubuntu Mono', monospace`。这允许你根据个人喜好自定义文本的外观。",
     "cph-ng.configuration.sidebar.properties.hiddenStatuses.markdownDescription": "选择在侧边栏视图中隐藏哪些**提交状态**。从列表中选择一个或多个状态以对其进行过滤，从而专注于特定结果，减少视觉混乱。例如，你可以隐藏“通过”结果，只查看待处理或失败的提交。",
     "cph-ng.configuration.sidebar.properties.retainWhenHidden.markdownDescription": "如果为 `true`，即使侧边栏视图被隐藏，它也将**保持活动并保留其状态**。如果为 `false`，侧边栏在隐藏时将被释放，并在再次显示时重新创建，这可能会影响性能或导致短暂的视觉闪烁。设置此项时请考虑你的工作流程和系统资源。",
     "cph-ng.configuration.sidebar.properties.showAcGif.markdownDescription": "启用后，每当题目成功被通过（收到“通过”判决）时，侧边栏中将显示一个**祝贺 GIF**。这为成功的提交提供了视觉反馈。",
