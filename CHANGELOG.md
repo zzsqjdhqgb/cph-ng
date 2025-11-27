@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.11
 
 - **fix**: improve testlib compare
 - **fix**: improve drag drop style
