@@ -32,7 +32,14 @@ const renderString = (original: string, replacements: [string, string][]) => {
 };
 
 export const renderTemplate = async (problem: Problem) => {
-    const template = await readFile(Settings.problem.templateFile, 'utf-8');
+    const templatePath = renderPathWithFile(
+        Settings.problem.templateFile,
+        problem.src.path,
+    );
+    if (!templatePath) {
+        return '';
+    }
+    const template = await readFile(templatePath, 'utf-8');
     return renderString(template, [
         ['title', problem.name],
         ['timeLimit', problem.timeLimit.toString()],
