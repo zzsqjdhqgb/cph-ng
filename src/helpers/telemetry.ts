@@ -70,11 +70,13 @@ export default class Telemetry {
   }
   public start(eventName: string, properties?: TelemetryEventProperties) {
     const startTime = Date.now();
-    return () => {
+    return (endProperties?: TelemetryEventProperties) => {
       const duration = Date.now() - startTime;
-      this.reporter.sendTelemetryEvent(eventName, properties, {
-        duration,
-      });
+      this.reporter.sendTelemetryEvent(
+        eventName,
+        { ...properties, ...endProperties },
+        { duration },
+      );
     };
   }
   dispose(): Promise<any> {
