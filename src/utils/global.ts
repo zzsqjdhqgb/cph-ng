@@ -23,8 +23,8 @@ import SidebarProvider from '../modules/sidebar';
 export let extensionUri: Uri;
 export let extensionPath: string;
 export const setExtensionUri = (uri: Uri) => {
-    extensionUri = uri;
-    extensionPath = uri.fsPath;
+  extensionUri = uri;
+  extensionPath = uri.fsPath;
 };
 export const problemFs = new ProblemFs();
 export const sidebarProvider = new SidebarProvider();
@@ -32,24 +32,24 @@ export const telemetry = new Telemetry();
 
 let _activePath: string | undefined;
 export const setActivePath = (textEditor: TextEditor) => {
-    const activeUri = textEditor.document.uri;
-    if (activeUri.scheme !== 'file') {
-        return;
-    }
-    _activePath = activeUri.fsPath;
+  const activeUri = textEditor.document.uri;
+  if (activeUri.scheme !== 'file') {
+    return;
+  }
+  _activePath = activeUri.fsPath;
 };
 export const getActivePath = () => _activePath;
 
 export const waitUntil = async (check: () => boolean) => {
-    return new Promise<void>((resolve, _reject) => {
-        if (check()) {
-            resolve();
-        }
-        const intervalId = setInterval(() => {
-            if (check()) {
-                clearInterval(intervalId);
-                resolve();
-            }
-        }, 50);
-    });
+  return new Promise<void>((resolve, _reject) => {
+    if (check()) {
+      resolve();
+    }
+    const intervalId = setInterval(() => {
+      if (check()) {
+        clearInterval(intervalId);
+        resolve();
+      }
+    }, 50);
+  });
 };
