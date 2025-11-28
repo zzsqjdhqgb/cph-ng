@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.12
 
 - **feat**: integrate telemetry for performance tracking and analytics
 
