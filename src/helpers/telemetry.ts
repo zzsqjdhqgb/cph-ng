@@ -23,38 +23,40 @@ import {
 } from '@vscode/extension-telemetry';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import Logger from './logger';
 
 export default class Telemetry {
-    private reporter: TelemetryReporter;
-    private commitHash!: string;
-    constructor() {
+    private logger = new Logger('telemetry');
+    private reporter!: TelemetryReporter;
+    public async init() {
         this.reporter = new TelemetryReporter(
             'InstrumentationKey=2fecce85-ad3b-4ccd-9773-70b02eb2fe43;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=56e8033b-ca41-427f-a839-825645ecb44e',
-        );
-    }
-    public async init() {
-        this.commitHash = JSON.parse(
-            await readFile(
-                join(extensionPath, 'dist', 'generated.json'),
-                'utf8',
-            ),
-        ).commitHash;
-    }
-    private sendLog(
-        eventName: string,
-        properties?: TelemetryEventProperties,
-        measurements?: TelemetryEventMeasurements,
-        isError: boolean = false,
-    ) {
-        (isError
-            ? this.reporter.sendTelemetryErrorEvent
-            : this.reporter.sendTelemetryEvent)(
-            eventName,
+            [],
             {
-                commitHash: this.commitHash,
-                ...properties,
+                additionalCommonProperties: {
+                    commitHash: JSON.parse(
+                        await readFile(
+                            join(extensionPath, 'dist', 'generated.json'),
+                            'utf8',
+                        ),
+                    ).commitHash,
+                },
             },
-            measurements,
+            async (url, init) => {
+                this.logger.debug(
+                    `Telemetry sent to ${url} with body: ${init?.body}`,
+                );
+                const res = await fetch(url, init);
+                res.ok ||
+                    this.logger.warn(`Telemetry request failed: ${res.status}`);
+                return {
+                    text: () => res.text(),
+                    status: res.status,
+                    headers: res.headers as unknown as Iterable<
+                        [string, string]
+                    >,
+                };
+            },
         );
     }
     public log(
@@ -62,20 +64,26 @@ export default class Telemetry {
         properties?: TelemetryEventProperties,
         measurements?: TelemetryEventMeasurements,
     ) {
-        this.sendLog(eventName, properties, measurements, false);
+        this.reporter.sendTelemetryEvent(eventName, properties, measurements);
     }
     public error(
         eventName: string,
         properties?: TelemetryEventProperties,
         measurements?: TelemetryEventMeasurements,
     ) {
-        this.sendLog(eventName, properties, measurements, true);
+        this.reporter.sendTelemetryErrorEvent(
+            eventName,
+            properties,
+            measurements,
+        );
     }
     public start(eventName: string, properties?: TelemetryEventProperties) {
         const startTime = Date.now();
         return () => {
             const duration = Date.now() - startTime;
-            this.sendLog(eventName, properties, { duration });
+            this.reporter.sendTelemetryEvent(eventName, properties, {
+                duration,
+            });
         };
     }
     dispose(): Promise<any> {
