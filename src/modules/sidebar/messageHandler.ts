@@ -1,6 +1,6 @@
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
-import { getActivePath, sidebarProvider } from '@/utils/global';
+import { getActivePath, sidebarProvider, telemetry } from '@/utils/global';
 import { WebviewMsg } from '@w/msgs';
 import { commands, l10n } from 'vscode';
 import ProblemsManager from '../problems/manager';
@@ -11,6 +11,9 @@ export const handleMessage = async (msg: WebviewMsg) => {
     logger.info('Received', msg.type, 'message');
     logger.debug('Received message data from webview', msg);
     try {
+        const handleEnd = telemetry.start('sidebar.handleMessage', {
+            type: msg.type,
+        });
         if (msg.type === 'init') {
             sidebarProvider.event.emit('activePath', {
                 activePath: getActivePath(),
@@ -82,6 +85,7 @@ export const handleMessage = async (msg: WebviewMsg) => {
                 msg.item,
             );
         }
+        handleEnd();
     } catch (e) {
         logger.error('Error handling webview message', msg, e);
         Io.error(
@@ -90,5 +94,9 @@ export const handleMessage = async (msg: WebviewMsg) => {
                 msg: (e as Error).message,
             }),
         );
+        telemetry.error('sidebar-handleMessage-error', {
+            type: msg.type,
+            error: (e as Error).message,
+        });
     }
 };

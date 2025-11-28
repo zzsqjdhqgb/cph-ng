@@ -819,6 +819,7 @@
         "@mui/lab": "7.0.1-beta.19",
         "@mui/material": "^7.3.5",
         "@uiw/react-codemirror": "^4.25.3",
+        "@vscode/extension-telemetry": "^1.2.0",
         "adm-zip": "^0.5.16",
         "anser": "^2.3.3",
         "ansi_up": "^6.0.6",

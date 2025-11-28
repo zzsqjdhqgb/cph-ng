@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import Telemetry from '@/helpers/telemetry';
 import { TextEditor, Uri } from 'vscode';
 import ProblemFs from '../modules/problems/problemFs';
 import SidebarProvider from '../modules/sidebar';
@@ -27,6 +28,7 @@ export const setExtensionUri = (uri: Uri) => {
 };
 export const problemFs = new ProblemFs();
 export const sidebarProvider = new SidebarProvider();
+export const telemetry = new Telemetry();
 
 let _activePath: string | undefined;
 export const setActivePath = (textEditor: TextEditor) => {

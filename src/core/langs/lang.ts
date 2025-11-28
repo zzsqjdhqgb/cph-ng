@@ -22,7 +22,7 @@ import Logger from '@/helpers/logger';
 import ProcessExecutor, { AbortReason } from '@/helpers/processExecutor';
 import Settings from '@/helpers/settings';
 import { FileWithHash, ICompilationSettings, TcVerdicts } from '@/types';
-import { waitUntil } from '@/utils/global';
+import { telemetry, waitUntil } from '@/utils/global';
 import { exists } from '@/utils/process';
 import { KnownResult, Result, UnknownResult } from '@/utils/result';
 import { readFile } from 'fs/promises';
@@ -86,12 +86,17 @@ export class Lang {
         CompilationIo.clear();
 
         try {
+            const compileEnd = telemetry.start('compile', {
+                lang: this.name,
+                forceCompile: forceCompile ? 'auto' : String(forceCompile),
+            });
             const langCompileResult = await this._compile(
                 src,
                 ac,
                 forceCompile,
                 additionalData,
             );
+            compileEnd();
 
             // Check if the output file exists
             if (

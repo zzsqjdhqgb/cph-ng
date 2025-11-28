@@ -35,6 +35,7 @@ import {
     setActivePath,
     setExtensionUri,
     sidebarProvider,
+    telemetry,
 } from '@/utils/global';
 import { version } from '@/utils/packageInfo';
 import { readFile, rm } from 'fs/promises';
@@ -70,6 +71,11 @@ export default class ExtensionManager {
     public static async activate(context: ExtensionContext) {
         ExtensionManager.logger.info('Activating CPH-NG extension');
         try {
+            setExtensionUri(context.extensionUri);
+            context.subscriptions.push(telemetry);
+            await telemetry.init();
+            const activateEnd = telemetry.start('activate');
+
             ExtensionManager.event.on('context', (context) => {
                 for (const [key, value] of Object.entries(context)) {
                     commands.executeCommand(
@@ -80,7 +86,6 @@ export default class ExtensionManager {
                 }
             });
 
-            setExtensionUri(context.extensionUri);
             if (Settings.cache.cleanOnStartup) {
                 ExtensionManager.logger.info('Cleaning cache on startup');
                 await rm(Settings.cache.directory, {
@@ -317,6 +322,7 @@ OS: ${release()}`;
             ExtensionManager.logger.info(
                 'CPH-NG extension activated successfully',
             );
+            activateEnd();
         } catch (e) {
             ExtensionManager.logger.error('Failed to activate extension', e);
             Io.error(

@@ -74,7 +74,7 @@ export class Compiler {
             compilationSettings: problem.compilationSettings,
         });
         if (result instanceof KnownResult) {
-            return result;
+            return new KnownResult(result.verdict, result.msg);
         }
         problem.src.hash = result.data.hash;
         const data: CompileData = {

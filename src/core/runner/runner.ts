@@ -21,6 +21,7 @@ import { Lang } from '@/core/langs/lang';
 import { ProcessResultHandler } from '@/helpers/processResultHandler';
 import ProblemsManager from '@/modules/problems/manager';
 import { Problem, TcIo, TcVerdicts, TcWithResult } from '@/types';
+import { telemetry } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
 import { readFile } from 'fs/promises';
 import { l10n } from 'vscode';
@@ -34,6 +35,7 @@ export class Runner {
         ac: AbortController,
         compileData: CompileData,
     ) {
+        const runTimerEnd = telemetry.start('runner.run', { lang: lang.name });
         try {
             tc.result.verdict = TcVerdicts.JG;
             await ProblemsManager.dataRefresh();
@@ -112,6 +114,12 @@ export class Runner {
             await tc.result.stdout.inlineSmall();
             await tc.result.stderr.inlineSmall();
             await ProblemsManager.dataRefresh();
+            runTimerEnd();
+            telemetry.log(
+                'tc.result',
+                { verdict: tc.result.verdict.name },
+                { time: tc.result.time, memory: tc.result.memory },
+            );
         }
     }
 }
