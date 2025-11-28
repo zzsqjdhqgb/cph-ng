@@ -2,9 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.13
 
 - **fix**: the cache telemetry log is too much
+- **fix**: improve telemetry
 
 ## 0.4.12
 
