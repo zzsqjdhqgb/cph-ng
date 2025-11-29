@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { renderWorkspacePath } from '@/utils/strTemplate';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import {
@@ -52,14 +53,20 @@ export default class UserScriptManager {
   public static async resolvePath(
     problems: CompanionProblem[],
     workspaceFolders: WorkspaceFolderCtx[],
-  ): Promise<(string | null)[]> {
+  ): Promise<(string | null)[] | undefined> {
     let code: string;
     try {
-      code = await readFile(Settings.companion.customPathScript, 'utf-8');
+      const scriptFile = await renderWorkspacePath(
+        Settings.companion.customPathScript,
+      );
+      if (!scriptFile) {
+        return;
+      }
+      code = await readFile(scriptFile, 'utf-8');
     } catch (e) {
       this.logger.error('Could not read user script', e);
       Io.error(l10n.t('Could not read user script'));
-      return problems.map(() => null);
+      return;
     }
 
     const context = createContext({
@@ -135,7 +142,7 @@ export default class UserScriptManager {
           Io.error(
             l10n.t('All paths returned by user script must be absolute'),
           );
-          return problems.map(() => null);
+          return;
         }
         while (mapped.length < problems.length) {
           mapped.push(null);
@@ -148,6 +155,5 @@ export default class UserScriptManager {
       this.logger.error('Error executing user script sandbox', e);
       Io.error(l10n.t('Error executing user script sandbox'));
     }
-    return problems.map(() => null);
   }
 }
