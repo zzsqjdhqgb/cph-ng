@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.4.14
 
 - **ci**: remove format
 - **feat**: add support for workspace replacement in user script paths
