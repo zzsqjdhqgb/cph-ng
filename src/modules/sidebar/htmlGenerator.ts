@@ -3,7 +3,7 @@ import Settings from '@/helpers/settings';
 import { extensionUri } from '@/utils/global';
 import { ColorThemeKind, env, Uri, Webview, window } from 'vscode';
 
-const logger = new Logger('sidebar-html');
+const logger = new Logger('sidebarHtmlGenerator');
 
 export const getHtmlForWebview = (webview: Webview): string => {
   logger.debug('Generating HTML for webview');

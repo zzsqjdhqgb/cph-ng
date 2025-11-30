@@ -8,7 +8,7 @@ import { Handler } from './handler';
 import { Submitter } from './submitter';
 
 export class Server {
-  private static logger: Logger = new Logger('companion-server');
+  private static logger: Logger = new Logger('companionServer');
   private static server: HttpServer;
 
   public static init() {

@@ -37,7 +37,7 @@ export interface ICphProblem {
 }
 
 export class CphProblem implements ICphProblem {
-  private static logger: Logger = new Logger('CphProblem');
+  private static logger: Logger = new Logger('problemsCphProblem');
 
   public name: string;
   public url: string;

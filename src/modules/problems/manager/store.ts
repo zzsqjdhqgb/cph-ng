@@ -17,7 +17,7 @@ export interface FullProblem {
 }
 
 class Store {
-  private static logger: Logger = new Logger('problemsManager-store');
+  private static logger: Logger = new Logger('problemsManagerStore');
   private static fullProblems: FullProblem[] = [];
 
   public static async listFullProblems(): Promise<FullProblem[]> {

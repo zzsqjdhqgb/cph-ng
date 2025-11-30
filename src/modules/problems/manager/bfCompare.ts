@@ -13,7 +13,7 @@ import { l10n } from 'vscode';
 import Store from './store';
 
 export class BfCompare {
-  private static logger = new Logger('bfCompare');
+  private static logger = new Logger('problemsManagerBfCompare');
 
   public static async startBfCompare(
     msg: msgs.StartBfCompareMsg,

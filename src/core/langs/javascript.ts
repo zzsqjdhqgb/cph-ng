@@ -22,7 +22,7 @@ import { UnknownResult } from '@/utils/result';
 import { CompileAdditionalData, Lang, LangCompileResult } from './lang';
 
 export class LangJavascript extends Lang {
-  private logger: Logger = new Logger('langJavascript');
+  private logger: Logger = new Logger('langsJavascript');
   public readonly name = 'JavaScript';
   public readonly extensions = ['js'];
   protected async _compile(

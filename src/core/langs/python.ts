@@ -28,7 +28,7 @@ import {
 } from './lang';
 
 export class LangPython extends Lang {
-  private logger: Logger = new Logger('langPython');
+  private logger: Logger = new Logger('langsPython');
   public readonly name = 'Python';
   public readonly extensions = ['py'];
   protected async _compile(

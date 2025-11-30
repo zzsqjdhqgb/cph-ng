@@ -42,7 +42,7 @@ export interface RunOptions {
 }
 
 export class Executor {
-  private static logger: Logger = new Logger('executor');
+  private static logger: Logger = new Logger('runnerExecutor');
 
   // The KnownResult<ProcessData>.data must be not-null when verdict is UKE
   public static async doRun(

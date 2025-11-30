@@ -7,7 +7,7 @@ import { l10n, ProgressLocation, window } from 'vscode';
 import { CphSubmitEmpty, CphSubmitResponse } from './types';
 
 export class Submitter {
-  private static logger: Logger = new Logger('companion-submitter');
+  private static logger: Logger = new Logger('companionSubmitter');
   private static isSubmitting = false;
   private static pendingSubmitData?: Exclude<
     CphSubmitResponse,

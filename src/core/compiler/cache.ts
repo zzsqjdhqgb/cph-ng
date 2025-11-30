@@ -21,7 +21,7 @@ import { SHA256 } from 'crypto-js';
 import { existsSync } from 'fs';
 import { readFile, unlink } from 'fs/promises';
 
-const logger = new Logger('compiler-cache');
+const logger = new Logger('compilerCache');
 
 export const checkHash = async (
   src: FileWithHash,

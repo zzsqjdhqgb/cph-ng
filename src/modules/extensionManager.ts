@@ -62,7 +62,7 @@ interface ContextEvent {
 }
 
 export default class ExtensionManager {
-  private static logger: Logger = new Logger('extension');
+  private static logger: Logger = new Logger('extensionManager');
   private static compatibleTimer: NodeJS.Timeout;
   public static event: EventEmitter<{
     context: ContextEvent[];

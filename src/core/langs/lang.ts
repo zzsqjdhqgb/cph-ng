@@ -33,7 +33,7 @@ export interface LangCompileData {
   hash?: string;
 }
 export type LangCompileResult = Result<LangCompileData>;
-const logger = new Logger('lang');
+const logger = new Logger('langsLang');
 
 export interface CompileAdditionalData {
   canUseWrapper: boolean;

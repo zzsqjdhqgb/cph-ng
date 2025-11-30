@@ -28,7 +28,7 @@ import {
 } from './lang';
 
 export class LangJava extends Lang {
-  private logger: Logger = new Logger('langJava');
+  private logger: Logger = new Logger('langsJava');
   public readonly name = 'Java';
   public readonly extensions = ['java'];
   protected async _compile(

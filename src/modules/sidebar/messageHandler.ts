@@ -5,7 +5,7 @@ import { WebviewMsg } from '@w/msgs';
 import { commands, l10n } from 'vscode';
 import ProblemsManager from '../problems/manager';
 
-const logger = new Logger('sidebar-message');
+const logger = new Logger('sidebarMessageHandler');
 
 export const handleMessage = async (msg: WebviewMsg) => {
   logger.info('Received', msg.type, 'message');

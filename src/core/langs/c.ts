@@ -29,7 +29,7 @@ import {
 } from './lang';
 
 export class LangC extends Lang {
-  private logger: Logger = new Logger('langC');
+  private logger: Logger = new Logger('langsC');
   public readonly name = 'C';
   public readonly extensions = ['c'];
   public readonly enableRunner = true;

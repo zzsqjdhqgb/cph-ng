@@ -21,13 +21,12 @@ import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { telemetry } from '@/utils/global';
 import { randomUUID, UUID } from 'crypto';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
 import { version } from '../utils/packageInfo';
-import { exists } from '../utils/process';
 import { KnownResult } from '../utils/result';
 import { renderPathWithFile } from '../utils/strTemplate';
 import { migration, OldProblem } from './migration';
@@ -286,8 +285,8 @@ export class Problem implements IProblem {
 
     // When the user moves the workspace
     // we need to fix the paths in the problem data
-    const fixPath = async (oldPath: string): Promise<string> => {
-      if (await exists(oldPath)) {
+    const fixPath = (oldPath: string): string => {
+      if (existsSync(oldPath)) {
         return oldPath;
       }
       // Use the relative path from the old path to the src file
@@ -296,30 +295,26 @@ export class Problem implements IProblem {
         dirname(srcPath),
         relative(dirname(problem.src.path), oldPath),
       );
-      if (await exists(newPath)) {
+      if (existsSync(newPath)) {
         this.logger.debug('Fixed path', oldPath, 'to', newPath);
         return newPath;
       }
       return oldPath;
     };
-    const fixTcIo = async (tcIo: TcIo) => {
-      tcIo.useFile && (tcIo.data = await fixPath(tcIo.data));
+    const fixTcIo = (tcIo: TcIo) => {
+      tcIo.useFile && (tcIo.data = fixPath(tcIo.data));
     };
-    const fixFileWithHash = async (fileWithHash?: FileWithHash) => {
-      fileWithHash && (fileWithHash.path = await fixPath(fileWithHash.path));
+    const fixFileWithHash = (fileWithHash?: FileWithHash) => {
+      fileWithHash && (fileWithHash.path = fixPath(fileWithHash.path));
     };
 
-    const promises: Promise<void>[] = [];
     for (const tc of Object.values(problem.tcs)) {
-      promises.push(fixTcIo(tc.stdin), fixTcIo(tc.answer));
+      (fixTcIo(tc.stdin), fixTcIo(tc.answer));
     }
-    promises.push(
-      fixFileWithHash(problem.checker),
-      fixFileWithHash(problem.interactor),
-      fixFileWithHash(problem.bfCompare?.generator),
-      fixFileWithHash(problem.bfCompare?.bruteForce),
-    );
-    await Promise.all(promises);
+    fixFileWithHash(problem.checker);
+    fixFileWithHash(problem.interactor);
+    fixFileWithHash(problem.bfCompare?.generator);
+    fixFileWithHash(problem.bfCompare?.bruteForce);
     problem.src.path = srcPath;
 
     this.logger.info('Problem', problem.src.path, 'loaded');

@@ -30,7 +30,7 @@ import {
 } from './lang';
 
 export class LangCpp extends Lang {
-  private logger: Logger = new Logger('langCpp');
+  private logger: Logger = new Logger('langsCpp');
   public readonly name = 'C++';
   public readonly extensions = ['cpp', 'cc', 'cxx', 'c++'];
   public readonly enableRunner = true;

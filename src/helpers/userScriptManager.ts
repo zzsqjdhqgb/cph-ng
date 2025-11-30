@@ -44,7 +44,7 @@ export interface WorkspaceFolderCtx {
 }
 
 export default class UserScriptManager {
-  private static logger = new Logger('UserScript');
+  private static logger = new Logger('userScriptManager');
   private static outputChannel = window.createOutputChannel(
     l10n.t('CPH-NG User Script'),
     { log: true },

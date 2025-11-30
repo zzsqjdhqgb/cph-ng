@@ -12,7 +12,7 @@ import ProblemsManager from '../problems/manager';
 import { CompanionProblem } from './types';
 
 export class Handler {
-  private static logger: Logger = new Logger('companion-handler');
+  private static logger: Logger = new Logger('companionHandler');
   private static batches: Map<string, CompanionProblem[]> = new Map();
 
   public static async handleIncomingProblem(data: CompanionProblem) {
