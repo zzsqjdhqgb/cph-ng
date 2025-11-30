@@ -2,6 +2,49 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.5.0
+
+Aggregated from prereleases 0.4.1~0.4.14.
+
+### Added
+
+- **Language Support**: Added JavaScript language support.
+- **Judge Features**:
+  - Added Special Judge templates.
+  - Added support for unlimited stack size in runner.
+  - Added feature to disable/enable specific test cases.
+- **UX Improvements**:
+  - Support drag and drop to webview with improved robustness and styling.
+  - Use VS Code builtin font selection.
+  - Configuration for expanding test cases.
+  - Support workspace replacement in user script paths.
+- **Telemetry**: Integrated telemetry for performance tracking and analytics.
+
+### Fixed
+
+- **Core Stability**:
+  - Improved migration logic for problem data updates.
+  - Refined core process logic and stopped running behavior.
+  - Fixed subprocess existence checks before listening.
+  - Fixed cache runner program issues.
+- **Comparison & Path**:
+  - Improved testlib comparison logic.
+  - Fixed Python compilation command output path (using raw string).
+  - Enhanced path handling for moved workspaces.
+  - Fixed brute force comparison unit issues.
+- **Interface**:
+  - Fixed panel visibility in new opening modes.
+  - Improved focus handling after keyboard shortcuts.
+
+### Changed
+
+- Refactored core process logic.
+- Added cache dispose and migration logic for problem management.
+- Unified file limit thresholds and test case extensions.
+
+<details>
+<summary>Pre-release history (0.4.1~0.4.14)</summary>
+
 ## 0.4.14
 
 - **ci**: remove format
@@ -93,6 +136,8 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## 0.4.1
 
 - **fix**: compare test case
+
+</details>
 
 ## 0.4.0
 
