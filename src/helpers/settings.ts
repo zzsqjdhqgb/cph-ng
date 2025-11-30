@@ -206,6 +206,14 @@ class ProblemSection extends SettingsSection {
   get foundMatchTestCaseBehavior(): 'ask' | 'always' | 'never' {
     return this.get('foundMatchTestCaseBehavior') as 'ask' | 'always' | 'never';
   }
+  get expandBehavior(): 'always' | 'never' | 'first' | 'firstFailed' | 'same' {
+    return this.get('expandBehavior') as
+      | 'always'
+      | 'never'
+      | 'first'
+      | 'firstFailed'
+      | 'same';
+  }
   get templateFile(): string {
     return this.get('templateFile') as string;
   }

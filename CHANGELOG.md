@@ -2,6 +2,12 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **ci**: remove format
+- **feat**: add support for workspace replacement in user script paths
+- **feat**: configuration for how to expand test cases
+
 ## 0.4.13
 
 - **fix**: the cache telemetry log is too much

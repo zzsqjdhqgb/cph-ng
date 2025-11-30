@@ -1,5 +1,6 @@
 import { Compiler } from '@/core/compiler';
 import { Runner } from '@/core/runner';
+import Settings from '@/helpers/settings';
 import {
   isExpandVerdict,
   isRunningVerdict,
@@ -69,9 +70,11 @@ export class TcRunner {
       const tcOrder = [...fullProblem.problem.tcOrder].filter(
         (id) => !tcs[id].isDisabled,
       );
+      const expandMemo: Record<string, boolean> = {};
       for (const tcId of tcOrder) {
         tcs[tcId].result?.dispose();
         tcs[tcId].result = new TcResult(TcVerdicts.CP);
+        expandMemo[tcId] = tcs[tcId].isExpand;
         tcs[tcId].isExpand = false;
       }
       await Store.dataRefresh();
@@ -97,7 +100,8 @@ export class TcRunner {
       await Store.dataRefresh();
 
       // Run
-      let hasExpandStatus = false;
+      const expandBehavior = Settings.problem.expandBehavior;
+      let hasAnyExpanded = false;
       for (const tcId of tcOrder) {
         const tc = tcs[tcId] as TcWithResult;
         if (!tc.result) {
@@ -118,11 +122,19 @@ export class TcRunner {
           fullProblem.ac,
           compileResult.data,
         );
-        if (!hasExpandStatus) {
-          tc.isExpand = isExpandVerdict(tc.result.verdict);
-          await Store.dataRefresh();
-          hasExpandStatus = tc.isExpand;
+        if (expandBehavior === 'always') {
+          tc.isExpand = true;
+        } else if (expandBehavior === 'never') {
+          tc.isExpand = false;
+        } else if (expandBehavior === 'first') {
+          tc.isExpand = !hasAnyExpanded;
+        } else if (expandBehavior === 'firstFailed') {
+          tc.isExpand = !hasAnyExpanded && isExpandVerdict(tc.result.verdict);
+        } else if (expandBehavior === 'same') {
+          tc.isExpand = expandMemo[tcId];
         }
+        await Store.dataRefresh();
+        hasAnyExpanded ||= tc.isExpand;
       }
     } finally {
       fullProblem.ac = null;
