@@ -81,6 +81,7 @@
   "cph-ng.configuration.problem.properties.deleteAfterUnzip.markdownDescription": "Specify whether to delete the zip file after unzipping.",
   "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.always": "Expand all test cases regardless of their results.",
   "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.first": "Only expand the first test case.",
+  "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.failed": "Only expand the failed test cases.",
   "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.firstFailed": "Only expand the first failed test case.",
   "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.never": "Do not expand any test cases after running.",
   "cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.same": "Expand test cases in the same state as before running.",

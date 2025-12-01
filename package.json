@@ -422,6 +422,7 @@
             "enum": [
               "always",
               "never",
+              "failed",
               "first",
               "firstFailed",
               "same"
@@ -430,6 +431,7 @@
             "markdownEnumDescriptions": [
               "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.always%",
               "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.never%",
+              "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.failed%",
               "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.first%",
               "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.firstFailed%",
               "%cph-ng.configuration.problem.properties.expandBehavior.enumDescriptions.same%"

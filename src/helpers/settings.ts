@@ -21,7 +21,7 @@ import Logger from './logger';
 
 class SettingsSection {
   protected logger: Logger = new Logger('settings');
-  constructor(private name: string) {}
+  constructor(private name: string) { }
   protected get(key: string): unknown {
     const value = workspace
       .getConfiguration('cph-ng')
@@ -206,10 +206,11 @@ class ProblemSection extends SettingsSection {
   get foundMatchTestCaseBehavior(): 'ask' | 'always' | 'never' {
     return this.get('foundMatchTestCaseBehavior') as 'ask' | 'always' | 'never';
   }
-  get expandBehavior(): 'always' | 'never' | 'first' | 'firstFailed' | 'same' {
+  get expandBehavior(): 'always' | 'never' | 'failed' | 'first' | 'firstFailed' | 'same' {
     return this.get('expandBehavior') as
       | 'always'
       | 'never'
+      | 'failed'
       | 'first'
       | 'firstFailed'
       | 'same';

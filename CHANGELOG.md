@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: add support for expanding failed test cases in configuration #130
+
 ## 0.5.0
 
 Aggregated from prereleases 0.4.1~0.4.14.

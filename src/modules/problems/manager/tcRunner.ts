@@ -126,6 +126,8 @@ export class TcRunner {
           tc.isExpand = true;
         } else if (expandBehavior === 'never') {
           tc.isExpand = false;
+        } else if (expandBehavior === 'failed') {
+          tc.isExpand = isExpandVerdict(tc.result.verdict);
         } else if (expandBehavior === 'first') {
           tc.isExpand = !hasAnyExpanded;
         } else if (expandBehavior === 'firstFailed') {
