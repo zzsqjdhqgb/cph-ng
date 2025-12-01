@@ -15,17 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Cache from '@/helpers/cache';
-import Io from '@/helpers/io';
-import Logger from '@/helpers/logger';
-import Settings from '@/helpers/settings';
-import { telemetry } from '@/utils/global';
 import { randomUUID, UUID } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
+import Cache from '@/helpers/cache';
+import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
+import Settings from '@/helpers/settings';
+import { telemetry } from '@/utils/global';
 import { version } from '../utils/packageInfo';
 import { KnownResult } from '../utils/result';
 import { renderPathWithFile } from '../utils/strTemplate';
@@ -142,8 +142,8 @@ export class Tc implements ITc {
     return instance;
   }
   public fromI(tc: ITc): void {
-    (this.stdin.fromI(tc.stdin), this.answer.fromI(tc.answer));
-    ((this.isExpand = tc.isExpand), (this.isDisabled = tc.isDisabled));
+    this.stdin.fromI(tc.stdin), this.answer.fromI(tc.answer);
+    (this.isExpand = tc.isExpand), (this.isDisabled = tc.isDisabled);
     if (tc.result) {
       this.result = new TcResult();
       this.result.fromI(tc.result);
@@ -309,7 +309,7 @@ export class Problem implements IProblem {
     };
 
     for (const tc of Object.values(problem.tcs)) {
-      (fixTcIo(tc.stdin), fixTcIo(tc.answer));
+      fixTcIo(tc.stdin), fixTcIo(tc.answer);
     }
     fixFileWithHash(problem.checker);
     fixFileWithHash(problem.interactor);

@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { renderWorkspacePath } from '@/utils/strTemplate';
 import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import {
@@ -31,6 +30,7 @@ import {
 } from 'path';
 import { createContext, Script } from 'vm';
 import { l10n, window } from 'vscode';
+import { renderWorkspacePath } from '@/utils/strTemplate';
 import { CompanionProblem } from '../modules/companion';
 import FolderChooser from './folderChooser';
 import Io from './io';

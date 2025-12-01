@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Io from '@/helpers/io';
-import Logger from '@/helpers/logger';
-import { Problem, Tc, TcIo } from '@/types';
-import { version } from '@/utils/packageInfo';
 import { enc, MD5 } from 'crypto-js';
 import { readdir, readFile } from 'fs/promises';
 import { basename, dirname, join } from 'path';
 import { l10n } from 'vscode';
+import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
+import { Problem, Tc, TcIo } from '@/types';
+import { version } from '@/utils/packageInfo';
 
 export interface ICphProblem {
   name: string;

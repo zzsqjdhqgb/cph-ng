@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '@/helpers/logger';
 import { l10n, window } from 'vscode';
+import Logger from '@/helpers/logger';
 
 const compilationChannel = window.createOutputChannel(
   l10n.t('CPH-NG Compilation'),

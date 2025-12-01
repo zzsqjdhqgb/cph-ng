@@ -15,6 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
+import { l10n, window } from 'vscode';
 import { checkHash } from '@/core/compiler/cache';
 import Cache from '@/helpers/cache';
 import { CompilationIo } from '@/helpers/io';
@@ -24,9 +27,6 @@ import Settings from '@/helpers/settings';
 import { FileWithHash, ICompilationSettings, TcVerdicts } from '@/types';
 import { telemetry, waitUntil } from '@/utils/global';
 import { KnownResult, Result, UnknownResult } from '@/utils/result';
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
-import { l10n, window } from 'vscode';
 
 export interface LangCompileData {
   outputPath: string;

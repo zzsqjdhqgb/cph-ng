@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { readFile } from 'fs/promises';
+import { l10n } from 'vscode';
 import { Checker } from '@/core/checker';
 import { CompileData } from '@/core/compiler';
 import { Lang } from '@/core/langs/lang';
@@ -24,8 +26,6 @@ import ProblemsManager from '@/modules/problems/manager';
 import { Problem, TcIo, TcVerdicts, TcWithResult } from '@/types';
 import { telemetry } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
-import { readFile } from 'fs/promises';
-import { l10n } from 'vscode';
 import { Executor } from './executor';
 
 export class Runner {

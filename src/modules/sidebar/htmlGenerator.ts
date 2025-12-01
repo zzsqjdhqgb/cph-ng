@@ -1,7 +1,7 @@
+import { ColorThemeKind, env, Uri, Webview, window } from 'vscode';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { extensionUri } from '@/utils/global';
-import { ColorThemeKind, env, Uri, Webview, window } from 'vscode';
 
 const logger = new Logger('sidebarHtmlGenerator');
 

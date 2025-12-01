@@ -15,6 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { readFile, rm } from 'fs/promises';
+import { release } from 'os';
+import { join } from 'path';
+import { EventEmitter } from 'stream';
+import {
+  commands,
+  ExtensionContext,
+  env,
+  extensions,
+  l10n,
+  lm,
+  MessageItem,
+  window,
+  workspace,
+} from 'vscode';
 import LlmDataInspector from '@/ai/llmDataInspector';
 import LlmTcRunner from '@/ai/llmTcRunner';
 import LlmTestCaseEditor from '@/ai/llmTestCaseEditor';
@@ -38,21 +53,6 @@ import {
   telemetry,
 } from '@/utils/global';
 import { version } from '@/utils/packageInfo';
-import { readFile, rm } from 'fs/promises';
-import { release } from 'os';
-import { join } from 'path';
-import { EventEmitter } from 'stream';
-import {
-  commands,
-  env,
-  ExtensionContext,
-  extensions,
-  l10n,
-  lm,
-  MessageItem,
-  window,
-  workspace,
-} from 'vscode';
 import SidebarProvider from './sidebar';
 
 interface ContextEvent {

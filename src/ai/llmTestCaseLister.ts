@@ -17,12 +17,12 @@
 
 import {
   CancellationToken,
-  l10n,
   LanguageModelTextPart,
   LanguageModelTool,
   LanguageModelToolInvocationOptions,
   LanguageModelToolInvocationPrepareOptions,
   LanguageModelToolResult,
+  l10n,
   PreparedToolInvocation,
 } from 'vscode';
 import ProblemsManager from '../modules/problems/manager';

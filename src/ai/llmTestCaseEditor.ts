@@ -15,18 +15,18 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Tc, TcIo } from '@/types';
 import { UUID } from 'crypto';
 import {
   CancellationToken,
-  l10n,
   LanguageModelTextPart,
   LanguageModelTool,
   LanguageModelToolInvocationOptions,
   LanguageModelToolInvocationPrepareOptions,
   LanguageModelToolResult,
+  l10n,
   PreparedToolInvocation,
 } from 'vscode';
+import { Tc, TcIo } from '@/types';
 import ProblemsManager from '../modules/problems/manager';
 
 interface LlmTestCaseEditorParams {

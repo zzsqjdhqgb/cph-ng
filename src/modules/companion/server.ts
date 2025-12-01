@@ -1,9 +1,9 @@
+import { createServer, Server as HttpServer } from 'http';
+import { l10n } from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { telemetry } from '@/utils/global';
-import { createServer, Server as HttpServer } from 'http';
-import { l10n } from 'vscode';
 import { Handler } from './handler';
 import { Submitter } from './submitter';
 

@@ -15,10 +15,10 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { IProblem } from '@/types/types';
 import Box from '@mui/material/Box';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IProblem } from '@/types/types';
 import { msg } from '../utils';
 import AcCongrats from './acCongrats';
 import CphFlex from './base/cphFlex';
@@ -131,10 +131,7 @@ const TcsView = ({ problem }: TcsViewProps) => {
               }
 
               return (
-                <Box
-                  key={id}
-                  onDragOver={(e) => handleDragOver(e, displayIdx)}
-                >
+                <Box key={id} onDragOver={(e) => handleDragOver(e, displayIdx)}>
                   <ErrorBoundary>
                     <TcView
                       tc={tc}
@@ -151,17 +148,17 @@ const TcsView = ({ problem }: TcsViewProps) => {
             <Box
               onClick={() => msg({ type: 'addTc' })}
               sx={{
-                'minHeight': '40px',
-                'cursor': 'pointer',
-                'display': 'flex',
-                'alignItems': 'center',
-                'justifyContent': 'center',
-                'opacity': 0.5,
+                minHeight: '40px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0.5,
                 '&:hover': {
                   opacity: 1,
                   backgroundColor: 'rgba(127, 127, 127, 0.1)',
                 },
-                'transition': 'all 0.2s',
+                transition: 'all 0.2s',
               }}
             >
               {t('tcsView.addTcHint')}

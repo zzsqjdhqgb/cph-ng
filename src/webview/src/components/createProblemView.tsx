@@ -32,11 +32,7 @@ interface CreateProblemProps {
 const CreateProblemView = ({ canImport }: CreateProblemProps) => {
   const { t } = useTranslation();
   return (
-    <CphFlex
-      column
-      gap={5}
-      paddingY={2}
-    >
+    <CphFlex column gap={5} paddingY={2}>
       <CphFlex column>
         <Alert
           sx={{ width: '100%', boxSizing: 'border-box' }}

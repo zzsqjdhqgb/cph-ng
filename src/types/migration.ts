@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '@/helpers/logger';
 import { randomUUID } from 'crypto';
 import { compare, lte } from 'semver';
+import Logger from '@/helpers/logger';
 import { Problem as Problem_0_0_1 } from './history/0.0.1';
 import { Problem as Problem_0_0_3 } from './history/0.0.3';
 import { Problem as Problem_0_0_4 } from './history/0.0.4';

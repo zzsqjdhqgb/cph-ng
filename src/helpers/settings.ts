@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { renderPath } from '@/utils/strTemplate';
 import { ConfigurationTarget, workspace } from 'vscode';
+import { renderPath } from '@/utils/strTemplate';
 import Logger from './logger';
 
 class SettingsSection {
   protected logger: Logger = new Logger('settings');
-  constructor(private name: string) { }
+  constructor(private name: string) {}
   protected get(key: string): unknown {
     const value = workspace
       .getConfiguration('cph-ng')
@@ -206,7 +206,13 @@ class ProblemSection extends SettingsSection {
   get foundMatchTestCaseBehavior(): 'ask' | 'always' | 'never' {
     return this.get('foundMatchTestCaseBehavior') as 'ask' | 'always' | 'never';
   }
-  get expandBehavior(): 'always' | 'never' | 'failed' | 'first' | 'firstFailed' | 'same' {
+  get expandBehavior():
+    | 'always'
+    | 'never'
+    | 'failed'
+    | 'first'
+    | 'firstFailed'
+    | 'same' {
     return this.get('expandBehavior') as
       | 'always'
       | 'never'

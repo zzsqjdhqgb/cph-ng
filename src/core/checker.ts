@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import assert from 'assert';
 import Cache from '@/helpers/cache';
 import Logger from '@/helpers/logger';
 import ProcessExecutor from '@/helpers/processExecutor';
@@ -24,7 +25,6 @@ import {
 } from '@/helpers/processResultHandler';
 import { TcWithResult } from '@/types';
 import { KnownResult } from '@/utils/result';
-import assert from 'assert';
 
 export class Checker {
   private static logger: Logger = new Logger('checker');

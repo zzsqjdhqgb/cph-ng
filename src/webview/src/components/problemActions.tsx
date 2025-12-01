@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { IProblem, isRunningVerdict } from '@/types/types';
 import AddIcon from '@mui/icons-material/Add';
 import BackupIcon from '@mui/icons-material/Backup';
 import CloseIcon from '@mui/icons-material/Close';
@@ -36,6 +35,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IProblem, isRunningVerdict } from '@/types/types';
 import { basename, getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -55,7 +55,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
     isRunningVerdict(tc.result?.verdict),
   );
   useEffect(() => {
-    if (clickTime.length == 10 && clickTime.at(-1)! - clickTime[0] < 2000) {
+    if (clickTime.length === 10 && clickTime.at(-1)! - clickTime[0] < 2000) {
       window.easterEgg = !window.easterEgg;
       setClickTime([]);
     }
@@ -68,7 +68,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           setClickTime((times) => {
             const now = Date.now();
             const newTimes = [...times, now];
-            if (newTimes.length > 10) newTimes.shift();
+            if (newTimes.length > 10) {
+              newTimes.shift();
+            }
             return newTimes;
           });
         }}
@@ -142,7 +144,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           sx={
             problem.bfCompare?.running
               ? {
-                  'animation': 'pulse 1s infinite',
+                  animation: 'pulse 1s infinite',
                   '@keyframes pulse': {
                     '0%': {
                       opacity: 1,
@@ -159,7 +161,9 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           }
         />
         {(() => {
-          if (!problem.url) return null;
+          if (!problem.url) {
+            return null;
+          }
           try {
             if (new URL(problem.url).hostname === 'codeforces.com') {
               return (
@@ -203,10 +207,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setDelDialogOpen(false)}
-            color={'primary'}
-          >
+          <Button onClick={() => setDelDialogOpen(false)} color={'primary'}>
             {t('problemActions.delDialog.cancel')}
           </Button>
           <Button

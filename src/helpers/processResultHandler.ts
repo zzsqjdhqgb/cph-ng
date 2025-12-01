@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import assert from 'assert';
+import { readFile, writeFile } from 'fs/promises';
+import { l10n } from 'vscode';
 import Logger from '@/helpers/logger';
 import { TcVerdicts } from '@/types';
 import { telemetry } from '@/utils/global';
 import { KnownResult, Result, UnknownResult } from '@/utils/result';
-import assert from 'assert';
-import { readFile, writeFile } from 'fs/promises';
-import { l10n } from 'vscode';
 import { AbortReason, ExecuteResult } from './processExecutor';
 import Settings from './settings';
 

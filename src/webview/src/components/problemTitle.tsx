@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { IProblem } from '@/types/types';
 import EditIcon from '@mui/icons-material/Edit';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
@@ -32,6 +31,7 @@ import Tab from '@mui/material/Tab';
 import TextField from '@mui/material/TextField';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IProblem } from '@/types/types';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -126,12 +126,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
         onMouseEnter={() => setHoveringTitle(true)}
         onMouseLeave={() => setHoveringTitle(false)}
       >
-        <CphFlex
-          column
-          alignStart
-          flexShrink={1}
-          width={'unset'}
-        >
+        <CphFlex column alignStart flexShrink={1} width={'unset'}>
           <CphText
             whiteSpace={'nowrap'}
             sx={{ cursor: problem.url ? 'pointer' : 'default' }}
@@ -139,20 +134,14 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
             width={'100%'}
           >
             {problem.url ? (
-              <CphLink
-                href={problem.url}
-                name={problem.url}
-              >
+              <CphLink href={problem.url} name={problem.url}>
                 {problem.name}
               </CphLink>
             ) : (
               problem.name
             )}
           </CphText>
-          <CphText
-            fontSize={'0.8rem'}
-            paddingRight={'4px'}
-          >
+          <CphText fontSize={'0.8rem'} paddingRight={'4px'}>
             {t('problemTitle.timeLimit', {
               time: problem.timeLimit,
             })}
@@ -193,10 +182,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
               </>
             )}
             &emsp;
-            <span
-              title={t('problemTitle.timeElapsed')}
-              className='defaultBlur'
-            >
+            <span title={t('problemTitle.timeElapsed')} className='defaultBlur'>
               {formatDuration(problem.timeElapsed + timeElapsed)}
             </span>
           </CphText>
@@ -238,10 +224,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                   setTabValue(value)
                 }
               >
-                <Tab
-                  label={t('problemTitle.dialog.tab.basic')}
-                  value='basic'
-                />
+                <Tab label={t('problemTitle.dialog.tab.basic')} value='basic' />
                 <Tab
                   label={t('problemTitle.dialog.tab.environment')}
                   value='environment'
@@ -252,10 +235,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 />
               </TabList>
             </Box>
-            <TabPanel
-              value='basic'
-              sx={{ padding: '0' }}
-            >
+            <TabPanel value='basic' sx={{ padding: '0' }}>
               <TextField
                 variant={'outlined'}
                 margin={'normal'}
@@ -304,10 +284,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 }}
               />
             </TabPanel>
-            <TabPanel
-              value='environment'
-              sx={{ padding: '0' }}
-            >
+            <TabPanel value='environment' sx={{ padding: '0' }}>
               <TextField
                 variant={'outlined'}
                 margin={'normal'}
@@ -341,14 +318,8 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 fullWidth
               />
             </TabPanel>
-            <TabPanel
-              value='advanced'
-              sx={{ padding: '0' }}
-            >
-              <CphFlex
-                flexWrap={'wrap'}
-                py={2}
-              >
+            <TabPanel value='advanced' sx={{ padding: '0' }}>
+              <CphFlex flexWrap={'wrap'} py={2}>
                 {problem.checker ? (
                   <Chip
                     label={t('problemTitle.dialog.field.specialJudge')}
@@ -420,17 +391,10 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
           </TabContext>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setEditDialogOpen(false)}
-            color={'primary'}
-          >
+          <Button onClick={() => setEditDialogOpen(false)} color={'primary'}>
             {t('problemTitle.dialog.cancel')}
           </Button>
-          <Button
-            onClick={handleEditDialogClose}
-            color={'primary'}
-            autoFocus
-          >
+          <Button onClick={handleEditDialogClose} color={'primary'} autoFocus>
             {t('problemTitle.dialog.save')}
           </Button>
         </DialogActions>

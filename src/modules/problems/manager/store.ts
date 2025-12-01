@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import Logger from '@/helpers/logger';
 import ExtensionManager from '@/modules/extensionManager';
 import { Problem } from '@/types';
@@ -7,7 +8,6 @@ import {
   sidebarProvider,
   waitUntil,
 } from '@/utils/global';
-import { existsSync } from 'fs';
 import { CphProblem } from '../cphProblem';
 
 export interface FullProblem {

@@ -15,19 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { TcIo } from '@/types';
 import { UUID } from 'crypto';
 import { readFile } from 'fs/promises';
 import {
   CancellationToken,
-  l10n,
   LanguageModelTextPart,
   LanguageModelTool,
   LanguageModelToolInvocationOptions,
   LanguageModelToolInvocationPrepareOptions,
   LanguageModelToolResult,
+  l10n,
   PreparedToolInvocation,
 } from 'vscode';
+import { TcIo } from '@/types';
 import ProblemsManager from '../modules/problems/manager';
 
 const MAX_PREVIEW_LENGTH = 1000;

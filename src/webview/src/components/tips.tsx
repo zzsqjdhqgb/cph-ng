@@ -74,8 +74,8 @@ const Tips = () => {
   return (
     <Alert
       sx={{
-        'width': '100%',
-        'boxSizing': 'border-box',
+        width: '100%',
+        boxSizing: 'border-box',
         '& > .MuiAlert-message': { flex: '1' },
       }}
       severity='info'

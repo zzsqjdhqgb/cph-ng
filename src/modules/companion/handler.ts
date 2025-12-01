@@ -1,12 +1,12 @@
+import { access, mkdir, writeFile } from 'fs/promises';
+import { dirname } from 'path';
+import { commands, l10n, Uri, workspace } from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import UserScriptManager from '@/helpers/userScriptManager';
 import { Problem } from '@/types';
 import { renderTemplate } from '@/utils/strTemplate';
-import { access, mkdir, writeFile } from 'fs/promises';
-import { dirname } from 'path';
-import { commands, l10n, Uri, workspace } from 'vscode';
 import { CphProblem } from '../problems/cphProblem';
 import ProblemsManager from '../problems/manager';
 import { CompanionProblem } from './types';

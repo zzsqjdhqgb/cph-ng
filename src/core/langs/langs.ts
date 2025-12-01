@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '@/helpers/logger';
 import { extname } from 'path';
+import Logger from '@/helpers/logger';
 import { LangC } from './c';
 import { LangCpp } from './cpp';
 import { LangJava } from './java';

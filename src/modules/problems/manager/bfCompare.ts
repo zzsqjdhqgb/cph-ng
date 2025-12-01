@@ -1,3 +1,5 @@
+import * as msgs from '@w/msgs';
+import { l10n } from 'vscode';
 import { Compiler } from '@/core/compiler';
 import Langs from '@/core/langs/langs';
 import { Executor, Runner } from '@/core/runner';
@@ -8,8 +10,6 @@ import Settings from '@/helpers/settings';
 import { Tc, TcIo, TcResult, TcVerdicts, TcWithResult } from '@/types';
 import { waitUntil } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
-import * as msgs from '@w/msgs';
-import { l10n } from 'vscode';
 import Store from './store';
 
 export class BfCompare {

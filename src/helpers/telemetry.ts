@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { extensionPath } from '@/utils/global';
 import {
   TelemetryEventMeasurements,
   TelemetryEventProperties,
@@ -23,6 +22,7 @@ import {
 } from '@vscode/extension-telemetry';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { extensionPath } from '@/utils/global';
 import Logger from './logger';
 
 export default class Telemetry {

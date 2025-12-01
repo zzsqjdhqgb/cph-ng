@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { basename, dirname, extname, join } from 'path';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { FileWithHash } from '@/types';
 import { KnownResult, UnknownResult } from '@/utils/result';
-import { basename, dirname, extname, join } from 'path';
 import {
   CompileAdditionalData,
   DefaultCompileAdditionalData,

@@ -1,9 +1,9 @@
+import { readFile } from 'fs/promises';
+import { l10n, ProgressLocation, window } from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { Problem } from '@/types';
-import { readFile } from 'fs/promises';
-import { l10n, ProgressLocation, window } from 'vscode';
 import { CphSubmitEmpty, CphSubmitResponse } from './types';
 
 export class Submitter {

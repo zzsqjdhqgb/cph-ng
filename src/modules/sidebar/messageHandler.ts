@@ -1,8 +1,8 @@
+import { WebviewMsg } from '@w/msgs';
+import { commands, l10n } from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import { getActivePath, sidebarProvider, telemetry } from '@/utils/global';
-import { WebviewMsg } from '@w/msgs';
-import { commands, l10n } from 'vscode';
 import ProblemsManager from '../problems/manager';
 
 const logger = new Logger('sidebarMessageHandler');

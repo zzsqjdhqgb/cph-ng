@@ -15,6 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
+import { existsSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
+import { type } from 'os';
+import { join } from 'path';
+import { l10n } from 'vscode';
 import { LangCpp } from '@/core/langs/cpp';
 import Cache from '@/helpers/cache';
 import Logger from '@/helpers/logger';
@@ -27,11 +32,6 @@ import Settings from '@/helpers/settings';
 import { TcIo, TcVerdicts } from '@/types';
 import { extensionPath } from '@/utils/global';
 import { KnownResult, Result } from '@/utils/result';
-import { existsSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
-import { type } from 'os';
-import { join } from 'path';
-import { l10n } from 'vscode';
 
 export interface RunOptions {
   cmd: string[];

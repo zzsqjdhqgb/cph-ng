@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ITcIo } from '@/types/types';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -27,6 +26,7 @@ import { AnserJsonEntry, ansiToJson } from 'anser';
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
+import { ITcIo } from '@/types/types';
 import { basename, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
@@ -89,10 +89,7 @@ const ansiToReact = (ansi: string) => {
           }
         }
         return (
-          <span
-            key={idx}
-            style={styles}
-          >
+          <span key={idx} style={styles}>
             {entry.content}
           </span>
         );
@@ -149,15 +146,9 @@ const TcDataView = ({
     return null;
   }
   return (
-    <CphFlex
-      column
-      smallGap
-    >
+    <CphFlex column smallGap>
       <CphFlex justifyContent={'space-between'}>
-        <CphFlex
-          flex={1}
-          flexWrap={'wrap'}
-        >
+        <CphFlex flex={1} flexWrap={'wrap'}>
           <CphLink
             color='inherit'
             name={t('tcDataView.openVirtual')}

@@ -25,12 +25,8 @@
   "engines": {
     "vscode": "^1.95.0"
   },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "*"
-  ],
+  "categories": ["Other"],
+  "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "exports": "./dist/extension.js",
   "contributes": {
@@ -51,9 +47,7 @@
         "icon": "$(play)",
         "inputSchema": {
           "type": "object",
-          "required": [
-            "activePath"
-          ],
+          "required": ["activePath"],
           "properties": {
             "id": {
               "type": "string",
@@ -76,11 +70,7 @@
         "icon": "$(file)",
         "inputSchema": {
           "type": "object",
-          "required": [
-            "dataType",
-            "id",
-            "activePath"
-          ],
+          "required": ["dataType", "id", "activePath"],
           "properties": {
             "dataType": {
               "type": "string",
@@ -117,9 +107,7 @@
         "icon": "$(list-unordered)",
         "inputSchema": {
           "type": "object",
-          "required": [
-            "activePath"
-          ],
+          "required": ["activePath"],
           "properties": {
             "activePath": {
               "type": "string",
@@ -138,9 +126,7 @@
         "icon": "$(edit)",
         "inputSchema": {
           "type": "object",
-          "required": [
-            "activePath"
-          ],
+          "required": ["activePath"],
           "properties": {
             "id": {
               "type": "string",
@@ -161,14 +147,10 @@
           },
           "anyOf": [
             {
-              "required": [
-                "stdin"
-              ]
+              "required": ["stdin"]
             },
             {
-              "required": [
-                "answer"
-              ]
+              "required": ["answer"]
             }
           ]
         }
@@ -216,10 +198,7 @@
           "cph-ng.basic.folderOpener": {
             "type": "string",
             "default": "tree",
-            "enum": [
-              "tree",
-              "flat"
-            ],
+            "enum": ["tree", "flat"],
             "markdownDescription": "%cph-ng.configuration.basic.properties.folderOpener.markdownDescription%",
             "markdownEnumDescriptions": [
               "%cph-ng.configuration.basic.properties.folderOpener.enumDescriptions.tree%",
@@ -404,11 +383,7 @@
           "cph-ng.problem.foundMatchTestCaseBehavior": {
             "type": "string",
             "default": "always",
-            "enum": [
-              "ask",
-              "always",
-              "never"
-            ],
+            "enum": ["ask", "always", "never"],
             "markdownDescription": "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.markdownDescription%",
             "markdownEnumDescriptions": [
               "%cph-ng.configuration.problem.properties.foundMatchTestCaseBehavior.enumDescriptions.ask%",
@@ -469,17 +444,12 @@
           },
           "cph-ng.problem.inputFileExtensionList": {
             "type": "array",
-            "default": [
-              ".in"
-            ],
+            "default": [".in"],
             "markdownDescription": "%cph-ng.configuration.problem.properties.inputFileExtensionList.markdownDescription%"
           },
           "cph-ng.problem.outputFileExtensionList": {
             "type": "array",
-            "default": [
-              ".ans",
-              ".out"
-            ],
+            "default": [".ans", ".out"],
             "markdownDescription": "%cph-ng.configuration.problem.properties.outputFileExtensionList.markdownDescription%"
           }
         }
@@ -532,12 +502,7 @@
             "type": "number",
             "default": -1,
             "markdownDescription": "%cph-ng.configuration.companion.properties.submitLanguage.markdownDescription%",
-            "enum": [
-              -1,
-              54,
-              89,
-              91
-            ],
+            "enum": [-1, 54, 89, 91],
             "enumItemLabels": [
               "%cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.-1%",
               "%cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.54%",
@@ -554,19 +519,7 @@
             "type": "number",
             "default": -1,
             "markdownDescription": "%cph-ng.configuration.companion.properties.showPanel.markdownDescription%",
-            "enum": [
-              -1,
-              -2,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9
-            ],
+            "enum": [-1, -2, 1, 2, 3, 4, 5, 6, 7, 8, 9],
             "enumItemLabels": [
               "%cph-ng.configuration.companion.properties.showPanel.enumItemLabels.-1%",
               "%cph-ng.configuration.companion.properties.showPanel.enumItemLabels.-2%",
@@ -615,11 +568,7 @@
             "type": "string",
             "default": "auto",
             "markdownDescription": "%cph-ng.configuration.sidebar.properties.colorTheme.markdownDescription%",
-            "enum": [
-              "auto",
-              "light",
-              "dark"
-            ],
+            "enum": ["auto", "light", "dark"],
             "markdownEnumDescriptions": [
               "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.auto%",
               "%cph-ng.configuration.sidebar.properties.colorTheme.enumDescriptions.light%",
@@ -784,8 +733,8 @@
     "package": "pnpm vsce package --allow-star-activation --no-dependencies",
     "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
     "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
-    "lint": "eslint src",
-    "format": "prettier --write --cache .",
+    "lint": "pnpm exec biome lint --write",
+    "format": "pnpm exec biome format --write",
     "install-hooks": "node scripts/install-hooks.js",
     "check-translations": "node scripts/pre-commit"
   },
@@ -793,6 +742,7 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
     "@babel/preset-react": "^7.28.5",
+    "@biomejs/biome": "^2.3.8",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@octokit/rest": "^22.0.1",
@@ -809,14 +759,9 @@
     "@types/speed-measure-webpack-plugin": "^1.3.6",
     "@types/vscode": "1.95.0",
     "@types/webpack": "^5.28.5",
-    "@typescript-eslint/eslint-plugin": "^8.48.0",
-    "@typescript-eslint/parser": "^8.48.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.3",
-    "prettier-plugin-organize-imports": "^4.3.0",
     "react-refresh": "^0.18.0",
     "speed-measure-webpack-plugin": "^1.5.0",
     "swc-loader": "^0.2.6",

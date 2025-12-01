@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Logger from '@/helpers/logger';
-import { TcIo } from '@/types';
-import { telemetry } from '@/utils/global';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
@@ -26,6 +23,9 @@ import { dirname } from 'path';
 import { cwd } from 'process';
 import { pipeline } from 'stream/promises';
 import { l10n } from 'vscode';
+import Logger from '@/helpers/logger';
+import { TcIo } from '@/types';
+import { telemetry } from '@/utils/global';
 import Cache from './cache';
 import Settings from './settings';
 

@@ -15,9 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-
 import ErrorIcon from '@mui/icons-material/Error';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Accordion from '@mui/material/Accordion';
@@ -28,6 +25,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import CphButton from '../cphButton';
 import CphFlex from './cphFlex';
 
@@ -73,10 +72,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
             <Accordion sx={{ width: '100%' }}>
               <AccordionSummary>{t('errorBoundary.details')}</AccordionSummary>
               <AccordionDetails>
-                <Box
-                  component='pre'
-                  overflow={'scroll'}
-                >
+                <Box component='pre' overflow={'scroll'}>
                   {error.stack}
                 </Box>
               </AccordionDetails>

@@ -26,10 +26,7 @@ interface CphLinkProps extends LinkProps {
 
 const CphLink = (props: CphLinkProps) => {
   return (
-    <Tooltip
-      disableInteractive
-      title={props.name}
-    >
+    <Tooltip disableInteractive title={props.name}>
       <Link
         href={'#'}
         overflow={'hidden'}

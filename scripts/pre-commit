@@ -457,7 +457,7 @@ function main() {
   log(
     `${colors.bold}${colors.blue}🔧 Formatting code using prettier...${colors.reset}`,
   );
-  execSync(`pnpm prettier --write .`);
+  execSync(`pnpm run format`);
   execSync(`git add .`, { stdio: 'pipe' });
   log('✅ Code formatted!', 'green');
   process.exit(0);

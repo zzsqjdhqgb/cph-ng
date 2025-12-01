@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Io from '@/helpers/io';
-import Settings from '@/helpers/settings';
-import { ITc, Tc, TcIo } from '@/types';
-import { renderUnzipFolder } from '@/utils/strTemplate';
 import AdmZip from 'adm-zip';
 import { existsSync } from 'fs';
 import { mkdir, readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
 import { l10n, window } from 'vscode';
+import Io from '@/helpers/io';
+import Settings from '@/helpers/settings';
+import { ITc, Tc, TcIo } from '@/types';
+import { renderUnzipFolder } from '@/utils/strTemplate';
 
 type ParticleTc = {
   stdin?: TcIo;

@@ -1,6 +1,3 @@
-import Io from '@/helpers/io';
-import Logger from '@/helpers/logger';
-import { extensionUri } from '@/utils/global';
 import { EventEmitter } from 'events';
 import {
   commands,
@@ -10,6 +7,9 @@ import {
   window,
   workspace,
 } from 'vscode';
+import Io from '@/helpers/io';
+import Logger from '@/helpers/logger';
+import { extensionUri } from '@/utils/global';
 import { getHtmlForWebview } from './htmlGenerator';
 import { handleMessage } from './messageHandler';
 import {

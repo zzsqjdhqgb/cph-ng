@@ -15,9 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { IProblem } from '@/types/types';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { IProblem } from '@/types/types';
 import { msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
@@ -36,10 +36,7 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
   return (
     <>
       <ErrorBoundary>
-        <ProblemTitle
-          problem={problem}
-          startTime={startTime}
-        />
+        <ProblemTitle problem={problem} startTime={startTime} />
       </ErrorBoundary>
       <CphFlex
         column

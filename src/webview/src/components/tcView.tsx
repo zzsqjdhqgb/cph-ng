@@ -15,7 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import { isRunningVerdict, ITc } from '@/types/types';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Accordion from '@mui/material/Accordion';
@@ -28,6 +27,7 @@ import { UUID } from 'crypto';
 import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { ITc, isRunningVerdict } from '@/types/types';
 import { getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
@@ -84,7 +84,9 @@ const TcView = ({
         expanded={tc.isDisabled ? false : tc.isExpand}
         disableGutters={true}
         onChange={(_, expanded) => {
-          if (tc.isDisabled) return;
+          if (tc.isDisabled) {
+            return;
+          }
           tc.isExpand = expanded;
           emitUpdate();
         }}
@@ -125,11 +127,15 @@ const TcView = ({
           draggable
           onDragStart={(e) => {
             e.stopPropagation();
-            if (onDragStart) onDragStart(e);
+            if (onDragStart) {
+              onDragStart(e);
+            }
           }}
           onDragEnd={(e) => {
             e.stopPropagation();
-            if (onDragEnd) onDragEnd();
+            if (onDragEnd) {
+              onDragEnd();
+            }
           }}
           onClick={(e) => {
             if (tc.isDisabled) {
@@ -139,12 +145,12 @@ const TcView = ({
           }}
           sx={{
             '& > span': { margin: '0 !important' },
-            'cursor': isDragging
+            cursor: isDragging
               ? 'grabbing'
               : tc.isDisabled
                 ? 'not-allowed'
                 : 'grab',
-            'pointerEvents': tc.isDisabled ? 'none' : 'auto',
+            pointerEvents: tc.isDisabled ? 'none' : 'auto',
             '&[draggable="true"]': {
               pointerEvents: 'auto',
             },
@@ -159,10 +165,7 @@ const TcView = ({
           <CphFlex smallGap>
             <CphFlex flex={1}>
               <CphText fontWeight={'bold'}>#{idx + 1}</CphText>
-              <Tooltip
-                disableInteractive
-                title={tc.result?.verdict.fullName}
-              >
+              <Tooltip disableInteractive title={tc.result?.verdict.fullName}>
                 <CphText>{tc.result?.verdict.name}</CphText>
               </Tooltip>
             </CphFlex>
@@ -240,10 +243,7 @@ const TcView = ({
           }}
         >
           <CphFlex column>
-            <CphFlex
-              smallGap
-              column
-            >
+            <CphFlex smallGap column>
               <ErrorBoundary>
                 <TcDataView
                   label={t('tcView.stdin')}
@@ -318,10 +318,7 @@ const TcView = ({
             {tc.result && (
               <>
                 <Divider />
-                <CphFlex
-                  smallGap
-                  column
-                >
+                <CphFlex smallGap column>
                   <ErrorBoundary>
                     <TcDataView
                       label={t('tcView.stdout')}

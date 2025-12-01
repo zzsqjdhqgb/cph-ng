@@ -1,3 +1,4 @@
+import * as msgs from '@w/msgs';
 import { Compiler } from '@/core/compiler';
 import { Runner } from '@/core/runner';
 import Settings from '@/helpers/settings';
@@ -10,7 +11,6 @@ import {
 } from '@/types';
 import { waitUntil } from '@/utils/global';
 import { KnownResult } from '@/utils/result';
-import * as msgs from '@w/msgs';
 import Store from './store';
 
 export class TcRunner {

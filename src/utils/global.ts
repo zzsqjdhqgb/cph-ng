@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
-import Telemetry from '@/helpers/telemetry';
 import { TextEditor, Uri } from 'vscode';
+import Telemetry from '@/helpers/telemetry';
 import ProblemFs from '../modules/problems/problemFs';
 import SidebarProvider from '../modules/sidebar';
 
