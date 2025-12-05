@@ -7,6 +7,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import { fileURLToPath } from 'url';
+import webpack from 'webpack';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -59,7 +60,7 @@ export default (env, argv) => {
   /** @type WebpackConfig */
   const baseConfig = {
     mode: isProd ? 'production' : 'development',
-    devtool: isProd ? 'source-map' : 'eval-cheap-module-source-map',
+    devtool: 'source-map',
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'],
       alias: {
@@ -136,6 +137,15 @@ export default (env, argv) => {
           { from: 'res/compare.cpp', to: 'testlib/compare.cpp' },
         ],
       }),
+      new webpack.BannerPlugin({
+        banner: `
+              import { createRequire } from 'module';
+              const require = createRequire(import.meta.url);
+              require('source-map-support').install();
+            `,
+        raw: true,
+        entryOnly: true,
+      }),
     ],
     experiments: { outputModule: true },
     cache: {
@@ -150,9 +160,13 @@ export default (env, argv) => {
     ...baseConfig,
     target: 'web',
     entry: './src/webview/src/App.tsx',
+    devtool: isProd ? 'source-map' : 'inline-source-map',
     output: {
       path: resolve(__dirname, 'dist'),
       filename: 'frontend.js',
+      devtoolModuleFilenameTemplate: (info) => {
+        return `file://${resolve(info.absoluteResourcePath).replace(/\\/g, '/')}`;
+      },
     },
     plugins: [
       new CopyPlugin({

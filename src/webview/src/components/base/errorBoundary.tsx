@@ -25,8 +25,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Typography from '@mui/material/Typography';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import StackTrace from 'stacktrace-js';
 import CphButton from '../cphButton';
 import CphFlex from './cphFlex';
 
@@ -38,6 +39,42 @@ interface ErrorFallbackProps {
 const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+
+  const [stackTraceString, setStackTraceString] = useState<string>(
+    'Loading stack trace...',
+  );
+  useEffect(() => {
+    let isMounted = true;
+
+    const parseStack = async () => {
+      try {
+        const frames = await StackTrace.fromError(error);
+        if (!isMounted) {
+          return;
+        }
+        setStackTraceString(
+          frames
+            .map((sf) => {
+              return sf.fileName?.includes('node_modules')
+                ? null
+                : `at ${sf.functionName || '<anonymous>'} (${sf.fileName}:${sf.lineNumber}:${sf.columnNumber})`;
+            })
+            .filter(Boolean)
+            .join('\n'),
+        );
+      } catch (e) {
+        if (isMounted) {
+          setStackTraceString(error.stack || 'No stack trace available');
+        }
+      }
+    };
+
+    parseStack();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [error]);
 
   return (
     <>
@@ -73,7 +110,9 @@ const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps) => {
               <AccordionSummary>{t('errorBoundary.details')}</AccordionSummary>
               <AccordionDetails>
                 <Box component='pre' overflow={'scroll'}>
-                  {error.stack}
+                  {error.name}: {error.message}
+                  {'\n'}
+                  {stackTraceString}
                 </Box>
               </AccordionDetails>
             </Accordion>

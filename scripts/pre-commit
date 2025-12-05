@@ -454,9 +454,7 @@ function main() {
     log('Proceeding with commit...', 'green');
   }
 
-  log(
-    `${colors.bold}${colors.blue}🔧 Formatting code using prettier...${colors.reset}`,
-  );
+  log(`${colors.bold}${colors.blue}🔧 Formatting code...${colors.reset}`);
   execSync(`pnpm run format`);
   execSync(`git add .`, { stdio: 'pipe' });
   log('✅ Code formatted!', 'green');
