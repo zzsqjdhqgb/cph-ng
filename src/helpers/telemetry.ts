@@ -63,10 +63,16 @@ export default class Telemetry {
   }
   public error(
     eventName: string,
+    error: Error,
     properties?: TelemetryEventProperties,
-    measurements?: TelemetryEventMeasurements,
   ) {
-    this.reporter.sendTelemetryErrorEvent(eventName, properties, measurements);
+    this.reporter.sendTelemetryErrorEvent(eventName, {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: String(error.cause),
+      ...properties,
+    });
   }
   public start(eventName: string, properties?: TelemetryEventProperties) {
     const startTime = Date.now();

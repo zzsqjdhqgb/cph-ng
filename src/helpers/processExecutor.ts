@@ -94,10 +94,7 @@ export default class ProcessExecutor {
         );
       } else {
         this.logger.warn('Set up process', pid, name, 'failed', e);
-        telemetry.error('pipeFailed', {
-          name,
-          error: (e as Error).message,
-        });
+        telemetry.error('pipeFailed', e as Error, { name });
       }
     };
   }
@@ -223,9 +220,8 @@ export default class ProcessExecutor {
               ),
             );
           }
-          telemetry.error('parseRunnerError', {
+          telemetry.error('parseRunnerError', e as Error, {
             output: stdout,
-            error: (e as Error).message,
           });
         }
       });

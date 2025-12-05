@@ -36,9 +36,8 @@ export class Server {
                   l10n.t('Error occurred while processing companion data'),
                 );
               }
-              telemetry.error('serverRequestError', {
+              telemetry.error('serverRequestError', e as Error, {
                 requestData,
-                error: (e as Error).message,
               });
             }
           }

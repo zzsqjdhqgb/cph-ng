@@ -91,9 +91,8 @@ export const handleMessage = async (msg: WebviewMsg) => {
         msg: (e as Error).message,
       }),
     );
-    telemetry.error('sidebarError', {
+    telemetry.error('sidebarError', e as Error, {
       type: msg.type,
-      error: (e as Error).message,
     });
   }
 };

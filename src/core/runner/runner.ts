@@ -117,9 +117,7 @@ export class Runner {
           error: (e as Error).message,
         }),
       );
-      telemetry.error('runError', {
-        error: (e as Error).message,
-      });
+      telemetry.error('runError', e as Error);
     } finally {
       await tc.result.stdout.inlineSmall();
       await tc.result.stderr.inlineSmall();

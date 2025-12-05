@@ -310,9 +310,7 @@ OS: ${release()}`;
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('activationError', {
-        error: (e as Error).message,
-      });
+      telemetry.error('activationError', e as Error);
     }
   }
 

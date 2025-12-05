@@ -109,9 +109,7 @@ export class Lang {
     } catch (e) {
       logger.error('Compilation failed', e);
       CompilationIo.append((e as Error).message);
-      telemetry.error('compileError', {
-        error: (e as Error).message,
-      });
+      telemetry.error('compileError', e as Error);
       return new KnownResult(TcVerdicts.CE, l10n.t('Compilation failed'));
     }
   }

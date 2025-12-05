@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **feat**: enhance error telemetry
+
 ## 0.5.1
 
 - **feat**: add support for expanding failed test cases in configuration
