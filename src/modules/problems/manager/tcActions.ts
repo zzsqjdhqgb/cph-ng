@@ -17,7 +17,7 @@ export class TcActions {
     if (!fullProblem) {
       return;
     }
-    fullProblem.problem.addTc(new Tc());
+    fullProblem.problem.addTc(new Tc(new TcIo(), new TcIo(), true));
     await Store.dataRefresh();
   }
   public static async loadTcs(msg: msgs.LoadTcsMsg) {

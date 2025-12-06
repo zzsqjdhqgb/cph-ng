@@ -5,6 +5,7 @@ All notable changes to the "cph-ng" extension will be documented in this file.
 ## [Unreleased]
 
 - **fix**: do not sanitize stack when tracking error
+- **feat**: expand test case after add
 
 ## 0.5.2
 
