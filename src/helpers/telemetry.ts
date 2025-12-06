@@ -24,6 +24,7 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import { extensionPath } from '@/utils/global';
 import Logger from './logger';
+import { env, TelemetryTrustedValue } from 'vscode';
 
 export default class Telemetry {
   private logger = new Logger('telemetry');
@@ -63,13 +64,14 @@ export default class Telemetry {
   }
   public error(
     eventName: string,
-    error: Error,
+    e: any,
     properties?: TelemetryEventProperties,
   ) {
+    const error = e instanceof Error ? e : new Error(e);
     this.reporter.sendTelemetryErrorEvent(eventName, {
       name: error.name,
       message: error.message,
-      stack: error.stack,
+      stack: error.stack ? new TelemetryTrustedValue(error.stack) : '',
       cause: String(error.cause),
       ...properties,
     });

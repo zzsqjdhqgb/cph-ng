@@ -260,7 +260,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('loadProblemError', e as Error);
+      telemetry.error('loadProblemError', e);
       return null;
     }
 
@@ -274,7 +274,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('migrateError', e as Error, {
+      telemetry.error('migrateError', e, {
         oldProblem: JSON.stringify(oldProblem),
       });
       return null;
@@ -403,7 +403,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('saveError', e as Error, {
+      telemetry.error('saveError', e, {
         problem: JSON.stringify(this),
       });
       return false;
@@ -424,7 +424,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('deleteError', e as Error);
+      telemetry.error('deleteError', e);
     }
   }
 }
