@@ -2,9 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.5.2
 
 - **feat**: enhance error telemetry
+- **fix**: source map broken
 
 ## 0.5.1
 

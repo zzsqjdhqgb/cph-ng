@@ -137,15 +137,6 @@ export default (env, argv) => {
           { from: 'res/compare.cpp', to: 'testlib/compare.cpp' },
         ],
       }),
-      new webpack.BannerPlugin({
-        banner: `
-              import { createRequire } from 'module';
-              const require = createRequire(import.meta.url);
-              require('source-map-support').install();
-            `,
-        raw: true,
-        entryOnly: true,
-      }),
     ],
     experiments: { outputModule: true },
     cache: {
