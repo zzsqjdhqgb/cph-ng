@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: use constant abort controller to avoid thread conflicts
+
 ## 0.5.3
 
 - **fix**: do not sanitize stack when tracking error

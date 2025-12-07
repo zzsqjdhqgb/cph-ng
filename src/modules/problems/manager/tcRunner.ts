@@ -19,8 +19,9 @@ export class TcRunner {
     if (!fullProblem) {
       return;
     }
-    fullProblem.ac && fullProblem.ac.abort();
-    fullProblem.ac = new AbortController();
+    const ac = new AbortController();
+    fullProblem.ac?.abort();
+    fullProblem.ac = ac;
 
     try {
       const tc = fullProblem.problem.tcs[msg.id] as TcWithResult;
@@ -33,7 +34,7 @@ export class TcRunner {
       const compileResult = await Compiler.compileAll(
         fullProblem.problem,
         msg.compile,
-        fullProblem.ac,
+        ac,
       );
       if (compileResult instanceof KnownResult) {
         tc.result.fromResult(compileResult);
@@ -47,7 +48,7 @@ export class TcRunner {
         fullProblem.problem,
         tc,
         compileResult.data.srcLang,
-        fullProblem.ac,
+        ac,
         compileResult.data,
       );
       tc.isExpand = isExpandVerdict(tc.result.verdict);
@@ -62,8 +63,9 @@ export class TcRunner {
     if (!fullProblem) {
       return;
     }
-    fullProblem.ac && fullProblem.ac.abort();
-    fullProblem.ac = new AbortController();
+    let ac = new AbortController();
+    fullProblem.ac?.abort();
+    fullProblem.ac = ac;
 
     try {
       const tcs = fullProblem.problem.tcs;
@@ -83,7 +85,7 @@ export class TcRunner {
       const compileResult = await Compiler.compileAll(
         fullProblem.problem,
         msg.compile,
-        fullProblem.ac,
+        ac,
       );
       if (compileResult instanceof KnownResult) {
         for (const tcId of tcOrder) {
@@ -107,9 +109,10 @@ export class TcRunner {
         if (!tc.result) {
           continue;
         }
-        if (fullProblem.ac.signal.aborted) {
-          if (fullProblem.ac.signal.reason === 'onlyOne') {
-            fullProblem.ac = new AbortController();
+        if (ac.signal.aborted) {
+          if (ac.signal.reason === 'onlyOne') {
+            ac = new AbortController();
+            fullProblem.ac = ac;
           } else {
             tc.result.verdict = TcVerdicts.SK;
             continue;
@@ -119,7 +122,7 @@ export class TcRunner {
           fullProblem.problem,
           tc,
           compileResult.data.srcLang,
-          fullProblem.ac,
+          ac,
           compileResult.data,
         );
         if (expandBehavior === 'always') {

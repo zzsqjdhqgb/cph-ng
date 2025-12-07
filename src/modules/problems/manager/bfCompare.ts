@@ -33,8 +33,9 @@ export class BfCompare {
       Io.warn(l10n.t('Brute Force comparison is already running.'));
       return;
     }
-    fullProblem.ac && fullProblem.ac.abort();
-    fullProblem.ac = new AbortController();
+    const ac = new AbortController();
+    fullProblem.ac?.abort();
+    fullProblem.ac = ac;
     const srcLang = Langs.getLang(fullProblem.problem.src.path);
     const generatorLang = Langs.getLang(bfCompare.generator.path);
     const bruteForceLang = Langs.getLang(bfCompare.bruteForce.path);
@@ -55,7 +56,7 @@ export class BfCompare {
       const compileResult = await Compiler.compileAll(
         fullProblem.problem,
         msg.compile,
-        fullProblem.ac,
+        ac,
       );
       if (compileResult instanceof KnownResult) {
         bfCompare.msg =
@@ -71,7 +72,7 @@ export class BfCompare {
 
       while (true) {
         cnt++;
-        if (fullProblem.ac.signal.aborted) {
+        if (ac.signal.aborted) {
           bfCompare.msg = l10n.t('Brute Force comparison stopped by user.');
           break;
         }
@@ -86,7 +87,7 @@ export class BfCompare {
           ),
           timeLimit: Settings.bfCompare.generatorTimeLimit,
           stdin: new TcIo(false, ''),
-          ac: fullProblem.ac,
+          ac,
           enableRunner: false,
         });
         if (generatorRunResult instanceof KnownResult) {
@@ -114,7 +115,7 @@ export class BfCompare {
           ),
           timeLimit: Settings.bfCompare.bruteForceTimeLimit,
           stdin,
-          ac: fullProblem.ac,
+          ac,
           enableRunner: false,
         });
         if (bruteForceRunResult instanceof KnownResult) {
@@ -147,7 +148,7 @@ export class BfCompare {
           fullProblem.problem,
           tempTc,
           srcLang,
-          fullProblem.ac,
+          ac,
           compileResult.data!,
         );
         if (tempTc.result.verdict !== TcVerdicts.AC) {
@@ -169,7 +170,7 @@ export class BfCompare {
       }
     } finally {
       bfCompare.running = false;
-      if (fullProblem.ac?.signal.aborted) {
+      if (ac.signal.aborted) {
         bfCompare.msg = l10n.t(
           'Brute Force comparison stopped by user, {cnt} runs completed.',
           { cnt },
@@ -192,7 +193,7 @@ export class BfCompare {
       Io.warn(l10n.t('Brute Force comparison is not running.'));
       return;
     }
-    fullProblem.ac && fullProblem.ac.abort();
+    fullProblem.ac?.abort();
     await waitUntil(() => !fullProblem.ac);
     this.logger.info('Brute Force comparison stopped');
     await Store.dataRefresh();
