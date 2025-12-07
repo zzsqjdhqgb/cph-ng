@@ -22,9 +22,9 @@ import {
 } from '@vscode/extension-telemetry';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import { TelemetryTrustedValue } from 'vscode';
 import { extensionPath } from '@/utils/global';
 import Logger from './logger';
-import { env, TelemetryTrustedValue } from 'vscode';
 
 export default class Telemetry {
   private logger = new Logger('telemetry');

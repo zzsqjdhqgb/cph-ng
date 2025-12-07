@@ -734,7 +734,8 @@
     "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
     "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
     "lint": "pnpm exec biome lint --write",
-    "format": "pnpm exec biome format --write",
+    "format": "pnpm exec biome check --write",
+    "check-format": "pnpm exec biome check",
     "install-hooks": "node scripts/install-hooks.js",
     "check-translations": "node scripts/pre-commit"
   },
