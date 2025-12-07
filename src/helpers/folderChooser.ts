@@ -54,9 +54,8 @@ export default class FolderChooser {
     });
     if (folderUri && folderUri[0]) {
       return folderUri[0];
-    } else {
-      return null;
     }
+    return null;
   }
 
   private static async chooseFolderWithQuickPick(
@@ -102,8 +101,7 @@ export default class FolderChooser {
     this.logger.trace('chooseFolder', { title });
     if (Settings.basic.folderOpener === 'tree') {
       return await this.chooseFolderWithDialog(title);
-    } else {
-      return await this.chooseFolderWithQuickPick(title);
     }
+    return await this.chooseFolderWithQuickPick(title);
   }
 }

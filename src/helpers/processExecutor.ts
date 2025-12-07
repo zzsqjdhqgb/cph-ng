@@ -215,13 +215,12 @@ export default class ProcessExecutor {
           Cache.dispose([stdoutPath, stderrPath]);
           if (e instanceof SyntaxError) {
             return this.toErrorResult(l10n.t('Runner output is invalid JSON'));
-          } else {
-            resolve(
-              this.toErrorResult(
-                l10n.t('Error occurred while processing runner output'),
-              ),
-            );
           }
+          resolve(
+            this.toErrorResult(
+              l10n.t('Error occurred while processing runner output'),
+            ),
+          );
           telemetry.error('parseRunnerError', e, {
             output: stdout,
           });

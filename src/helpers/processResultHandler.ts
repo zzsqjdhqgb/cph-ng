@@ -61,9 +61,8 @@ export class ProcessResultHandler {
         stderrContent.replace(wrapperDataRegex, '').trim(),
       );
       return wrapperData;
-    } else {
-      return undefined;
     }
+    return undefined;
   }
 
   public static async parse(
@@ -94,13 +93,15 @@ export class ProcessResultHandler {
         l10n.t('Killed due to timeout'),
         processData,
       );
-    } else if (result.abortReason === AbortReason.UserAbort) {
+    }
+    if (result.abortReason === AbortReason.UserAbort) {
       return new KnownResult(
         TcVerdicts.RJ,
         l10n.t('Aborted by user'),
         processData,
       );
-    } else if (
+    }
+    if (
       // Always handle signal termination
       // Handle exit code only when not ignored
       typeof result.codeOrSignal === 'string' ||

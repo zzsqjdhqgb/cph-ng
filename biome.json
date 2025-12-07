@@ -27,10 +27,17 @@
     "rules": {
       "recommended": false,
       "style": {
-        "useBlockStatements": "warn"
+        "useBlockStatements": "warn",
+        "noCommonJs": "on",
+        "noUselessElse": "on",
+        "useConst": "on"
       },
       "suspicious": {
-        "noDoubleEquals": "warn"
+        "noDoubleEquals": "on",
+        "noImplicitAnyLet": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "on"
       }
     }
   },
@@ -46,7 +53,8 @@
       "attributePosition": "auto",
       "bracketSpacing": true
     },
-    "globals": []
+    "globals": [],
+    "jsxRuntime": "reactClassic"
   },
   "html": {
     "formatter": {

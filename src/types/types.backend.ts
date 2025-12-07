@@ -97,18 +97,16 @@ export class TcIo {
   public toString(): string {
     if (this.useFile) {
       return readFileSync(this.data, 'utf-8');
-    } else {
-      return this.data;
     }
+    return this.data;
   }
   public toPath(): string {
     if (this.useFile) {
       return this.data;
-    } else {
-      const path = Cache.createIo();
-      writeFileSync(path, this.data);
-      return path;
     }
+    const path = Cache.createIo();
+    writeFileSync(path, this.data);
+    return path;
   }
   public async inlineSmall(): Promise<void> {
     if (this.useFile) {

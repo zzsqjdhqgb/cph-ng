@@ -228,7 +228,7 @@ export const migration = (problem: OldProblem): Problem => {
       return '0.0.1';
     })();
     logger.debug('Detected version', detectedVer);
-    let newProblem = migrateFunctions[detectedVer](problem);
+    const newProblem = migrateFunctions[detectedVer](problem);
     if (newProblem === null) {
       break;
     }
