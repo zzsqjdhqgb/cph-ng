@@ -345,10 +345,13 @@ export class Problem implements IProblem {
     path = path.toLowerCase();
 
     // We always consider the IO files related to the problem
-    if (
-      Settings.problem.inputFileExtensionList.includes(extname(path)) ||
-      Settings.problem.outputFileExtensionList.includes(extname(path))
-    ) {
+    const extensionList = [
+      // I don't know why but the telemetry shows that the values can be undefined
+      // TypeError: Cannot read properties of undefined (reading 'includes')
+      ...(Settings.problem.inputFileExtensionList ?? []),
+      ...(Settings.problem.outputFileExtensionList ?? []),
+    ];
+    if (extensionList.includes(extname(path))) {
       return true;
     }
 
