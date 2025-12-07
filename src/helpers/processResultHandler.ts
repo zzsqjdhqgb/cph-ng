@@ -52,7 +52,7 @@ export class ProcessResultHandler {
         wrapperData = JSON.parse(wrapperDataStr) as WrapperData;
       } catch (e) {
         this.logger.error('Failed to parse wrapper data JSON', e as Error);
-        telemetry.error('wrapperError', e as Error, {
+        telemetry.error('wrapperError', e, {
           output: wrapperDataStr,
         });
       }

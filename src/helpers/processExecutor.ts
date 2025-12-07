@@ -84,17 +84,19 @@ export default class ProcessExecutor {
 
   private static pipeFailed(pid: number | undefined, name: string) {
     return (e: any) => {
-      if (e.code === 'ERR_STREAM_PREMATURE_CLOSE' || e.code === 'EPIPE') {
-        this.logger.trace(
-          'Pipe',
-          name,
-          'of process',
-          pid,
-          'closed prematurely',
-        );
+      if (
+        e.code in
+        [
+          'ERR_STREAM_PREMATURE_CLOSE',
+          'EPIPE',
+          'ERR_STREAM_WRITE_AFTER_END',
+          'ENOENT',
+        ]
+      ) {
+        this.logger.trace(`Pipe ${name} of process ${pid} closed prematurely`);
       } else {
         this.logger.warn('Set up process', pid, name, 'failed', e);
-        telemetry.error('pipeFailed', e as Error, { name });
+        telemetry.error('pipeFailed', e, { name });
       }
     };
   }
@@ -220,7 +222,7 @@ export default class ProcessExecutor {
               ),
             );
           }
-          telemetry.error('parseRunnerError', e as Error, {
+          telemetry.error('parseRunnerError', e, {
             output: stdout,
           });
         }

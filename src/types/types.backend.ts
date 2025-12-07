@@ -260,7 +260,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('loadProblemError', e as Error);
+      telemetry.error('loadProblemError', e);
       return null;
     }
 
@@ -274,7 +274,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('migrateError', e as Error, {
+      telemetry.error('migrateError', e, {
         oldProblem: JSON.stringify(oldProblem),
       });
       return null;
@@ -345,10 +345,13 @@ export class Problem implements IProblem {
     path = path.toLowerCase();
 
     // We always consider the IO files related to the problem
-    if (
-      Settings.problem.inputFileExtensionList.includes(extname(path)) ||
-      Settings.problem.outputFileExtensionList.includes(extname(path))
-    ) {
+    const extensionList = [
+      // I don't know why but the telemetry shows that the values can be undefined
+      // TypeError: Cannot read properties of undefined (reading 'includes')
+      ...(Settings.problem.inputFileExtensionList ?? []),
+      ...(Settings.problem.outputFileExtensionList ?? []),
+    ];
+    if (extensionList.includes(extname(path))) {
       return true;
     }
 
@@ -403,7 +406,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('saveError', e as Error, {
+      telemetry.error('saveError', e, {
         problem: JSON.stringify(this),
       });
       return false;
@@ -424,7 +427,7 @@ export class Problem implements IProblem {
           msg: (e as Error).message,
         }),
       );
-      telemetry.error('deleteError', e as Error);
+      telemetry.error('deleteError', e);
     }
   }
 }

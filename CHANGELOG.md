@@ -2,6 +2,17 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## 0.5.4
+
+- **fix**: use constant abort controller to avoid thread conflicts
+- **fix**: handle potential undefined values in file extension lists
+- **fix**: enhance error handling in pipe failure logging
+
+## 0.5.3
+
+- **fix**: do not sanitize stack when tracking error
+- **feat**: expand test case after add
+
 ## 0.5.2
 
 - **feat**: enhance error telemetry

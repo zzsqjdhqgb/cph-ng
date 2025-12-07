@@ -4,8 +4,8 @@ import { env, l10n, window } from 'vscode';
 import WebSocket from 'ws';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
-import { CompanionProblem, CphSubmitData } from './types';
 import { Handler } from './handler';
+import { CompanionProblem, CphSubmitData } from './types';
 
 const WS_URL = 'ws://localhost:27122';
 
