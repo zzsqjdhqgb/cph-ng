@@ -66,6 +66,8 @@ export default (env, argv) => {
       alias: {
         '@': resolve(__dirname, 'src'),
         '@w': resolve(__dirname, 'src/webview/src'),
+        bufferutil: false,
+        'utf-8-validate': false,
       },
     },
     module: {
@@ -122,7 +124,9 @@ export default (env, argv) => {
         type: 'module',
       },
       chunkFormat: 'module',
-      clean: { keep: /generated\.json/ },
+      clean: {
+        keep: /generated\.json|router\.js|frontend\.js|styles\.css/,
+      },
     },
     externals: { vscode: 'vscode' },
     plugins: [
@@ -171,5 +175,27 @@ export default (env, argv) => {
     },
   };
 
-  return [extensionConfig, webviewConfig];
+  /** @type WebpackConfig */
+  const routerConfig = {
+    ...baseConfig,
+    target: 'node',
+    entry: './src/router/index.ts',
+    output: {
+      path: resolve(__dirname, 'dist'),
+      filename: 'router.js',
+      clean: false,
+      library: {
+        type: 'module',
+      },
+      chunkFormat: 'module',
+    },
+    experiments: { outputModule: true },
+    cache: {
+      type: 'filesystem',
+      buildDependencies: { config: [__filename] },
+      name: isProd ? 'prod-router' : 'dev-router',
+    },
+  };
+
+  return [extensionConfig, webviewConfig, routerConfig];
 };
