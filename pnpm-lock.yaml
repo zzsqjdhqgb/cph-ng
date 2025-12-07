@@ -1096,20 +1096,20 @@ packages:
   '@swc/types@0.1.25':
     resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
 
-  '@textlint/ast-node-types@15.4.1':
-    resolution: {integrity: sha512-XifMpBMdo0E1Fuh85YdcYAgy+okNg9WKBzIPIO4JUDnSWUVFihnogrM4cjDapeHkgzSgulwR8oJVJ17eyxI1bA==}
+  '@textlint/ast-node-types@15.5.0':
+    resolution: {integrity: sha512-K0LEuuTo4rza8yDrlYkRdXLao8Iz/QBMsQdIxRrOOrLYb4HAtZaypZ78c+J6rDA1UlGxadZVLmkkiv4KV5fMKQ==}
 
-  '@textlint/linter-formatter@15.4.1':
-    resolution: {integrity: sha512-kAV7Sup3vwvqxKvBbf9lx/JaPHkRybQp/LLvA73U1AorPZE6XyfBAFG24BbMiCs4OX1ax4g7kXRuFPgMLWRf+g==}
+  '@textlint/linter-formatter@15.5.0':
+    resolution: {integrity: sha512-DPTm2+VXKID41qKQWagg/4JynM6hEEpvbq0PlGsEoC4Xm7IqXIxFym3mSf5+ued0cuiIV1hR9kgXjqGdP035tw==}
 
-  '@textlint/module-interop@15.4.1':
-    resolution: {integrity: sha512-jHtM2E5CR68P3z/+FGrEU5pml2fQVzEo2sez9FEjrVHSPCrHtqHcPaKfsYbQJjc9C48ObwaWrCzRNaL3KedNCQ==}
+  '@textlint/module-interop@15.5.0':
+    resolution: {integrity: sha512-rqfouEhBEgZlR9umswWXXRBcmmSM28Trpr9b0duzgehKYVc7wSQCuQMagr6YBJa2NRMfRNinupusbJXMg0ij2A==}
 
-  '@textlint/resolver@15.4.1':
-    resolution: {integrity: sha512-uVssyG3XXXKNY+O7NOajGvQZTyOuhPviwlq7Xek6ZT9K1eDQtA8074cPkAQoLMYhi/TUyOE5P5kpz42UF8Lmdw==}
+  '@textlint/resolver@15.5.0':
+    resolution: {integrity: sha512-kK5nFbg5N3kVoZExQI/dnYjCInmTltvXDnuCRrBxHI01i6kO/o8R7Lc2aFkAZ6/NUZuRPalkyDdwZJke4/R2wg==}
 
-  '@textlint/types@15.4.1':
-    resolution: {integrity: sha512-WByVZ3zblbvuI+voWQplUP7seSTKXI9z6TMVXEB3dY3JFrZCIXWKNfLbETX5lZV7fYkCMaDtILO1l6s11wdbQA==}
+  '@textlint/types@15.5.0':
+    resolution: {integrity: sha512-EjAPbuA+3NyQ9WyFP7iUlddi35F3mGrf4tb4cZM0nWywbtEJ3+XAYqL+5RsF0qFeSguxGir09NdZOWrG9wVOUQ==}
 
   '@types/adm-zip@0.5.7':
     resolution: {integrity: sha512-DNEs/QvmyRLurdQPChqq0Md4zGvPwHerAJYWk9l2jCbD1VPpnzRJorOdiq4zsw09NFbYnhfsoEhWtxIzXpn2yw==}
@@ -1459,8 +1459,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.9.3:
-    resolution: {integrity: sha512-8QdH6czo+G7uBsNo0GiUfouPN1lRzKdJTGnKXwe12gkFbnnOUaUKGN55dMkfy+mnxmvjwl9zcI4VncczcVXDhA==}
+  baseline-browser-mapping@2.9.4:
+    resolution: {integrity: sha512-ZCQ9GEWl73BVm8bu5Fts8nt7MHdbt5vY9bP6WGnUh+r3l8M7CgfyTlwsgCbMC66BNxPr6Xoce3j66Ms5YUQTNA==}
     hasBin: true
 
   before-after-hook@2.2.3:
@@ -4391,9 +4391,9 @@ snapshots:
     dependencies:
       '@secretlint/resolver': 10.2.2
       '@secretlint/types': 10.2.2
-      '@textlint/linter-formatter': 15.4.1
-      '@textlint/module-interop': 15.4.1
-      '@textlint/types': 15.4.1
+      '@textlint/linter-formatter': 15.5.0
+      '@textlint/module-interop': 15.5.0
+      '@textlint/types': 15.5.0
       chalk: 5.6.2
       debug: 4.4.3(supports-color@8.1.1)
       pluralize: 8.0.0
@@ -4491,15 +4491,15 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@textlint/ast-node-types@15.4.1': {}
+  '@textlint/ast-node-types@15.5.0': {}
 
-  '@textlint/linter-formatter@15.4.1':
+  '@textlint/linter-formatter@15.5.0':
     dependencies:
       '@azu/format-text': 1.0.2
       '@azu/style-format': 1.0.1
-      '@textlint/module-interop': 15.4.1
-      '@textlint/resolver': 15.4.1
-      '@textlint/types': 15.4.1
+      '@textlint/module-interop': 15.5.0
+      '@textlint/resolver': 15.5.0
+      '@textlint/types': 15.5.0
       chalk: 4.1.2
       debug: 4.4.3(supports-color@8.1.1)
       js-yaml: 4.1.1
@@ -4512,13 +4512,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@textlint/module-interop@15.4.1': {}
+  '@textlint/module-interop@15.5.0': {}
 
-  '@textlint/resolver@15.4.1': {}
+  '@textlint/resolver@15.5.0': {}
 
-  '@textlint/types@15.4.1':
+  '@textlint/types@15.5.0':
     dependencies:
-      '@textlint/ast-node-types': 15.4.1
+      '@textlint/ast-node-types': 15.5.0
 
   '@types/adm-zip@0.5.7':
     dependencies:
@@ -4933,7 +4933,7 @@ snapshots:
   base64-js@1.5.1:
     optional: true
 
-  baseline-browser-mapping@2.9.3: {}
+  baseline-browser-mapping@2.9.4: {}
 
   before-after-hook@2.2.3: {}
 
@@ -4973,7 +4973,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.3
+      baseline-browser-mapping: 2.9.4
       caniuse-lite: 1.0.30001759
       electron-to-chromium: 1.5.266
       node-releases: 2.0.27

@@ -2,7 +2,7 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.5.4
 
 - **fix**: use constant abort controller to avoid thread conflicts
 - **fix**: handle potential undefined values in file extension lists
