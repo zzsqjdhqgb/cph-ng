@@ -12,22 +12,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const generateSettings = () => {
+  const pkgPath = resolve(__dirname, 'package.json');
+
   return {
     /**
      * @param {import('webpack').Compiler} compiler
      */
     apply: (compiler) => {
-      compiler.hooks.beforeCompile.tap('Generate Settings Plugin', () => {
+      const runScript = () => {
         try {
           execSync('node scripts/generate-settings.js', { stdio: 'inherit' });
         } catch (error) {
           console.error('Failed to generate settings:', error);
         }
+      };
+      compiler.hooks.beforeRun.tap('Generate Settings Plugin', () => {
+        runScript();
+      });
+      compiler.hooks.watchRun.tap('Generate Settings Plugin', (compiler) => {
+        const modifiedFiles = compiler.modifiedFiles;
+        if (!modifiedFiles || modifiedFiles.has(pkgPath)) {
+          runScript();
+        }
       });
       compiler.hooks.afterCompile.tap(
         'Generate Settings Plugin',
         (compilation) => {
-          compilation.fileDependencies.add(resolve(__dirname, 'package.json'));
+          compilation.fileDependencies.add(pkgPath);
         },
       );
     },

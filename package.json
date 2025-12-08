@@ -795,7 +795,7 @@
     "codemirror": "^6.0.2",
     "copy-webpack-plugin": "^13.0.1",
     "crypto-js": "^4.2.0",
-    "i18next": "^25.7.1",
+    "i18next": "^25.7.2",
     "natural-orderby": "^5.0.0",
     "p-queue": "^9.0.1",
     "react": "^19.2.1",
