@@ -11,6 +11,28 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const generateSettings = () => {
+  return {
+    /**
+     * @param {import('webpack').Compiler} compiler
+     */
+    apply: (compiler) => {
+      compiler.hooks.beforeCompile.tap('Generate Settings Plugin', () => {
+        try {
+          execSync('node scripts/generate-settings.js', { stdio: 'inherit' });
+        } catch (error) {
+          console.error('Failed to generate settings:', error);
+        }
+      });
+      compiler.hooks.afterCompile.tap(
+        'Generate Settings Plugin',
+        (compilation) => {
+          compilation.fileDependencies.add(resolve(__dirname, 'package.json'));
+        },
+      );
+    },
+  };
+};
 const generateBuildInfo = () => {
   return {
     /**
@@ -49,11 +71,11 @@ const generateBuildInfo = () => {
 };
 
 /**
- * @param {any} env
+ * @param {any} _env
  * @param {any} argv
  * @returns {WebpackConfig[]}
  */
-export default (env, argv) => {
+export default (_env, argv) => {
   const isProd = argv.mode === 'production';
 
   /** @type WebpackConfig */
@@ -125,6 +147,7 @@ export default (env, argv) => {
     },
     externals: { vscode: 'vscode' },
     plugins: [
+      generateSettings(),
       generateBuildInfo(),
       new CopyPlugin({
         patterns: [

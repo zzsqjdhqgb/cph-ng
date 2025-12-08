@@ -730,14 +730,15 @@
     "vscode:prepublish": "webpack --mode production",
     "compile": "webpack --mode production",
     "watch": "webpack --watch --mode development",
-    "package": "pnpm vsce package --allow-star-activation --no-dependencies",
-    "publish": "pnpm vsce publish --allow-star-activation --no-dependencies",
-    "publish:pre": "pnpm vsce publish --allow-star-activation --no-dependencies --pre-release",
-    "lint": "pnpm exec biome lint --write",
-    "format": "pnpm exec biome check --write",
-    "check-format": "pnpm exec biome check",
+    "package": "vsce package --allow-star-activation --no-dependencies",
+    "publish": "vsce publish --allow-star-activation --no-dependencies",
+    "publish:pre": "vsce publish --allow-star-activation --no-dependencies --pre-release",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check-translations": "node scripts/check-translations.js",
+    "generate-settings": "node scripts/generate-settings.js",
     "install-hooks": "node scripts/install-hooks.js",
-    "check-translations": "node scripts/pre-commit"
+    "postinstall": "pnpm run generate-settings && pnpm run install-hooks"
   },
   "devDependencies": {
     "@actions/core": "^1.11.1",
