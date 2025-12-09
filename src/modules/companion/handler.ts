@@ -1,4 +1,5 @@
-import { access, mkdir, writeFile } from 'fs/promises';
+import { existsSync } from 'fs';
+import { writeFile } from 'fs/promises';
 import { dirname } from 'path';
 import { commands, l10n, Uri, workspace } from 'vscode';
 import Io from '@/helpers/io';
@@ -6,6 +7,7 @@ import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import UserScriptManager from '@/helpers/userScriptManager';
 import { Problem } from '@/types';
+import { mkdirIfNotExists } from '@/utils/process';
 import { renderTemplate } from '@/utils/strTemplate';
 import { CphProblem } from '../problems/cphProblem';
 import ProblemsManager from '../problems/manager';
@@ -73,22 +75,10 @@ export class Handler {
         local: true,
       }).toProblem();
 
-      try {
-        await mkdir(dirname(problem.src.path), { recursive: true });
-      } catch (e) {
-        Handler.logger.error('Failed to create directory', e);
-        Io.error(
-          l10n.t('Failed to create directory for problem: {msg}', {
-            msg: (e as Error).message,
-          }),
-        );
-        continue;
-      }
-
-      try {
-        await access(problem.src.path);
+      await mkdirIfNotExists(dirname(problem.src.path));
+      if (existsSync(problem.src.path)) {
         Handler.logger.debug('Source file already exists', srcPath);
-      } catch {
+      } else {
         Handler.logger.debug('Creating new source file', srcPath);
         await Handler.createSourceFile(problem);
       }

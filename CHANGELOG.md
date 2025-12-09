@@ -2,6 +2,10 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: mkdir in root
+
 ## 0.5.5
 
 - **feat**: simplify git hooks

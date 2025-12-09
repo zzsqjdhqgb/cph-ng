@@ -16,8 +16,8 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { randomUUID } from 'crypto';
-import { mkdir } from 'fs/promises';
 import { join } from 'path';
+import { mkdirIfNotExists } from '@/utils/process';
 import Logger from './logger';
 import Settings from './settings';
 
@@ -28,9 +28,7 @@ export default class Cache {
   private static monitorInterval?: NodeJS.Timeout;
 
   public static async ensureDir() {
-    return await mkdir(Settings.cache.directory, {
-      recursive: true,
-    });
+    return await mkdirIfNotExists(Settings.cache.directory);
   }
   public static async startMonitor() {
     if (this.monitorInterval) {

@@ -17,7 +17,7 @@
 
 import { randomUUID, UUID } from 'crypto';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import { mkdir, readFile, stat, unlink, writeFile } from 'fs/promises';
+import { readFile, stat, unlink, writeFile } from 'fs/promises';
 import { basename, dirname, extname, join, relative } from 'path';
 import { l10n } from 'vscode';
 import { gunzipSync, gzipSync } from 'zlib';
@@ -26,6 +26,7 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { telemetry } from '@/utils/global';
+import { mkdirIfNotExists } from '@/utils/process';
 import { version } from '../utils/packageInfo';
 import { KnownResult } from '../utils/result';
 import { renderPathWithFile } from '../utils/strTemplate';
@@ -390,7 +391,7 @@ export class Problem implements IProblem {
       ),
     );
     try {
-      await mkdir(dirname(binPath), { recursive: true });
+      await mkdirIfNotExists(dirname(binPath));
       await writeFile(binPath, gzipSync(Buffer.from(JSON.stringify(this))));
       Problem.logger.info('Saved problem', this.src.path);
       return true;
