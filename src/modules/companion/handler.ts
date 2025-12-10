@@ -20,12 +20,17 @@ export class Handler {
     batchId: string,
     problems: CompanionProblem[],
   ) {
-    const selection = await window.showInformationMessage(
-      l10n.t('Received {count} problems from Companion. Import here?', {
-        count: problems.length,
-      }),
-      l10n.t('Yes'),
-      l10n.t('No'),
+    const selection = await window.showQuickPick(
+      [l10n.t('Yes'), l10n.t('No')],
+      {
+        placeHolder: l10n.t(
+          'Received {count} problems from Companion. Import here?',
+          {
+            count: problems.length,
+          },
+        ),
+        ignoreFocusOut: true,
+      },
     );
 
     if (selection === l10n.t('Yes')) {

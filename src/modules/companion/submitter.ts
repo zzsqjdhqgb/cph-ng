@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { l10n, window } from 'vscode';
+import { l10n, ProgressLocation, window } from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
@@ -60,6 +60,17 @@ export class Submitter {
     };
     Submitter.logger.debug('Submission data', requestData);
 
-    CompanionClient.sendSubmit(requestData);
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: l10n.t('Waiting response from cph-submit...'),
+        cancellable: false,
+      },
+      async () => {
+        CompanionClient.sendSubmit(requestData);
+        await CompanionClient.waitForSubmissionConsumed();
+        Io.info(l10n.t('Submission payload consumed by companion'));
+      },
+    );
   }
 }

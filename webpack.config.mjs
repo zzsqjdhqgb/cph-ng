@@ -131,6 +131,10 @@ export default (env, argv) => {
     externals: { vscode: 'vscode' },
     plugins: [
       generateBuildInfo(),
+      new webpack.DefinePlugin({
+        'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
+        'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify(true),
+      }),
       new CopyPlugin({
         patterns: [
           { from: 'testlib/testlib.h', to: 'testlib/testlib.h' },
@@ -190,6 +194,12 @@ export default (env, argv) => {
       chunkFormat: 'module',
     },
     experiments: { outputModule: true },
+    plugins: [
+      new webpack.DefinePlugin({
+        'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
+        'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify(true),
+      }),
+    ],
     cache: {
       type: 'filesystem',
       buildDependencies: { config: [__filename] },
