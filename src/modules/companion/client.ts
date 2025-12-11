@@ -7,7 +7,7 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { Handler } from './handler';
-import { CompanionProblem, CphSubmitData } from './types';
+import { CphSubmitData } from './types';
 
 const WS_URL = 'ws://localhost:27122';
 
