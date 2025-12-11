@@ -84,15 +84,14 @@ export default class ProcessExecutor {
 
   private static pipeFailed(pid: number | undefined, name: string) {
     return (e: any) => {
-      if (
-        e.code in
-        [
-          'ERR_STREAM_PREMATURE_CLOSE',
-          'EPIPE',
-          'ERR_STREAM_WRITE_AFTER_END',
-          'ENOENT',
-        ]
-      ) {
+      const expectedErrors = [
+        'ERR_STREAM_PREMATURE_CLOSE',
+        'EPIPE',
+        'ERR_STREAM_WRITE_AFTER_END',
+        'ENOENT',
+        'EOF',
+      ];
+      if (e && e.code && expectedErrors.includes(e.code)) {
         this.logger.trace(`Pipe ${name} of process ${pid} closed prematurely`);
       } else {
         this.logger.warn('Set up process', pid, name, 'failed', e);
@@ -215,13 +214,12 @@ export default class ProcessExecutor {
           Cache.dispose([stdoutPath, stderrPath]);
           if (e instanceof SyntaxError) {
             return this.toErrorResult(l10n.t('Runner output is invalid JSON'));
-          } else {
-            resolve(
-              this.toErrorResult(
-                l10n.t('Error occurred while processing runner output'),
-              ),
-            );
           }
+          resolve(
+            this.toErrorResult(
+              l10n.t('Error occurred while processing runner output'),
+            ),
+          );
           telemetry.error('parseRunnerError', e, {
             output: stdout,
           });

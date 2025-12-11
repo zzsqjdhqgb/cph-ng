@@ -7,11 +7,43 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { dirname, join, resolve } from 'path';
 import TerserPlugin from 'terser-webpack-plugin';
 import { fileURLToPath } from 'url';
-import webpack from 'webpack';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const generateSettings = () => {
+  const pkgPath = resolve(__dirname, 'package.json');
+
+  return {
+    /**
+     * @param {import('webpack').Compiler} compiler
+     */
+    apply: (compiler) => {
+      const runScript = () => {
+        try {
+          execSync('node scripts/generate-settings.js', { stdio: 'inherit' });
+        } catch (error) {
+          console.error('Failed to generate settings:', error);
+        }
+      };
+      compiler.hooks.beforeRun.tap('Generate Settings Plugin', () => {
+        runScript();
+      });
+      compiler.hooks.watchRun.tap('Generate Settings Plugin', (compiler) => {
+        const modifiedFiles = compiler.modifiedFiles;
+        if (!modifiedFiles || modifiedFiles.has(pkgPath)) {
+          runScript();
+        }
+      });
+      compiler.hooks.afterCompile.tap(
+        'Generate Settings Plugin',
+        (compilation) => {
+          compilation.fileDependencies.add(pkgPath);
+        },
+      );
+    },
+  };
+};
 const generateBuildInfo = () => {
   return {
     /**
@@ -50,11 +82,11 @@ const generateBuildInfo = () => {
 };
 
 /**
- * @param {any} env
+ * @param {any} _env
  * @param {any} argv
  * @returns {WebpackConfig[]}
  */
-export default (env, argv) => {
+export default (_env, argv) => {
   const isProd = argv.mode === 'production';
 
   /** @type WebpackConfig */
@@ -130,6 +162,7 @@ export default (env, argv) => {
     },
     externals: { vscode: 'vscode' },
     plugins: [
+      generateSettings(),
       generateBuildInfo(),
       new webpack.DefinePlugin({
         'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),

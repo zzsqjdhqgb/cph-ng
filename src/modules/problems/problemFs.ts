@@ -198,7 +198,8 @@ export class ProblemFs implements FileSystemProvider {
         size: 0,
         permissions: FilePermission.Readonly,
       };
-    } else if (item.data instanceof Uri) {
+    }
+    if (item.data instanceof Uri) {
       return {
         type: FileType.File | FileType.SymbolicLink,
         ctime: 0,
@@ -206,26 +207,25 @@ export class ProblemFs implements FileSystemProvider {
         size: 0,
         permissions: item.set ? undefined : FilePermission.Readonly,
       };
-    } else {
-      return {
-        type: FileType.File,
-        ctime: 0,
-        mtime: Date.now(),
-        size: item.data.length,
-        permissions: item.set ? undefined : FilePermission.Readonly,
-      };
     }
+    return {
+      type: FileType.File,
+      ctime: 0,
+      mtime: Date.now(),
+      size: item.data.length,
+      permissions: item.set ? undefined : FilePermission.Readonly,
+    };
   }
 
   async readFile(uri: Uri): Promise<Uint8Array> {
     const item = await this.parseUri(uri);
     if (Array.isArray(item)) {
       throw this.isDir;
-    } else if (item.data instanceof Uri) {
-      return await readFile(item.data.fsPath);
-    } else {
-      return Buffer.from(item.data);
     }
+    if (item.data instanceof Uri) {
+      return await readFile(item.data.fsPath);
+    }
+    return Buffer.from(item.data);
   }
 
   async writeFile(uri: Uri, content: Uint8Array): Promise<void> {

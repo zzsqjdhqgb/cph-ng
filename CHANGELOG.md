@@ -2,6 +2,16 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
+## [Unreleased]
+
+- **fix**: mkdir in root
+
+## 0.5.5
+
+- **feat**: simplify git hooks
+- **style**: add biome rules
+- **chore**: refactor settings management and fix telemetry reported errors
+
 ## 0.5.4
 
 - **fix**: use constant abort controller to avoid thread conflicts
