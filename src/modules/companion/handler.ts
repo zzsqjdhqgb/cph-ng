@@ -1,6 +1,14 @@
 import { access, mkdir, writeFile } from 'fs/promises';
 import { dirname } from 'path';
-import { commands, l10n, Uri, window, workspace } from 'vscode';
+import {
+  commands,
+  l10n,
+  QuickPick,
+  QuickPickItem,
+  Uri,
+  window,
+  workspace,
+} from 'vscode';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
@@ -15,36 +23,50 @@ import { CompanionProblem } from './types';
 export class Handler {
   private static logger: Logger = new Logger('companionHandler');
   private static claimedBatches = new Set<string>();
+  private static activeQuickPicks = new Map<string, QuickPick<QuickPickItem>>();
 
-  public static async handleBatchAvailable(
+  public static handleBatchAvailable(
     batchId: string,
     problems: CompanionProblem[],
   ) {
-    const selection = await window.showQuickPick(
-      [l10n.t('Yes'), l10n.t('No')],
+    const quickPick = window.createQuickPick();
+    quickPick.items = [{ label: l10n.t('Yes') }, { label: l10n.t('No') }];
+    quickPick.placeholder = l10n.t(
+      'Received {count} problems from Companion. Import here?',
       {
-        placeHolder: l10n.t(
-          'Received {count} problems from Companion. Import here?',
-          {
-            count: problems.length,
-          },
-        ),
-        ignoreFocusOut: true,
+        count: problems.length,
       },
     );
+    quickPick.ignoreFocusOut = true;
 
-    if (selection === l10n.t('Yes')) {
-      if (Handler.claimedBatches.has(batchId)) {
-        Io.warn(l10n.t('Problems already imported by another instance'));
-        return;
+    quickPick.onDidAccept(async () => {
+      const selection = quickPick.selectedItems[0];
+      if (selection && selection.label === l10n.t('Yes')) {
+        if (Handler.claimedBatches.has(batchId)) {
+          Io.warn(l10n.t('Problems already imported by another instance'));
+        } else {
+          CompanionClient.claimBatch(batchId);
+          await Handler.processProblem(problems);
+        }
       }
-      CompanionClient.claimBatch(batchId);
-      await Handler.processProblem(problems);
-    }
+      quickPick.hide();
+    });
+
+    quickPick.onDidHide(() => {
+      quickPick.dispose();
+      Handler.activeQuickPicks.delete(batchId);
+    });
+
+    Handler.activeQuickPicks.set(batchId, quickPick);
+    quickPick.show();
   }
 
   public static handleBatchClaimed(batchId: string) {
     Handler.claimedBatches.add(batchId);
+    const quickPick = Handler.activeQuickPicks.get(batchId);
+    if (quickPick) {
+      quickPick.hide();
+    }
   }
 
   private static async processProblem(companionProblems: CompanionProblem[]) {

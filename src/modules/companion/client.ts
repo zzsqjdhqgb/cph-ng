@@ -23,7 +23,7 @@ export class CompanionClient {
     this.connect();
   }
 
-  private static connect() {
+  private static async connect() {
     if (
       this.isConnecting ||
       (this.ws && this.ws.readyState === WebSocket.OPEN)
@@ -32,53 +32,97 @@ export class CompanionClient {
     }
     this.isConnecting = true;
 
-    window.withProgress(
+    await window.withProgress(
       {
         location: ProgressLocation.Notification,
         title: l10n.t('Connecting to Companion Router...'),
         cancellable: false,
       },
-      async () => {
-        this.logger.info('Connecting to Companion Router...');
-        this.ws = new WebSocket(WS_URL);
-
-        this.ws.on('open', () => {
-          this.logger.info('Connected to Companion Router');
-          this.isConnecting = false;
-          this.reconnectAttempts = 0;
-        });
-
-        this.ws.on('message', (data) => {
-          try {
-            const msg = JSON.parse(data.toString());
-            this.handleMessage(msg);
-          } catch (e) {
-            this.logger.error('Failed to parse message', e);
-          }
-        });
-
-        this.ws.on('error', (err) => {
-          this.logger.warn('WebSocket error', err);
-        });
-
-        this.ws.on('close', () => {
-          this.logger.info('Disconnected from Companion Router');
-          this.ws = null;
-          this.isConnecting = false;
-
-          // If we haven't tried too many times, try to spawn the router
-          if (this.reconnectAttempts < 3) {
-            this.reconnectAttempts++;
-            this.spawnRouter().then(() => {
-              setTimeout(() => this.connect(), 1000);
+      async (progress) => {
+        const maxRetries = 3;
+        for (let i = 0; i <= maxRetries; i++) {
+          if (i > 0) {
+            progress.report({
+              message: l10n.t(
+                'Connection failed. Retrying... ({attempt}/{max})',
+                { attempt: i, max: maxRetries },
+              ),
+              increment: 100 / (maxRetries + 1),
             });
-          } else {
-            // Retry slowly if it keeps failing
-            setTimeout(() => this.connect(), 5000);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await this.spawnRouter();
           }
-        });
+
+          const success = await this.attemptConnection();
+          if (success) {
+            this.isConnecting = false;
+            return;
+          }
+        }
+
+        this.isConnecting = false;
+        Io.error(
+          l10n.t(
+            'Failed to connect to Companion Router after multiple attempts.',
+          ),
+        );
       },
     );
+  }
+
+  private static attemptConnection(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const ws = new WebSocket(WS_URL);
+
+      const onOpen = () => {
+        cleanup();
+        this.ws = ws;
+        this.setupListeners(ws);
+        resolve(true);
+      };
+
+      const onError = (err: Error) => {
+        this.logger.warn('WebSocket connection error', err);
+        cleanup();
+        resolve(false);
+      };
+
+      const onClose = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      const cleanup = () => {
+        ws.removeListener('open', onOpen);
+        ws.removeListener('error', onError);
+        ws.removeListener('close', onClose);
+      };
+
+      ws.on('open', onOpen);
+      ws.on('error', onError);
+      ws.on('close', onClose);
+    });
+  }
+
+  private static setupListeners(ws: WebSocket) {
+    ws.on('message', (data) => {
+      try {
+        const msg = JSON.parse(data.toString());
+        this.handleMessage(msg);
+      } catch (e) {
+        this.logger.error('Failed to parse message', e);
+      }
+    });
+
+    ws.on('error', (err) => {
+      this.logger.warn('WebSocket error', err);
+    });
+
+    ws.on('close', () => {
+      this.logger.info('Disconnected from Companion Router');
+      this.ws = null;
+      this.isConnecting = false;
+    });
   }
 
   private static async spawnRouter() {
@@ -109,7 +153,6 @@ export class CompanionClient {
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (e) {
           this.logger.error('Failed to spawn router', e);
-          Io.error(l10n.t('Failed to spawn Companion Router'));
         }
       },
     );
