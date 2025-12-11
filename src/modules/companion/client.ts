@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import { join } from 'path';
-import { env, l10n, ProgressLocation, window } from 'vscode';
+import { l10n, ProgressLocation, window } from 'vscode';
 import WebSocket from 'ws';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
