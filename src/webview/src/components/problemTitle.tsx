@@ -32,7 +32,7 @@ import TextField from '@mui/material/TextField';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IProblem } from '@/types/types';
-import { msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphMenu from './base/cphMenu';
@@ -58,6 +58,7 @@ const formatDuration = (ms: number) => {
 
 const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [isHoveringTitle, setHoveringTitle] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [tabValue, setTabValue] = useState('basic');
@@ -110,7 +111,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
             runnerArgs: editedRunnerArgs || undefined,
           }
         : undefined;
-    msg({
+    dispatch({
       type: 'editProblemDetails',
       title: editedTitle,
       url: editedUrl,
@@ -155,7 +156,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 <CphLink
                   name={problem.checker.path!}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'openFile',
                       path: problem.checker!.path,
                     });
@@ -171,7 +172,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 <CphLink
                   name={problem.interactor.path!}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'openFile',
                       path: problem.interactor!.path,
                     });
@@ -191,7 +192,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
           <CphMenu
             menu={{
               [t('problemTitle.menu.editRaw')]: () => {
-                msg({
+                dispatch({
                   type: 'openFile',
                   path: '/problem.cph-ng.json',
                   isVirtual: true,
@@ -325,13 +326,13 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                     label={t('problemTitle.dialog.field.specialJudge')}
                     variant='outlined'
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'openFile',
                         path: problem.checker!.path,
                       });
                     }}
                     onDelete={() => {
-                      msg({
+                      dispatch({
                         type: 'removeSrcFile',
                         fileType: 'checker',
                       });
@@ -341,7 +342,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                   <Chip
                     label={t('problemTitle.dialog.field.specialJudge')}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'chooseSrcFile',
                         fileType: 'checker',
                       });
@@ -353,13 +354,13 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                     label={t('problemTitle.dialog.field.interact')}
                     variant='outlined'
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'openFile',
                         path: problem.interactor!.path,
                       });
                     }}
                     onDelete={() => {
-                      msg({
+                      dispatch({
                         type: 'removeSrcFile',
                         fileType: 'interactor',
                       });
@@ -369,7 +370,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                   <Chip
                     label={t('problemTitle.dialog.field.interact')}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'chooseSrcFile',
                         fileType: 'interactor',
                       });
@@ -379,7 +380,7 @@ const ProblemTitle = ({ problem, startTime }: ProblemTitleProps) => {
                 <CphLink
                   name={t('problemTitle.dialog.testlib')}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'openTestlib',
                     });
                   }}

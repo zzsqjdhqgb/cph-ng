@@ -70,7 +70,7 @@ export class ProblemActions {
     fullProblem.problem.timeLimit = msg.timeLimit;
     fullProblem.problem.memoryLimit = msg.memoryLimit;
     fullProblem.problem.compilationSettings = msg.compilationSettings;
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async delProblem(msg: msgs.DelProblemMsg) {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -120,7 +120,7 @@ export class ProblemActions {
       }
       fullProblem.problem.bfCompare.bruteForce = { path };
     }
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async removeSrcFile(msg: msgs.RemoveSrcFileMsg): Promise<void> {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -136,7 +136,7 @@ export class ProblemActions {
     } else if (msg.fileType === 'bruteForce' && fullProblem.problem.bfCompare) {
       fullProblem.problem.bfCompare.bruteForce = undefined;
     }
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async submitToCodeforces(
     msg: msgs.SubmitToCodeforcesMsg,

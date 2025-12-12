@@ -36,7 +36,8 @@ import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IProblem, isRunningVerdict } from '@/types/types';
-import { basename, getCompile, msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
+import { basename, getCompile } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphMenu from './base/cphMenu';
@@ -48,6 +49,7 @@ interface ProblemActionsProps {
 
 const ProblemActions = ({ problem }: ProblemActionsProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [clickTime, setClickTime] = useState<number[]>([]);
   const [isDelDialogOpen, setDelDialogOpen] = useState(false);
   const [isBfCompareDialogOpen, setBfCompareDialogOpen] = useState(false);
@@ -80,7 +82,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           name={t('problemActions.addTc')}
           icon={AddIcon}
           onClick={() => {
-            msg({ type: 'addTc' });
+            dispatch({ type: 'addTc' });
           }}
         />
         <CphButton
@@ -88,7 +90,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           name={t('problemActions.loadTcs')}
           icon={FileCopyIcon}
           onClick={() => {
-            msg({ type: 'loadTcs' });
+            dispatch({ type: 'loadTcs' });
           }}
         />
 
@@ -99,7 +101,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
             icon={PlaylistRemoveIcon}
             color={'warning'}
             onClick={(e) => {
-              msg({
+              dispatch({
                 type: 'stopTcs',
                 onlyOne: e.ctrlKey,
               });
@@ -109,13 +111,13 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           <CphMenu
             menu={{
               [t('problemActions.runTcs.menu.forceCompile')]: () => {
-                msg({
+                dispatch({
                   type: 'runTcs',
                   compile: true,
                 });
               },
               [t('problemActions.runTcs.menu.skipCompile')]: () => {
-                msg({
+                dispatch({
                   type: 'runTcs',
                   compile: false,
                 });
@@ -128,7 +130,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
               icon={PlaylistPlayIcon}
               color={'success'}
               onClick={(e) => {
-                msg({
+                dispatch({
                   type: 'runTcs',
                   compile: getCompile(e),
                 });
@@ -173,7 +175,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                   icon={BackupIcon}
                   color={'success'}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'submitToCodeforces',
                     });
                   }}
@@ -212,7 +214,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
           </Button>
           <Button
             onClick={() => {
-              msg({
+              dispatch({
                 type: 'delProblem',
               });
               setDelDialogOpen(false);
@@ -253,7 +255,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                   <CphLink
                     name={problem.bfCompare.generator.path}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'openFile',
                         path: problem.bfCompare!.generator!.path,
                       });
@@ -264,7 +266,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                   <CphButton
                     icon={CloseIcon}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'removeSrcFile',
                         fileType: 'generator',
                       });
@@ -278,7 +280,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                 <CphButton
                   icon={FileOpenIcon}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'chooseSrcFile',
                       fileType: 'generator',
                     });
@@ -298,7 +300,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                   <CphLink
                     name={problem.bfCompare.bruteForce.path}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'openFile',
                         path: problem.bfCompare!.bruteForce!.path,
                       });
@@ -309,7 +311,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                   <CphButton
                     icon={CloseIcon}
                     onClick={() => {
-                      msg({
+                      dispatch({
                         type: 'removeSrcFile',
                         fileType: 'bruteForce',
                       });
@@ -323,7 +325,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
                 <CphButton
                   icon={FileOpenIcon}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'chooseSrcFile',
                       fileType: 'bruteForce',
                     });
@@ -339,7 +341,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
               <CphButton
                 name={t('problemActions.bfCompareDialog.stop')}
                 onClick={() => {
-                  msg({
+                  dispatch({
                     type: 'stopBfCompare',
                   });
                 }}
@@ -350,7 +352,7 @@ const ProblemActions = ({ problem }: ProblemActionsProps) => {
               <CphButton
                 name={t('problemActions.bfCompareDialog.run')}
                 onClick={(e) => {
-                  msg({
+                  dispatch({
                     type: 'startBfCompare',
                     compile: getCompile(e),
                   });

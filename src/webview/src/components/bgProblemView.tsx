@@ -20,7 +20,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphText from './base/cphText';
@@ -34,6 +34,7 @@ interface BgProblemViewProps {
 
 const BgProblemView = ({ bgProblems }: BgProblemViewProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [open, setOpen] = useState(false);
 
   return (
@@ -65,7 +66,7 @@ const BgProblemView = ({ bgProblems }: BgProblemViewProps) => {
                 <CphLink
                   name={bgProblem.srcPath}
                   onClick={() => {
-                    msg({
+                    dispatch({
                       type: 'openFile',
                       path: bgProblem.srcPath,
                     });

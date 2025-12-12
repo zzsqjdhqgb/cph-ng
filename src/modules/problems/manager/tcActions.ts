@@ -78,7 +78,7 @@ export class TcActions {
       return;
     }
     fullProblem.problem.tcs[msg.id] = Tc.fromI(msg.tc);
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async toggleDisable(msg: msgs.ToggleDisableMsg) {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -87,7 +87,7 @@ export class TcActions {
     }
     fullProblem.problem.tcs[msg.id].isDisabled =
       !fullProblem.problem.tcs[msg.id].isDisabled;
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async clearTcStatus(msg: msgs.ClearTcStatusMsg) {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -95,7 +95,7 @@ export class TcActions {
       return;
     }
     fullProblem.problem.tcs[msg.id].result = undefined;
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async clearStatus(msg: msgs.ClearStatusMsg) {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -105,7 +105,7 @@ export class TcActions {
     for (const tc of Object.values(fullProblem.problem.tcs)) {
       tc.result = undefined;
     }
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async chooseTcFile(msg: msgs.ChooseTcFileMsg): Promise<void> {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -212,7 +212,7 @@ export class TcActions {
     fullProblem.problem.tcOrder = fullProblem.problem.tcOrder.filter(
       (id) => id !== msg.id,
     );
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async reorderTc(msg: msgs.ReorderTcMsg): Promise<void> {
     const fullProblem = await Store.getFullProblem(msg.activePath);
@@ -222,7 +222,7 @@ export class TcActions {
     const tcOrder = fullProblem.problem.tcOrder;
     const [movedTc] = tcOrder.splice(msg.fromIdx, 1);
     tcOrder.splice(msg.toIdx, 0, movedTc);
-    await Store.dataRefresh();
+    await Store.dataRefresh(true);
   }
   public static async dragDrop(msg: msgs.DragDropMsg): Promise<void> {
     // Try to get the problem, if not exist, create a new one

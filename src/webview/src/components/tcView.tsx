@@ -28,6 +28,7 @@ import { MD5 } from 'crypto-js';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ITc, isRunningVerdict } from '@/types/types';
+import { useProblemContext } from '../context/ProblemContext';
 import { getCompile, msg } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
@@ -56,9 +57,10 @@ const TcView = ({
   autoFocus = false,
 }: TcViewProp) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const running = isRunningVerdict(tc.result?.verdict);
 
-  const emitUpdate = () => msg({ type: 'updateTc', id, tc });
+  const emitUpdate = () => dispatch({ type: 'updateTc', id, tc });
 
   return (
     <CphMenu
@@ -66,18 +68,18 @@ const TcView = ({
         tc.isDisabled
           ? {
               [t('tcView.menu.enableTc')]: () => {
-                msg({ type: 'toggleDisable', id });
+                dispatch({ type: 'toggleDisable', id });
               },
             }
           : {
               [t('tcView.menu.disableTc')]: () => {
-                msg({ type: 'toggleDisable', id });
+                dispatch({ type: 'toggleDisable', id });
               },
               [t('tcView.menu.clearTcStatus')]: () => {
-                msg({ type: 'clearTcStatus', id });
+                dispatch({ type: 'clearTcStatus', id });
               },
               [t('tcView.menu.debug')]: () => {
-                msg({ type: 'debugTc', id });
+                dispatch({ type: 'debugTc', id });
               },
             }
       }
@@ -198,14 +200,14 @@ const TcView = ({
             <CphMenu
               menu={{
                 [t('tcView.run.menu.forceCompile')]: () => {
-                  msg({
+                  dispatch({
                     type: 'runTc',
                     id,
                     compile: true,
                   });
                 },
                 [t('tcView.run.menu.skipCompile')]: () => {
-                  msg({
+                  dispatch({
                     type: 'runTc',
                     id,
                     compile: false,
@@ -220,7 +222,7 @@ const TcView = ({
                 loading={running}
                 onClick={(e) => {
                   e.stopPropagation();
-                  msg({
+                  dispatch({
                     type: 'runTc',
                     id,
                     compile: getCompile(e),
@@ -234,7 +236,7 @@ const TcView = ({
               color={'error'}
               onClick={(e) => {
                 e.stopPropagation();
-                msg({ type: 'delTc', id });
+                dispatch({ type: 'delTc', id });
               }}
             />
           </CphFlex>
@@ -255,24 +257,25 @@ const TcView = ({
                       useFile: false,
                       data: value,
                     };
-                    emitUpdate();
+                    // Input handles its own state change, so we use sendMsg directly to avoid redundant state updates.
+                    msg({ type: 'updateTc', id, tc });
                   }}
                   onChooseFile={() =>
-                    msg({
+                    dispatch({
                       type: 'chooseTcFile',
                       label: 'stdin',
                       id,
                     })
                   }
                   onToggleFile={() => {
-                    msg({
+                    dispatch({
                       type: 'toggleTcFile',
                       label: 'stdin',
                       id,
                     });
                   }}
                   onOpenVirtual={() => {
-                    msg({
+                    dispatch({
                       type: 'openFile',
                       path: `/tcs/${id}/stdin`,
                       isVirtual: true,
@@ -291,24 +294,25 @@ const TcView = ({
                       useFile: false,
                       data: value,
                     };
-                    emitUpdate();
+                    // Input handles its own state change, so we use sendMsg directly to avoid redundant state updates.
+                    msg({ type: 'updateTc', id, tc });
                   }}
                   onChooseFile={() => {
-                    msg({
+                    dispatch({
                       type: 'chooseTcFile',
                       label: 'answer',
                       id,
                     });
                   }}
                   onToggleFile={() => {
-                    msg({
+                    dispatch({
                       type: 'toggleTcFile',
                       label: 'answer',
                       id,
                     });
                   }}
                   onOpenVirtual={() => {
-                    msg({
+                    dispatch({
                       type: 'openFile',
                       path: `/tcs/${id}/answer`,
                       isVirtual: true,
@@ -334,14 +338,14 @@ const TcView = ({
                           emitUpdate();
                         },
                         onCompare: () => {
-                          msg({
+                          dispatch({
                             type: 'compareTc',
                             id,
                           });
                         },
                       }}
                       onOpenVirtual={() => {
-                        msg({
+                        dispatch({
                           type: 'openFile',
                           path: `/tcs/${id}/stdout`,
                           isVirtual: true,
@@ -355,7 +359,7 @@ const TcView = ({
                       value={tc.result.stderr}
                       readOnly={true}
                       onOpenVirtual={() => {
-                        msg({
+                        dispatch({
                           type: 'openFile',
                           path: `/tcs/${id}/stderr`,
                           isVirtual: true,

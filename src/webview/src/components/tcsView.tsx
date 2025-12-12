@@ -20,7 +20,7 @@ import { UUID } from 'crypto';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IProblem } from '@/types/types';
-import { msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
 import AcCongrats from './acCongrats';
 import CphFlex from './base/cphFlex';
 import ErrorBoundary from './base/errorBoundary';
@@ -33,6 +33,7 @@ interface TcsViewProps {
 
 const TcsView = ({ problem }: TcsViewProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [expandedStates, setExpandedStates] = useState<boolean[]>([]);
@@ -84,7 +85,7 @@ const TcsView = ({ problem }: TcsViewProps) => {
     ) {
       const [movedId] = problem.tcOrder.splice(draggedIdx, 1);
       problem.tcOrder.splice(dragOverIdx, 0, movedId);
-      msg({ type: 'reorderTc', fromIdx: draggedIdx, toIdx: dragOverIdx });
+      dispatch({ type: 'reorderTc', fromIdx: draggedIdx, toIdx: dragOverIdx });
     }
 
     if (expandedStates.length > 0) {
@@ -160,7 +161,7 @@ const TcsView = ({ problem }: TcsViewProps) => {
               );
             })}
             <Box
-              onClick={() => msg({ type: 'addTc' })}
+              onClick={() => dispatch({ type: 'addTc' })}
               sx={{
                 minHeight: '40px',
                 cursor: 'pointer',

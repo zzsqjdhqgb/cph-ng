@@ -17,14 +17,9 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import i18n from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
-import {
-  ActivePathEvent,
-  ProblemEvent,
-  ProblemEventData,
-} from '../../modules/sidebar';
 import CphFlex from './components/base/cphFlex';
 import ErrorBoundary from './components/base/errorBoundary';
 import BgProblemView from './components/bgProblemView';
@@ -32,9 +27,9 @@ import CreateProblemView from './components/createProblemView';
 import DragOverlay from './components/dragOverlay';
 import InitView from './components/initView';
 import ProblemView from './components/problemView';
+import { ProblemProvider, useProblemContext } from './context/ProblemContext';
 import langEn from './l10n/en.json';
 import langZh from './l10n/zh.json';
-import { msg } from './utils';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -45,42 +40,11 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
-const App = () => {
-  const [problemData, setProblemData] = useState<
-    ProblemEventData | undefined
-  >();
-  useEffect(() => {
-    i18n.changeLanguage(language);
-    window.onmessage = (e: MessageEvent<ProblemEvent | ActivePathEvent>) => {
-      const msg = e.data;
-      switch (msg.type) {
-        case 'activePath':
-          window.activePath = msg.activePath;
-          break;
-        case 'problem':
-          setProblemData(msg);
-          break;
-      }
-    };
-    msg({ type: 'init' });
-  }, []);
+const Main = () => {
+  const { problemData } = useProblemContext();
 
-  const theme = createTheme({
-    palette: {
-      mode: isDarkMode ? 'dark' : 'light',
-    },
-    breakpoints: {
-      values: {
-        xs: 0,
-        sm: 170,
-        md: 260,
-        lg: 360,
-        xl: 480,
-      },
-    },
-  });
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <ErrorBoundary>
         <DragOverlay />
       </ErrorBoundary>
@@ -108,6 +72,34 @@ const App = () => {
           )}
         </CphFlex>
       </ErrorBoundary>
+    </>
+  );
+};
+
+const App = () => {
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, []);
+
+  const theme = createTheme({
+    palette: {
+      mode: isDarkMode ? 'dark' : 'light',
+    },
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 170,
+        md: 260,
+        lg: 360,
+        xl: 480,
+      },
+    },
+  });
+  return (
+    <ThemeProvider theme={theme}>
+      <ProblemProvider>
+        <Main />
+      </ProblemProvider>
     </ThemeProvider>
   );
 };
