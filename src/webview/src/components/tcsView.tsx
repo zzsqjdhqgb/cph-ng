@@ -16,7 +16,8 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import Box from '@mui/material/Box';
-import React, { useState } from 'react';
+import { UUID } from 'crypto';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IProblem } from '@/types/types';
 import { msg } from '../utils';
@@ -35,6 +36,18 @@ const TcsView = ({ problem }: TcsViewProps) => {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [expandedStates, setExpandedStates] = useState<boolean[]>([]);
+  const [prevTcOrder, setPrevTcOrder] = useState<UUID[]>(problem.tcOrder);
+  const [focusTcId, setFocusTcId] = useState<UUID | null>(null);
+
+  useEffect(() => {
+    if (problem.tcOrder.length > prevTcOrder.length) {
+      const newIds = problem.tcOrder.filter((id) => !prevTcOrder.includes(id));
+      if (newIds.length === 1) {
+        setFocusTcId(newIds[0]);
+      }
+    }
+    setPrevTcOrder([...problem.tcOrder]);
+  }, [problem.tcOrder]);
 
   const handleDragStart = (idx: number, e: React.DragEvent) => {
     const states = problem.tcOrder.map((id) =>
@@ -140,6 +153,7 @@ const TcsView = ({ problem }: TcsViewProps) => {
                       onDragStart={(e) => handleDragStart(originalIdx, e)}
                       onDragEnd={handleDragEnd}
                       isDragging={draggedIdx === originalIdx}
+                      autoFocus={id === focusTcId}
                     />
                   </ErrorBoundary>
                 </Box>

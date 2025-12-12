@@ -43,6 +43,7 @@ interface TcViewProp {
   onDragStart?: (e: React.DragEvent) => void;
   onDragEnd?: () => void;
   isDragging?: boolean;
+  autoFocus?: boolean;
 }
 
 const TcView = ({
@@ -52,6 +53,7 @@ const TcView = ({
   onDragStart,
   onDragEnd,
   isDragging = false,
+  autoFocus = false,
 }: TcViewProp) => {
   const { t } = useTranslation();
   const running = isRunningVerdict(tc.result?.verdict);
@@ -276,6 +278,7 @@ const TcView = ({
                       isVirtual: true,
                     });
                   }}
+                  autoFocus={autoFocus}
                   tabIndex={idx * 2 + 1}
                 />
               </ErrorBoundary>
