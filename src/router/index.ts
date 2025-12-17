@@ -33,9 +33,6 @@ let shutdownTimer: NodeJS.Timeout | null = null;
 const submissionQueue: any[] = [];
 const batches = new Map<string, CompanionProblem[]>();
 
-// Logger (simple file append or console, since stdio is ignored in detached, we might want to write to a file if needed, but for now console is fine as it goes to /dev/null or similar)
-// Actually, for debugging, let's just keep it simple.
-
 // --- Helper Functions ---
 
 function gracefulShutdown(reason: string, error?: any) {
