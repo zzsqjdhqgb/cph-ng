@@ -85,6 +85,11 @@ export class CompanionClient {
 
       const onError = (err: Error) => {
         this.logger.warn('WebSocket connection error', err);
+        try {
+          ws.terminate();
+        } catch {
+          // Ignore errors during closure
+        }
         cleanup();
         resolve(false);
       };
