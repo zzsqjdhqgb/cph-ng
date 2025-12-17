@@ -33,7 +33,7 @@ export class Handler {
   ) {
     if (!problems || problems.length === 0) {
       window.showWarningMessage(
-        l10n.t('No problems were received from Companion. Nothing to import.')
+        l10n.t('No problems were received from Companion. Nothing to import.'),
       );
       return;
     }
