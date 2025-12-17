@@ -23,9 +23,6 @@ export default class Companion {
   public static init() {
     CompanionClient.init();
   }
-  public static stopServer() {
-    // No-op for client
-  }
   public static async submit(problem?: Problem) {
     return Submitter.submit(problem);
   }
