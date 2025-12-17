@@ -19,10 +19,10 @@ export class Submitter {
       'GNU G++17 7.3.0': 54,
       'GNU G++20 13.2 (64 bit, winlibs)': 89,
       'GNU G++23 14.2 (64 bit, msys2)': 91,
-    };
+    } as const;
 
     let submitLanguageId = Settings.companion.submitLanguage;
-    if (!Object.values(languageList).includes(submitLanguageId)) {
+    if (!(Object.values(languageList) as number[]).includes(submitLanguageId)) {
       const choice = await window.showQuickPick(Object.keys(languageList), {
         placeHolder: l10n.t('Choose submission language'),
       });

@@ -80,7 +80,6 @@
   "Failed to compile runner program": "编译运行器程序失败",
   "Failed to compile the program: {msg}": "编译程序失败：{msg}",
   "Failed to connect to Companion Router after multiple attempts.": "多次尝试后无法连接到 Companion 路由。",
-  "Failed to create directory for problem: {msg}": "创建题目目录失败：{msg}",
   "Failed to debug test case: {msg}": "调试测试样例失败：{msg}",
   "Failed to detect language for source, generator, or brute force.": "无法检测源代码、生成器或暴力解法的语言。",
   "Failed to load problem from CPH.": "加载 CPH 题目失败。",
