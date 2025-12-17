@@ -10,8 +10,6 @@ import Settings from '@/helpers/settings';
 import { Handler } from './handler';
 import { CphSubmitData } from './types';
 
-const WS_URL = 'ws://localhost:27122';
-
 export class CompanionClient {
   private static logger = new Logger('companionClient');
   private static ws: WebSocket | null = null;
@@ -19,6 +17,19 @@ export class CompanionClient {
   private static isConnecting = false;
   private static clientId = randomUUID();
   private static eventEmitter = new EventEmitter();
+
+  private static getPorts() {
+    const httpPort = Settings.companion.listenPort;
+    return {
+      httpPort,
+      wsPort: httpPort + 1,
+    };
+  }
+
+  private static getWsUrl() {
+    const { wsPort } = this.getPorts();
+    return `ws://localhost:${wsPort}`;
+  }
 
   public static init() {
     this.connect();
@@ -74,7 +85,7 @@ export class CompanionClient {
 
   private static attemptConnection(): Promise<boolean> {
     return new Promise((resolve) => {
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(this.getWsUrl());
 
       const onOpen = () => {
         cleanup();
@@ -143,6 +154,7 @@ export class CompanionClient {
         this.logger.info('Spawning Companion Router process...');
         const routerScript = join(__dirname, 'router.js');
         const logFile = join(Settings.cache.directory, 'router.log');
+        const { httpPort, wsPort } = this.getPorts();
 
         try {
           const child = spawn(process.execPath, [routerScript], {
@@ -152,10 +164,14 @@ export class CompanionClient {
               ...process.env,
               ELECTRON_RUN_AS_NODE: '1',
               CPH_NG_LOG_FILE: logFile,
+              CPH_NG_HTTP_PORT: String(httpPort),
+              CPH_NG_WS_PORT: String(wsPort),
             },
           });
           child.unref();
-          this.logger.info('Router process spawned');
+          this.logger.info(
+            `Router process spawned on ports http=${httpPort}, ws=${wsPort}`,
+          );
           // Give it a moment to start
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (e) {

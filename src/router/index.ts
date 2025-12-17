@@ -7,8 +7,13 @@ import {
   CphSubmitResponse,
 } from '../modules/companion/types';
 
-const HTTP_PORT = 27121;
-const WS_PORT = 27122;
+const httpPortEnv = Number(process.env.CPH_NG_HTTP_PORT);
+const wsPortEnv = Number(process.env.CPH_NG_WS_PORT);
+
+const HTTP_PORT =
+  Number.isFinite(httpPortEnv) && httpPortEnv > 0 ? httpPortEnv : 27121;
+const WS_PORT =
+  Number.isFinite(wsPortEnv) && wsPortEnv > 0 ? wsPortEnv : HTTP_PORT + 1;
 const SHUTDOWN_DELAY = 30000;
 const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
