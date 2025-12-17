@@ -39,7 +39,6 @@ export class Submitter {
       srcPath: problem.src.path,
       sourceCode,
     });
-
     if (sourceCode.trim() === '') {
       Io.warn(l10n.t('Source code is empty. Submission cancelled.'));
       return;
