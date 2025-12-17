@@ -31,6 +31,12 @@ export class Handler {
     batchId: string,
     problems: CompanionProblem[],
   ) {
+    if (!problems || problems.length === 0) {
+      window.showWarningMessage(
+        l10n.t('No problems were received from Companion. Nothing to import.')
+      );
+      return;
+    }
     const quickPick = window.createQuickPick();
     quickPick.items = [{ label: l10n.t('Yes') }, { label: l10n.t('No') }];
     quickPick.placeholder = l10n.t(
