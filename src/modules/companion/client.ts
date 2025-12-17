@@ -151,7 +151,7 @@ export class CompanionClient {
             env: {
               ...process.env,
               ELECTRON_RUN_AS_NODE: '1',
-              CPH_LOG_FILE: logFile,
+              CPH_NG_LOG_FILE: logFile,
             },
           });
           child.unref();

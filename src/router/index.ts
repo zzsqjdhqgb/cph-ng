@@ -10,7 +10,7 @@ import {
 const HTTP_PORT = 27121;
 const WS_PORT = 27122;
 const SHUTDOWN_DELAY = 30000;
-const LOG_FILE = process.env.CPH_LOG_FILE;
+const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
 function log(msg: string) {
   if (LOG_FILE) {
