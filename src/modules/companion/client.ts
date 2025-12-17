@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { join } from 'path';
 import { env, l10n, ProgressLocation, window } from 'vscode';
@@ -16,7 +17,7 @@ export class CompanionClient {
   private static ws: WebSocket | null = null;
   private static reconnectAttempts = 0;
   private static isConnecting = false;
-  private static clientId = Math.random().toString(36).substring(7);
+  private static clientId = randomUUID();
   private static eventEmitter = new EventEmitter();
 
   public static init() {
@@ -42,11 +43,12 @@ export class CompanionClient {
         const maxRetries = 3;
         for (let i = 0; i <= maxRetries; i++) {
           if (i > 0) {
+            const msg = l10n.t(
+              'Connection failed. Retrying... ({attempt}/{max})',
+              { attempt: i, max: maxRetries },
+            );
             progress.report({
-              message: l10n.t(
-                'Connection failed. Retrying... ({attempt}/{max})',
-                { attempt: i, max: maxRetries },
-              ),
+              message: msg,
               increment: 100 / (maxRetries + 1),
             });
             await new Promise((resolve) => setTimeout(resolve, 2000));

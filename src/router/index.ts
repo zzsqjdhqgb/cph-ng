@@ -1,5 +1,6 @@
-import { appendFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { dirname } from 'path';
 import { WebSocket, WebSocketServer } from 'ws';
 import {
   CompanionProblem,
@@ -14,6 +15,13 @@ const LOG_FILE = process.env.CPH_LOG_FILE;
 function log(msg: string) {
   if (LOG_FILE) {
     try {
+      const dir = dirname(LOG_FILE);
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+      }
+      if (!existsSync(LOG_FILE)) {
+        writeFileSync(LOG_FILE, '');
+      }
       appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`);
     } catch (e) {}
   }
@@ -30,6 +38,43 @@ const batches = new Map<string, CompanionProblem[]>();
 
 // --- Helper Functions ---
 
+function gracefulShutdown(reason: string, error?: any) {
+  log(`Shutting down: ${reason}`);
+  if (error) {
+    log(`Error details: ${error.message || error}`);
+  }
+
+  if (shutdownTimer) {
+    clearTimeout(shutdownTimer);
+    shutdownTimer = null;
+  }
+
+  // Close all WebSocket connections
+  for (const client of clients) {
+    try {
+      client.terminate();
+    } catch (e) {}
+  }
+  clients.clear();
+
+  // Close WebSocket server
+  wss.close(() => {
+    log('WebSocket server closed');
+  });
+
+  // Close HTTP server
+  httpServer.close(() => {
+    log('HTTP server closed');
+    process.exit(error ? 1 : 0);
+  });
+
+  // Force exit if graceful shutdown takes too long
+  setTimeout(() => {
+    log('Force exiting...');
+    process.exit(error ? 1 : 0);
+  }, 1000);
+}
+
 function resetShutdownTimer() {
   if (shutdownTimer) {
     clearTimeout(shutdownTimer);
@@ -37,7 +82,7 @@ function resetShutdownTimer() {
   }
   if (clients.size === 0) {
     shutdownTimer = setTimeout(() => {
-      process.exit(0);
+      gracefulShutdown('No clients connected for timeout period');
     }, SHUTDOWN_DELAY);
   }
 }
@@ -124,9 +169,7 @@ httpServer.listen(HTTP_PORT, () => {
 });
 
 httpServer.on('error', (err) => {
-  // If port is in use, we should probably exit, as another router might be running.
-  // But since we check for WS connection before spawning, this shouldn't happen often.
-  process.exit(1);
+  gracefulShutdown('HTTP Server Error', err);
 });
 
 // --- WebSocket Server ---
@@ -166,8 +209,20 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 wss.on('error', (err) => {
-  process.exit(1);
+  gracefulShutdown('WebSocket Server Error', err);
 });
 
 // Initial timer
 resetShutdownTimer();
+
+process.on('SIGINT', () => {
+  gracefulShutdown('Received SIGINT');
+});
+
+process.on('SIGTERM', () => {
+  gracefulShutdown('Received SIGTERM');
+});
+
+process.on('uncaughtException', (err) => {
+  gracefulShutdown('Uncaught Exception', err);
+});
