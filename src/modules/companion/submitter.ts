@@ -63,12 +63,40 @@ export class Submitter {
       {
         location: ProgressLocation.Notification,
         title: l10n.t('Waiting response from cph-submit...'),
-        cancellable: false,
+        cancellable: true,
       },
-      async () => {
-        CompanionClient.sendSubmit(requestData);
-        await CompanionClient.waitForSubmissionConsumed();
-        Io.info(l10n.t('Submission payload consumed by companion'));
+      async (progress, token) => {
+        try {
+          if (token.isCancellationRequested) {
+            Io.info(l10n.t('Submission cancelled by user.'));
+            return;
+          }
+
+          CompanionClient.sendSubmit(requestData);
+
+          await Promise.race([
+            CompanionClient.waitForSubmissionConsumed(),
+            new Promise((_, reject) => {
+              const d = token.onCancellationRequested(() => {
+                d.dispose();
+                reject(new Error('Cancelled'));
+              });
+            }),
+          ]);
+
+          Io.info(l10n.t('Submission payload consumed by companion'));
+        } catch (err: any) {
+          if (err.message === 'Cancelled') {
+            Io.info(l10n.t('Submission cancelled by user.'));
+            return;
+          }
+          Submitter.logger.error('Submission failed', { error: err });
+          window.showErrorMessage(
+            l10n.t('Submission failed: {msg}', {
+              msg: err?.message || String(err),
+            }),
+          );
+        }
       },
     );
   }
