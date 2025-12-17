@@ -18,6 +18,7 @@ const SHUTDOWN_DELAY = 30000;
 const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
 function log(msg: string) {
+  const line = `[${new Date().toISOString()}] ${msg}`;
   if (LOG_FILE) {
     try {
       const dir = dirname(LOG_FILE);
@@ -27,9 +28,12 @@ function log(msg: string) {
       if (!existsSync(LOG_FILE)) {
         writeFileSync(LOG_FILE, '');
       }
-      appendFileSync(LOG_FILE, `[${new Date().toISOString()}] ${msg}\n`);
+      appendFileSync(LOG_FILE, `${line}\n`);
     } catch (e) {}
   }
+  // Always emit to stderr so errors are visible even without log file
+  // eslint-disable-next-line no-console
+  console.error(line);
 }
 
 // State
@@ -43,7 +47,8 @@ const batches = new Map<string, CompanionProblem[]>();
 function gracefulShutdown(reason: string, error?: any) {
   log(`Shutting down: ${reason}`);
   if (error) {
-    log(`Error details: ${error.message || error}`);
+    const detail = error.stack || error.message || String(error);
+    log(`Error details: ${detail}`);
   }
 
   if (shutdownTimer) {
