@@ -6,14 +6,8 @@ fi
 
 MSG_FILE="$1"
 
-if command -v pnpm >/dev/null 2>&1; then
-  PNPM_BIN=pnpm
-else
-  PNPM_BIN=npx
-fi
-
 if [ -f "$MSG_FILE" ]; then
-  $PNPM_BIN commitlint --edit "$MSG_FILE"
+  pnpm commitlint --edit "$MSG_FILE"
   STATUS=$?
 else
   echo "commit-msg: cannot find commit message file: $MSG_FILE" >&2

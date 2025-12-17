@@ -16,6 +16,19 @@
 // along with cph-ng.  If not, see <https://www.gnu.org/licenses/>.
 
 import { exec } from 'child_process';
+import { existsSync } from 'fs';
+import { mkdir } from 'fs/promises';
 import { promisify } from 'util';
 
 export const execAsync = promisify(exec);
+export const mkdirIfNotExists = async (path: string): Promise<void> => {
+  try {
+    if (!existsSync(path)) {
+      await mkdir(path, { recursive: true });
+    }
+  } catch (e) {
+    throw new Error(
+      `Failed to create directory at ${path}: ${(e as Error).message}`,
+    );
+  }
+};

@@ -17,13 +17,14 @@
 
 import AdmZip from 'adm-zip';
 import { existsSync } from 'fs';
-import { mkdir, readdir, unlink } from 'fs/promises';
+import { readdir, unlink } from 'fs/promises';
 import { orderBy } from 'natural-orderby';
 import { basename, dirname, extname, join } from 'path';
 import { l10n, window } from 'vscode';
 import Io from '@/helpers/io';
 import Settings from '@/helpers/settings';
 import { ITc, Tc, TcIo } from '@/types';
+import { mkdirIfNotExists } from '@/utils/process';
 import { renderUnzipFolder } from '@/utils/strTemplate';
 
 type ParticleTc = {
@@ -93,7 +94,7 @@ export default class TcFactory {
     if (folderPath === null) {
       return [];
     }
-    await mkdir(folderPath, { recursive: true });
+    await mkdirIfNotExists(folderPath);
     zipData.extractAllTo(folderPath, true);
     if (Settings.problem.deleteAfterUnzip) {
       await unlink(zipPath);

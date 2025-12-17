@@ -1,9 +1,10 @@
-dist
-node_modules
-*.vsix
-venv/
-site/
+__pycache__/
 .mypy_cache/
 .pytest_cache/
-__pycache__/
 *.pyc
+*.vsix
+dist
+node_modules
+site/
+src/helpers/settings.ts
+venv/
