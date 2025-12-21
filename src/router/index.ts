@@ -27,17 +27,26 @@ const SHUTDOWN_DELAY =
     : 30000;
 const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
+// Initialize log directory once at startup
+if (LOG_FILE) {
+  try {
+    const dir = dirname(LOG_FILE);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+    if (!existsSync(LOG_FILE)) {
+      writeFileSync(LOG_FILE, '');
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to initialize log directory: ${e}`);
+  }
+}
+
 function log(msg: string) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   if (LOG_FILE) {
     try {
-      const dir = dirname(LOG_FILE);
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true });
-      }
-      if (!existsSync(LOG_FILE)) {
-        writeFileSync(LOG_FILE, '');
-      }
       appendFileSync(LOG_FILE, `${line}\n`);
     } catch (e) {
       // eslint-disable-next-line no-console
