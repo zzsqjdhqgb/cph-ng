@@ -32,7 +32,12 @@ function log(msg: string) {
         writeFileSync(LOG_FILE, '');
       }
       appendFileSync(LOG_FILE, `${line}\n`);
-    } catch (e) {}
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${new Date().toISOString()}] Failed to write to log file ${LOG_FILE}: ${e}`,
+      );
+    }
   }
   // Always emit to stderr so errors are visible even without log file
   // eslint-disable-next-line no-console
