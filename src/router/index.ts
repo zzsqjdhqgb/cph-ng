@@ -1,7 +1,7 @@
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { dirname } from 'path';
-import { WebSocket, WebSocketServer } from 'ws';
+import { RawData, WebSocket, WebSocketServer } from 'ws';
 import {
   CompanionClientMsg,
   CompanionMsg,
@@ -191,7 +191,7 @@ wss.on('connection', (ws: WebSocket) => {
   clients.add(ws);
   resetShutdownTimer();
 
-  ws.on('message', (message: string) => {
+  ws.on('message', (message: RawData) => {
     try {
       const msg: CompanionClientMsg = JSON.parse(message.toString());
 
