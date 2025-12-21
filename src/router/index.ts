@@ -13,6 +13,7 @@ import {
 const httpPortEnv = Number(process.env.CPH_NG_HTTP_PORT);
 const wsPortEnv = Number(process.env.CPH_NG_WS_PORT);
 const shutdownDelayEnv = Number(process.env.CPH_NG_SHUTDOWN_DELAY);
+const batchTimeoutEnv = Number(process.env.CPH_NG_BATCH_TIMEOUT);
 
 const HTTP_PORT =
   Number.isFinite(httpPortEnv) && httpPortEnv > 0 ? httpPortEnv : 27121;
@@ -56,9 +57,12 @@ let shutdownTimer: NodeJS.Timeout | null = null;
 const submissionQueue: CphSubmitMsgData[] = [];
 const batches = new Map<string, CompanionProblem[]>();
 const batchTimers = new Map<string, NodeJS.Timeout>();
-const BATCH_TIMEOUT = 60000;
+const BATCH_TIMEOUT =
+  Number.isFinite(batchTimeoutEnv) && batchTimeoutEnv > 0
+    ? batchTimeoutEnv
+    : 60000;
 
-let httpServer: ReturnType<typeof createServer>;
+let httpServer: ReturnType<typeof createServer> | null = null;
 let wss: WebSocketServer;
 
 // --- Helper Functions ---

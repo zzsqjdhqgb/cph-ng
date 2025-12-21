@@ -185,6 +185,7 @@ export class CompanionClient {
               CPH_NG_HTTP_PORT: String(httpPort),
               CPH_NG_WS_PORT: String(wsPort),
               CPH_NG_SHUTDOWN_DELAY: '30000',
+              CPH_NG_BATCH_TIMEOUT: '60000',
             },
           });
           child.unref();
