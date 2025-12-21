@@ -157,9 +157,6 @@ export default (_env, argv) => {
         type: 'module',
       },
       chunkFormat: 'module',
-      clean: {
-        keep: /generated\.json|router\.js|frontend\.js|styles\.css/,
-      },
     },
     externals: { vscode: 'vscode' },
     plugins: [
