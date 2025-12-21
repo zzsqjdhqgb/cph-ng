@@ -184,6 +184,7 @@ export class CompanionClient {
               CPH_NG_LOG_FILE: logFile,
               CPH_NG_HTTP_PORT: String(httpPort),
               CPH_NG_WS_PORT: String(wsPort),
+              CPH_NG_SHUTDOWN_DELAY: '30000',
             },
           });
           child.unref();

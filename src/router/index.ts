@@ -12,12 +12,18 @@ import {
 
 const httpPortEnv = Number(process.env.CPH_NG_HTTP_PORT);
 const wsPortEnv = Number(process.env.CPH_NG_WS_PORT);
+const shutdownDelayEnv = Number(process.env.CPH_NG_SHUTDOWN_DELAY);
 
 const HTTP_PORT =
   Number.isFinite(httpPortEnv) && httpPortEnv > 0 ? httpPortEnv : 27121;
 const WS_PORT =
   Number.isFinite(wsPortEnv) && wsPortEnv > 0 ? wsPortEnv : HTTP_PORT + 1;
-const SHUTDOWN_DELAY = 30000;
+// Shutdown delay (ms). Default 30s balances quick cleanup with avoiding
+// rapid shutdown/start cycles when clients connect intermittently.
+const SHUTDOWN_DELAY =
+  Number.isFinite(shutdownDelayEnv) && shutdownDelayEnv >= 0
+    ? shutdownDelayEnv
+    : 30000;
 const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
 function log(msg: string) {
