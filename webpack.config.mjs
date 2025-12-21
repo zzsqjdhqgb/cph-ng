@@ -90,6 +90,11 @@ const generateBuildInfo = () => {
 export default (_env, argv) => {
   const isProd = argv.mode === 'production';
 
+  const wsDefinePlugin = new webpack.DefinePlugin({
+    'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
+    'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify(true),
+  });
+
   /** @type WebpackConfig */
   const baseConfig = {
     mode: isProd ? 'production' : 'development',
@@ -162,10 +167,7 @@ export default (_env, argv) => {
     plugins: [
       generateSettings(),
       generateBuildInfo(),
-      new webpack.DefinePlugin({
-        'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
-        'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify(true),
-      }),
+      wsDefinePlugin,
       new CopyPlugin({
         patterns: [
           { from: 'testlib/testlib.h', to: 'testlib/testlib.h' },
@@ -228,12 +230,7 @@ export default (_env, argv) => {
       vscode: 'vscode',
     },
     experiments: { outputModule: true },
-    plugins: [
-      new webpack.DefinePlugin({
-        'process.env.WS_NO_BUFFER_UTIL': JSON.stringify(true),
-        'process.env.WS_NO_UTF_8_VALIDATE': JSON.stringify(true),
-      }),
-    ],
+    plugins: [wsDefinePlugin],
     cache: {
       type: 'filesystem',
       buildDependencies: { config: [__filename] },
