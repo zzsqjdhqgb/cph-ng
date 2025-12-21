@@ -63,7 +63,9 @@ function gracefulShutdown(reason: string, error?: any) {
   for (const client of clients) {
     try {
       client.terminate();
-    } catch (e) {}
+    } catch (e) {
+      log(`Error terminating client: ${e}`);
+    }
   }
   clients.clear();
 
