@@ -50,6 +50,9 @@ let shutdownTimer: NodeJS.Timeout | null = null;
 const submissionQueue: CphSubmitMsgData[] = [];
 const batches = new Map<string, CompanionProblem[]>();
 
+let httpServer: ReturnType<typeof createServer>;
+let wss: WebSocketServer;
+
 // --- Helper Functions ---
 
 function gracefulShutdown(reason: string, error?: any) {
@@ -75,15 +78,21 @@ function gracefulShutdown(reason: string, error?: any) {
   clients.clear();
 
   // Close WebSocket server
-  wss.close(() => {
-    log('WebSocket server closed');
-  });
+  if (wss) {
+    wss.close(() => {
+      log('WebSocket server closed');
+    });
+  }
 
   // Close HTTP server
-  httpServer.close(() => {
-    log('HTTP server closed');
+  if (httpServer) {
+    httpServer.close(() => {
+      log('HTTP server closed');
+      process.exit(error ? 1 : 0);
+    });
+  } else {
     process.exit(error ? 1 : 0);
-  });
+  }
 
   // Force exit if graceful shutdown takes too long
   setTimeout(() => {
@@ -115,7 +124,7 @@ function broadcast(message: CompanionMsg, exclude?: WebSocket) {
 
 // --- HTTP Server ---
 
-const httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
+httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
@@ -192,7 +201,7 @@ httpServer.on('error', (err) => {
 
 // --- WebSocket Server ---
 
-const wss = new WebSocketServer({ port: WS_PORT });
+wss = new WebSocketServer({ port: WS_PORT });
 
 wss.on('connection', (ws: WebSocket) => {
   clients.add(ws);
