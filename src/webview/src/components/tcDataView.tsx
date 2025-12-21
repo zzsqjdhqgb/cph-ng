@@ -27,7 +27,8 @@ import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import TextareaAutosize from 'react-textarea-autosize';
 import { ITcIo } from '@/types/types';
-import { basename, msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
+import { basename } from '../utils';
 import CphFlex from './base/cphFlex';
 import CphLink from './base/cphLink';
 import CphButton from './cphButton';
@@ -111,6 +112,7 @@ const TcDataView = ({
   tabIndex,
 }: CodeMirrorSectionProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [copied, setCopied] = useState(false);
   const [internalValue, setInternalValue] = useState(value);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -161,7 +163,7 @@ const TcDataView = ({
             <CphLink
               name={internalValue.data}
               onClick={() => {
-                msg({
+                dispatch({
                   type: 'openFile',
                   path: internalValue.data,
                 });

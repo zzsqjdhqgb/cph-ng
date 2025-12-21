@@ -2,9 +2,11 @@
 
 All notable changes to the "cph-ng" extension will be documented in this file.
 
-## [Unreleased]
+## 0.5.6
 
 - **fix**: mkdir in root
+- **feat**: try to implement auto focus
+- **feat**: suppress backend data refresh
 
 ## 0.5.5
 

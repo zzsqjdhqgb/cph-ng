@@ -56,7 +56,7 @@ class Store {
     return fullProblem;
   }
 
-  public static async dataRefresh() {
+  public static async dataRefresh(noMsg = false) {
     this.logger.trace('Starting data refresh');
     const activePath = getActivePath();
     const idles: FullProblem[] = this.fullProblems.filter(
@@ -73,21 +73,22 @@ class Store {
     const fullProblem = await this.getFullProblem(activePath);
     const canImport =
       !!activePath && existsSync(CphProblem.getProbBySrc(activePath));
-    sidebarProvider.event.emit('problem', {
-      problem: fullProblem && {
-        problem: fullProblem.problem,
-        startTime: fullProblem.startTime,
-      },
-      bgProblems: this.fullProblems
-        .map((bgProblem) => ({
-          name: bgProblem.problem.name,
-          srcPath: bgProblem.problem.src.path,
-        }))
-        .filter(
-          (bgProblem) => bgProblem.srcPath !== fullProblem?.problem.src.path,
-        ),
-      canImport,
-    });
+    noMsg ||
+      sidebarProvider.event.emit('problem', {
+        problem: fullProblem && {
+          problem: fullProblem.problem,
+          startTime: fullProblem.startTime,
+        },
+        bgProblems: this.fullProblems
+          .map((bgProblem) => ({
+            name: bgProblem.problem.name,
+            srcPath: bgProblem.problem.src.path,
+          }))
+          .filter(
+            (bgProblem) => bgProblem.srcPath !== fullProblem?.problem.src.path,
+          ),
+        canImport,
+      });
     ExtensionManager.event.emit('context', {
       hasProblem: !!fullProblem,
       canImport,

@@ -21,7 +21,7 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
 import CphFlex from './base/cphFlex';
 import Tips from './tips';
 
@@ -31,6 +31,7 @@ interface CreateProblemProps {
 
 const CreateProblemView = ({ canImport }: CreateProblemProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   return (
     <CphFlex column gap={5} paddingY={2}>
       <CphFlex column>
@@ -50,7 +51,7 @@ const CreateProblemView = ({ canImport }: CreateProblemProps) => {
               variant={'contained'}
               endIcon={<InputIcon />}
               onClick={() => {
-                msg({ type: 'importProblem' });
+                dispatch({ type: 'importProblem' });
               }}
             >
               {t('createProblemView.importButton')}
@@ -61,7 +62,7 @@ const CreateProblemView = ({ canImport }: CreateProblemProps) => {
             variant={canImport ? 'outlined' : 'contained'}
             endIcon={<SendIcon />}
             onClick={() => {
-              msg({ type: 'createProblem' });
+              dispatch({ type: 'createProblem' });
             }}
           >
             {t('createProblemView.createButton')}

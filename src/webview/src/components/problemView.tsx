@@ -18,7 +18,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IProblem } from '@/types/types';
-import { msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
 import CphFlex from './base/cphFlex';
 import CphMenu from './base/cphMenu';
 import ErrorBoundary from './base/errorBoundary';
@@ -33,6 +33,7 @@ interface ProblemViewProps {
 
 const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   return (
     <>
       <ErrorBoundary>
@@ -54,7 +55,7 @@ const ProblemView = ({ problem, startTime }: ProblemViewProps) => {
           <CphMenu
             menu={{
               [t('problemView.menu.clearStatus')]: () => {
-                msg({ type: 'clearStatus' });
+                dispatch({ type: 'clearStatus' });
               },
             }}
             flex={1}

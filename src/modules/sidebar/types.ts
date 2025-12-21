@@ -1,9 +1,9 @@
-import { Problem } from '@/types';
+import { IProblem } from '@/types';
 
 export interface ProblemEventData {
   canImport: boolean;
   problem: {
-    problem: Problem;
+    problem: IProblem;
     startTime: number;
   } | null;
   bgProblems: {

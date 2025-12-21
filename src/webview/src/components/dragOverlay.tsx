@@ -25,11 +25,13 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { basename, msg } from '../utils';
+import { useProblemContext } from '../context/ProblemContext';
+import { basename } from '../utils';
 import CphFlex from './base/cphFlex';
 
 const DragOverlay = () => {
   const { t } = useTranslation();
+  const { dispatch } = useProblemContext();
   const [dragData, setDragData] = useState<string[] | null | undefined>(null);
 
   const onDragOver = (e: DragEvent) =>
@@ -49,7 +51,7 @@ const DragOverlay = () => {
       setDragData(null);
     } else {
       setDragData(items);
-      msg({ type: 'dragDrop', items });
+      dispatch({ type: 'dragDrop', items });
       setTimeout(() => setDragData(null), 1000);
     }
   };
