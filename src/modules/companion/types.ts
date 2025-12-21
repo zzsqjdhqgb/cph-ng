@@ -11,6 +11,7 @@ export type CphSubmitData = {
 
 export interface CphSubmitMsgData extends CphSubmitData {
   clientId: string;
+  submissionId: string;
 }
 
 export type CphSubmitResponse = CphSubmitEmpty | CphSubmitData;
@@ -63,6 +64,7 @@ export interface BatchClaimedMsg {
 export interface SubmissionConsumedMsg {
   type: 'submission-consumed';
   clientId: string;
+  submissionId: string;
 }
 
 export type CompanionMsg =

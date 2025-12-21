@@ -72,10 +72,14 @@ export class Submitter {
             return;
           }
 
-          CompanionClient.sendSubmit(requestData);
+          const submissionId = CompanionClient.sendSubmit(requestData);
+
+          if (!submissionId) {
+            return;
+          }
 
           await Promise.race([
-            CompanionClient.waitForSubmissionConsumed(),
+            CompanionClient.waitForSubmissionConsumed(submissionId),
             new Promise((_, reject) => {
               const d = token.onCancellationRequested(() => {
                 d.dispose();

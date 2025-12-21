@@ -190,41 +190,47 @@ export class CompanionClient {
         break;
       case 'submission-consumed':
         if (msg.clientId === this.clientId) {
-          this.eventEmitter.emit('submission-consumed');
+          this.eventEmitter.emit('submission-consumed', msg.submissionId);
         }
         break;
     }
   }
 
-  public static sendSubmit(data: CphSubmitData) {
+  public static sendSubmit(data: CphSubmitData): string | null {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const submissionId = randomUUID();
       this.ws.send(
         JSON.stringify({
           type: 'submit',
           data: {
             ...data,
             clientId: this.clientId,
+            submissionId,
           },
         }),
       );
       Io.info(l10n.t('Submission sent to queue'));
-    } else {
-      Io.error(l10n.t('Companion Router not connected'));
+      return submissionId;
     }
+    Io.error(l10n.t('Companion Router not connected'));
+    return null;
   }
 
-  public static waitForSubmissionConsumed(): Promise<void> {
+  public static waitForSubmissionConsumed(submissionId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       let timeout: NodeJS.Timeout;
-      const listener = () => {
-        clearTimeout(timeout);
-        resolve();
+      const listener = (id: string) => {
+        if (id === submissionId) {
+          clearTimeout(timeout);
+          this.eventEmitter.removeListener('submission-consumed', listener);
+          resolve();
+        }
       };
       timeout = setTimeout(() => {
         this.eventEmitter.removeListener('submission-consumed', listener);
         reject(new Error(l10n.t('Submission timeout')));
       }, 30000);
-      this.eventEmitter.once('submission-consumed', listener);
+      this.eventEmitter.on('submission-consumed', listener);
     });
   }
 

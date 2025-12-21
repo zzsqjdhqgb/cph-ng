@@ -166,6 +166,7 @@ const httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
       broadcast({
         type: 'submission-consumed',
         clientId: submission.clientId,
+        submissionId: submission.submissionId,
       });
     }
   } else {
