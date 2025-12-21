@@ -88,7 +88,7 @@ export class CompanionClient {
       const ws = new WebSocket(this.getWsUrl());
 
       const onOpen = () => {
-        cleanup();
+        cleanup(false);
         this.ws = ws;
         this.setupListeners(ws);
         resolve(true);
@@ -96,24 +96,33 @@ export class CompanionClient {
 
       const onError = (err: Error) => {
         this.logger.warn('WebSocket connection error', err);
-        try {
-          ws.terminate();
-        } catch {
-          // Ignore errors during closure
-        }
-        cleanup();
+        cleanup(true);
         resolve(false);
       };
 
       const onClose = () => {
-        cleanup();
+        cleanup(true);
         resolve(false);
       };
 
-      const cleanup = () => {
+      const timeout = setTimeout(() => {
+        this.logger.warn('WebSocket connection timeout');
+        cleanup(true);
+        resolve(false);
+      }, 5000);
+
+      const cleanup = (terminate: boolean) => {
+        clearTimeout(timeout);
         ws.removeListener('open', onOpen);
         ws.removeListener('error', onError);
         ws.removeListener('close', onClose);
+        if (terminate) {
+          try {
+            ws.terminate();
+          } catch {
+            // Ignore errors during closure
+          }
+        }
       };
 
       ws.on('open', onOpen);
