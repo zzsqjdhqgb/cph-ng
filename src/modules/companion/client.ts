@@ -237,21 +237,42 @@ export class CompanionClient {
     return null;
   }
 
-  public static waitForSubmissionConsumed(submissionId: string): Promise<void> {
+  public static waitForSubmissionConsumed(
+    submissionId: string,
+    signal?: AbortSignal,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (signal?.aborted) {
+        return reject(new Error('Aborted'));
+      }
+
       let timeout: NodeJS.Timeout;
+
+      const cleanup = () => {
+        clearTimeout(timeout);
+        this.eventEmitter.removeListener('submission-consumed', listener);
+        signal?.removeEventListener('abort', onAbort);
+      };
+
+      const onAbort = () => {
+        cleanup();
+        reject(new Error('Aborted'));
+      };
+
       const listener = (id: string) => {
         if (id === submissionId) {
-          clearTimeout(timeout);
-          this.eventEmitter.removeListener('submission-consumed', listener);
+          cleanup();
           resolve();
         }
       };
+
       timeout = setTimeout(() => {
-        this.eventEmitter.removeListener('submission-consumed', listener);
+        cleanup();
         reject(new Error(l10n.t('Submission timeout')));
       }, 30000);
+
       this.eventEmitter.on('submission-consumed', listener);
+      signal?.addEventListener('abort', onAbort);
     });
   }
 

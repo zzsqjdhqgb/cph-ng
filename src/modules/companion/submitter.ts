@@ -86,19 +86,28 @@ export class Submitter {
             return;
           }
 
+          const abortController = new AbortController();
           let disposable: { dispose(): any } | undefined;
           try {
             await Promise.race([
-              CompanionClient.waitForSubmissionConsumed(submissionId),
+              CompanionClient.waitForSubmissionConsumed(
+                submissionId,
+                abortController.signal,
+              ),
               new Promise((_, reject) => {
                 disposable = token.onCancellationRequested(() => {
                   CompanionClient.sendCancelSubmit(submissionId);
+                  abortController.abort();
                   reject(new CancellationError());
                 });
               }),
             ]);
           } finally {
             disposable?.dispose();
+            // Ensure we abort the wait if the race finished by other means (though here it's mostly for the cancellation path)
+            // If waitForSubmissionConsumed finished first, aborting does nothing.
+            // If cancellation happened, we already aborted above, but it's safe to call again.
+            abortController.abort();
           }
 
           Io.info(l10n.t('Submission payload consumed by companion'));
