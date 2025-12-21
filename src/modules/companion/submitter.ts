@@ -105,11 +105,28 @@ export class Submitter {
           Submitter.logger.error('Submission failed', { error: err });
           window.showErrorMessage(
             l10n.t('Submission failed: {msg}', {
-              msg: err?.message || String(err),
+              msg: Submitter.getErrorMessage(err),
             }),
           );
         }
       },
     );
+  }
+
+  private static getErrorMessage(err: unknown): string {
+    if (err instanceof Error) {
+      return err.message;
+    }
+    if (typeof err === 'string') {
+      return err;
+    }
+    if (typeof err === 'object' && err !== null && 'message' in err) {
+      return String((err as any).message);
+    }
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return String(err);
+    }
   }
 }
