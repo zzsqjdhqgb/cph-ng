@@ -7,7 +7,12 @@ import { Problem } from '@/types';
 import { CompanionClient } from './client';
 import { CphSubmitEmpty, CphSubmitResponse } from './types';
 
-const ERR_CANCELLED = 'Cancelled';
+class CancellationError extends Error {
+  constructor() {
+    super('Cancelled');
+    this.name = 'CancellationError';
+  }
+}
 
 export class Submitter {
   private static logger: Logger = new Logger('companionSubmitter');
@@ -88,7 +93,7 @@ export class Submitter {
               new Promise((_, reject) => {
                 disposable = token.onCancellationRequested(() => {
                   CompanionClient.sendCancelSubmit(submissionId);
-                  reject(new Error(ERR_CANCELLED));
+                  reject(new CancellationError());
                 });
               }),
             ]);
@@ -98,7 +103,7 @@ export class Submitter {
 
           Io.info(l10n.t('Submission payload consumed by companion'));
         } catch (err: any) {
-          if (err.message === ERR_CANCELLED) {
+          if (err instanceof CancellationError) {
             Io.info(l10n.t('Submission cancelled by user.'));
             return;
           }
