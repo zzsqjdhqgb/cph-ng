@@ -50,33 +50,35 @@ export class CompanionClient {
         cancellable: false,
       },
       async (progress) => {
-        const maxRetries = 3;
-        for (let i = 0; i <= maxRetries; i++) {
-          if (i > 0) {
-            const msg = l10n.t(
-              'Connection failed. Retrying... ({attempt}/{max})',
-              { attempt: i, max: maxRetries },
-            );
-            progress.report({
-              message: msg,
-              increment: 100 / maxRetries,
-            });
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-            await this.spawnRouter();
-          }
+        const SPAWN_WAIT_MS = 3000;
 
-          const success = await this.attemptConnection();
-          if (success) {
-            this.isConnecting = false;
-            return;
-          }
+        // 1. First attempt
+        if (await this.attemptConnection()) {
+          this.isConnecting = false;
+          return;
+        }
+
+        // 2. Spawn router
+        progress.report({
+          message: l10n.t('Connection failed. Spawning Router...'),
+          increment: 33,
+        });
+        await this.spawnRouter();
+        await new Promise((resolve) => setTimeout(resolve, SPAWN_WAIT_MS));
+
+        // 3. Second attempt
+        progress.report({
+          message: l10n.t('Retrying connection...'),
+          increment: 33,
+        });
+        if (await this.attemptConnection()) {
+          this.isConnecting = false;
+          return;
         }
 
         this.isConnecting = false;
         Io.error(
-          l10n.t(
-            'Failed to connect to Companion Router after multiple attempts.',
-          ),
+          l10n.t('Failed to connect to Companion Router after spawning.'),
         );
       },
     );
