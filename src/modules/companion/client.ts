@@ -268,7 +268,7 @@ export class CompanionClient {
       timeout = setTimeout(() => {
         cleanup();
         reject(new Error(l10n.t('Submission timeout')));
-      }, 30000);
+      }, 30000); // 30s timeout matches cph-submit's polling interval (3000ms) * 10 retries
 
       this.eventEmitter.on('submission-consumed', listener);
       signal?.addEventListener('abort', onAbort);
