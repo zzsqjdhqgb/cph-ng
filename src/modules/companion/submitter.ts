@@ -17,7 +17,7 @@ export class Submitter {
     if (!problem) {
       return;
     }
-    // Use 'as const' to ensure keys are treated as literal types for type-safe indexing
+    // Map of language display names to submission language IDs used for QuickPick and persistence
     const languageList = {
       'GNU G++17 7.3.0': 54,
       'GNU G++20 13.2 (64 bit, winlibs)': 89,
