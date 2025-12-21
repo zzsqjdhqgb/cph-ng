@@ -49,6 +49,8 @@ const clients = new Set<WebSocket>();
 let shutdownTimer: NodeJS.Timeout | null = null;
 const submissionQueue: CphSubmitMsgData[] = [];
 const batches = new Map<string, CompanionProblem[]>();
+const batchTimers = new Map<string, NodeJS.Timeout>();
+const BATCH_TIMEOUT = 60000;
 
 let httpServer: ReturnType<typeof createServer>;
 let wss: WebSocketServer;
@@ -66,6 +68,12 @@ function gracefulShutdown(reason: string, error?: any) {
     clearTimeout(shutdownTimer);
     shutdownTimer = null;
   }
+
+  // Clear all batch timers
+  for (const timer of batchTimers.values()) {
+    clearTimeout(timer);
+  }
+  batchTimers.clear();
 
   // Close all WebSocket connections
   for (const client of clients) {
@@ -152,11 +160,26 @@ httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
         if (!currentBatch) {
           currentBatch = [];
           batches.set(batchId, currentBatch);
+
+          // Set cleanup timer for new batch
+          const timer = setTimeout(() => {
+            if (batches.has(batchId)) {
+              batches.delete(batchId);
+              batchTimers.delete(batchId);
+              log(`Batch ${batchId} timed out and was removed`);
+            }
+          }, BATCH_TIMEOUT);
+          batchTimers.set(batchId, timer);
         }
         currentBatch.push(data);
 
         if (currentBatch.length >= batchSize) {
           batches.delete(batchId);
+          const timer = batchTimers.get(batchId);
+          if (timer) {
+            clearTimeout(timer);
+            batchTimers.delete(batchId);
+          }
           broadcast({
             type: 'batch-available',
             batchId,
@@ -179,6 +202,8 @@ httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
 
     if (submission && submission.clientId) {
       log(`Submission consumed for client ${submission.clientId}`);
+      // Broadcast consumption even if the original client might have disconnected.
+      // The submission itself is processed independently of the client's connection state.
       broadcast({
         type: 'submission-consumed',
         clientId: submission.clientId,

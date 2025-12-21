@@ -79,16 +79,20 @@ export class Submitter {
             return;
           }
 
-          await Promise.race([
-            CompanionClient.waitForSubmissionConsumed(submissionId),
-            new Promise((_, reject) => {
-              const d = token.onCancellationRequested(() => {
-                d.dispose();
-                CompanionClient.sendCancelSubmit(submissionId);
-                reject(new Error('Cancelled'));
-              });
-            }),
-          ]);
+          let disposable: { dispose(): any } | undefined;
+          try {
+            await Promise.race([
+              CompanionClient.waitForSubmissionConsumed(submissionId),
+              new Promise((_, reject) => {
+                disposable = token.onCancellationRequested(() => {
+                  CompanionClient.sendCancelSubmit(submissionId);
+                  reject(new Error('Cancelled'));
+                });
+              }),
+            ]);
+          } finally {
+            disposable?.dispose();
+          }
 
           Io.info(l10n.t('Submission payload consumed by companion'));
         } catch (err: any) {
