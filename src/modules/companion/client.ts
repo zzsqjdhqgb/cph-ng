@@ -60,7 +60,7 @@ export class CompanionClient {
             );
             progress.report({
               message: msg,
-              increment: 100 / (maxRetries + 1),
+              increment: 100 / maxRetries,
             });
             await new Promise((resolve) => setTimeout(resolve, 2000));
             await this.spawnRouter();
