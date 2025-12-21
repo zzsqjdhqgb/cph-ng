@@ -245,4 +245,16 @@ export class CompanionClient {
       );
     }
   }
+
+  public static sendCancelSubmit(submissionId: string) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(
+        JSON.stringify({
+          type: 'cancel-submit',
+          submissionId,
+          clientId: this.clientId,
+        }),
+      );
+    }
+  }
 }

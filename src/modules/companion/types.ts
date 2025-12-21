@@ -83,4 +83,10 @@ export interface ClaimBatchMsg {
   clientId: string;
 }
 
-export type CompanionClientMsg = SubmitMsg | ClaimBatchMsg;
+export interface CancelSubmitMsg {
+  type: 'cancel-submit';
+  submissionId: string;
+  clientId: string;
+}
+
+export type CompanionClientMsg = SubmitMsg | ClaimBatchMsg | CancelSubmitMsg;

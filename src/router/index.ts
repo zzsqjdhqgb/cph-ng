@@ -197,6 +197,16 @@ wss.on('connection', (ws: WebSocket) => {
 
       if (msg.type === 'submit') {
         submissionQueue.push(msg.data);
+      } else if (msg.type === 'cancel-submit') {
+        const index = submissionQueue.findIndex(
+          (s) => s.submissionId === msg.submissionId,
+        );
+        if (index !== -1) {
+          submissionQueue.splice(index, 1);
+          log(
+            `Submission ${msg.submissionId} cancelled and removed from queue`,
+          );
+        }
       } else if (msg.type === 'claim-batch') {
         // Broadcast to others that this batch is claimed
         broadcast(

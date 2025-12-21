@@ -83,6 +83,7 @@ export class Submitter {
             new Promise((_, reject) => {
               const d = token.onCancellationRequested(() => {
                 d.dispose();
+                CompanionClient.sendCancelSubmit(submissionId);
                 reject(new Error('Cancelled'));
               });
             }),
