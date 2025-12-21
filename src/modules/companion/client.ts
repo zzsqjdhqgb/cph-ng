@@ -51,8 +51,6 @@ export class CompanionClient {
         cancellable: false,
       },
       async (progress) => {
-        const SPAWN_WAIT_MS = 3000;
-
         // 1. First attempt
         if (await this.attemptConnection()) {
           this.isConnecting = false;
@@ -65,7 +63,6 @@ export class CompanionClient {
           increment: 33,
         });
         await this.spawnRouter();
-        await new Promise((resolve) => setTimeout(resolve, SPAWN_WAIT_MS));
 
         // 3. Second attempt
         progress.report({
@@ -192,8 +189,10 @@ export class CompanionClient {
           this.logger.info(
             `Router process spawned on ports http=${httpPort}, ws=${wsPort}`,
           );
-          // Give it a moment to start
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          // Wait for the router process to fully initialize and start listening on ports
+          // 3000ms is chosen to be safe even on slower machines
+          const SPAWN_WAIT_MS = 3000;
+          await new Promise((resolve) => setTimeout(resolve, SPAWN_WAIT_MS));
         } catch (e) {
           this.logger.error('Failed to spawn router', e);
         }
