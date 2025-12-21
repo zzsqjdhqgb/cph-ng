@@ -53,6 +53,7 @@ export class Handler {
         if (Handler.claimedBatches.has(batchId)) {
           Io.warn(l10n.t('Problems already imported by another instance'));
         } else {
+          Handler.claimedBatches.add(batchId);
           CompanionClient.claimBatch(batchId);
           await Handler.processProblem(problems);
         }
