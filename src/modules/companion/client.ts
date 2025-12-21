@@ -13,7 +13,6 @@ import { CompanionMsg, CphSubmitData } from './types';
 export class CompanionClient {
   private static logger = new Logger('companionClient');
   private static ws: WebSocket | null = null;
-  private static reconnectAttempts = 0;
   private static isConnecting = false;
   private static clientId = randomUUID();
   private static eventEmitter = new EventEmitter();
