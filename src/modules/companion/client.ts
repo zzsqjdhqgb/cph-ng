@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import { l10n, ProgressLocation, window } from 'vscode';
 import WebSocket from 'ws';
@@ -163,6 +164,14 @@ export class CompanionClient {
       async () => {
         this.logger.info('Spawning Companion Router process...');
         const routerScript = join(__dirname, 'router.js');
+
+        if (!existsSync(routerScript)) {
+          const errorMsg = `Companion Router script not found at ${routerScript}. Please ensure the extension is correctly built.`;
+          this.logger.error(errorMsg);
+          window.showErrorMessage(errorMsg);
+          return;
+        }
+
         const logFile = join(Settings.cache.directory, 'router.log');
         const { httpPort, wsPort } = this.getPorts();
 
