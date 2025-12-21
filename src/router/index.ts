@@ -208,15 +208,12 @@ wss.on('connection', (ws: WebSocket) => {
           );
         }
       } else if (msg.type === 'claim-batch') {
-        // Broadcast to others that this batch is claimed
-        broadcast(
-          {
-            type: 'batch-claimed',
-            batchId: msg.batchId,
-            claimedBy: msg.clientId, // Optional
-          },
-          ws,
-        ); // Exclude the sender
+        // Broadcast to all clients that this batch is claimed
+        broadcast({
+          type: 'batch-claimed',
+          batchId: msg.batchId,
+          claimedBy: msg.clientId, // Optional
+        });
       }
     } catch (e) {
       // Ignore invalid messages
