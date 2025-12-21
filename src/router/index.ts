@@ -223,7 +223,7 @@ httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
 });
 
 httpServer.listen(HTTP_PORT, () => {
-  // console.log(`HTTP Server listening on ${HTTP_PORT}`);
+  log(`HTTP Server listening on ${HTTP_PORT}`);
 
   // --- WebSocket Server ---
 
