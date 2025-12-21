@@ -226,9 +226,6 @@ export default (_env, argv) => {
       },
       chunkFormat: 'module',
     },
-    externals: {
-      vscode: 'vscode',
-    },
     experiments: { outputModule: true },
     plugins: [wsDefinePlugin],
     cache: {
