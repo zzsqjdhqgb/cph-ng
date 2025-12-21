@@ -112,7 +112,7 @@ function gracefulShutdown(reason: string, error?: any) {
   setTimeout(() => {
     log('Force exiting...');
     process.exit(error ? 1 : 0);
-  }, 1000);
+  }, 5000);
 }
 
 function resetShutdownTimer() {
