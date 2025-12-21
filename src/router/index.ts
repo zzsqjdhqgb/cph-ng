@@ -193,57 +193,57 @@ httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
 
 httpServer.listen(HTTP_PORT, () => {
   // console.log(`HTTP Server listening on ${HTTP_PORT}`);
+
+  // --- WebSocket Server ---
+
+  wss = new WebSocketServer({ port: WS_PORT });
+
+  wss.on('connection', (ws: WebSocket) => {
+    clients.add(ws);
+    resetShutdownTimer();
+
+    ws.on('message', (message: RawData) => {
+      try {
+        const msg: CompanionClientMsg = JSON.parse(message.toString());
+
+        if (msg.type === 'submit') {
+          submissionQueue.push(msg.data);
+        } else if (msg.type === 'cancel-submit') {
+          const index = submissionQueue.findIndex(
+            (s) => s.submissionId === msg.submissionId,
+          );
+          if (index !== -1) {
+            submissionQueue.splice(index, 1);
+            log(
+              `Submission ${msg.submissionId} cancelled and removed from queue`,
+            );
+          }
+        } else if (msg.type === 'claim-batch') {
+          // Broadcast to all clients that this batch is claimed
+          broadcast({
+            type: 'batch-claimed',
+            batchId: msg.batchId,
+            claimedBy: msg.clientId, // Optional
+          });
+        }
+      } catch (e) {
+        log(`Failed to parse WebSocket message: ${e}`);
+      }
+    });
+
+    ws.on('close', () => {
+      clients.delete(ws);
+      resetShutdownTimer();
+    });
+  });
+
+  wss.on('error', (err) => {
+    gracefulShutdown('WebSocket Server Error', err);
+  });
 });
 
 httpServer.on('error', (err) => {
   gracefulShutdown('HTTP Server Error', err);
-});
-
-// --- WebSocket Server ---
-
-wss = new WebSocketServer({ port: WS_PORT });
-
-wss.on('connection', (ws: WebSocket) => {
-  clients.add(ws);
-  resetShutdownTimer();
-
-  ws.on('message', (message: RawData) => {
-    try {
-      const msg: CompanionClientMsg = JSON.parse(message.toString());
-
-      if (msg.type === 'submit') {
-        submissionQueue.push(msg.data);
-      } else if (msg.type === 'cancel-submit') {
-        const index = submissionQueue.findIndex(
-          (s) => s.submissionId === msg.submissionId,
-        );
-        if (index !== -1) {
-          submissionQueue.splice(index, 1);
-          log(
-            `Submission ${msg.submissionId} cancelled and removed from queue`,
-          );
-        }
-      } else if (msg.type === 'claim-batch') {
-        // Broadcast to all clients that this batch is claimed
-        broadcast({
-          type: 'batch-claimed',
-          batchId: msg.batchId,
-          claimedBy: msg.clientId, // Optional
-        });
-      }
-    } catch (e) {
-      log(`Failed to parse WebSocket message: ${e}`);
-    }
-  });
-
-  ws.on('close', () => {
-    clients.delete(ws);
-    resetShutdownTimer();
-  });
-});
-
-wss.on('error', (err) => {
-  gracefulShutdown('WebSocket Server Error', err);
 });
 
 // Initial timer
