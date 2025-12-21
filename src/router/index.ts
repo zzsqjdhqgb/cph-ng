@@ -3,7 +3,10 @@ import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { dirname } from 'path';
 import { WebSocket, WebSocketServer } from 'ws';
 import {
+  CompanionClientMsg,
+  CompanionMsg,
   CompanionProblem,
+  CphSubmitMsgData,
   CphSubmitResponse,
 } from '../modules/companion/types';
 
@@ -39,7 +42,7 @@ function log(msg: string) {
 // State
 const clients = new Set<WebSocket>();
 let shutdownTimer: NodeJS.Timeout | null = null;
-const submissionQueue: any[] = [];
+const submissionQueue: CphSubmitMsgData[] = [];
 const batches = new Map<string, CompanionProblem[]>();
 
 // --- Helper Functions ---
@@ -94,7 +97,7 @@ function resetShutdownTimer() {
   }
 }
 
-function broadcast(message: any, exclude?: WebSocket) {
+function broadcast(message: CompanionMsg, exclude?: WebSocket) {
   const data = JSON.stringify(message);
   for (const client of clients) {
     if (client !== exclude && client.readyState === WebSocket.OPEN) {
@@ -189,7 +192,7 @@ wss.on('connection', (ws: WebSocket) => {
 
   ws.on('message', (message: string) => {
     try {
-      const msg = JSON.parse(message.toString());
+      const msg: CompanionClientMsg = JSON.parse(message.toString());
 
       if (msg.type === 'submit') {
         submissionQueue.push(msg.data);

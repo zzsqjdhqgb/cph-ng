@@ -8,7 +8,7 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { Handler } from './handler';
-import { CphSubmitData } from './types';
+import { CompanionMsg, CphSubmitData } from './types';
 
 export class CompanionClient {
   private static logger = new Logger('companionClient');
@@ -180,7 +180,7 @@ export class CompanionClient {
     );
   }
 
-  private static handleMessage(msg: any) {
+  private static handleMessage(msg: CompanionMsg) {
     switch (msg.type) {
       case 'batch-available':
         Handler.handleBatchAvailable(msg.batchId, msg.problems);
@@ -214,8 +214,17 @@ export class CompanionClient {
   }
 
   public static waitForSubmissionConsumed(): Promise<void> {
-    return new Promise((resolve) => {
-      this.eventEmitter.once('submission-consumed', resolve);
+    return new Promise((resolve, reject) => {
+      let timeout: NodeJS.Timeout;
+      const listener = () => {
+        clearTimeout(timeout);
+        resolve();
+      };
+      timeout = setTimeout(() => {
+        this.eventEmitter.removeListener('submission-consumed', listener);
+        reject(new Error(l10n.t('Submission timeout')));
+      }, 30000);
+      this.eventEmitter.once('submission-consumed', listener);
     });
   }
 

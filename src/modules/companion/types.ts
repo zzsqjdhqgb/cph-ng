@@ -8,6 +8,11 @@ export type CphSubmitData = {
   sourceCode: string;
   languageId: number;
 };
+
+export interface CphSubmitMsgData extends CphSubmitData {
+  clientId: string;
+}
+
 export type CphSubmitResponse = CphSubmitEmpty | CphSubmitData;
 
 export interface CompanionProblem {
@@ -42,3 +47,38 @@ export interface CompanionProblem {
     size: number;
   };
 }
+
+export interface BatchAvailableMsg {
+  type: 'batch-available';
+  batchId: string;
+  problems: CompanionProblem[];
+}
+
+export interface BatchClaimedMsg {
+  type: 'batch-claimed';
+  batchId: string;
+  claimedBy?: string;
+}
+
+export interface SubmissionConsumedMsg {
+  type: 'submission-consumed';
+  clientId: string;
+}
+
+export type CompanionMsg =
+  | BatchAvailableMsg
+  | BatchClaimedMsg
+  | SubmissionConsumedMsg;
+
+export interface SubmitMsg {
+  type: 'submit';
+  data: CphSubmitMsgData;
+}
+
+export interface ClaimBatchMsg {
+  type: 'claim-batch';
+  batchId: string;
+  clientId: string;
+}
+
+export type CompanionClientMsg = SubmitMsg | ClaimBatchMsg;
