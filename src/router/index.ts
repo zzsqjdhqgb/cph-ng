@@ -232,7 +232,7 @@ wss.on('connection', (ws: WebSocket) => {
         });
       }
     } catch (e) {
-      // Ignore invalid messages
+      log(`Failed to parse WebSocket message: ${e}`);
     }
   });
 
