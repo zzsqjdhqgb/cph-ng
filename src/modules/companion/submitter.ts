@@ -128,19 +128,6 @@ export class Submitter {
   }
 
   private static getErrorMessage(err: unknown): string {
-    if (err instanceof Error) {
-      return err.message;
-    }
-    if (typeof err === 'string') {
-      return err;
-    }
-    if (typeof err === 'object' && err !== null && 'message' in err) {
-      return String((err as any).message);
-    }
-    try {
-      return JSON.stringify(err);
-    } catch {
-      return String(err);
-    }
+    return (err as Error).message;
   }
 }
