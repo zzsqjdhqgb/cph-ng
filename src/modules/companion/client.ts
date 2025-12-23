@@ -9,7 +9,7 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { Handler } from './handler';
-import { CompanionMsg, CphSubmitData } from './types';
+import { CompanionClientMsg, CompanionMsg, CphSubmitData } from './types';
 
 export class CompanionClient {
   private static logger = new Logger('companionClient');
@@ -227,7 +227,7 @@ export class CompanionClient {
             clientId: this.clientId,
             submissionId,
           },
-        }),
+        } satisfies CompanionClientMsg),
       );
       Io.info(l10n.t('Submission sent to queue'));
       return submissionId;
