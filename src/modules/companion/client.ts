@@ -11,12 +11,26 @@ import Settings from '@/helpers/settings';
 import { Handler } from './handler';
 import { CompanionClientMsg, CompanionMsg, CphSubmitData } from './types';
 
+interface CompanionClientEvents {
+  'submission-consumed': (submissionId: string) => void;
+}
+
+interface TypedEventEmitter<T> {
+  on<K extends keyof T>(event: K, listener: T[K]): this;
+  emit<K extends keyof T>(
+    event: K,
+    ...args: Parameters<T[K] extends (...args: any) => any ? T[K] : never>
+  ): boolean;
+  removeListener<K extends keyof T>(event: K, listener: T[K]): this;
+}
+
 export class CompanionClient {
   private static logger = new Logger('companionClient');
   private static ws: WebSocket | null = null;
   private static isConnecting = false;
   private static clientId = randomUUID();
-  private static eventEmitter = new EventEmitter();
+  private static eventEmitter =
+    new EventEmitter() as unknown as TypedEventEmitter<CompanionClientEvents>;
 
   private static getPorts() {
     const httpPort = Settings.companion.listenPort;
