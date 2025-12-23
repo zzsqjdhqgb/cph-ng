@@ -10,21 +10,24 @@ import {
   CphSubmitResponse,
 } from '../modules/companion/types';
 
-const httpPortEnv = Number(process.env.CPH_NG_HTTP_PORT);
-const wsPortEnv = Number(process.env.CPH_NG_WS_PORT);
-const shutdownDelayEnv = Number(process.env.CPH_NG_SHUTDOWN_DELAY);
-const batchTimeoutEnv = Number(process.env.CPH_NG_BATCH_TIMEOUT);
+function getEnvOrExit(
+  key: string,
+  validator: (val: number) => boolean,
+): number {
+  const val = Number(process.env[key]);
+  if (!Number.isFinite(val) || !validator(val)) {
+    console.error(`Error: ${key} environment variable is not set or invalid.`);
+    process.exit(1);
+  }
+  return val;
+}
 
-const HTTP_PORT =
-  Number.isFinite(httpPortEnv) && httpPortEnv > 0 ? httpPortEnv : 27121;
-const WS_PORT =
-  Number.isFinite(wsPortEnv) && wsPortEnv > 0 ? wsPortEnv : HTTP_PORT + 1;
+const HTTP_PORT = getEnvOrExit('CPH_NG_HTTP_PORT', (v) => v > 0);
+const WS_PORT = getEnvOrExit('CPH_NG_WS_PORT', (v) => v > 0);
 // Shutdown delay (ms). Default 30s balances quick cleanup with avoiding
 // rapid shutdown/start cycles when clients connect intermittently.
-const SHUTDOWN_DELAY =
-  Number.isFinite(shutdownDelayEnv) && shutdownDelayEnv >= 0
-    ? shutdownDelayEnv
-    : 30000;
+const SHUTDOWN_DELAY = getEnvOrExit('CPH_NG_SHUTDOWN_DELAY', (v) => v >= 0);
+const BATCH_TIMEOUT = getEnvOrExit('CPH_NG_BATCH_TIMEOUT', (v) => v > 0);
 const LOG_FILE = process.env.CPH_NG_LOG_FILE;
 
 // Initialize log directory once at startup
@@ -66,10 +69,6 @@ let shutdownTimer: NodeJS.Timeout | null = null;
 const submissionQueue: CphSubmitMsgData[] = [];
 const batches = new Map<string, CompanionProblem[]>();
 const batchTimers = new Map<string, NodeJS.Timeout>();
-const BATCH_TIMEOUT =
-  Number.isFinite(batchTimeoutEnv) && batchTimeoutEnv > 0
-    ? batchTimeoutEnv
-    : 60000;
 
 let httpServer: ReturnType<typeof createServer> | null = null;
 let wss: WebSocketServer;
