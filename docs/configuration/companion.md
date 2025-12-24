@@ -44,6 +44,15 @@ Competitive Companion 浏览器扩展集成的设置。
 - **默认值**：根据评测而定
 - **用户影响**：提交到 Codeforces 时使用的编译器版本。
 
+## 提交超时
+
+### `cph-ng.companion.submissionTimeout`
+
+- **类型**：数字（毫秒）
+- **默认值**：`30000`
+- **用户影响**：等待 Companion Router 报告提交已被消费的最长时间。
+  队列拥堵或网络慢时可调大；想更快发现异常则可调小。
+
 ## 工作原理
 
 使用 Competitive Companion 时：

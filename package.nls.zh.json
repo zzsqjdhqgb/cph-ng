@@ -44,6 +44,7 @@
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.7": "第七列",
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.8": "第八列",
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.9": "第九列",
+  "cph-ng.configuration.companion.properties.submissionTimeout.markdownDescription": "设置等待 Companion Router 标记提交已消费的**超时时长（毫秒）**。队列慢可以调大，若想尽快得知异常可调小。",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.-1": "请选择",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.54": "GNU G++17 7.3.0",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.89": "GNU G++20 13.2 (64 位, winlibs)",

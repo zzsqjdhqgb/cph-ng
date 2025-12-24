@@ -255,6 +255,8 @@ export class CompanionClient {
     submissionId: string,
     signal?: AbortSignal,
   ): Promise<void> {
+    const configuredTimeout = Settings.companion.submissionTimeout;
+    const timeoutMs = configuredTimeout > 0 ? configuredTimeout : 30000;
     return new Promise((resolve, reject) => {
       if (signal?.aborted) {
         return reject(new Error('Aborted'));
@@ -283,7 +285,7 @@ export class CompanionClient {
       timeout = setTimeout(() => {
         cleanup();
         reject(new Error(l10n.t('Submission timeout')));
-      }, 30000); // 30s timeout matches cph-submit's polling interval (3000ms) * 10 retries
+      }, timeoutMs);
 
       this.eventEmitter.on('submission-consumed', listener);
       signal?.addEventListener('abort', onAbort);

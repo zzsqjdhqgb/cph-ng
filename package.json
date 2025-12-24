@@ -515,6 +515,11 @@
               "%cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.91%"
             ]
           },
+          "cph-ng.companion.submissionTimeout": {
+            "type": "number",
+            "default": 30000,
+            "markdownDescription": "%cph-ng.configuration.companion.properties.submissionTimeout.markdownDescription%"
+          },
           "cph-ng.companion.addTimestamp": {
             "type": "boolean",
             "default": true,

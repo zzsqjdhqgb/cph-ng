@@ -44,6 +44,7 @@
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.7": "The seventh column",
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.8": "The eighth column",
   "cph-ng.configuration.companion.properties.showPanel.markdownEnumDescriptions.9": "The ninth column",
+  "cph-ng.configuration.companion.properties.submissionTimeout.markdownDescription": "Set the **timeout (ms)** to wait for Codeforces submissions to be consumed by the Companion Router. Increase for slower queues; decrease for faster feedback.",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.-1": "Please select",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.54": "GNU G++17 7.3.0",
   "cph-ng.configuration.companion.properties.submitLanguage.enumItemLabels.89": "GNU G++20 13.2 (64 bit, winlibs)",
