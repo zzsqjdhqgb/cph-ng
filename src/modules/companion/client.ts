@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { spawn } from 'child_process';
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
@@ -164,7 +165,7 @@ export class CompanionClient {
       } catch (e) {
         this.logger.error('Failed to parse message', e);
         telemetry.error('companionMessageParse', e, {
-          dataLength: this.getPayloadLength(data),
+          dataLength: String(this.getPayloadLength(data)),
         });
       }
     });
