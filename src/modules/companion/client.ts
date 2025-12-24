@@ -8,6 +8,7 @@ import WebSocket from 'ws';
 import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
+import { telemetry } from '@/utils/global';
 import { Handler } from './handler';
 import { CompanionClientMsg, CompanionMsg, CphSubmitData } from './types';
 
@@ -152,6 +153,9 @@ export class CompanionClient {
         this.handleMessage(msg);
       } catch (e) {
         this.logger.error('Failed to parse message', e);
+        telemetry.error('companionMessageParse', e, {
+          dataLength: this.getPayloadLength(data),
+        });
       }
     });
 
@@ -314,5 +318,21 @@ export class CompanionClient {
         }),
       );
     }
+  }
+
+  private static getPayloadLength(data: WebSocket.RawData): number {
+    if (typeof data === 'string') {
+      return Buffer.byteLength(data);
+    }
+    if (Buffer.isBuffer(data)) {
+      return data.byteLength;
+    }
+    if (Array.isArray(data)) {
+      return data.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+    }
+    if (data instanceof ArrayBuffer) {
+      return data.byteLength;
+    }
+    return -1;
   }
 }
