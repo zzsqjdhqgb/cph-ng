@@ -121,6 +121,7 @@ export class CompanionClient {
         resolve(false);
       };
 
+      // Localhost handshake should complete quickly; longer timeouts would just stall reconnect loops.
       const timeout = setTimeout(() => {
         this.logger.warn('WebSocket connection timeout');
         cleanup(true);
@@ -219,10 +220,6 @@ export class CompanionClient {
           this.logger.info(
             `Router process spawned on ports http=${httpPort}, ws=${wsPort}`,
           );
-          // Wait for the router process to fully initialize and start listening on ports
-          // 3000ms is chosen to be safe even on slower machines
-          const SPAWN_WAIT_MS = 3000;
-          await new Promise((resolve) => setTimeout(resolve, SPAWN_WAIT_MS));
         } catch (e) {
           this.logger.error('Failed to spawn router', e);
         }
