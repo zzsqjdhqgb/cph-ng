@@ -4,6 +4,7 @@ import Io from '@/helpers/io';
 import Logger from '@/helpers/logger';
 import Settings from '@/helpers/settings';
 import { Problem } from '@/types';
+import { telemetry } from '@/utils/global';
 import { CompanionClient } from './client';
 import { CphSubmitEmpty, CphSubmitResponse } from './types';
 
@@ -117,6 +118,7 @@ export class Submitter {
             return;
           }
           Submitter.logger.error('Submission failed', { error: err });
+          telemetry.error('companionSubmissionFailed', err);
           window.showErrorMessage(
             l10n.t('Submission failed: {msg}', {
               msg: Submitter.getErrorMessage(err),
