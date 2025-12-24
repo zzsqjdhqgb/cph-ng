@@ -22,8 +22,8 @@ function getEnvOrExit(
   return val;
 }
 
-const HTTP_PORT = getEnvOrExit('CPH_NG_HTTP_PORT', (v) => v > 0);
-const WS_PORT = getEnvOrExit('CPH_NG_WS_PORT', (v) => v > 0);
+const HTTP_PORT = getEnvOrExit('CPH_NG_HTTP_PORT', (v) => v > 0 && v <= 65535);
+const WS_PORT = getEnvOrExit('CPH_NG_WS_PORT', (v) => v > 0 && v <= 65535);
 // Shutdown delay (ms). Default 30s balances quick cleanup with avoiding
 // rapid shutdown/start cycles when clients connect intermittently.
 const SHUTDOWN_DELAY = getEnvOrExit('CPH_NG_SHUTDOWN_DELAY', (v) => v >= 0);
