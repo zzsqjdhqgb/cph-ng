@@ -67,8 +67,8 @@ export class CompanionClient {
         cancellable: false,
       },
       async (progress) => {
-        // 1. First attempt
-        if (await this.attemptConnection()) {
+        // 1. First attempt window
+        if (await this.tryConnectWithin(3000)) {
           this.isConnecting = false;
           return;
         }
@@ -80,12 +80,12 @@ export class CompanionClient {
         });
         await this.spawnRouter();
 
-        // 3. Second attempt
+        // 3. Second attempt window
         progress.report({
           message: l10n.t('Retrying connection...'),
           increment: 33,
         });
-        if (await this.attemptConnection()) {
+        if (await this.tryConnectWithin(5000)) {
           this.isConnecting = false;
           return;
         }
@@ -124,7 +124,7 @@ export class CompanionClient {
         this.logger.warn('WebSocket connection timeout');
         cleanup(true);
         resolve(false);
-      }, 5000);
+      }, 1000);
 
       const cleanup = (terminate: boolean) => {
         clearTimeout(timeout);
@@ -144,6 +144,16 @@ export class CompanionClient {
       ws.on('error', onError);
       ws.on('close', onClose);
     });
+  }
+
+  private static async tryConnectWithin(durationMs: number): Promise<boolean> {
+    const deadline = Date.now() + durationMs;
+    do {
+      if (await this.attemptConnection()) {
+        return true;
+      }
+    } while (Date.now() < deadline);
+    return false;
   }
 
   private static setupListeners(ws: WebSocket) {
