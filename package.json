@@ -493,6 +493,11 @@
             "default": 27121,
             "markdownDescription": "%cph-ng.configuration.companion.properties.listenPort.markdownDescription%"
           },
+          "cph-ng.companion.wsPort": {
+            "type": "number",
+            "default": -1,
+            "markdownDescription": "%cph-ng.configuration.companion.properties.wsPort.markdownDescription%"
+          },
           "cph-ng.companion.customPathScript": {
             "type": "string",
             "default": "${extensionPath}/res/defaultScript.js",

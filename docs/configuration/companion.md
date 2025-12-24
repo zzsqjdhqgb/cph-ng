@@ -13,6 +13,15 @@ Competitive Companion 浏览器扩展集成的设置。
 - **用户影响**：CPH-NG 监听来自浏览器扩展的连接的端口。必须与 Competitive
   Companion 配置匹配。
 
+## WebSocket 端口
+
+### `cph-ng.companion.wsPort`
+
+- **类型**：数字
+- **默认值**：`-1`（自动使用 `listenPort + 1`）
+- **用户影响**：控制 Companion Router 暴露给 VS Code 的 WebSocket 端口。若需
+  将 HTTP 与 WS 端口完全分离，可指定具体值；保持 `-1` 时会维持旧行为。
+
 ## 文件保存
 
 ### `cph-ng.companion.showPanel`

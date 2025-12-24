@@ -34,9 +34,10 @@ export class CompanionClient {
 
   private static getPorts() {
     const httpPort = Settings.companion.listenPort;
+    const wsPortSetting = Settings.companion.wsPort;
     return {
       httpPort,
-      wsPort: httpPort + 1,
+      wsPort: wsPortSetting > 0 ? wsPortSetting : httpPort + 1,
     };
   }
 
