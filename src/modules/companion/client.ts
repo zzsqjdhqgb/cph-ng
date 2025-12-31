@@ -221,7 +221,15 @@ export class CompanionClient {
             `Router process spawned on ports http=${httpPort}, ws=${wsPort}`,
           );
         } catch (e) {
-          this.logger.error('Failed to spawn router', e);
+          const error = e instanceof Error ? e : new Error(String(e));
+          this.logger.error('Failed to spawn router', error);
+          window.showErrorMessage(
+            l10n.t(
+              'Failed to start Companion Router. See log for details: {message}',
+              { message: error.message },
+            ),
+          );
+          throw error;
         }
       },
     );
