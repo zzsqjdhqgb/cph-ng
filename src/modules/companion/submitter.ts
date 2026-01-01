@@ -34,12 +34,12 @@ export class Submitter {
     if (!(Object.values(languageList) as number[]).includes(submitLanguageId)) {
       const choice = await window.showQuickPick(Object.keys(languageList), {
         placeHolder: l10n.t('Choose submission language'),
-      });
+      })) as keyof typeof languageList | undefined;
       if (!choice) {
         Io.info(l10n.t('Submission cancelled.'));
         return;
       }
-      submitLanguageId = languageList[choice as keyof typeof languageList];
+      submitLanguageId = languageList[choice];
       Settings.companion.submitLanguage = submitLanguageId;
     }
 
