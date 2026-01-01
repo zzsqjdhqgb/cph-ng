@@ -121,15 +121,11 @@ export class Submitter {
           telemetry.error('companionSubmissionFailed', err);
           window.showErrorMessage(
             l10n.t('Submission failed: {msg}', {
-              msg: Submitter.getErrorMessage(err),
+              msg: err instanceof Error ? err.message : String(err),
             }),
           );
         }
       },
     );
-  }
-
-  private static getErrorMessage(err: unknown): string {
-    return (err as Error).message;
   }
 }
