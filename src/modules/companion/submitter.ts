@@ -32,7 +32,7 @@ export class Submitter {
 
     let submitLanguageId = Settings.companion.submitLanguage;
     if (!(Object.values(languageList) as number[]).includes(submitLanguageId)) {
-      const choice = await window.showQuickPick(Object.keys(languageList), {
+      const choice = (await window.showQuickPick(Object.keys(languageList), {
         placeHolder: l10n.t('Choose submission language'),
       })) as keyof typeof languageList | undefined;
       if (!choice) {

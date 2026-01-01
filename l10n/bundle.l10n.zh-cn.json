@@ -86,6 +86,7 @@
   "Failed to read CPH problem file {file}: {error}": "读取 CPH 题目文件 {file} 失败：{error}",
   "Failed to run test cases: {msg}": "运行测试样例失败：{msg}",
   "Failed to save problem: {msg}": "保存题目失败：{msg}",
+  "Failed to start Companion Router. See log for details: {message}": "无法启动 Companion 路由器。详情请查看日志：{message}",
   "Failed to start debugger: {msg}": "启动调试器失败：{msg}",
   "Failed to upsert test case: {msg}": "新增或更新测试样例失败：{msg}",
   "Failed to use template file: {msg}, creating empty file instead": "使用模板文件失败：{msg}，将创建空文件",
