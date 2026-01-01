@@ -31,6 +31,7 @@ export class CompanionClient {
   private static ws: WebSocket | null = null;
   private static isConnecting = false;
   private static clientId = randomUUID();
+  private static readonly CONNECT_TIMEOUT_MS = 400;
   private static eventEmitter =
     new EventEmitter() as unknown as TypedEventEmitter<CompanionClientEvents>;
 
@@ -126,7 +127,7 @@ export class CompanionClient {
         this.logger.warn('WebSocket connection timeout');
         cleanup(true);
         resolve(false);
-      }, 1000);
+      }, this.CONNECT_TIMEOUT_MS);
 
       const cleanup = (terminate: boolean) => {
         clearTimeout(timeout);
